@@ -20,7 +20,7 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /build
 COPY . .
-RUN dotnet restore
+RUN dotnet restore -v diag
 RUN dotnet publish -c Release -o /app
 
 # Stage 2
