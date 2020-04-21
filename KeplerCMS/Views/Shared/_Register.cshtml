@@ -1,0 +1,66 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>@ViewData["Title"] Habbo ~ Habbo</title>
+    <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/process.css' type='text/css' rel='stylesheet' />
+
+    <script language='JavaScript' type='text/javascript'>
+        var habboReqPath = 'http://www.test1.webbanditten.dk';
+        var habboStaticFilePath = '~';
+        var habboImagerUrl = '/habbo-imaging/';
+        document.habboLoggedIn = false;
+        window.name = 'habboMain';
+    </script>
+
+    <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/builder.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/swfobject.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/ads.js'></script>
+    <script type='text/javascript' language='JavaScript' src='~/js/validation.js'></script>
+
+    <script>var j = jQuery.noConflict();</script>
+
+
+
+
+
+
+    <script language='JavaScript' type='text/javascript'>
+        window.onload = function () {
+            advertisementLoad();
+        }
+    </script>
+
+</head>
+<body>
+    <div id="overlay"></div>
+    <div id="process-wrapper">
+        <div id="process-header">
+            <div id="process-header-body">
+                <div id="process-header-content">
+                    <div id="habbologo"><a href="http://www.test1.webbanditten.dk"></a></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="outer">
+            <div id="outer-content">
+                @RenderBody()
+            </div>
+        </div>
+        <div id="outer-bottom">
+            <div id="outer-bottom-content"></div>
+        </div>
+    </div>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)    
+</body>
+</html>
