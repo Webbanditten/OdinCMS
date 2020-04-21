@@ -1,0 +1,4 @@
+﻿{
+    "schemaVersion": 2,
+    "dockerfilePath": "./KeplerCMS/Dockerfile"
+}
