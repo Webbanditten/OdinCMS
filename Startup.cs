@@ -11,13 +11,17 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using Westwind.Globalization;
+using Westwind.Globalization.AspnetCore;
 
 namespace KeplerCMS
 {
@@ -33,20 +37,41 @@ namespace KeplerCMS
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-            services.Configure<RequestLocalizationOptions>(options =>
+            // Standard ASP.NET Localization features are recommended
+            // Make sure this is done FIRST!
+            services.AddLocalization(options =>
             {
-                var supportedCultures = new List<CultureInfo>
-                    {
-                        new CultureInfo("en-US"),
-                        new CultureInfo("da-DK")
-                    };
-
-                options.DefaultRequestCulture = new RequestCulture("en-US");
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
+                // I prefer Properties over the default `Resources` folder
+                // due to namespace issues if you have a Resources type as
+                // most people do for shared resources.
+                options.ResourcesPath = "Resources";
             });
+
+
+            // Replace StringLocalizers with Db Resource Implementation
+            services.AddSingleton(typeof(IStringLocalizerFactory),
+                                  typeof(DbResStringLocalizerFactory));
+            services.AddSingleton(typeof(IHtmlLocalizerFactory),
+                                  typeof(DbResHtmlLocalizerFactory));
+
+
+            // Required: Enable Westwind.Globalization (opt parm is optional)
+            // shown here with optional manual configuration code
+            services.AddWestwindGlobalization(opt =>
+            {
+                opt.ConnectionString = Configuration.GetConnectionString("DefaultConnection");
+                opt.ConfigureAuthorizeLocalizationAdministration(actionContext =>
+                {
+                    return false; 
+                });
+
+            });
+
+
+
+
+
+
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -59,9 +84,15 @@ namespace KeplerCMS
            ));
 
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddControllersWithViews()
-                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
-                .AddDataAnnotationsLocalization();
+
+
+            services.AddControllersWithViews().AddViewLocalization();
+
+            // this *has to go here* after view localization has been initialized
+            // so that Pages can localize - note required even if you're not using
+            // the DbResource manager.
+            services.AddTransient<IViewLocalizer, DbResViewLocalizer>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,7 +114,8 @@ namespace KeplerCMS
 
             var supportedCultures = new[]
             {
-                new CultureInfo(Configuration["culture"]),
+                new CultureInfo("da-DK")
+                //new CultureInfo("en-US")
             };
 
 

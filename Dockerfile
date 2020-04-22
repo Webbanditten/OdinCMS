@@ -19,6 +19,8 @@
 # Stage 1
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /build
+EXPOSE 80
+EXPOSE 443
 COPY . .
 RUN dotnet restore -v diag
 RUN dotnet publish -c Release -o /app

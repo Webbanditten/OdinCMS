@@ -87,12 +87,12 @@ namespace KeplerCMS.Controllers
                 {
 
                     ViewData["wrong_users_or_password"] = true;
-                    return View();
+                    return View("index");
                 }
             } else
             {
                 ViewData["please_enter_username"] = true;
-                return View();
+                return View("index");
             }
         }
 

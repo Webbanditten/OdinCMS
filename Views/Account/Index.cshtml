@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
+
 @inject IViewLocalizer Localizer
 @{
     Layout = "_Register";
@@ -8,18 +9,18 @@
     <div class="headline">
         <div class="headline-content">
             <div class="headline-wrapper">
-                <h2><span class="lang-login-headline-wrapperLeft">@ViewData["culture"] @Localizer["orange_box_header"] NY PÅ HABBO? OPRET DIG HER!</span></h2>
+                <h2>@DbRes.T("orange_box_header", "register")</h2>
             </div>
         </div>
     </div>
     <div class="content-top">
         <div class="content">
             <div class="processbox-inner">
-                <h4><span class="lang-login-content-subheaderLeft">OPRET DIG NU!</span></h4>
+                <h4>@DbRes.T("orange_box_content_header", "register")</h4>
                 <p>
-                    <img vspace="10" hspace="10" border="0" align="right" src="~/c_images/album209/frank_with_key.gif" alt=""><span class="lang-login-content-contentLeft">
-                        Habbo er et online community der giver dig mulighed for at oprette din egen virtuelle verden for dig og dine venner. Med tusinder af medlemmer der bare venter på dig, er der altid noget at lave...
-                    </span><br><br><br><br>
+                    <img vspace="10" hspace="10" border="0" align="right" src="~/c_images/album209/frank_with_key.gif" alt="">
+                        @DbRes.T("orange_box_content_text", "register")
+                    <br><br><br><br>
                 </p>
             </div>
             <div id="registration-errors">
@@ -39,8 +40,8 @@
                         <div class="content-white-content">
                             <form method="post" action="http://www.test1.webbanditten.dk/register/start" id="registration-form">
                                 <p>
-                                    <label for="day" class="registration-text"><span class="lang-login-content-registrationText">START VENLIGST MED AT INDTASTE DIN FØDSELSDATO</span></label>
-                                    <br /><br />VIGTIGT: Din fødselsdato er ikke synlig for nogen. Fødselsdatoen er din personlige nøgle, som du skal bruge når du ændrer adgangskode. Oplyser du en falsk fødselsdato, kan vi ikke ændre den for dig!
+                                    <label for="day" class="registration-text">@DbRes.T("orange_box_birthday_header", "register")</label>
+                                    <br /><br />@DbRes.T("orange_box_birthday_text", "register")
                                 </p>
                                 <div id="required-birthday">
                                     <select name="day" id="day" class="dateselector">
@@ -79,18 +80,18 @@
                                     </select>
                                     <select name="month" id="month" class="dateselector">
                                         <option value="">--</option>
-                                        <option id="lang-month-1" value="1">Janeiro</option>
-                                        <option id="lang-month-2" value="2">Fevereiro</option>
-                                        <option id="lang-month-3" value="3">Março</option>
-                                        <option id="lang-month-4" value="4">Abril</option>
-                                        <option id="lang-month-5" value="5">Maio</option>
-                                        <option id="lang-month-6" value="6">Junho</option>
-                                        <option id="lang-month-7" value="7">Julho</option>
-                                        <option id="lang-month-8" value="8">Agosto</option>
-                                        <option id="lang-month-9" value="9">Setembro</option>
-                                        <option id="lang-month-10" value="10">Outubro</option>
-                                        <option id="lang-month-11" value="11">Novembro</option>
-                                        <option id="lang-month-12" value="12">Dezembro</option>
+                                        <option value="1">@DbRes.T("orange_box_birthday_month_jan", "register")</option>
+                                        <option value="2">@DbRes.T("orange_box_birthday_month_feb", "register")</option>
+                                        <option value="3">@DbRes.T("orange_box_birthday_month_mar", "register")</option>
+                                        <option value="4">@DbRes.T("orange_box_birthday_month_apr", "register")</option>
+                                        <option value="5">@DbRes.T("orange_box_birthday_month_may", "register")</option>
+                                        <option value="6">@DbRes.T("orange_box_birthday_month_jun", "register")</option>
+                                        <option value="7">@DbRes.T("orange_box_birthday_month_jul", "register")</option>
+                                        <option value="8">@DbRes.T("orange_box_birthday_month_aug", "register")</option>
+                                        <option value="9">@DbRes.T("orange_box_birthday_month_sep", "register")</option>
+                                        <option value="10">@DbRes.T("orange_box_birthday_month_oct", "register")</option>
+                                        <option value="11">@DbRes.T("orange_box_birthday_month_nov", "register")</option>
+                                        <option value="12">@DbRes.T("orange_box_birthday_month_dec", "register")</option>
                                     </select>
                                     <select name="year" id="year" class="dateselector">
                                         <option value="">--</option>
@@ -215,7 +216,7 @@
                                 </script>
                                 <p class="last">
                                     <input type="hidden" name="required-birth" id="required-birth">
-                                    <input type="submit" value="Fortsæt oprettelse" onmousedown="MergeData()" class="process-button" id="registration-submit">
+                                    <input type="submit" value="@DbRes.T("orange_box_birthday_continue", "register")" onmousedown="MergeData()" class="process-button" id="registration-submit">
                                 </p>
                             </form>
                         </div>
@@ -231,13 +232,14 @@
                 <br>
                 <p>
                     <img vspace="0" hspace="0" border="0" align="right" src="~/c_images/album109/reindeer_1_small.gif" alt=""><br>
-                    <span class="lang-login-content-reistrationReason" style="font-weight: bold;">5 GRUNDE TIL AT OPRETTE DIG</span><br>
-                </p><ul>
-                    <li><span class="lang-login-content-registerReason1">Opret din egen Habbo figur og Home side</span></li>
-                    <li><span class="lang-login-content-registerReason2">Mød både gamle og nye venner</span></li>
-                    <li><span class="lang-login-content-registerReason3">Indret dit eget rum</span></li>
-                    <li><span class="lang-login-content-registerReason4">Det er sjovere end ikke at oprette sig!</span></li>
-                    <li><span class="lang-login-content-registerReason5"><strong>Det er 100% gratis!</strong></span><br></li>
+                    <strong>@DbRes.T("orange_box_5_reasons", "register")</strong><br>
+                </p>
+                <ul>
+                    <li>@DbRes.T("orange_box_5_reasons_1", "register")</li>
+                    <li>@DbRes.T("orange_box_5_reasons_2", "register")</li>
+                    <li>@DbRes.T("orange_box_5_reasons_3", "register")</li>
+                    <li>@DbRes.T("orange_box_5_reasons_4", "register")</li>
+                    <li><strong>@DbRes.T("orange_box_5_reasons_5", "register")</strong><br></li>
                 </ul>
                 <p></p>
             </div>
@@ -252,7 +254,7 @@
     <div class="headline">
         <div class="headline-content">
             <div class="headline-wrapper">
-                <h2><span class="lang-login-headline-wrapperRight">HAR DU ALLEREDE EN HABBO? LOG IND HER!</span></h2>
+                <h2>@DbRes.T("blue_box_header", "register")</h2>
             </div>
         </div>
     </div>
@@ -260,9 +262,22 @@
         <div class="content">
             <div class="processbox-inner">
                 <p>
-                    Hvis du allerede har en Habbo profil, så log ind her ved hjælp af dit Habbo navn og adgangskode. Dit brugernavn og adgangskode er det samme her som de er på Hotellet.<br><br>
+                    @DbRes.T("blue_box_content", "register")<br><br>
                 </p>
             </div>
+            @if (ViewData["wrong_users_or_password"] != null || ViewData["please_enter_username"] != null)
+            {
+                <div style="display: block;">
+                    <div class="content-red">
+                        <div class="content-red-body" id="login-errors-content">
+                            @(ViewData["wrong_users_or_password"] != null && (bool)ViewData["wrong_users_or_password"] ? @DbRes.T("error_wrong_users_or_password", "register") : null)
+                            @(ViewData["please_enter_username"] != null && (bool)ViewData["please_enter_username"] ? @DbRes.T("error_please_enter_username", "register") : null)
+                        </div>
+                    </div>
+                    <div class="content-red-bottom"><div class="content-red-bottom-body"></div></div>
+                </div>
+            }
+
 
             <div id="login-errors">
                 <div class="content-red">
@@ -279,18 +294,18 @@
                             <form action="/account/login" method="post" id="login-form">
                                 @Html.AntiForgeryToken()
                                 <p>
-                                    <label for="login-username" class="registration-text"><span class="lang-login-content-holderUser">MIT HABBO NAVN</span></label>
+                                    <label for="login-username" class="registration-text">@DbRes.T("blue_box_username", "register")</label>
                                     <input type="text" class="required-username" name="username" id="login-username" value="">
                                 </p>
                                 <script type="text/javascript" language="JavaScript">
                                     $("login-username").focus();
                                 </script>
                                 <p>
-                                    <label for="login-password" class="registration-text"><span class="lang-login-content-holderPassword">ADGANGSKODE</span></label>
+                                    <label for="login-password" class="registration-text">@DbRes.T("blue_box_password", "register")</label>
                                     <input type="password" class="required-password" name="password" id="login-password" value="">
                                 </p>
                                 <p class="last">
-                                    <input type="submit" value="LOG IND" class="process-button" id="lang-login-content-loginSubmit">
+                                    <input type="submit" value="@DbRes.T("blue_box_login", "register")" class="process-button">
                                 </p>
                             </form>
                         </div>
@@ -303,13 +318,13 @@
             </div>
             <div class="processbox-inner">
                 <p>
-                    <br style="font-weight: bold;"><span style="font-weight: bold;" class="lang-login-content-loginForgotTitle"> GLEMT DIT HABBONAVN ELLER ADGANGSKODE?</span><br><br><span class="lang-login-content-loginForgotContent">Hvis du har glemt din adgangskode eller dit brugernavn, så klik her for at få dem tilbage. </span><a href="http://web.archive.org/web/20070613213428/http://www.habbohotel.com.br/iot/go?lang=pt_BR&amp;country=br" target="_blank"><span class="lang-login-content-loginForgotContentURL"> Genskab brugeroplysninger</span></a>.<br><br>
+                    <br><span style="font-weight: bold;">@DbRes.T("blue_box_forgot_header", "register")</span><br><br>@DbRes.T("blue_box_forgot_text", "register")<br /><a href="/account/forgot" target="_blank">@DbRes.T("blue_box_forgot_link", "register")</a>.<br><br>
                 </p>
-                <h4><span class="lang-login-content-loginSafetyTitle">SIKKERHEDSINFORMATION</span></h4>
+                <h4>@DbRes.T("blue_box_security_header", "register")</h4>
                 <p>
-                    <img vspace="10" hspace="9" border="0" align="right" src="~/c_images/album209/encryption_pc_ie.gif?h=e4fc37398b1a546726f6e1e4694c8035" alt=""><span class="lang-login-content-loginSafetyContent">
-                        Den rigtige Habbo side er krypteret for at beskytte dig og dine data. Du kan se om siden er krypteret ved at kigge efter den fine hængelås i bunden af din internet-browser.
-                    </span><br><br><br>
+                    <img vspace="10" hspace="9" border="0" align="right" src="~/c_images/album209/encryption_pc_ie.gif" alt="">
+                    @DbRes.T("blue_box_security_text", "register")
+                    <br><br><br>
                 </p>
             </div>
             <div class="clear"></div>
@@ -325,7 +340,7 @@
     Event.observe($("registration-form"), "submit", function (e) {
         if ($("day").selectedIndex == 0 || $("month").selectedIndex == 0 || $("year").selectedIndex == 0) {
             validatorBeforeSubmit("registration-errors");
-            validatorAddError(false, false, "Angiv venligst en gyldig dato", "registration-errors");
+            validatorAddError(false, false, "@DbRes.T("error_birthday", "register")", "registration-errors");
             $("required-birthday").className = "validation-failed";
             Event.stop(e);
         } else {
@@ -336,7 +351,7 @@
     Event.observe($("login-form"), "submit", function (e) {
         if ($F("login-username") == "" || $F("login-password") == "") {
             validatorBeforeSubmit("login-errors");
-            validatorAddError(false, false, "Indtast venligst dit Habbo navn og adgangskode", "login-errors");
+            validatorAddError(false, false, "@DbRes.T("error_please_enter_username", "register")", "login-errors");
 
             if ($F("login-password") == "") { $("login-password").className = "validation-failed"; $("login-password").focus(); }
             else { Element.removeClassName($("login-password"), "validation-failed"); }
@@ -344,21 +359,9 @@
             else { Element.removeClassName($("login-username"), "validation-failed"); }
             Event.stop(e);
         } else {
-            $("lang-login-content-loginSubmit").disabled = 'true';
+            $("loginSubmit").disabled = 'true';
         }
     }, false);
 </script>
 
 
-
-<div id="footer">
-    <div id="footer-top">
-        <div id="footer-content">
-
-            © 2009-2018 RetroCMS ~ The Oldschool era is Back!!!  <br> Powered by m.tiago from Ragezone.
-        </div>
-    </div>
-    <div id="footer-bottom">
-        <div id="footer-bottom-content"></div>
-    </div>
-</div>
