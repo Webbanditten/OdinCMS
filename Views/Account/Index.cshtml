@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
     Layout = "_Register";
     ViewData["Title"] = "Home Page";
 }
@@ -6,7 +8,7 @@
     <div class="headline">
         <div class="headline-content">
             <div class="headline-wrapper">
-                <h2><span class="lang-login-headline-wrapperLeft">NY PÅ HABBO? OPRET DIG HER!</span></h2>
+                <h2><span class="lang-login-headline-wrapperLeft">@ViewData["culture"] @Localizer["orange_box_header"] NY PÅ HABBO? OPRET DIG HER!</span></h2>
             </div>
         </div>
     </div>

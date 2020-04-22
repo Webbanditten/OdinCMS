@@ -13,12 +13,10 @@ namespace KeplerCMS.Controllers
     public class ProfileController : Controller
     {
         private readonly DataContext _context;
-        private readonly ILogger<HomeController> _logger;
 
-        public ProfileController(ILogger<HomeController> logger, DataContext context)
+        public ProfileController(DataContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public IActionResult Index()

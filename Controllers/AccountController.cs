@@ -1,33 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Isopoh.Cryptography.Argon2;
+using KeplerCMS.Data;
+using KeplerCMS.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using KeplerCMS.Models;
-using KeplerCMS.Data;
-using Isopoh.Cryptography.Argon2;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 
 namespace KeplerCMS.Controllers
 {
     public class AccountController : Controller
     {
         private readonly DataContext _context;
-        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(ILogger<AccountController> logger, DataContext context)
+        public AccountController(DataContext context)
         {
             _context = context;
-            _logger = logger;
         }
+        public string GetCulture() => $"CurrentCulture:{CultureInfo.CurrentCulture.Name}, CurrentUICulture:{CultureInfo.CurrentUICulture.Name}";
 
         [HttpGet]
         public IActionResult Index()
         {
+
+            ViewData["culture"] = GetCulture();
             return View();
         }
 
