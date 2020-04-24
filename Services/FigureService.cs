@@ -9,7 +9,6 @@ namespace KeplerCMS.Services
     {
         public static string FixFigure(string input)
         {
-            Console.WriteLine(input.Length);
             var hr = input.Substring(0, 5);
             var hd = input.Substring(5, 5);
             var ch = input.Substring(10, 5);

@@ -31,7 +31,7 @@ namespace KeplerCMS.Controllers
             ViewData["figure"] = user.Figure;
             ViewData["username"] = user.Username;
             ViewData["gender"] = user.Gender;
-            ViewData["club"] = user.hasHabboClub();
+            ViewData["club"] = user.HasHabboClub();
 
             return View();
             
