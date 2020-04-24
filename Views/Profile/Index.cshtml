@@ -1,5 +1,159 @@
 ﻿@{
+
     ViewData["Title"] = "Ændre din profil";
+    var figureDataUrl =
+        ((bool)ViewData["club"]) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
 }
 
-Edit profile
+<div id="page-headline">
+    <div id="page-headline-breadcrums">
+        <a href="/web/20070321072402/http://www.habbo.dk/community">Community</a>
+        »
+        Habbo Fansites
+    </div>
+    <div id="page-headline-text">Habbo Fansites</div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="content-2col">
+    <tbody>
+        <tr>
+            <td style="width: 8px;"></td>
+            <td valign="top" style="width: 202px;" class="habboPage-col">
+                <div id="top-3rd-level"></div>
+                <div id="content-3rd-level">
+
+                    <ul id="third-level-navi">
+
+                        <li class="active">
+                            Habbo Fansites
+                        </li>
+
+
+                        <li class="inactive">
+                            <a href="/web/20070321072402/http://www.habbo.dk/community/fansites/how_to_set_up_a_fansite.html">Sådan laver du et Fansite</a>
+                        </li>
+
+                    </ul>
+                    <div class="clear"></div>
+                </div>
+                <div id="bottom-3rd-level"></div>
+                <div class="portlet-scale gold">
+                    <div class="portlet-scale-header"><h3>Habbo Mønter</h3></div>
+                    <div class="portlet-scale-body">
+                        <div class="portlet-scale-content">
+
+                            <img align="right" src="https://web.archive.org/web/20070321072402im_/http://community.habbohotel.jp/content/images/mgm_icon.gif" alt="">Habbo Mønter giver dig mulighed for at købe Habbo <a target="_self" href="/web/20070321072402/http://www.habbo.dk/hotel/furniture/index.html">Møbler</a>, købe gaver til dine venner, eller melde dig ind i <a target="_self" href="/web/20070321072402/http://www.habbo.dk/club/index.html">Habbo Club</a> Spille <a target="_self" href="/web/20070321072402/http://www.habbo.dk/games/battle_ball/index.html">Battle Ball</a> og meget mere! <p>
+                            </p><div class="clear"></div>
+                        </div>
+                    </div>
+                    <div class="portlet-scale-bottom">
+                        <div class="portlet-scale-bottom-body"></div>
+                    </div>
+                </div>
+                <div class="portlet-scale gold">
+                    <div class="portlet-scale-header"><h3>Habbo Møbler</h3></div>
+                    <div class="portlet-scale-body">
+                        <div class="portlet-scale-content">
+
+                            <p><img width="36" height="36" border="0" align="right" src="https://web.archive.org/web/20070321072402im_/http://images.habbohotel.dk/c_images/album923/news_icon_01.gif" id="galleryImage" alt=""><a href="/web/20070321072402/http://www.habbo.dk/hotel/furniture/index.html" target="_self">Habbo Møbler</a> kan bruges til at indrette dine rum, Du kan lave labyrinthher, spil, forsvundne byer, og KÆMPE toiletter.</p><p>Kig i vores online <a target="_self" href="https://web.archive.org/web/20070321072402/http://www.habbo.dk/hotel/furniture/index.html">Katalog</a> og find ud af alt hvad der er at vide om Habbo Møbler.</p>
+
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                    <div class="portlet-scale-bottom">
+                        <div class="portlet-scale-bottom-body"></div>
+                    </div>
+                </div>
+            </td>
+            <td valign="top" style="width: 539px;" class="habboPage-col rightmost">
+
+                <div class="portlet-scale gold">
+                    <div class="portlet-scale-header"><h3>Ændre din profil</h3></div>
+                    <div class="portlet-scale-body">
+                        <div class="portlet-scale-content">
+                            <div class="editfigure">
+                                <div id="flashcontent">
+                                    <center>
+                                        <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
+                                        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
+                                    </center>
+                                </div>
+                            </div>
+                            <script type="text/javascript" language="JavaScript">
+	                            var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration.swf")", "habboreg", "406", "327", "8");
+	                            swfobj.addVariable("post_url", "/profile/updatefigure?");
+	                            swfobj.addVariable("figuredata_url", "@figureDataUrl");
+	                            swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
+	                            swfobj.addVariable("post_figure", "figureData");
+	                            swfobj.addVariable("post_gender", "newGender");
+                                swfobj.addParam("wmode", "opaque");
+	                            swfobj.addVariable("figure", "@ViewData["figure"]");
+	                            swfobj.addVariable("gender", "@ViewData["gender"]");
+	                            swfobj.write("flashcontent");
+                            </script>
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                    <div class="portlet-scale-bottom">
+                        <div class="portlet-scale-bottom-body"></div>
+                    </div>
+                </div>
+            </td>
+
+            <td rowspan="2" style="width: 4px;"></td>
+
+            <td rowspan="2" valign="top" style=" margin-left: 4px; width: 176px;">
+                <div id="ad_sidebar">
+                    <div class="cooperation">
+                        <table height="120" width="168" valign="middle" align="center" border="0" cellpadding="0" cellspacing="0" background="http://www.test1.webbanditten.dk/c_images/themes/partner_box.gif">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <!--Advertisement Box if as enabled-->
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--Advertisement Right if as enabled-->
+                    <script type='text/javascript'>
+Ads_Right('@Url.Content("~/c_images/album728/ads_habbogroup_bbpromo.gif")', '@Url.Content("~/c_images/album728/")'); Links_Right.push('#'); Links_Right.push('#');</script>
+                    <div class="ad-scale ad160">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="ad-header-tl"></td>
+                                    <td class="ad-header-t"></td>
+                                    <td class="ad-header-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td class="ad-header-ml"></td>
+                                    <td class="ad-header-m">
+                                        <h5><span class="lang-Advertissement_Title">Publicidade</span></h5>
+                                    </td>
+                                    <td class="ad-header-mr"></td>
+                                </tr>
+                                <tr>
+                                    <td class="ad-content-ml"></td>
+                                    <td class="ad-content-m" align="center" valign="top">
+                                        <a href="#" target="_blank" id="RightLink"><img style="width: 160px; height: 600px;" alt="" src="#" id="RightImage"></a>
+                                    </td>
+                                    <td class="ad-content-mr"></td>
+                                </tr>
+                                <tr>
+                                    <td class="ad-content-bl"></td>
+                                    <td class="ad-content-b"></td>
+                                    <td class="ad-content-br"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </td>
+        </tr>
+
+    </tbody>
+</table>

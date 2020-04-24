@@ -74,14 +74,15 @@ namespace KeplerCMS
 
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options =>
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
-              
+                options.Cookie.Name = "HabboCookie";
+                options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/account");
             });
 
             services.AddDbContextPool<DataContext>(
-              options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
-           ));
+                options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
+            ));
 
             services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -134,8 +135,11 @@ namespace KeplerCMS
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            // who are you?  
             app.UseAuthentication();
+
+            // are you allowed?  
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
