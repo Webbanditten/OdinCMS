@@ -1,8 +1,8 @@
 ﻿@{
-
     ViewData["Title"] = "Ændre din profil";
+    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
     var figureDataUrl =
-        ((bool)ViewData["club"]) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
+(userData.HasHabboClub) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
 }
 
 <div id="page-headline">
@@ -47,7 +47,7 @@
                                                 <div id="flashcontent">
                                                     <center>
                                                         <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
-                                                        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
+                                                        <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
                                                     </center>
                                                 </div>
                                             </div>
@@ -59,8 +59,8 @@
 	                                            swfobj.addVariable("post_figure", "figureData");
 	                                            swfobj.addVariable("post_gender", "newGender");
                                                 swfobj.addParam("wmode", "opaque");
-	                                            swfobj.addVariable("figure", "@ViewData["figure"]");
-	                                            swfobj.addVariable("gender", "@ViewData["gender"]");
+	                                            swfobj.addVariable("figure", "@userData.Figure");
+	                                            swfobj.addVariable("gender", "@userData.Gender");
 	                                            swfobj.write("flashcontent");
                                             </script>
                                         </div>

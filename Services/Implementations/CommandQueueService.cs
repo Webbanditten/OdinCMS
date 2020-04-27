@@ -1,14 +1,12 @@
 ﻿using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
 using KeplerCMS.Models.Enums;
+using KeplerCMS.Services.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KeplerCMS.Services
 {
-    public class CommandQueueService
+    public class CommandQueueService : ICommandQueueService
     {
         private readonly DataContext _context;
 

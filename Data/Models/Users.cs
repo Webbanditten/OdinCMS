@@ -26,10 +26,12 @@ namespace KeplerCMS.Data.Models
         [Column("sex")]
         public string Gender { get; set; }
 
-        public bool HasHabboClub()
+        public bool HasHabboClub
         {
-            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
-            return this.ClubExpiration > timeSpan.TotalSeconds;
+            get {
+                var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
+                return this.ClubExpiration > timeSpan.TotalSeconds;
+            }
         }
     }
 }

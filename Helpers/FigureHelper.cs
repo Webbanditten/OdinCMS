@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace KeplerCMS.Services
+﻿namespace KeplerCMS.Helpers
 {
-    public class FigureService
+    public class FigureHelper
     {
         public static string FixFigure(string input)
         {

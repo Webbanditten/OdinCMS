@@ -1,26 +1,18 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using KeplerCMS.Data;
+using KeplerCMS.Services;
+using KeplerCMS.Services.Implementations;
+using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc.Localization;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
-using Westwind.Globalization;
 using Westwind.Globalization.AspnetCore;
 
 namespace KeplerCMS
@@ -68,11 +60,7 @@ namespace KeplerCMS
             });
 
 
-
-
-
-
-
+            // Add authentication
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
@@ -94,6 +82,8 @@ namespace KeplerCMS
             // the DbResource manager.
             services.AddTransient<IViewLocalizer, DbResViewLocalizer>();
 
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICommandQueueService, CommandQueueService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -115,8 +105,7 @@ namespace KeplerCMS
 
             var supportedCultures = new[]
             {
-                new CultureInfo("da-DK")
-                //new CultureInfo("en-US")
+                new CultureInfo(Configuration["culture"])
             };
 
 
@@ -128,8 +117,6 @@ namespace KeplerCMS
                 // UI strings that we have localized.
                 SupportedUICultures = supportedCultures
             });
-
-
 
             app.UseStaticFiles();
 

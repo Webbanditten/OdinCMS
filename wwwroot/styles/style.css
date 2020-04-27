@@ -294,7 +294,6 @@ a.arrow {
 
 img.tabmenu-image {
 	float: left;
-	margin-top: 5px;
 	margin-left: 10px;
 }
 
@@ -2421,4 +2420,8 @@ a.colorlink.noarrow.newfightbutton {
 .editfigure {
 	width:406px;
 	margin: 0 auto;
+}
+
+.getflash {
+	width:280px;
 }

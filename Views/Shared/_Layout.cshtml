@@ -1,4 +1,7 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+﻿@{ 
+    var userData = (KeplerCMS.Data.Models.Users) ViewData["user"];
+}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
@@ -103,7 +106,7 @@ Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url
                             <!-- TOPBAR INCLUDE ( User Status ) -->
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <td id="topbar-status" class="loggedin">Logget ind som <strong>@ViewData["username"]</strong></td>
+                                <td id="topbar-status" class="loggedin">Logget ind som <strong>@userData.Username</strong></td>
                             }
                             else
                             {
@@ -125,8 +128,8 @@ Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url
 
                                     <!-- TOPMENU INCLUDE (MYHABBO) -->
 
-                                    <img src="https://dcr.webbanditten.dk/habbo-imager/avatar.php?figure=@ViewData["figure"]&amp;size=b&amp;action=wav,&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;size=m" alt="" class="tabmenu-image" style="margin-right: 5px; margin-right: 0px;">
-                                    <h3 style="">Velkommen @ViewData["username"] <span class="lang-topbar-myhabbo-content-loggedinAfter"></span></h3>
+                                    <img src="https://dcr.webbanditten.dk/habbo-imager/avatar.php?figure=@userData.Figure&amp;size=b&amp;action=wav,&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;size=m" alt="" class="tabmenu-image" style="margin-right: 5px; margin-right: 0px;">
+                                    <h3 style="">Velkommen @userData.Username <span class="lang-topbar-myhabbo-content-loggedinAfter"></span></h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
                                             <a href="http://www.test1.webbanditten.dk//client" class="arrow" target="client" onclick="openOrFocusHabbo(this); return false;"><span class="lang-topbar-myhabbo-inner-client">Gå til hotellet</span></a>

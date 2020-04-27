@@ -1,6 +1,8 @@
 ﻿using Isopoh.Cryptography.Argon2;
 using KeplerCMS.Data;
 using KeplerCMS.Models;
+using KeplerCMS.Services;
+using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -10,35 +12,32 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly DataContext _context;
+        private readonly IUserService _userService;
 
-        public AccountController(DataContext context)
+        public AccountController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
-        public string GetCulture() => $"CurrentCulture:{CultureInfo.CurrentCulture.Name}, CurrentUICulture:{CultureInfo.CurrentUICulture.Name}";
 
         [HttpGet]
         public IActionResult Index()
         {
-
-            ViewData["culture"] = GetCulture();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password)
         {
-            var users = _context.Users.ToList();
             if(username != null && password != null)
             {
-                var user = _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefault();
+                var user = _userService.GetUserByUsername(username);
                 if (user != null && Argon2.Verify(user.Password, password))
                 {
 
@@ -77,7 +76,7 @@ namespace KeplerCMS.Controllers
                         #endregion
                     };
 
-                    HttpContext.SignInAsync(
+                    await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
@@ -96,16 +95,10 @@ namespace KeplerCMS.Controllers
             }
         }
 
-        public IActionResult Logout()
+        public async Task <IActionResult> Logout()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("index", "home");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
