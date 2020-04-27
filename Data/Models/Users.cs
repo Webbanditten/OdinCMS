@@ -26,6 +26,9 @@ namespace KeplerCMS.Data.Models
         [Column("sex")]
         public string Gender { get; set; }
 
+        [Column("credits")]
+        public int Credits { get; set; }
+
         public bool HasHabboClub
         {
             get {

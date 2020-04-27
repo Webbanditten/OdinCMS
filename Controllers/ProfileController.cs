@@ -5,7 +5,7 @@ using KeplerCMS.Services.Interfaces;
 
 namespace KeplerCMS.Controllers
 {
-    [Authorize]
+    [LoggedInFilter]
     public class ProfileController : Controller
     {
         private readonly IUserService _userService;
@@ -15,12 +15,12 @@ namespace KeplerCMS.Controllers
             _userService = userService;
         }
 
-        [LoggedInFilter]
         public IActionResult Index()
         {
             return View();
             
         }
+
         [HttpPost]
         public IActionResult UpdateFigure(string newGender, string figureData)
         {

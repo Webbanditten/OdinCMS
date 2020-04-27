@@ -22,7 +22,7 @@ namespace KeplerCMS.Filters
         public void OnActionExecuting(ActionExecutingContext context)
         {
             _userService = context.HttpContext.RequestServices.GetService<IUserService>(); ;
-            Controller controller = context.Controller as Controller;
+            var controller = context.Controller as Controller;
 
             if (controller != null)
             {
@@ -31,7 +31,7 @@ namespace KeplerCMS.Filters
                     controller.ViewData["user"] = null;
                     if(_redirect)
                     {
-                        controller.Challenge();
+                        context.Result = controller.Challenge();
                     }
                 } else
                 {
