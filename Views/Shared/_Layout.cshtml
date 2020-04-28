@@ -1,11 +1,16 @@
-﻿@{ 
-    var userData = (KeplerCMS.Data.Models.Users) ViewData["user"];
+﻿@using KeplerCMS.Data.Models 
+@using KeplerCMS.Models.Enums
+@{
+    var userData = (Users)ViewData["user"];
+    var menu = (List<Menu>)ViewData["menu"];
+    var subMenu = new List<Menu>();
+    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <title>@ViewData["Title"] Habbo ~ Habbo</title>
+    <title>Habbo ~ @ViewData["Title"]</title>
     <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
@@ -48,7 +53,8 @@
     <div id="wrapper">
         <!-- ADVERTISEMENT INCLUDE -->
         <script type='text/javascript'>
-Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url.Content("~/c_images/album728/ads_habbogroup_habbogarden.png")'); Links_Top.push('#'); Links_Top.push('#');</script>
+            Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url.Content("~/c_images/album728/ads_habbogroup_habbogarden.png")'); Links_Top.push('#'); Links_Top.push('#');
+        </script>
         <div align="center">
             <div class="ad-scale ad-leader">
                 <table>
@@ -143,7 +149,9 @@ Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url
                                         <a href="/account/logout" class="colorlink orange last" style=" margin-right: 2px;"><span class="lang-topbar-myhabbo-inner-logout">Log af</span></a>
                                     </div>
                                 </div>
-                            } else { 
+                            }
+                            else
+                            {
                                 <div id="myhabbo-content" class="tabmenu-inner selected">
 
                                     <!-- TOPMENU INCLUDE (MYHABBO) -->
@@ -160,7 +168,7 @@ Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url
                                     </div>
                                 </div>
                             }
-                            
+
                             <div id="mycredits-content" class="tabmenu-inner">
                                 <div id="credits-status">
                                     <!-- TOPMENU INCLUDE (MYCREDITS) -->
@@ -206,52 +214,69 @@ Ads_Top('@Url.Content("~/c_images/album728/ads_habbogroup_clubjoin.png")', '@Url
                 <div id="mainmenu">
                     <ul>
                         <li id="leftspacer">&nbsp;</li>
-                        <li id="active">
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/"><img src="~/c_images/navi_icons/tab_icon_01_home.gif" alt="" /> <span class="lang-navbar-home">Home</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/#"><img src="~/c_images/navi_icons/tab_icon_02_hotel.gif" alt="" /> <span class="lang-navbar-community">Ny på Habbo?</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/#"><img src="~/c_images/navi_icons/tab_icon_03_community.gif" alt="" /> <span class="lang-navbar-community">Community</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/#"><img src="~/c_images/navi_icons/tab_icon_04_games.gif" alt="" /> <span class="lang-navbar-games">Games</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/credits"><img src="~/c_images/navi_icons/tab_icon_10_coins.gif" style="margin-left: 4px" alt="" /> <span class="lang-navbar-credits">Habbo Mønter</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/club"><img src="~/c_images/navi_icons/tab_icon_09_hc.gif" style="margin-left: 4px" alt="" ; /> <span class="lang-navbar-habboclub">Habbo Club</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li>
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/groups"><img src="~/c_images/navi_icons/tab_icon_06_mobile.gif" alt="" /> <span class="lang-navbar-groups">Mobil</span></a>
-                            <span class="right"></span>
-                        </li>
-                        <li class="last">
-                            <span class="left"></span>
-                            <a href="http://www.test1.webbanditten.dk/#"><img src="~/c_images/navi_icons/tab_icon_08_help.gif" alt="" /> <span class="lang-navbar-help">Hjælp og sikkerhed</span></a>
-                            <span class="right"></span>
-                        </li>
+                        @{
+                            if (menu != null)
+                            {
+                                var headerMenu = menu.Where(m => m.Parent == 0).OrderBy(m => m.Order);
+                                var last = headerMenu.Last();
+                                foreach (Menu item in headerMenu)
+                                {
+                                    string lastClass = (item == last) ? "last" : "";
+                                    bool isActive = (Path.Count() > 0 && pathList[0].Contains(item.Href.Substring(1)));
+                                    string active = isActive ? "active" : "";
+                                    bool needsAuthentication = item.State == Enum.GetName(typeof(MenuState), MenuState.authenticated);
+                                    string disabledClass = (needsAuthentication && !User.Identity.IsAuthenticated) ? "disabled" : "";
+                                    string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href="+item.Href : "";
+                                    if (isActive)
+                                        subMenu = menu.Where(m => m.Parent == item.Id).ToList();
+                                    <li id="@active" class="@disabledClass @lastClass">
+                                        <span class="left"></span>
+                                            <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
+                                        <span class="right"></span>
+                                    </li>
+                                }
+                            }
+                        }
                     </ul>
                 </div>
                 <div id="submenu">
                     <div class="subnav">
+                        @{
+                            if (subMenu.Count > 0)
+                            {
+                                var subMenuItems = subMenu.OrderBy(m => m.Order);
+                                var last = subMenuItems.Last();
+                                foreach (var item in subMenuItems)
+                                {
 
 
+                                    bool isActive = false;
+                                    int index = item.Href.IndexOf(pathList[0]);
+                                    string cleanPath = (index < 0)
+                                        ? item.Href
+                                        : item.Href.Remove(index, pathList[0].Length);
+                                    if (pathList.Count() > 1 && cleanPath.Replace("/", "") == pathList[1])
+                                    {
+                                        isActive = true;
+                                    } else if(pathList.Count() == 1 && Context.Request.Path.ToString().Contains(item.Href)) {
+                                        isActive = true;
+                                    }
+                                    if (isActive)
+                                    {
+                                        @item.Text
+                                    }
+                                    else
+                                    {
+                                        @:<a href="@item.Href">@item.Text</a>
+                                    }
+                                    if (last != item)
+                                    {
+                                        @:|
+                                    }
+
+                                }
+                            }
+                        }
 
                     </div>
                 </div>

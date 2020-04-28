@@ -519,8 +519,8 @@ img.tabmenu-image.coins {
 	background-position: 0 -78px;
 }
 
-/* CUSTOM DISABLED TAGS :D */
-#mainmenu li#disabled a {
+/* CUSTOM DISABLED TAGS  */
+#mainmenu li.disabled a {
 	background-position: -19px -39px;
 	color: #8C7853;
 	height: 39px	!important;
@@ -532,22 +532,26 @@ img.tabmenu-image.coins {
 	text-shadow: black 2px 2px 2px;	
 }
 
+#mainmenu li.disabled img {
+	filter: brightness(50%)
+}
 
-#mainmenu li#disabled .left {
+
+#mainmenu li.disabled .left {
 	width: 4px;
 	float: left;
 	background-position: -12px -39px;
 	height: 39px;
 }
 
-#mainmenu li#disabled .right {
+#mainmenu li.disabled .right {
 	width: 4px;
 	float: left;
 	height: 39px;
 	background-position: 100% -39px;
 }
 
-#mainmenu li#disabled.last .right {
+#mainmenu li.disabled.last .right {
 	width: 12px;
 	height: 39px;
 	background-position: 0 -39px;

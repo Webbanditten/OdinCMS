@@ -1,0 +1,21 @@
+﻿@{ 
+    Page currentPage = ViewData["page"] as Page;
+    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+
+
+    ViewData["Title"] = currentPage.Details.Name;
+}
+
+<div id="page-headline">
+    <div id="page-headline-breadcrums">
+        @foreach (string s in pathList)
+        {
+            @s @:-> @currentPage.Details.Name
+        }
+    </div>
+    <div id="page-headline-text">
+        @currentPage.Details.Name
+    </div>
+</div>
+
+<partial name="~/Views/Shared/PageDesigns/two_small_one_wide.cshtml" model=currentPage optional="true" />

@@ -1,0 +1,22 @@
+﻿@model KeplerCMS.Data.Models.Containers
+
+@{
+    switch (Model.Theme)
+    {
+        case "red":
+                <partial name="~/Views/Shared/Containers/Red.cshtml" model=Model />
+            break;
+        case "blue":
+                <partial name="~/Views/Shared/Containers/Blue.cshtml" model=Model />
+            break;
+        case "green":
+                <partial name="~/Views/Shared/Containers/Green.cshtml" model=Model />
+            break;
+        case "gold":
+                <partial name="~/Views/Shared/Containers/Gold.cshtml" model=Model />
+            break;
+        default:
+                <strong>Container style not found</strong>
+            break;
+    }
+}

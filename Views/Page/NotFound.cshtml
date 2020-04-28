@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = DbRes.T("header", "404");
+}
+
+<div id="page-headline">
+    <div id="page-headline-breadcrums">
+        
+    </div>
+    <div id="page-headline-text">@DbRes.T("header", "404")</div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="content-2col">
+    <tbody>
+        <tr>
+            <td rowspan="2" style="width: 8px;">&nbsp;</td>
+            <td valign="top" style="width: 740px;">
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tbody>
+                        <tr><td colspan="3" style="padding-bottom: 3px;"></td></tr>
+                        <tr>
+                            <td valign="top" style="width: 215px; height: 400px;" class="habboPage-col">
+                                <div class="portlet-scale gold">
+                                    <div class="portlet-scale-header">
+                                        <h3>@DbRes.T("header", "404")</h3>
+                                    </div>
+                                    <div class="portlet-scale-body">
+                                        <div class="portlet-scale-content">
+                                            <img width="113" vspace="0" hspace="0" height="100" border="0" align="right" src="http://www.test1.webbanditten.dk//c_images/content/maintenance.gif" id="galleryImage" alt="maintenance.gif">
+                                            @DbRes.T("text", "404")
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-scale-bottom">
+                                        <div class="portlet-scale-bottom-body"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+            <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+        </tr>
+
+    </tbody>
+</table>

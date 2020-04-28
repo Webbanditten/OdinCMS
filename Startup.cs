@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using KeplerCMS.Data;
 using KeplerCMS.Services;
 using KeplerCMS.Services.Implementations;
@@ -84,6 +85,8 @@ namespace KeplerCMS
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICommandQueueService, CommandQueueService>();
+            services.AddScoped<IMenuService, MenuService>();
+            services.AddScoped<IPageService, PageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -131,8 +134,22 @@ namespace KeplerCMS
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                   name: "default",
-                   pattern: "{controller=Home}/{action=Index}/{id?}");
+                    name: "slug",
+                    pattern: "{slug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "slugWithSub",
+                    pattern: "{slug}/{subSlug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(name: "api", pattern: "api/{controller=MeApiController}");
             });

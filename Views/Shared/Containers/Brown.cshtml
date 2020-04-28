@@ -1,0 +1,33 @@
+﻿@model KeplerCMS.Data.Models.Containers
+
+
+@{
+    switch (Model.Theme)
+    {
+        case "red":
+            // Use the text block below to separate html elements from code
+            <text>
+                <h1>Test Site</h1>
+            </text>
+            break;  // Always break each case
+        case "blue":
+            <text>
+                <h1>Prod Site</h1>
+            </text>
+            break;
+        default:
+            <text>
+                <strong>Container theme not found</strong>
+            </text>
+            break;
+    }
+}
+<div class="v2box red light">
+    <div class="headline"><h3>@Model.Title</h3></div>
+    <div class="border"><div></div></div>
+    <div class="body">
+        @Model.Text
+        <div class="clear"></div>
+    </div>
+    <div class="bottom"><div></div></div>
+</div>
