@@ -1,0 +1,59 @@
+﻿@using KeplerCMS.Data.Models
+@using KeplerCMS.Models.Enums
+@{
+    var userData = (Users)ViewData["user"];
+    var menu = (List<Menu>)ViewData["menu"];
+    var subMenu = new List<Menu>();
+    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Housekeeping</title>
+
+    <link rel="stylesheet" href="~/css/housekeeping.css">
+
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="top">
+            <div class="loggedin">Logged in as xxx <a href="">Log out</a></div>
+            <ul class="menu">
+                <li><a href="">Bla bla</a></li>
+                <li class="active"><a href="">Bla bla</a></li>
+                <li><a href="">Bla bla</a></li>
+                <li><a href="">Bla bla</a></li>
+                <li><a href="">Bla bla</a></li>
+                <li><a href="">Bla bla</a></li>
+                <li><a href="">Bla bla</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <div class="sidebar">
+                <div class="container">
+                    <div class="title">
+                        Blabla
+                    </div>
+                    <div class="container-content">
+                        <ul>
+                            <li><a href="">sdfsdf</a></li>
+                            <li><a href="">sdfsdf</a></li>
+                            <li><a href="">sdfsdf</a></li>
+                            <li><a href="">sdfsdf</a></li>
+                            <li><a href="">sdfsdf</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+

@@ -37,7 +37,7 @@ namespace KeplerCMS.Controllers
         {
             if(username != null && password != null)
             {
-                var user = _userService.GetUserByUsername(username);
+                var user = await _userService.GetUserByUsername(username);
                 if (user != null && Argon2.Verify(user.Password, password))
                 {
 

@@ -2,6 +2,7 @@
 using KeplerCMS.Data.Models;
 using KeplerCMS.Helpers;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace KeplerCMS.Services.Implementations
 {
     public class UserService : IUserService
     {
-        private ICommandQueueService _commandQueueService;
-        private DataContext _context;
+        private readonly ICommandQueueService _commandQueueService;
+        private readonly DataContext _context;
 
         public UserService(ICommandQueueService commandQueueService, DataContext context)
         {
@@ -20,14 +21,14 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
-        public Users GetUserByUsername(string username)
+        public async Task<Users> GetUserByUsername(string username)
         {
-            return _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefault();
+            return await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();
         }
 
-        public Users GetUserById(string id)
+        public async Task<Users> GetUserById(string id)
         {
-            return _context.Users.Where(user => user.Id == int.Parse(id)).FirstOrDefault();
+            return await _context.Users.Where(user => user.Id == int.Parse(id)).FirstOrDefaultAsync();
         }
 
         public void UpdateFigure(string userId, string figureData, string newGender)
@@ -39,7 +40,6 @@ namespace KeplerCMS.Services.Implementations
 
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.refresh_appearance, userId);
         }
-
     }
 
 }

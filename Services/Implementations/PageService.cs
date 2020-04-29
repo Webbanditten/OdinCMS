@@ -2,8 +2,10 @@
 using KeplerCMS.Data.Models;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Services.Implementations
 {
@@ -16,9 +18,9 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
-        public Page GetPageBySlug(string slug)
+        public async Task<Page> GetPageBySlug(string slug)
         {
-            var pageDetails = _context.Pages.Where(p => p.Slug == slug).FirstOrDefault();
+            var pageDetails = await _context.Pages.Where(p => p.Slug == slug).FirstOrDefaultAsync();
             if(pageDetails == null)
             {
                 return null;

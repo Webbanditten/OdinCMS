@@ -23,19 +23,18 @@ namespace KeplerCMS.Controllers
     [Authorize]
     public class MeApiController : ControllerBase
     {
-        private readonly DataContext _context;
         private readonly IUserService _userService;
 
-        public MeApiController(IUserService userService, DataContext context)
+        public MeApiController(IUserService userService)
         {
-            _context = context;
             _userService = userService;
         }
 
         [HttpGet("credits")]
-        public ActionResult<int> Credits()
+        public async Task<int> Credits()
         {
-            return _userService.GetUserById(User.Identity.Name).Credits;
+            var user = await _userService.GetUserById(User.Identity.Name);
+            return user.Credits;
         }
     }
 }

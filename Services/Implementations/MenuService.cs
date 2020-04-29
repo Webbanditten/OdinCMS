@@ -1,8 +1,10 @@
 ﻿using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Services.Implementations
 {
@@ -15,9 +17,9 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
-        public List<Menu> GetMenu()
+        public async Task<List<Menu>> GetMenu()
         {
-            return _context.Menu.ToList();
+            return await _context.Menu.ToListAsync();
         }
     }
 

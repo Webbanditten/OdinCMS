@@ -3,31 +3,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Filters
 {
-    public class LoggedInFilter : Attribute, IActionFilter
+    public class LoggedInFilter : Attribute, IAsyncActionFilter
     {
-        private bool _redirect;
+        private readonly bool _redirect;
         private IUserService _userService;
         private IMenuService _menuService;
         public LoggedInFilter(bool redirect = true)
         {
             _redirect = redirect;
         }
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
 
-        }
-
-        public void OnActionExecuting(ActionExecutingContext context)
-        {
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) {
             _userService = context.HttpContext.RequestServices.GetService<IUserService>();
             _menuService = context.HttpContext.RequestServices.GetService<IMenuService>();
 
             if (context.Controller is Controller controller)
             {
-                var menu = _menuService.GetMenu();
+                var menu = await _menuService.GetMenu();
                 controller.ViewData["menu"] = menu;
                 if (!context.HttpContext.User.Identity.IsAuthenticated)
                 {
@@ -40,10 +36,12 @@ namespace KeplerCMS.Filters
                 else
                 {
                     //injecting values in the ViewData
-                    var user = _userService.GetUserById(context.HttpContext.User.Identity.Name);
+                    var user = await _userService.GetUserById(context.HttpContext.User.Identity.Name);
                     controller.ViewData["user"] = user;
                 }
             }
+
+            await next();
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using KeplerCMS.Data.Models;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Services.Interfaces
 {
     public interface IUserService
     {
-        public Users GetUserByUsername(string username);
+        Task<Users> GetUserByUsername(string username);
 
-        public Users GetUserById(string id);
+        Task<Users> GetUserById(string id);
 
         public void UpdateFigure(string userId, string figureData, string newGender);
     }

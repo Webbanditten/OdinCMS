@@ -2,6 +2,7 @@
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
@@ -15,14 +16,14 @@ namespace KeplerCMS.Controllers
         }
 
         [LoggedInFilter(false)]
-        public IActionResult Index(string slug, string subSlug = null)
+        public async Task<IActionResult> Index(string slug, string subSlug = null)
         {
             var dbSlug = slug;
             if(subSlug != null)
             {
                 dbSlug = slug + "/" + subSlug;
             }
-            var page = _pageService.GetPageBySlug(dbSlug);
+            var page = await _pageService.GetPageBySlug(dbSlug);
 
             if (page == null)
             {
