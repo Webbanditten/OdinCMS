@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
+
+    [MenuFilter]
     public class PageController : Controller
     {
         private readonly IPageService _pageService;

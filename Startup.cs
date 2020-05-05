@@ -87,6 +87,7 @@ namespace KeplerCMS
             services.AddScoped<ICommandQueueService, CommandQueueService>();
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IPageService, PageService>();
+            services.AddScoped<IFuseService, FuseService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

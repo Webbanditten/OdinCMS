@@ -16,24 +16,24 @@ namespace KeplerCMS.Data.Models
         [Column("slug")]
         public string Slug { get; set; }
         [Column("display_header")]
-        public int _DisplayHeader { get; set; }
+        public int IDisplayHeader { get; set; }
         [Column("news")]
-        public int _News { get; set; }
+        public int INews { get; set; }
         [Column("design")]
-        public string design { get; set; }
+        public string Design { get; set; }
 
         [NotMapped]
         public bool DisplayHeader
         {
-            get { return _DisplayHeader == 1; }
-            set { _DisplayHeader = value ? 1 : 0; }
+            get { return IDisplayHeader == 1; }
+            set { IDisplayHeader = value ? 1 : 0; }
         }
 
         [NotMapped]
         public bool News
         {
-            get { return _News == 1; }
-            set { _News = value ? 1 : 0; }
+            get { return INews == 1; }
+            set { INews = value ? 1 : 0; }
         }
     }
 }

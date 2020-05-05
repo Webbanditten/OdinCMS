@@ -13,22 +13,34 @@ namespace KeplerCMS.Services.Implementations
     public class UserService : IUserService
     {
         private readonly ICommandQueueService _commandQueueService;
+        private readonly IFuseService _fuseService;
         private readonly DataContext _context;
 
-        public UserService(ICommandQueueService commandQueueService, DataContext context)
+        public UserService(ICommandQueueService commandQueueService, IFuseService fuseService, DataContext context)
         {
             _commandQueueService = commandQueueService;
+            _fuseService = fuseService;
             _context = context;
         }
 
         public async Task<Users> GetUserByUsername(string username)
         {
-            return await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();
+            if(user != null)
+            {
+                user.Fuses = await _fuseService.GetFusesByRank(user.Rank);
+            }
+            return user;
         }
 
         public async Task<Users> GetUserById(string id)
         {
-            return await _context.Users.Where(user => user.Id == int.Parse(id)).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(user => user.Id == int.Parse(id)).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                user.Fuses = await _fuseService.GetFusesByRank(user.Rank);
+            }
+            return user;
         }
 
         public void UpdateFigure(string userId, string figureData, string newGender)

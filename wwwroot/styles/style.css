@@ -300,6 +300,8 @@ img.tabmenu-image {
 img.tabmenu-image.myimage {
 	margin-top: 0;
 	margin-right: 5px;
+	height: 110px;
+	width: 64px;
 }
 
 img.tabmenu-image.coins {
@@ -315,6 +317,7 @@ img.tabmenu-image.coins {
 #myhabbo-content div.tabmenu-inner-content {
 	text-align: left;
 }
+
 
 #habbologo {
 	position: absolute;

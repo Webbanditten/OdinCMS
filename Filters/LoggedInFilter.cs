@@ -11,26 +11,24 @@ namespace KeplerCMS.Filters
     {
         private readonly bool _redirect;
         private IUserService _userService;
-        private IMenuService _menuService;
         public LoggedInFilter(bool redirect = true)
         {
             _redirect = redirect;
         }
 
-        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) {
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
             _userService = context.HttpContext.RequestServices.GetService<IUserService>();
-            _menuService = context.HttpContext.RequestServices.GetService<IMenuService>();
 
             if (context.Controller is Controller controller)
             {
-                var menu = await _menuService.GetMenu();
-                controller.ViewData["menu"] = menu;
                 if (!context.HttpContext.User.Identity.IsAuthenticated)
                 {
                     controller.ViewData["user"] = null;
                     if (_redirect)
                     {
                         context.Result = controller.Challenge();
+                        return;
                     }
                 }
                 else

@@ -1,10 +1,25 @@
 ﻿@using KeplerCMS.Data.Models
-@using KeplerCMS.Models.Enums
+@using KeplerCMS.Areas.Housekeeping.Models.Enums
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
     var subMenu = new List<Menu>();
-    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+    var path = Context.Request.Path;
+
+    HousekeepingMenu activeMenuItem;
+
+    switch (path)
+    {
+        case "/housekeeping/website":
+            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
+            break;
+        case "/housekeeping/menu":
+            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
+            break;
+        default:
+            activeMenuItem = HousekeepingMenu.Frontpage;
+            break;
+    }
 }
 <!doctype html>
 <html lang="en">
@@ -13,46 +28,53 @@
 
     <title>Housekeeping</title>
 
-    <link rel="stylesheet" href="~/css/housekeeping.css">
+    <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css">
+    <link rel="stylesheet" href="~/housekeeping/css/sweetalert2.min.css">
 
 </head>
 
 <body>
     <div class="wrapper">
         <div class="top">
-            <div class="loggedin">Logged in as xxx <a href="">Log out</a></div>
+            <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
             <ul class="menu">
-                <li><a href="">Bla bla</a></li>
-                <li class="active"><a href="">Bla bla</a></li>
-                <li><a href="">Bla bla</a></li>
-                <li><a href="">Bla bla</a></li>
-                <li><a href="">Bla bla</a></li>
-                <li><a href="">Bla bla</a></li>
-                <li><a href="">Bla bla</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.Statistics) ? "class=active" : "")><a href="">Statistics</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
+                <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")><a href="">Hobba tools</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="">Admin tools</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="">Localization</a></li>
             </ul>
         </div>
         <div class="content">
             <div class="sidebar">
-                <div class="container">
-                    <div class="title">
-                        Blabla
-                    </div>
-                    <div class="container-content">
-                        <ul>
-                            <li><a href="">sdfsdf</a></li>
-                            <li><a href="">sdfsdf</a></li>
-                            <li><a href="">sdfsdf</a></li>
-                            <li><a href="">sdfsdf</a></li>
-                            <li><a href="">sdfsdf</a></li>
-                        </ul>
-                    </div>
-                </div>
+                @{if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Website administration
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    <li><a href="@Url.Action("Index", "Menu")">Menu</a></li>
+                                    <li><a href="@Url.Action("Index", "Pages")">Pages</a></li>
+                                    <li><a href="@Url.Action("Index", "News")">News & Promotions</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                }
             </div>
             <div class="main-content">
                 @RenderBody()
             </div>
         </div>
     </div>
+
+    <script src="~/housekeeping/js/jquery.js" type="text/javascript"></script>
+    <script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
+    <script src="~/housekeeping/js/sweetalert2.min.js" type="text/javascript"></script>
+    @RenderSection("scripts", false);
 </body>
 
 </html>

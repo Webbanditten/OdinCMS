@@ -22,7 +22,7 @@ namespace KeplerCMS.Data.Models
         [Column("href")]
         public string Href { get; set; }
         [Column("order")]
-        public string Order { get; set; }
+        public int Order { get; set; }
         [Column("state")]
         public string State { get; set; }
     }

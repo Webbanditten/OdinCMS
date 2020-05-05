@@ -1,0 +1,53 @@
+﻿@model MenuAddViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Create Menu</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div class="form-group">
+                <label asp-for="Text" class="label-control"></label>
+                <input asp-for="Text" class="form-control" />
+                <span asp-validation-for="Text" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Icon" class="label-control"></label>
+                <select asp-for="Icon" class="form-control">
+                    <option>spaceexplore_tab</option>
+                    <option>tab_icon_01_home</option>
+                    <option>tab_icon_02_hotel</option>
+                    <option>tab_icon_03_community</option>
+                    <option>tab_icon_04_games</option>
+                    <option>tab_icon_05_bbs</option>
+                    <option>tab_icon_05_fun</option>
+                    <option>tab_icon_06_mobile</option>
+                    <option>tab_icon_07_shop</option>
+                    <option>tab_icon_08_help</option>
+                    <option>tab_icon_09_hc</option>
+                    <option>tab_icon_10_coins</option>
+                    <option>tab_icon_11_bbs</option>
+                    <option>Xmas_tab_image</option>
+                </select>
+                <span asp-validation-for="Icon" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Href" class="label-control"></label>
+                <input asp-for="Href" class="form-control" />
+                <span asp-validation-for="Href" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="State" class="label-control"></label>
+                <select asp-for="State" class="form-control">
+                    <option value="display">Display</option>
+                    <option value="authenticated">Authentication required</option>
+                </select>
+                <span asp-validation-for="State" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>  

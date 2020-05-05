@@ -26,6 +26,9 @@ namespace KeplerCMS.Data.Models
         [Column("sex")]
         public string Gender { get; set; }
 
+        [Column("rank")]
+        public int Rank { get; set; }
+
         [Column("credits")]
         public int Credits { get; set; }
 
@@ -36,5 +39,8 @@ namespace KeplerCMS.Data.Models
                 return this.ClubExpiration > timeSpan.TotalSeconds;
             }
         }
+
+        [NotMapped]
+        public IEnumerable<string> Fuses { get; set; }
     }
 }

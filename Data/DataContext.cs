@@ -10,6 +10,8 @@ namespace KeplerCMS.Data
         public DbSet<Containers> Containers { get; set; }
         public DbSet<Pages> Pages { get; set; }
 
+        public DbSet<Fuses> Fuses { get; set; }
+
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

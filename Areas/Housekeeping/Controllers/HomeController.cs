@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 
-namespace KeplerCMS.Areas.Admin
+namespace KeplerCMS.Areas.Housekeeping
 {
     [Area("Housekeeping")]
     public class HomeController : Controller

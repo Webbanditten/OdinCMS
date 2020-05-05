@@ -3,6 +3,8 @@ using KeplerCMS.Filters;
 
 namespace KeplerCMS.Controllers
 {
+
+    [MenuFilter]
     public class HomeController : Controller
     {
         public HomeController()

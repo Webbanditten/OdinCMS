@@ -1,3 +1,7 @@
+.ad-scale.ad-leader .ad-content-m {
+	height:92px;
+	width:728px;
+}
 div.ad-scale {
 	margin-top: 8px;
 }
@@ -29,6 +33,10 @@ td.ad-header-tl {
 td.ad-header-t {
 	height: 4px;
 	background: url(../images/ads-scale/bg-banner-top-r.gif) no-repeat;
+}
+
+div.ad-scale.ad160 .ad-content-m {
+	height:600px;
 }
 
 div.ad-scale.ad300, div.ad-scale.ad160 {
@@ -99,6 +107,9 @@ td.ad-content-ml
 
 td.ad-content-m {
 	background-color: #004979;
+	background-image: url(../images/progress_habbos.gif);
+	background-repeat:no-repeat;
+	background-position:center;
 }
 
 td.ad-content-m table, td.ad-content-m div, td.ad-content-m p, td.ad-content-m object, td.ad-content-m embed, td.ad-content-m img {
@@ -111,6 +122,7 @@ td.ad-content-mr
 	background-image: url(../images/ads-scale/bg-banner-scale-r.gif);
 	background-repeat: no-repeat;
 	background-position: right -15px;
+	height:92px;
 }
 
 td.ad-content-bl {
