@@ -20,6 +20,60 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\housekeeping\js\tinymce\jquery.tinymce.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\langs\readme.md" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\advlist\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\anchor\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autolink\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autoresize\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autosave\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\bbcode\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\charmap\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\codesample\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\code\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\colorpicker\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\contextmenu\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\directionality\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\js\emojis.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\js\emojis.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\fullpage\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\fullscreen\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\help\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\hr\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\imagetools\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\image\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\importcss\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\insertdatetime\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\legacyoutput\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\link\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\lists\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\media\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\nonbreaking\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\noneditable\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\pagebreak\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\paste\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\preview\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\print\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\quickbars\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\save\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\searchreplace\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\spellchecker\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\tabfocus\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\table\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\template\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\textcolor\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\textpattern\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\toc\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\visualblocks\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\visualchars\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\plugins\wordcount\plugin.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\themes\mobile\theme.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\themes\silver\theme.min.js" />
+    <None Include="wwwroot\housekeeping\js\tinymce\tinymce.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.3" />

@@ -18,4 +18,4 @@
     </div>
 </div>
 
-<partial name="~/Views/Shared/PageDesigns/two_small_one_wide.cshtml" model=currentPage optional="true" />
+<partial name="~/Views/Shared/PageDesigns/@{@currentPage.Details.Design;}.cshtml" model=currentPage optional="true" />

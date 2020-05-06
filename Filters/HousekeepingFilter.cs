@@ -1,4 +1,5 @@
 ﻿
+using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -14,9 +15,9 @@ namespace KeplerCMS.Filters
         private IUserService _userService;
         private readonly string _fuse;
         // Todo make enum with roles.
-        public HousekeepingFilter(string fuse)
+        public HousekeepingFilter(Fuse fuse)
         {
-            _fuse = fuse;
+            _fuse = Enum.GetName(typeof(Fuse), fuse);
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)

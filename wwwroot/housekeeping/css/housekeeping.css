@@ -65,6 +65,11 @@
     display: flex;
 }
 
+.main-content {
+    position:relative;
+    width: 708px;
+}
+
 .sidebar {
     width: 200px;
     margin-right: 12px;
@@ -432,4 +437,231 @@ p {
     background: #ddd;
 }
 
+
+
+
+table.blueTable {
+  border: 1px solid #1C6EA4;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+table.blueTable td, table.blueTable th {
+  border: 1px solid #AAAAAA;
+  padding: 3px 2px;
+}
+table.blueTable tbody td {
+  font-size: 13px;
+}
+table.blueTable tr:nth-child(even) {
+  background: #D0E4F5;
+}
+table.blueTable thead {
+  background: #0066cc;
+  border-bottom: 2px solid #444444;
+}
+table.blueTable thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+  border-left: 2px solid #D0E4F5;
+}
+table.blueTable thead th:first-child {
+  border-left: none;
+}
+
+table.blueTable tfoot {
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFFFFF;
+  background: #D0E4F5;
+  background: -moz-linear-gradient(top, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+  background: -webkit-linear-gradient(top, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+  background: linear-gradient(to bottom, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+  border-top: 2px solid #444444;
+}
+table.blueTable tfoot td {
+  font-size: 14px;
+}
+table.blueTable tfoot .links {
+  text-align: right;
+}
+table.blueTable tfoot .links a{
+  display: inline-block;
+  background: #1C6EA4;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+
+/* Draggable pages containers */
+
+
+
+/* Board */
+
+.board {
+    position: relative;
+    width:100%;
+    margin-bottom:15px;
+
+}
+.board-column:first-child {
+    margin-left:0px;
+}
+.board-column:last-child {
+    margin-right: 0px;
+}
+.board-column {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 30%;
+    margin: 0 1.5%;
+    background: #f0f0f0;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+.board-column.muuri-item-releasing {
+    z-index: 2;
+}
+
+.board-column.muuri-item-dragging {
+    z-index: 3;
+    cursor: move;
+}
+
+.board-column-header {
+    position: relative;
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+    padding: 0 20px;
+    text-align: center;
+    background: #333;
+    color: #fff;
+    border-radius: 3px 3px 0 0;
+}
+.board-column-header span {
+    display: block;
+    position: absolute;
+    top: 14px;
+    width: 100%;
+    left: 0px;
+}
+
+@media (max-width: 600px) {
+    .board-column-header {
+        text-indent: -1000px;
+    }
+}
+
+.board-column.todo .board-column-header {
+    background: #4A9FF9;
+}
+
+.board-column.working .board-column-header {
+    background: #f9944a;
+}
+
+.board-column.done .board-column-header {
+    background: #2ac06d;
+}
+
+.board-column-content {
+    position: relative;
+    border: 10px solid transparent;
+    min-height: 95px;
+}
+
+.board-item {
+    position: absolute;
+    width: 100%;
+    margin: 5px 0;
+    margin-bottom:30px;
+}
+
+.board-item.muuri-item-releasing {
+    z-index: 9998;
+}
+
+.board-item.muuri-item-dragging {
+    z-index: 9999;
+    cursor: move;
+}
+
+.board-item.muuri-item-hidden {
+    z-index: 0;
+}
+
+.board-item-content {
+    position: relative;
+    padding: 20px;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 17px;
+    cursor: pointer;
+    -webkit-box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+    box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+}
+
+.board-item-content .actions {
+    z-index:2;
+    position:absolute;
+    bottom:-20px;
+}
+
+@media (max-width: 600px) {
+    .board-item-content {
+        text-align: center;
+    }
+
+        .board-item-content span {
+            display: none;
+        }
+}
+.header {
+    color: #ffffff;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 16px;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    display: block;
+    border-radius: 3px;
+    background: #083d55;
+    margin-bottom:15px;
+}
+.header span {
+    padding:0px 0px 0px 15px;
+}
+.news {
+    height:254px;
+    margin-bottom:20px;
+    width:740px;
+    display:flex;
+}
+
+.news .left {
+    width:429px;
+    height:100%;
+    border:2px solid #000;
+    background:#004979;
+    font-size:40px;
+    text-align:center;
+    color:#fff;
+}
+
+.news .right {
+    width: 311px;
+    height: 100%;
+    border: 2px solid #000;
+    background: #004979;
+    font-size:40px;
+    text-align:center;
+    color:#fff;
+}
 

@@ -1,0 +1,46 @@
+﻿@model PageUpdateViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Edit page</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update">
+
+            <input asp-for="Id" type="hidden" />
+            <div class="form-group">
+                <label asp-for="Name" class="label-control"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Slug" class="label-control"></label>
+                <input asp-for="Slug" class="form-control" />
+                <span asp-validation-for="Slug" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DisplayHeader" class="label-control"></label>
+                <input type="checkbox" asp-for="DisplayHeader" class="form-control" />
+                <span asp-validation-for="DisplayHeader" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="News" class="label-control"></label>
+                <input type="checkbox" asp-for="News" class="form-control" />
+                <span asp-validation-for="News" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Design" class="label-control"></label>
+                <select asp-for="Design" class="form-control">
+                    <option value="page_with_sidebar">Page with sidebar</option>
+                    <option value="two_small_one_wide">Two Small One Wide Column</option>
+                    <option value="two_columns">Two columns</option>
+                </select>
+                <span asp-validation-for="Design" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>  

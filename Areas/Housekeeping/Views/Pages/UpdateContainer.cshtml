@@ -1,0 +1,64 @@
+﻿@model ContainerUpdateViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Create Container</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="UpdateContainer">
+            <input asp-for="Id" hidden="hidden" />
+            <input asp-for="PageId" hidden="hidden" />
+            <div class="form-group">
+                <label asp-for="Title" class="label-control"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Text" class="label-control"></label>
+                <textarea id="editor" asp-for="Text" class="form-control"></textarea>
+                <span asp-validation-for="Text" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Type" class="label-control"></label>
+                <select asp-for="Type" class="form-control">
+                    <option value="container">Default</option>
+                    <option value="credit">Credit</option>
+                    <option value="hc">Habbo Club</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Theme" class="label-control"></label>
+                <select asp-for="Theme" class="form-control">
+                    <option>red</option>
+                    <option>green</option>
+                    <option>blue</option>
+                    <option>gold</option>
+                    <option>redv2</option>
+                    <option>bluev2</option>
+                    <option>greenv2</option>
+                </select>
+                <span asp-validation-for="Theme" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/housekeeping/js/tinymce/tinymce.min.js"></script>
+    <script src="~/housekeeping/js/tinymce/jquery.tinymce.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#editor').tinymce({
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table paste imagetools wordcount"
+                ]});
+        });
+    </script>
+}
