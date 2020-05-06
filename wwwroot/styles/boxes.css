@@ -1,5 +1,4 @@
 /* --- Scaling portlets --- */
-
 div.portlet-scale p {
 	margin-top: 0;
 	margin-bottom: 8px;
@@ -57,6 +56,10 @@ div.portlet-scale.gold div.portlet-scale-bottom-body {
 
 div.v2box a {
 	color: #D75C03;
+}
+
+div.v2box p {
+	margin-bottom:0px;
 }
 
 div.v2box div.headline, div.v2box div.border, div.v2box div.border div {

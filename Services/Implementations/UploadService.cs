@@ -79,7 +79,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<UploadUpdateViewModel> GetWithoutBlob(int id)
         {
-            var file = await _context.Uploads.Select(x => new UploadUpdateViewModel
+            var file = await _context.Uploads.Where(s=>s.Id == id).Select(x => new UploadUpdateViewModel
             {
                 Id = x.Id,
                 Category = x.Category

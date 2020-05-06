@@ -16,7 +16,6 @@ namespace KeplerCMS.Controllers
             _uploadService = uploadService;
         }
 
-        [LoggedInFilter]
         public async Task<IActionResult> Index(string category, string fileName)
         {
             var file = await _uploadService.GetByCategoryAndName(category, fileName);
