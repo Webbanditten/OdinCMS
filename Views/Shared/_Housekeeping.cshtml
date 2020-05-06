@@ -25,6 +25,9 @@
         case "/housekeeping/promotions":
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
+        case "/housekeeping/upload":
+            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
+            break;
         default:
             activeMenuItem = HousekeepingMenu.Frontpage;
             break;
@@ -68,6 +71,7 @@
                                     <li><a href="@Url.Action("Index", "Menu")">Menu</a></li>
                                     <li><a href="@Url.Action("Index", "Pages")">Pages</a></li>
                                     <li><a href="@Url.Action("Index", "News")">News & Promotions</a></li>
+                                    <li><a href="@Url.Action("Index", "Upload")">Upload</a></li>
                                 </ul>
                             </div>
                         </div>

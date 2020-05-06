@@ -79,7 +79,7 @@ namespace KeplerCMS.Areas.Housekeeping
         [HousekeepingFilter(Fuse.housekeeping_pages)]
         public IActionResult CreateContainer(int id, int column)
         {
-            return View(new ContainerAddViewModel { PageId = id });
+            return View(new ContainerAddViewModel { PageId = id, Column = column });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]

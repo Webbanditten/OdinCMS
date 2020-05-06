@@ -12,6 +12,7 @@ namespace KeplerCMS.Models
         housekeeping_menu,
         housekeeping,
         housekeeping_localization,
-        housekeeping_campaign
+        housekeeping_campaign,
+        housekeeping_upload
     }
 }

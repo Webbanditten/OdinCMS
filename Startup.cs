@@ -88,6 +88,7 @@ namespace KeplerCMS
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IPageService, PageService>();
             services.AddScoped<IFuseService, FuseService>();
+            services.AddScoped<IUploadService, UploadService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -146,6 +147,12 @@ namespace KeplerCMS
                     pattern: "{slug}/{subSlug}",
                     defaults: new { controller = "Page", action = "Index" },
                     constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "images",
+                    pattern: "images/{category}/{fileName}",
+                    defaults: new { controller = "Images", action = "Index" }
                 );
 
                 endpoints.MapControllerRoute(
