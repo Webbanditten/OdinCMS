@@ -21,7 +21,8 @@ namespace KeplerCMS.Data.Models
         public int INews { get; set; }
         [Column("design")]
         public string Design { get; set; }
-
+        [Column("news_header")]
+        public string NewsHeader { get; set; }
         [NotMapped]
         public bool DisplayHeader
         {

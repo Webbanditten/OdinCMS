@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace KeplerCMS.Data.Models
+{
+    [Table("cms_news")]
+    public class News
+    {
+        [Column("id")]
+        public int Id { get; set; }
+        [Column("title")]
+        public string Ttile { get; set; }
+        [Column("text")]
+        public string Text { get; set; }
+        [Column("writer")]
+        public string Writer { get; set; }
+        [Column("publish_date")]
+        public DateTime PublishDate { get; set; }
+
+
+
+    }
+}

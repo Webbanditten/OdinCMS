@@ -11,6 +11,8 @@ namespace KeplerCMS.Data
         public DbSet<Pages> Pages { get; set; }
         public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Upload> Uploads { get; set; }
+        public DbSet<News> News { get; set; }
+        public DbSet<Promo> Promos { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
