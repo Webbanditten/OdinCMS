@@ -13,6 +13,8 @@ namespace KeplerCMS.Data
         public DbSet<Upload> Uploads { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<Promo> Promos { get; set; }
+        public DbSet<Vouchers> Vouchers { get; set; }
+        public DbSet<VoucherHistory> VoucherHistory { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }

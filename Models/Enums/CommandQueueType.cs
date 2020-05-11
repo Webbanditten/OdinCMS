@@ -7,6 +7,7 @@ namespace KeplerCMS.Models.Enums
 {
     public enum CommandQueueType
     {
-        refresh_appearance
+        refresh_appearance,
+        update_credits
     }
 }

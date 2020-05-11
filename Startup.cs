@@ -89,6 +89,7 @@ namespace KeplerCMS
             services.AddScoped<IPageService, PageService>();
             services.AddScoped<IFuseService, FuseService>();
             services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<ICreditService, CreditService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -161,7 +162,7 @@ namespace KeplerCMS
 
                 endpoints.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Page}/{action=Index}/{slug?}");
 
                 endpoints.MapControllerRoute(name: "api", pattern: "api/{controller=MeApiController}");
             });

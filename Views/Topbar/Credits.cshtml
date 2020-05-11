@@ -1,0 +1,18 @@
+﻿@using KeplerCMS.Data.Models
+@{
+    Layout = null;
+    var userData = (Users)ViewData["user"];
+}
+
+
+<h3>@DbRes.T("you_have", "credits") <span id="amount-credits" class="amount habbocredits">@userData.Credits</span> @DbRes.T("coins", "credits")</h3>
+<div class="tabmenu-inner-content">
+    <p>
+        <img src="~/images/top_bar/mycredits_coins.gif" alt="" width="47" height="21" class="tabmenu-image coins" />
+        <a href="/credits" class="arrow">@DbRes.T("buy", "credits")</a>
+    </p>
+    <p>
+        <a href="/credits" class="arrow">@DbRes.T("redeem_btn", "credits")</a>
+    </p>
+</div>
+<script>CreditsUpdated = false;</script>

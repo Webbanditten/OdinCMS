@@ -41,6 +41,19 @@ namespace KeplerCMS.Data.Models
         }
 
         [NotMapped]
+        public int HabboClubInDays
+        {
+            get
+            {
+                var today = DateTime.UtcNow;
+                var expirationDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                expirationDate = expirationDate.AddSeconds(ClubExpiration).ToLocalTime();
+
+                return (expirationDate - today).Days;
+            }
+        }
+
+        [NotMapped]
         public IEnumerable<string> Fuses { get; set; }
     }
 }

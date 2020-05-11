@@ -5,6 +5,7 @@
     var menu = (List<Menu>)ViewData["menu"];
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+    var baseUrl = Context.Request.Scheme + "://" + Context.Request.Host;
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -18,11 +19,11 @@
     <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
 
 
-    <script language='JavaScript' type='text/javascript'>
-        var habboReqPath = 'http://www.test1.webbanditten.dk';
-        var habboStaticFilePath = '~';
+    <script type='text/javascript'>
+        var habboReqPath = '@baseUrl';
+        var habboStaticFilePath = '@baseUrl@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
-        document.habboLoggedIn = false;
+        document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
         window.name = 'habboMain';
     </script>
 

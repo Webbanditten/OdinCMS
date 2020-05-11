@@ -58,8 +58,9 @@ div.v2box a {
 	color: #D75C03;
 }
 
-div.v2box p {
-	margin-bottom:0px;
+div p {
+	margin-top: 0px;
+	margin-bottom: 0px;
 }
 
 div.v2box div.headline, div.v2box div.border, div.v2box div.border div {

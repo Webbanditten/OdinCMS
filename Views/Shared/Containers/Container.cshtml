@@ -1,22 +1,181 @@
-﻿@model KeplerCMS.Data.Models.Containers
+﻿@using KeplerCMS.Data.Models
+@model Containers
+
+@functions
+{
+
+    string GenerateClassBasedOnTheme(string theme)
+    {
+        return theme.Replace("-", " ");
+    }
+
+    async Task RenderBody(string text)
+    {
+
+        if (text.Contains("{credits}"))
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                <div class="v2box brown darkest">
+                    <div class="headline"><h3>@Model.Title</h3></div>
+                    <div class="border"><div></div></div>
+                    <div class="body">
+                        <p>
+                            @DbRes.T("body", "credits") <a href="/credits">@DbRes.T("link", "credits")</a>
+                        </p>
+                        <div class="purse-balance">
+                            <span class="lang-creditsMain-purseContentBefore">
+                                <font style="vertical-align: inherit;">
+                                    <font style="vertical-align: inherit;">@DbRes.T("you_have", "credits") </font>
+                                </font>
+                            </span>
+                            <span class="purse-balance-amount">
+                                &nbsp;<span class="habbocredits">@(((Users)ViewData["user"]).Credits)</span>
+                            </span>
+                            <font style="vertical-align: inherit;">&nbsp;@DbRes.T("coins", "credits")</font>
+                        </div>
+
+                        <div id="purse-redeem">
+                            <div id="purse-form-container">
+                                @DbRes.T("redeem_text", "credits")
+
+                                <form method="post" action="/api/credits/redeem" id="purse-redeem-form">
+                                    <input type="text" name="redeem-code" size="34" id="redeem-code">
+                                    <input type="hidden" name="doRedeem" value="yes" id="doredeem">
+                                    <input type="image" src="http://www.test1.webbanditten.dk//habboweb/17/16/web-gallery/images/button/arrow_button.gif" class="arrow-button" align="top">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="bottom"><div></div></div>
+                </div>
+            }
+            else
+            {
+                <div class="v2box brown darkest">
+                    <div class="headline"><h3>@Model.Title</h3></div>
+                    <div class="border"><div></div></div>
+                    <div class="body">
+                        <p>
+                            @DbRes.T("body", "credits") <a href="/credits">@DbRes.T("link", "credits")</a>
+                        </p>
+
+
+                        <div id="purse-redeem">
+                            <div>
+                                <div class="content-beige">
+                                    <div class="content-beige-body">
+                                        @DbRes.T("not_logged_in", "credits")
+                                        <div class="clear"></div>
+                                    </div>
+                                </div>
+                                <div class="content-beige-bottom">
+                                    <div class="content-beige-bottom-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="bottom"><div></div></div>
+                </div>
+            }
+        }
+        else
+        {
+            @Html.Raw(Model.Text)
+        }
+    }
+
+    void CreditContent()
+    {
+
+        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="headline"><h3>@Model.Title</h3></div>
+            <div class="border"><div></div></div>
+            <div class="body">
+                @{ RenderBody(Model.Text); }
+                <div class="clear"></div>
+            </div>
+            <div class="bottom"><div></div></div>
+        </div>
+    }
+
+    void V2Box()
+    {
+
+        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="headline"><h3>@Model.Title</h3></div>
+            <div class="border"><div></div></div>
+            <div class="body">
+                @{ RenderBody(Model.Text); }
+                <div class="clear"></div>
+            </div>
+            <div class="bottom"><div></div></div>
+        </div>
+    }
+
+    void V3Box()
+    {
+        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="v3box-top">
+                <h3>@Model.Title</h3>
+            </div>
+            <div class="v3box-content">
+                <div class="v3box-body">
+                    @{ RenderBody(Model.Text); }
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="v3box-bottom">
+                <div></div>
+            </div>
+        </div>
+    }
+    void MaskBox()
+    {
+        <div class="v2box @GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="headline"><h3>@Model.Title</h3></div>
+            <div class="border"><div></div></div>
+            <div class="body">
+                @{ RenderBody(Model.Text); }
+                <div class="clear"></div>
+            </div>
+            <div class="bottom"><div></div></div>
+        </div>
+    }
+
+    void NoBox()
+    {
+        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="nobox-content">
+                @{ RenderBody(Model.Text); }
+            </div>
+        </div>
+    }
+
+
+}
 
 @{
-    switch (Model.Theme)
+    if (Model.Theme.Contains("v2"))
     {
-        case "red":
-                <partial name="~/Views/Shared/Containers/Red.cshtml" model=Model />
-            break;
-        case "blue":
-                <partial name="~/Views/Shared/Containers/Blue.cshtml" model=Model />
-            break;
-        case "green":
-                <partial name="~/Views/Shared/Containers/Green.cshtml" model=Model />
-            break;
-        case "gold":
-                <partial name="~/Views/Shared/Containers/Gold.cshtml" model=Model />
-            break;
-        default:
-                <strong>Container style not found</strong>
-            break;
+        V2Box();
+    }
+    else if (Model.Theme.Contains("v3"))
+    {
+        V3Box();
+    }
+    else if (Model.Theme.Contains("maskbox"))
+    {
+        MaskBox();
+    }
+    else if (Model.Theme.Contains("nobox"))
+    {
+        NoBox();
+    }
+    else
+    {
+        <strong>Whups Theme not implemented</strong>
     }
 }

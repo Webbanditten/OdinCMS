@@ -26,8 +26,10 @@ namespace KeplerCMS.Services.Implementations
             {
                 return null;
             }
-            var containers = _context.Containers.Where(c => c.PageId == pageDetails.Id).ToList();
-            return new Page { Details = pageDetails, Containers = containers };
+            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id).ToListAsync();
+            var news = await GetNews(0, 5);
+            var promos = await GetPromos(pageDetails.Id);
+            return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
         }
         public async Task<Page> GetPageObjById(int id)
         {
@@ -36,8 +38,10 @@ namespace KeplerCMS.Services.Implementations
             {
                 return null;
             }
-            var containers = _context.Containers.Where(c => c.PageId == pageDetails.Id).ToList();
-            return new Page { Details = pageDetails, Containers = containers };
+            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id).ToListAsync();
+            var news = await GetNews(0, 5);
+            var promos = await GetPromos(pageDetails.Id);
+            return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
         }
 
         public async Task<IEnumerable<Pages>> GetAll()
@@ -154,6 +158,16 @@ namespace KeplerCMS.Services.Implementations
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<News>> GetNews(int from, int amount)
+        {
+            return await _context.News.OrderBy(s => s.PublishDate).Skip(from).Take(amount).ToListAsync();
+        }
+
+        public async Task<List<Promo>> GetPromos(int pageId)
+        {
+            return await _context.Promos.Where(s=>s.PageId == pageId).OrderBy(s => s.Id).ToListAsync();
         }
     }
 

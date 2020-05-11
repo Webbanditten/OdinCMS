@@ -1,21 +1,59 @@
-﻿@{ 
+﻿@using System.Web  
+@{
     Page currentPage = ViewData["page"] as Page;
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
 
-
     ViewData["Title"] = currentPage.Details.Name;
 }
+@{
+    if (currentPage.Details.DisplayHeader)
+    {
+        <div id="page-headline">
+            <div id="page-headline-breadcrums">
+                <!-- NOT IMPLEMENTED     @foreach (string s in pathList)
+                {
+                    @s @:-> @currentPage.Details.Name
+                }-->
+            </div>
+            <div id="page-headline-text">
+                @currentPage.Details.Name
+            </div>
+        </div>
+    }
+}
 
-<div id="page-headline">
-    <div id="page-headline-breadcrums">
-        @foreach (string s in pathList)
-        {
-            @s @:-> @currentPage.Details.Name
-        }
-    </div>
-    <div id="page-headline-text">
-        @currentPage.Details.Name
-    </div>
-</div>
 
 <partial name="~/Views/Shared/PageDesigns/@{@currentPage.Details.Design;}.cshtml" model=currentPage optional="true" />
+
+
+
+@section Scripts {
+    <script>
+        function closePurseRedeem() {
+            Element.remove("redeem_dialog");
+            hideOverlay();
+            refreshCredits();
+        }
+        j(document).ready(function () {
+            j("#purse-redeem-form").submit(function (event) {
+                event.preventDefault();
+                 var header = "@Html.Raw(DbRes.T("redeem_dialog", "credits"))";
+                var dialog = createDialog("redeem_dialog", header, 9003, 0, -1000, closePurseRedeem);
+                appendDialogBody(dialog, "<p style=\"text-align:center\"><img src=\"" + habboStaticFilePath + "/images/progress_bubbles.gif"+"\" alt=\"\" width=\"29\" height=\"5\" /></p><div style=\"clear\"></div>", true);
+                moveDialogToCenter(dialog);
+                showOverlay();
+                new Ajax.Request(
+                    habboReqPath + "/api/credits/redeem",
+                    {
+                        method: "post", parameters: "code=" + encodeURIComponent(j("#redeem-code").val()), onComplete: function (req, json) {
+                            setDialogBody(dialog, req.responseText);
+                        }
+                    }
+                );
+            });
+            /*
+
+             */
+        });
+    </script>
+}

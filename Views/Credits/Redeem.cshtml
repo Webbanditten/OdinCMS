@@ -1,0 +1,44 @@
+﻿@{
+    Layout = null;
+    bool success = (bool)ViewData["success"];
+}
+
+@{
+    if (success)
+    {
+        <div class="redeem_dialog" style="height:115px;">
+            <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
+            <p><strong>@DbRes.T("success_code_header", "credits")</strong></p>
+            <p>@DbRes.T("success_code_body", "credits")</p>
+            <br>
+            <p>
+            </p>
+            <table align="right">
+                <tbody>
+                    <tr>
+                        <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="redeem_dialog" style="height:100px;">
+            <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
+            <p><strong>@DbRes.T("wrong_code_header", "credits")</strong></p>
+            <p>@DbRes.T("wrong_code_body", "credits")</p>
+            <br>
+            <p>
+            </p>
+            <table align="right">
+                <tbody>
+                    <tr>
+                        <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    }
+}

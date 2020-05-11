@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Data.Models
 {
-    [Table("cms_promo")]
+    [Table("cms_promos")]
     public class Promo
     {
         [Column("id")]

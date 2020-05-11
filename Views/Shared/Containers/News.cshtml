@@ -1,0 +1,68 @@
+﻿@model KeplerCMS.Models.Page
+<tr>
+    <td colspan="3" style="padding-bottom: 3px;">
+
+        <div id="promoarea">
+            <!-- NEWS ITEMS INCLUDE -->
+
+            <script type="text/javascript">
+                var promoPages = [{
+                    image: "<img src=\"https://i.imgur.com/B0v5asa.png\" / alt=\"\"\>", links: ["<a href=\"http://www.test1.webbanditten.dk/news/article/1\">More</a>",
+                        "<a href=\"http://dcr.webbanditten.dk/client\" target=\"client\" onclick=\"openOrFocusHabbo(this); return false;\"\>Check In</a\>"], text: "Hello<br /\>"
+                }
+                    , { image: "<img src=\"https://i.imgur.com/BSDLmRF.png\" / alt=\"\"\>", links: ["<a href=\"http://dcr.webbanditten.dk/client\" target=\"client\" onclick=\"openOrFocusHabbo(this); return false;\"\>Check In</a\>"], text: "Windows added to Hotel, what your waiting for ?" }
+                    , { image: "<img src=\"http://dcr.webbanditten.dk/c_images/c_images/album1054/beta_updated_promo.gif\" / alt=\"\"\>", links: ["<a href=\"https://github.com/Negociation/RetroCMS\">Github</a>"], text: "Warning: Beta Preview Only for Tests. For more information access the GitHub directory.<br /\>" }];</script>
+
+            <div id="promoheader">
+                <h2><span class="lang-promoheader">Destaques</span></h2>
+                <ul style="display: block;" id="promoheader-selectors">
+                    <li><a href="#" onclick="showPromo(0); return false;" class="selected">1</a></li>
+                    <li><a href="#" onclick="showPromo(1); return false;" class="">2</a></li>
+                    <li><a href="#" onclick="showPromo(2); return false;" class="">3</a></li>
+
+                </ul>
+                <script type="text/javascript">
+                    $("promoheader-selectors").style.display = "block";
+                </script>
+            </div>
+
+            <div id="promocontent">
+                <div id="promobody">
+                    <p id="promoimage"><img src="https://i.imgur.com/B0v5asa.png" alt=""></p>
+                    <div class="promotext">
+                        <p id="promotext-content">Hello<br \=""><br></p>
+                    </div>
+                    <div id="promolinks">
+                        <ul id="promolinks-list">
+                            <li><a href="http://www.test1.webbanditten.dk/news/article/1">More</a></li>
+                            <li><a href="http://dcr.webbanditten.dk/client" target="client" onclick="openOrFocusHabbo(this); return false;">Check In</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="newsbox">
+            <div id="newsbox-header">
+                <h2><span class="lang-newsbox-header">Últimas Notícias</span></h2>
+                <a href="http://www.test1.webbanditten.dk//rss.xml"><img src="http://www.test1.webbanditten.dk//habboweb/17/16/web-gallery/images/promo_area/feed-icon.gif" alt="" border="0"></a>
+            </div>
+            <div id="newsbox-text">
+                <div class="newsitem">
+                    <!-- NEWS ITEMS INCLUDE -->
+
+                    <h3>
+                        <span class="articledate">[04/01/19]</span>
+                        <a href="http://www.test1.webbanditten.dk//news/article/1"><span class="lang-article-install-title">Test</span></a>
+                    </h3>
+                    <p><span class="lang-article-install-sub">sdfsdfsdfsdf</span></p>
+                </div>
+            </div>
+            <div id="newsbox-footer">
+                <div class="promo-button"><a href="http://www.test1.webbanditten.dk//news" alt=""><span class="lang-newsbox-footer">mais notícias</span></a></div>
+            </div>
+        </div>
+
+
+    </td>
+</tr>

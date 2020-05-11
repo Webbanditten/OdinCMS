@@ -20,6 +20,12 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         public async Task<IActionResult> Index(string slug, string subSlug = null)
         {
+            var currentPath = HttpContext.Request.Path;
+            if (currentPath.ToString() == "/")
+            {
+                return Redirect("~/home");
+            }
+
             var dbSlug = slug;
             if(subSlug != null)
             {

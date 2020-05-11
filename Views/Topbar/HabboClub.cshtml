@@ -1,0 +1,17 @@
+﻿@using KeplerCMS.Data.Models
+@{
+    Layout = null;
+    var userData = (Users)ViewData["user"];
+}
+
+
+<h3>Você possui @userData.HabboClubInDays dias restantes no Habbo Clube</h3>
+<div class="tabmenu-inner-content">
+    <p>
+        Habbo Club te dá os melhores benefícios
+    </p>
+    <p>
+        <a href="/habboclub" class="arrow">Últimas Notícias</a>
+    </p>
+</div>
+<script>habboClubUpdated = false;</script>
