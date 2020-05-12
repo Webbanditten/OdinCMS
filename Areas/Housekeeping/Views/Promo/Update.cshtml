@@ -1,0 +1,28 @@
+﻿@model UploadUpdateViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Edit file</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update">
+
+            <input asp-for="Id" class="form-control" type="hidden" />
+            <div class="form-group">
+                <label asp-for="Category" class="label-control"></label>
+                <select asp-for="Category" class="form-control">
+                    <option>news</option>
+                    <option>habbohome</option>
+                    <option>various</option>
+                    <option>promo</option>
+                    <option>content</option>
+                </select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>  

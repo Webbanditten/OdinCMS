@@ -1,0 +1,71 @@
+﻿@model KeplerCMS.Data.Models.News
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Create news</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div class="form-group">
+                <label asp-for="Title" class="label-control"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Slug" class="label-control"></label>
+                <input asp-for="Slug" class="form-control" />
+                <span asp-validation-for="Slug" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Writer" class="label-control"></label>
+                <input asp-for="Writer" class="form-control" />
+                <span asp-validation-for="Writer" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Teaser" class="label-control"></label>
+                <input asp-for="Teaser" class="form-control" />
+                <span asp-validation-for="Teaser" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PublishDate" class="label-control"></label>
+                <input asp-for="PublishDate" id="datepicker" type="text" class="form-control" />
+                <span asp-validation-for="PublishDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Text" class="label-control"></label>
+                <textarea id="editor" asp-for="Text" class="form-control"></textarea>
+                <span asp-validation-for="Text" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section scripts {
+    <link rel="stylesheet" href="~/housekeeping/css/jquery-ui.min.css">
+    <script src="~/housekeeping/js/tinymce/tinymce.min.js"></script>
+    <script src="~/housekeeping/js/tinymce/jquery.tinymce.min.js"></script>
+    <script src="~/housekeeping/js/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#datepicker").datepicker({ dateFormat: 'dd-mm-yy' });
+            $('#editor').tinymce({
+                relative_urls: false,
+                convert_urls: false,
+                remove_script_host: false,
+                forced_root_block: '',
+                force_br_newlines: true,
+                force_p_newlines: false,
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table paste imagetools wordcount"
+                ]
+            });
+        });
+    </script>
+}

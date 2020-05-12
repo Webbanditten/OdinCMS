@@ -19,14 +19,30 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
-        public Task<News> Add(News model)
+        public async Task<News> Add(News model)
         {
-            throw new System.NotImplementedException();
+            await _context.News.AddAsync(model);
+            await _context.SaveChangesAsync();
+            return model;
         }
 
-        public Task<News> Get(int id)
+        public async Task<News> Get(int id)
         {
-            throw new System.NotImplementedException();
+            return await _context.News.Where(s => s.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> Remove(int id)
+        {
+            _context.News.Remove(await Get(id));
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<News> Update(News model)
+        {
+            _context.News.Update(model);
+            await _context.SaveChangesAsync();
+            return model;
         }
 
         public async Task<List<News>> GetAll()
@@ -44,15 +60,6 @@ namespace KeplerCMS.Services.Implementations
             return await _context.News.OrderByDescending(s => s.PublishDate).Skip(from).Take(amount).ToListAsync();
         }
 
-        public Task<bool> Remove(int id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<News> Update(News model)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 
 }

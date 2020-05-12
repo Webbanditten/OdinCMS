@@ -19,9 +19,42 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        public async Task<Promo> Add(Promo model)
+        {
+            await _context.Promos.AddAsync(model);
+            await _context.SaveChangesAsync();
+            return model;
+        }
+
+        public async Task<Promo> Get(int id)
+        {
+            return await _context.Promos.Where(s => s.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Promo>> GetAll()
+        {
+            return await _context.Promos.ToListAsync();
+        }
+
+
+
         public async Task<List<Promo>> GetPromos(int pageId)
         {
             return await _context.Promos.Where(s => s.PageId == pageId).OrderBy(s => s.Id).ToListAsync();
+        }
+
+        public async Task<bool> Remove(int id)
+        {
+            _context.Promos.Remove(await Get(id));
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<Promo> Update(Promo model)
+        {
+            _context.Promos.Update(model);
+            await _context.SaveChangesAsync();
+            return model;
         }
     }
 
