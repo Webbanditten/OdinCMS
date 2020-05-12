@@ -23,7 +23,8 @@ namespace KeplerCMS.Data.Models
         public string Link2Text { get; set; }
         [Column("link2_href")]
         public string Link2Href { get; set; }
-
+        [Column("teaser")]
+        public string Teaser { get; set; }
 
 
     }

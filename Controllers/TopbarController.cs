@@ -9,12 +9,6 @@ namespace KeplerCMS.Controllers
 {
     public class TopbarController : Controller
     {
-        private readonly IUploadService _uploadService;
-
-        public TopbarController()
-        {
-        }
-
         [LoggedInFilter(false)]
         public IActionResult HabboClub()
         {

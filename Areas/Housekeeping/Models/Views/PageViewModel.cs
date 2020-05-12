@@ -12,6 +12,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Name { get; set; }
         [Required]
         public string Slug { get; set; }
+
+        public string NewsHeader { get; set; }
         public bool DisplayHeader { get; set; }
         public bool News { get; set; }
         [Required]
@@ -25,6 +27,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Name { get; set; }
         [Required]
         public string Slug { get; set; }
+        public string NewsHeader { get; set; }
         public bool DisplayHeader { get; set; }
         public bool News { get; set; }
         [Required]

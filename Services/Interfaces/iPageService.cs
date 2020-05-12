@@ -37,8 +37,5 @@ namespace KeplerCMS.Services.Interfaces
 
         Task<bool> ArrangeContainers(PageGrid grid);
 
-        Task<List<News>> GetNews(int from, int amount);
-        Task<List<Promo>> GetPromos(int pageId);
-
     }
 }

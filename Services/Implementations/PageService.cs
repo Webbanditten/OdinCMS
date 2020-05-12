@@ -14,9 +14,15 @@ namespace KeplerCMS.Services.Implementations
     {
         private readonly DataContext _context;
 
-        public PageService(DataContext context)
+        public readonly INewsService _newsService;
+
+        private readonly IPromoService _promoService;
+
+        public PageService(DataContext context, INewsService newsService, IPromoService promoService)
         {
             _context = context;
+            _newsService = newsService;
+            _promoService = promoService;
         }
 
         public async Task<Page> GetPageBySlug(string slug)
@@ -27,8 +33,8 @@ namespace KeplerCMS.Services.Implementations
                 return null;
             }
             var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id).ToListAsync();
-            var news = await GetNews(0, 5);
-            var promos = await GetPromos(pageDetails.Id);
+            var news = await _newsService.GetNews(0, 5);
+            var promos = await _promoService.GetPromos(pageDetails.Id);
             return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
         }
         public async Task<Page> GetPageObjById(int id)
@@ -39,8 +45,8 @@ namespace KeplerCMS.Services.Implementations
                 return null;
             }
             var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id).ToListAsync();
-            var news = await GetNews(0, 5);
-            var promos = await GetPromos(pageDetails.Id);
+            var news = await _newsService.GetNews(0, 5);
+            var promos = await _promoService.GetPromos(pageDetails.Id);
             return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
         }
 
@@ -66,8 +72,9 @@ namespace KeplerCMS.Services.Implementations
                 Slug = model.Slug,
                 DisplayHeader = model.DisplayHeader,
                 News = model.News,
-                Design = model.Design
-            };
+                Design = model.Design,
+                NewsHeader = model.NewsHeader
+        };
             await _context.Pages.AddAsync(page);
             await _context.SaveChangesAsync();
             return page;
@@ -117,6 +124,7 @@ namespace KeplerCMS.Services.Implementations
                 item.DisplayHeader = model.DisplayHeader;
                 item.News = model.News;
                 item.Design = model.Design;
+                item.NewsHeader = model.NewsHeader;
                 _context.Pages.Update(item);
                 await _context.SaveChangesAsync();
             }
@@ -158,16 +166,6 @@ namespace KeplerCMS.Services.Implementations
 
             await _context.SaveChangesAsync();
             return true;
-        }
-
-        public async Task<List<News>> GetNews(int from, int amount)
-        {
-            return await _context.News.OrderBy(s => s.PublishDate).Skip(from).Take(amount).ToListAsync();
-        }
-
-        public async Task<List<Promo>> GetPromos(int pageId)
-        {
-            return await _context.Promos.Where(s=>s.PageId == pageId).OrderBy(s => s.Id).ToListAsync();
         }
     }
 

@@ -90,6 +90,8 @@ namespace KeplerCMS
             services.AddScoped<IFuseService, FuseService>();
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ICreditService, CreditService>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<IPromoService, PromoService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -147,6 +149,13 @@ namespace KeplerCMS
                     name: "slugWithSub",
                     pattern: "{slug}/{subSlug}",
                     defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "newsWithSlug",
+                    pattern: "news/{slug}",
+                    defaults: new { controller = "News", action = "Index" },
                     constraints: new { slug = ".+" }
                 );
 

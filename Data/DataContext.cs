@@ -15,6 +15,7 @@ namespace KeplerCMS.Data
         public DbSet<Promo> Promos { get; set; }
         public DbSet<Vouchers> Vouchers { get; set; }
         public DbSet<VoucherHistory> VoucherHistory { get; set; }
+        public DbSet<Settings> Settings { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }

@@ -1,0 +1,79 @@
+﻿@model KeplerCMS.Models.NewsViewModel
+@{
+    ViewData["Title"] = Model.News.Title;
+}
+<div id="page-headline">
+    <div id="page-headline-breadcrums">
+
+    </div>
+    <div id="page-headline-text">
+        @Model.News.Title
+    </div>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tbody>
+        <tr>
+            <td rowspan="2" style="width: 8px;">&nbsp;</td>
+            <td valign="top" style="width: 740px;">
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td valign="top" style="width: 202px; height: 400px;" class="habboPage-col">
+                                <div class="portlet-scale gold">
+                                    <div class="portlet-scale-header"><h3>@DbRes.T("news_header", "news")</h3></div>
+                                    <div class="portlet-scale-body">
+                                        <div class="portlet-scale-content">
+                                            <div class="archive-sidebar">
+                                                <ul>
+                                                    @{
+                                                        foreach (var news in Model.LatestNews)
+                                                        {
+                                                            <li>
+                                                                <span class="articledate">@news.PublishDate.ToString("dd-MM-yy")</span>
+                                                                <a href="/news/@news.Slug">@news.Title</a>
+                                                            </li>
+                                                        }
+                                                    }
+                                                   
+                                                </ul>
+                                                <div class="promo-button"><a href="/news">@DbRes.T("readmore", "news")</a></div>
+                                            </div>
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-scale-bottom">
+                                        <div class="portlet-scale-bottom-body"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td valign="top" style="width: 539px;" class="habboPage-col rightmost">
+                                <div class="portlet-scale gold">
+                                    <div class="portlet-scale-header"><h3>@Model.News.Title</h3></div>
+                                    <div class="portlet-scale-body">
+                                        <div class="portlet-scale-content">
+                                            <div class="article-full">
+                                                <p class="article-author">@Model.News.Writer</p>
+                                                <p class="teaser">@Model.News.Teaser</p>
+                                                <div>
+                                                    @Model.News.Text
+                                                </div>
+                                            </div>
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-scale-bottom">
+                                        <div class="portlet-scale-bottom-body"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+            <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+        </tr>
+
+    </tbody>
+</table>

@@ -12,7 +12,11 @@ namespace KeplerCMS.Data.Models
         [Column("id")]
         public int Id { get; set; }
         [Column("title")]
-        public string Ttile { get; set; }
+        public string Title { get; set; }
+        [Column("slug")]
+        public string Slug { get; set; }
+        [Column("teaser")]
+        public string Teaser { get; set; }
         [Column("text")]
         public string Text { get; set; }
         [Column("writer")]

@@ -1,4 +1,13 @@
 ﻿@model KeplerCMS.Models.Page
+@functions
+{
+
+    void GenerateLink(string text, string href)
+    {
+        var link = (href.Contains("client")) ? "<a href='"+href+ "' target='client' onclick='openOrFocusHabbo(this); return false;'>" + text+"</a>" : "<a href='"+href+"'>"+text+"</a>";
+        @Html.Raw(link);
+    }
+}
 <tr>
     <td colspan="3" style="padding-bottom: 3px;">
 
@@ -6,60 +15,116 @@
             <!-- NEWS ITEMS INCLUDE -->
 
             <script type="text/javascript">
-                var promoPages = [{
-                    image: "<img src=\"https://i.imgur.com/B0v5asa.png\" / alt=\"\"\>", links: ["<a href=\"http://www.test1.webbanditten.dk/news/article/1\">More</a>",
-                        "<a href=\"http://dcr.webbanditten.dk/client\" target=\"client\" onclick=\"openOrFocusHabbo(this); return false;\"\>Check In</a\>"], text: "Hello<br /\>"
+            var promoPages = [
+                @{
+                    foreach (var promo in Model.Promos)
+                    {
+                        @:{
+                        @:image: "<img src='@promo.Img' alt=''>",
+                        @:links: [
+
+                        if(promo.Link1Text != null && promo.Link1Text != "")
+                        {
+                             @: " @{ GenerateLink(promo.Link1Text, promo.Link1Href); } ",
+                        }
+
+                        if(promo.Link2Text != null &&promo.Link2Text != "")
+                        {   
+                             @: " @{ GenerateLink(promo.Link2Text, promo.Link2Href); } "
+                        }
+                        @:],
+                        @:text: "@promo.Teaser"
+                        @:},
+                    }
+
                 }
-                    , { image: "<img src=\"https://i.imgur.com/BSDLmRF.png\" / alt=\"\"\>", links: ["<a href=\"http://dcr.webbanditten.dk/client\" target=\"client\" onclick=\"openOrFocusHabbo(this); return false;\"\>Check In</a\>"], text: "Windows added to Hotel, what your waiting for ?" }
-                    , { image: "<img src=\"http://dcr.webbanditten.dk/c_images/c_images/album1054/beta_updated_promo.gif\" / alt=\"\"\>", links: ["<a href=\"https://github.com/Negociation/RetroCMS\">Github</a>"], text: "Warning: Beta Preview Only for Tests. For more information access the GitHub directory.<br /\>" }];</script>
+
+
+            ]; </script>
 
             <div id="promoheader">
-                <h2><span class="lang-promoheader">Destaques</span></h2>
+                <h2>@Model.Details.NewsHeader</h2>
                 <ul style="display: block;" id="promoheader-selectors">
-                    <li><a href="#" onclick="showPromo(0); return false;" class="selected">1</a></li>
-                    <li><a href="#" onclick="showPromo(1); return false;" class="">2</a></li>
-                    <li><a href="#" onclick="showPromo(2); return false;" class="">3</a></li>
+                    @{
+                        for (var i = 0; i < Model.Promos.Count(); i++)
+                        {
+                            var selected = (i == 0) ? "class=selected" : "";
+                            <li><a href="#" onclick="showPromo(@i); return false;" @selected>@(i+1)</a></li>
+                        }
+                    }
 
                 </ul>
-                <script type="text/javascript">
-                    $("promoheader-selectors").style.display = "block";
-                </script>
             </div>
 
             <div id="promocontent">
-                <div id="promobody">
-                    <p id="promoimage"><img src="https://i.imgur.com/B0v5asa.png" alt=""></p>
-                    <div class="promotext">
-                        <p id="promotext-content">Hello<br \=""><br></p>
-                    </div>
-                    <div id="promolinks">
-                        <ul id="promolinks-list">
-                            <li><a href="http://www.test1.webbanditten.dk/news/article/1">More</a></li>
-                            <li><a href="http://dcr.webbanditten.dk/client" target="client" onclick="openOrFocusHabbo(this); return false;">Check In</a></li>
-                        </ul>
-                    </div>
-                </div>
+                @{
+                    if (Model.Promos != null && Model.Promos.Count() > 0)
+                    {
+                        <div id="promobody">
+                            <p id="promoimage"><img src="@Model.Promos[0].Img" alt=""></p>
+                            <div class="promotext">
+                                <p id="promotext-content">@Model.Promos[0].Teaser</p>
+                            </div>
+                            <div id="promolinks">
+                                <ul id="promolinks-list">
+                                    @{
+                                        if (Model.Promos[0].Link1Text != null && Model.Promos[0].Link1Text != "")
+                                        {
+                                            <li>@{ GenerateLink(Model.Promos[0].Link1Text, Model.Promos[0].Link1Href); }</li>
+                                        }
+
+                                        if (Model.Promos[0].Link2Text != null && Model.Promos[0].Link2Text != "")
+                                        {
+                                            <li>@{ GenerateLink(Model.Promos[0].Link2Text, Model.Promos[0].Link2Href);}</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                }
             </div>
 
         </div>
         <div id="newsbox">
             <div id="newsbox-header">
-                <h2><span class="lang-newsbox-header">Últimas Notícias</span></h2>
-                <a href="http://www.test1.webbanditten.dk//rss.xml"><img src="http://www.test1.webbanditten.dk//habboweb/17/16/web-gallery/images/promo_area/feed-icon.gif" alt="" border="0"></a>
+                <h2>@DbRes.T("news_header", "news")</h2>
             </div>
             <div id="newsbox-text">
-                <div class="newsitem">
-                    <!-- NEWS ITEMS INCLUDE -->
+                @{
+                    if (Model.News != null)
+                    {
 
-                    <h3>
-                        <span class="articledate">[04/01/19]</span>
-                        <a href="http://www.test1.webbanditten.dk//news/article/1"><span class="lang-article-install-title">Test</span></a>
-                    </h3>
-                    <p><span class="lang-article-install-sub">sdfsdfsdfsdf</span></p>
-                </div>
+                        foreach (var news in Model.News.Take(3))
+                        {
+                            <div class="newsitem oldnewsitem">
+                                <h3>
+                                    <span class="articledate">[@news.PublishDate.ToString("dd-MM-yy")]</span>
+                                    <a href="/news/@news.Slug">@news.Title</a>
+                                </h3>
+                                <p>
+                                    @news.Teaser
+                                </p>
+                            </div>
+                        }
+                        if (Model.News.Count() > 3)
+                        {
+                            <div class="hr">&nbsp;</div>
+                            foreach (var news in Model.News.Skip(3).Take(2))
+                            {
+                                <div class="newsitem oldnewsitem">
+                                    <h3>
+                                        <span class="articledate">[@news.PublishDate.ToString("dd-MM-yy")]</span>
+                                        <a href="/news/@news.Slug">@news.Title</a>
+                                    </h3>
+                                </div>
+                            }
+                        }
+                    }
+                }
             </div>
             <div id="newsbox-footer">
-                <div class="promo-button"><a href="http://www.test1.webbanditten.dk//news" alt=""><span class="lang-newsbox-footer">mais notícias</span></a></div>
+                <div class="promo-button"><a href="/news">@DbRes.T("readmore", "news")</a></div>
             </div>
         </div>
 

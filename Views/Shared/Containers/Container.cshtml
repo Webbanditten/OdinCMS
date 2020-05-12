@@ -42,7 +42,7 @@
                                 <form method="post" action="/api/credits/redeem" id="purse-redeem-form">
                                     <input type="text" name="redeem-code" size="34" id="redeem-code">
                                     <input type="hidden" name="doRedeem" value="yes" id="doredeem">
-                                    <input type="image" src="http://www.test1.webbanditten.dk//habboweb/17/16/web-gallery/images/button/arrow_button.gif" class="arrow-button" align="top">
+                                    <input type="image" src="~/images/button/arrow_button.gif" class="arrow-button" align="top">
                                 </form>
                             </div>
                         </div>
@@ -87,35 +87,35 @@
         }
     }
 
-    void CreditContent()
+    async Task CreditContent()
     {
 
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
             <div class="headline"><h3>@Model.Title</h3></div>
             <div class="border"><div></div></div>
             <div class="body">
-                @{ RenderBody(Model.Text); }
+                @{ await RenderBody(Model.Text); }
                 <div class="clear"></div>
             </div>
             <div class="bottom"><div></div></div>
         </div>
     }
 
-    void V2Box()
+    async Task  V2Box()
     {
 
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
             <div class="headline"><h3>@Model.Title</h3></div>
             <div class="border"><div></div></div>
             <div class="body">
-                @{ RenderBody(Model.Text); }
+                @{ await RenderBody(Model.Text); }
                 <div class="clear"></div>
             </div>
             <div class="bottom"><div></div></div>
         </div>
     }
 
-    void V3Box()
+    async Task  V3Box()
     {
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
             <div class="v3box-top">
@@ -123,7 +123,7 @@
             </div>
             <div class="v3box-content">
                 <div class="v3box-body">
-                    @{ RenderBody(Model.Text); }
+                    @{ await RenderBody(Model.Text); }
                     <div class="clear"></div>
                 </div>
             </div>
@@ -132,24 +132,24 @@
             </div>
         </div>
     }
-    void MaskBox()
+    async Task MaskBox()
     {
         <div class="v2box @GenerateClassBasedOnTheme(Model.Theme)">
             <div class="headline"><h3>@Model.Title</h3></div>
             <div class="border"><div></div></div>
             <div class="body">
-                @{ RenderBody(Model.Text); }
+                @{ await RenderBody(Model.Text); }
                 <div class="clear"></div>
             </div>
             <div class="bottom"><div></div></div>
         </div>
     }
 
-    void NoBox()
+    async Task  NoBox()
     {
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
             <div class="nobox-content">
-                @{ RenderBody(Model.Text); }
+                @{ await RenderBody(Model.Text); }
             </div>
         </div>
     }
@@ -160,19 +160,19 @@
 @{
     if (Model.Theme.Contains("v2"))
     {
-        V2Box();
+        await V2Box();
     }
     else if (Model.Theme.Contains("v3"))
     {
-        V3Box();
+        await V3Box();
     }
     else if (Model.Theme.Contains("maskbox"))
     {
-        MaskBox();
+        await MaskBox();
     }
     else if (Model.Theme.Contains("nobox"))
     {
-        NoBox();
+        await NoBox();
     }
     else
     {
