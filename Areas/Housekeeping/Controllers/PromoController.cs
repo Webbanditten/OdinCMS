@@ -21,13 +21,15 @@ namespace KeplerCMS.Areas.Housekeeping
         [HousekeepingFilter(Fuse.housekeeping_pages)]
         public async Task<IActionResult> Index(int pageId)
         {
+            ViewData["PageId"] = pageId;
             return View(await _promoService.GetPromos(pageId));
         }
 
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]
-        public IActionResult Create()
+        public IActionResult Create(int pageId)
         {
+            ViewData["PageId"] = pageId;
             return View();
         }
 
@@ -38,8 +40,9 @@ namespace KeplerCMS.Areas.Housekeeping
             if (ModelState.IsValid)
             {
                 await _promoService.Add(model);
-                return RedirectToAction("Index", "Promo", new { message = "Promo uploaded" });
+                return RedirectToAction("Index", "Promo", new { message = "Promo uploaded", pageId = model.PageId });
             }
+            ViewData["PageId"] = model.PageId;
             return View(model);
         }
 
@@ -66,7 +69,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> Remove(int id, int pageId)
         {
             await _promoService.Remove(id);
-            return RedirectToAction("Index", "Promo", new { message = "Promo Removed", pageId = pageId });
+            return RedirectToAction("Index", "Promo", new { message = "Promo Removed", pageId });
         }
     }
 }

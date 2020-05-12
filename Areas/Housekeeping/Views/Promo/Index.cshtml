@@ -1,6 +1,6 @@
-﻿@model IEnumerable<KeplerCMS.Areas.Housekeeping.Models.Views.UploadViewModel>;
+﻿@model IEnumerable<KeplerCMS.Data.Models.Promo>;
 
-<h1>Uploads</h1>
+<h1>Promos</h1>
 
 @if (ViewData["message"] != null)
 {
@@ -8,14 +8,12 @@
         @ViewData["message"]
     </div>
 }
-<a href="@Url.Action("Create")">Add</a>
+<a href="@Url.Action("Create", "Promo", new { pageId = ViewData["pageId"] })">Add</a>
 
 <table class="blueTable">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Path</th>
+            <th>Teaser</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,22 +21,18 @@
         @{
             if (Model != null)
             {
-                foreach (var item in Model.OrderBy(s => s.Category))
+                foreach (var item in Model.OrderBy(s => s.Id))
                 {
-                    var imgPath = "/images/" + item.Category + "/" + item.Name;
                 <tr>
-                    <td><a target="_blank" href="@imgPath">@item.Name</a></td>
-                    <td>@item.Category</td>
-                    <td><input type="text" style="width:90%" value="@imgPath" /></td>
-                    <td><a href="@Url.Action("Update", "Upload", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeUpload(@item.Id)">Remove</a></td>
+                    <td>@item.Teaser</td>
+                    <td><a href="@Url.Action("Update", "Promo", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeUpload(@item.Id)">Remove</a></td>
                 </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td>No uploads</td>
-                    <td></td>
+                    <td>No promos</td>
                     <td></td>
                 </tr>
             }
@@ -60,7 +54,7 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.value) {
-                    window.location = "@Url.Action("Remove")/" + id;
+                    window.location = "@Url.Action("Remove")/" + id + "?pageId=@ViewData["PageId"]";
                 }
             })
         }

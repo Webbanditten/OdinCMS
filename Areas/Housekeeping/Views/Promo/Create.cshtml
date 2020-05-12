@@ -1,26 +1,41 @@
-﻿@model UploadAddViewModel
+﻿@model KeplerCMS.Data.Models.Promo
 
 <div class="card">
     <div class="card-header">
         <h4 class="text-uppercase">Upload file</h4>
     </div>
     <div class="card-body">
-        <form asp-action="Create" enctype="multipart/form-data" >
+        <form asp-action="Create">
+            <input asp-for="PageId" value="@ViewData["PageId"]" type="hidden" class="form-control" />
             <div class="form-group">
-                <label asp-for="Files" class="label-control"></label>
-                <input asp-for="Files" class="form-control" multiple type="file" />
-                <span asp-validation-for="Files" class="text-danger"></span>
+                <label asp-for="Teaser" class="label-control"></label>
+                <input asp-for="Teaser" class="form-control" />
+                <span asp-validation-for="Teaser" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Category" class="label-control"></label>
-                <select asp-for="Category" class="form-control">
-                    <option>news</option>
-                    <option>habbohome</option>
-                    <option>various</option>
-                    <option>promo</option>
-                    <option>content</option>
-                </select>
-                <span asp-validation-for="Category" class="text-danger"></span>
+                <label asp-for="Img" class="label-control"></label>
+                <input asp-for="Img" class="form-control" />
+                <span asp-validation-for="Img" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Link1Text" class="label-control"></label>
+                <input asp-for="Link1Text" class="form-control" />
+                <span asp-validation-for="Link1Text" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Link1Href" class="label-control"></label>
+                <input asp-for="Link1Href" class="form-control" />
+                <span asp-validation-for="Link1Href" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Link2Text" class="label-control"></label>
+                <input asp-for="Link2Text" class="form-control" />
+                <span asp-validation-for="Link2Text" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Link2Href" class="label-control"></label>
+                <input asp-for="Link2Href" class="form-control" />
+                <span asp-validation-for="Link2Href" class="text-danger"></span>
             </div>
 
             <div class="form-group">

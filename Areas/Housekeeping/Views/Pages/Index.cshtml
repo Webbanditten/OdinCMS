@@ -32,7 +32,7 @@
                     <td>@item.Slug</td>
                     <td>@item.DisplayHeader</td>
                     <td>@item.News</td>
-                    <td><a href="@Url.Action("Update", "Pages", new { id = item.Id })">Edit</a> - <a href="#" onclick="removePage(@item.Id)">Remove</a></td>
+                    <td><a href="@Url.Action("Index", "Promo", new { pageId = item.Id })">Promos</a> - <a href="@Url.Action("Update", "Pages", new { id = item.Id })">Edit</a> - <a href="#" onclick="removePage(@item.Id)">Remove</a></td>
                 </tr>
             }
         }

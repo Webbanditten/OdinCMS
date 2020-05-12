@@ -24,7 +24,18 @@ namespace KeplerCMS.Controllers
             {
                 return View(await _newsService.GetAll());
             }
-            return View("SingleNews", new NewsViewModel { News = await _newsService.GetBySlug(slug), LatestNews = await _newsService.GetNews(0, 5) });
+            var article = await _newsService.GetBySlug(slug);
+            new NewsViewModel
+            {
+                News = article,
+                LatestNews = await _newsService.GetNews(0, 5)
+            };
+            if(article != null)
+            {
+                return View("SingleNews");
+            }
+
+            return View("NotFound");
         }
     }
 }
