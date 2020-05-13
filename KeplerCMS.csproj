@@ -83,4 +83,8 @@
     <PackageReference Include="Westwind.Globalization.AspnetCore" Version="3.1.0-preview1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\MyHabbo\Models\" />
+  </ItemGroup>
+
 </Project>

@@ -17,7 +17,7 @@
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
-
+    @RenderSection("Styles", required: false)
 
     <script type='text/javascript'>
         var habboReqPath = window.location.href.split("/")[0] + '//@baseUrl';
@@ -34,8 +34,9 @@
     <script language='JavaScript' type='text/javascript' src='~/js/swfobject.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/ads.js'></script>
     <script type='text/javascript' language='JavaScript' src='~/js/validation.js'></script>
+    @RenderSection("ScriptsTop", required: false)
 
-    <script>var j = jQuery.noConflict();</script>
+    <script type='text/javascript'>var j = jQuery.noConflict();</script>
 
 
 
@@ -49,7 +50,7 @@
     </script>
 
 </head>
-<body id="">
+<body>
     <div id="overlay"></div>
     <h1 id="main-header">Habbo</h1>
     <div id="wrapper">

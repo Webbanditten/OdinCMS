@@ -1,0 +1,579 @@
+﻿div.box-tabs-container {
+    position: relative;
+}
+
+div.box-tabs-container h2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #f60;
+    font-size: 14px;
+    margin: 0;
+    padding: 3px 0 0 10px;
+}
+
+ul.box-tabs {
+    padding: 0 5px;
+    margin: 0;
+    font-size: 11px;
+    height: 25px;
+    border-bottom: 1px solid #ff9900;
+}
+
+ul.box-tabs li {
+    padding: 0;
+    float: right;
+    height: 25px;
+    margin: 0 0 0 4px;
+    position: relative;
+}
+
+ul.box-tabs li strong,
+ul.box-tabs li a,
+ul.box-tabs li span.tab-spacer {
+    top: 1px;
+    position: relative;
+}
+
+ul.box-tabs li a:focus {
+    outline: none;
+}
+
+ul.box-tabs li strong,
+ul.box-tabs li a {
+    float: left;
+    height: 19px;
+    padding: 6px 10px 0 14px;
+    background-repeat: no-repeat;
+    background-image: url(/images/inner-tabs.png);
+    background-position: -16px -25px;
+    color: #FFFFFF;
+    font-weight: normal;
+    text-decoration: none;
+    /* hide overflowing text */
+    max-width: 184px;
+    overflow: hidden;
+}
+
+ul.box-tabs li span.tab-spacer {
+    float: left;
+    height: 25px;
+    width: 4px;
+    background: url(/images/inner-tabs.png) no-repeat -12px -25px;
+}
+
+ul.box-tabs li.selected strong,
+ul.box-tabs li.selected a {
+    background-position: -16px 0;
+    color: #000000;
+    font-weight: bold;
+}
+
+ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px 0;
+}
+
+ul.box-tabs li:hover a {
+    background-position: -16px -50px;
+}
+
+ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -50px;
+}
+
+ul.box-tabs li.selected:hover a {
+    background-position: -16px 0;
+}
+
+ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px 0;
+}
+
+
+/* align left */
+
+div.box-tabs-container h2 {
+    position: absolute;
+}
+
+div.box-tabs-container h2.page-owner {
+    position: relative;
+    float: left;
+}
+
+div.box-tabs-left ul.box-tabs li {
+    float: left;
+}
+
+
+/* blue tabs */
+
+div.blue a.secondary {
+    color: #2767a7;
+}
+
+div.blue div.box-tabs-container h2 {
+    color: #009dff;
+}
+
+div.blue ul.box-tabs {
+    border-bottom-color: #528dc9;
+}
+
+div.blue ul.box-tabs li strong,
+div.blue ul.box-tabs li a {
+    background-position: -16px -100px;
+}
+
+div.blue ul.box-tabs li span.tab-spacer {
+    background-position: -12px -100px;
+}
+
+div.blue ul.box-tabs li.selected strong,
+div.blue ul.box-tabs li.selected a {
+    background-position: -16px -75px;
+}
+
+div.blue ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -75px;
+}
+
+div.blue ul.box-tabs li:hover a {
+    background-position: -16px -125px;
+}
+
+div.blue ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -125px;
+}
+
+div.blue ul.box-tabs li.selected:hover a {
+    background-position: -16px -75px;
+}
+
+div.blue ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -75px;
+}
+
+
+/* green tabs */
+
+div.green a.secondary {
+    color: #4ab501;
+}
+
+div.green div.box-tabs-container h2 {
+    color: #3ba800;
+}
+
+div.green ul.box-tabs {
+    border-bottom-color: #3ba800;
+}
+
+div.green ul.box-tabs li strong,
+div.green ul.box-tabs li a {
+    background-position: -16px -175px;
+}
+
+div.green ul.box-tabs li span.tab-spacer {
+    background-position: -12px -175px;
+}
+
+div.green ul.box-tabs li.selected strong,
+div.green ul.box-tabs li.selected a {
+    background-position: -16px -150px;
+}
+
+div.green ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+div.green ul.box-tabs li:hover a {
+    background-position: -16px -200px;
+}
+
+div.green ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -200px;
+}
+
+div.green ul.box-tabs li.selected:hover a {
+    background-position: -16px -150px;
+}
+
+div.green ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+
+/* red tabs */
+
+div.red div.box-tabs-container h2 {
+    color: #d64242;
+}
+
+div.red ul.box-tabs {
+    border-bottom-color: #d64242;
+}
+
+div.red ul.box-tabs li strong,
+div.red ul.box-tabs li a {
+    background-position: -16px -325px;
+}
+
+div.red ul.box-tabs li span.tab-spacer {
+    background-position: -12px -325px;
+}
+
+div.red ul.box-tabs li.selected strong,
+div.red ul.box-tabs li.selected a {
+    background-position: -16px -300px;
+}
+
+div.red ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -300px;
+}
+
+div.red ul.box-tabs li:hover a {
+    background-position: -16px -350px;
+}
+
+div.red ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -350px;
+}
+
+div.red ul.box-tabs li.selected:hover a {
+    background-position: -16px -300px;
+}
+
+div.red ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -300px;
+}
+
+
+/* Habboclub red tabs */
+
+div.hcred div.box-tabs-container h2 {
+    color: #d64242;
+}
+
+div.hcred ul.box-tabs {
+    border-bottom-color: #d64242;
+}
+
+div.hcred ul.box-tabs li strong,
+div.hcred ul.box-tabs li a {
+    background-position: -16px -175px;
+}
+
+div.hcred ul.box-tabs li span.tab-spacer {
+    background-position: -12px -175px;
+}
+
+div.hcred ul.box-tabs li.selected strong,
+div.hcred ul.box-tabs li.selected a {
+    background-position: -16px -150px;
+}
+
+div.hcred ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+div.hcred ul.box-tabs li:hover a {
+    background-position: -16px -200px;
+}
+
+div.hcred ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -200px;
+}
+
+div.hcred ul.box-tabs li.selected:hover a {
+    background-position: -16px -150px;
+}
+
+div.hcred ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+
+/* Light brown tabs */
+
+div.lightbrown div.box-tabs-container h2 {
+    color: #cf9c44;
+}
+
+div.lightbrown ul.box-tabs {
+    border-bottom-color: #cf9c44;
+}
+
+div.lightbrown ul.box-tabs li strong,
+div.lightbrown ul.box-tabs li a {
+    background-position: -16px -175px;
+}
+
+div.lightbrown ul.box-tabs li span.tab-spacer {
+    background-position: -12px -175px;
+}
+
+div.lightbrown ul.box-tabs li.selected strong,
+div.lightbrown ul.box-tabs li.selected a {
+    background-position: -16px -150px;
+}
+
+div.lightbrown ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+div.lightbrown ul.box-tabs li:hover a {
+    background-position: -16px -200px;
+}
+
+div.lightbrown ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -200px;
+}
+
+div.lightbrown ul.box-tabs li.selected:hover a {
+    background-position: -16px -150px;
+}
+
+div.lightbrown ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -150px;
+}
+
+
+/* Black tabs */
+
+div.black div.box-tabs-container h2 {
+    color: #fff;
+}
+
+div.black ul.box-tabs {
+    border-bottom-color: #333;
+}
+
+div.black ul.box-tabs li strong,
+div.black ul.box-tabs li a {
+    background-position: -16px -250px;
+}
+
+div.black ul.box-tabs li span.tab-spacer {
+    background-position: -12px -250px;
+}
+
+div.black ul.box-tabs li.selected strong,
+div.black ul.box-tabs li.selected a {
+    background-position: -16px -225px;
+}
+
+div.black ul.box-tabs li.selected span.tab-spacer {
+    background-position: -12px -225px;
+}
+
+div.black ul.box-tabs li:hover a {
+    background-position: -16px -275px;
+}
+
+div.black ul.box-tabs li:hover span.tab-spacer {
+    background-position: -12px -275px;
+}
+
+div.black ul.box-tabs li.selected:hover a {
+    background-position: -16px -225px;
+}
+
+div.black ul.box-tabs li.selected:hover span.tab-spacer {
+    background-position: -12px -225px;
+}
+
+
+/* ------------- */
+
+ul.box-tabs li a.icon-help-tab,
+ul.box-tabs li.selected a.icon-help-tab {
+    padding: 3px 10px 3px 14px;
+}
+
+ul.box-tabs li a.icon-help-tab span,
+ul.box-tabs li.selected a.icon-help-tab span {
+    float: left;
+    margin: 0;
+    padding: 0;
+    background: url(/images/help.gif) no-repeat 0 0;
+    width: 16px;
+    height: 16px;
+}
+
+
+
+.topdialog {
+    text-align: left;
+    position: absolute;
+    width: 398px;
+    z-index: 9001;
+}
+
+.topdialog-body {
+    padding: 10px 10px 0 10px;
+}
+
+.topdialog .dialog-handle {
+    cursor: move;
+}
+
+a.topdialog-exit {
+    height: 15px;
+    width: 15px;
+    position: absolute;
+    right: 13px;
+    top: 9px;
+    text-indent: -10000px;
+    background: transparent url(/images/close_x.gif) no-repeat;
+}
+
+.black a.topdialog-exit {
+    background: transparent url(/images/close_x_black.png) no-repeat;
+}
+
+.topdialog .box-tabs {
+    border-bottom: 1px solid #000;
+}
+
+.topdialog .box-tabs li {
+    float: left;
+}
+
+
+/* Rounded boxes */
+
+
+/* Basic styling, used when JavaScript is unsupported */
+
+.cbb {
+    margin: 8px;
+    padding: 0;
+    background: #FFFFFF;
+}
+
+
+/* Normal styling */
+
+
+/* Top corners and border */
+
+.bt {
+    height: 5px;
+    margin: 0 0 0 18px;
+    background: no-repeat 100% 0;
+}
+
+.bt div {
+    position: relative;
+    left: -18px;
+    width: 18px;
+    height: 5px;
+    background: no-repeat 0 0;
+    font-size: 0;
+    line-height: 0;
+    z-index: 1;
+}
+
+
+/* Bottom corners and border */
+
+.bb {
+    height: 9px;
+    margin: 0 0 0 8px;
+    background: no-repeat 100% 100%;
+    position: relative;
+}
+
+.bb div {
+    position: absolute;
+    left: -8px;
+    width: 8px;
+    height: 9px;
+    background: no-repeat 0 100%;
+    font-size: 0;
+    line-height: 0;
+    display: block;
+}
+
+
+/* Left border */
+
+.i1 {
+    padding: 0 0 0 1px;
+    background: url(/images/borders.png) repeat-y;
+}
+
+
+/* Right border */
+
+.i2 {
+    padding: 0 1px 0 0;
+    background: url(/images/borders.png) repeat-y top right;
+}
+
+
+/* Wrapper for the content. Use it to set the background colour and insert some padding between the borders2 and the content. */
+
+.i3 {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    z-index: 0;
+}
+
+
+/* Make the content wrapper auto clearing so it will contain floats (see http://positioniseverything.net/easyclearing.html). */
+
+.i3:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.i3 {
+    display: inline-block;
+}
+
+.i3 {
+    display: block;
+}
+
+.topdialog .bt,
+.topdialog .bt div,
+.topdialog .bb,
+.topdialog .bb div {
+    background-image: url(/images/box_black_borders.png);
+}
+
+.topdialog .i1,
+.topdialog .i2 {
+    background-image: url(/images/borders_black.png);
+}
+
+#content .bt {
+    background-image: url(/images/box.png);
+}
+
+#content .bt div {
+    background-image: url(/images/box.png);
+}
+
+#content .bb {
+    background-image: url(/images/box.png);
+}
+
+#content .bb div {
+    background-image: url(/images/box.png);
+}
+
+#content .i1 {
+    background-image: url(/images/borders.png);
+}
+
+#content .i2 {
+    background-image: url(/images/borders.png);
+}
