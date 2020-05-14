@@ -1,0 +1,11 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
+
+@{
+    switch (Model.Definition.CssClass)
+    {
+        case "ProfileWidget":
+            @:<partial name="~/Areas/MyHabbo/Views/Items/Widgets/ProfileWidget.cshtml" model=Model />
+            break;
+    }
+}

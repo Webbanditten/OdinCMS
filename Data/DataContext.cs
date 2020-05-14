@@ -17,6 +17,13 @@ namespace KeplerCMS.Data
         public DbSet<VoucherHistory> VoucherHistory { get; set; }
         public DbSet<Settings> Settings { get; set; }
 
+        public DbSet<Homes> Homes { get; set; }
+        public DbSet<HomesCatalog> HomesCatalog { get; set; }
+        public DbSet<HomesCategories> HomesCategories { get; set; }
+        public DbSet<HomesItems> HomesItems { get; set; }
+        public DbSet<HomesItemData> HomesItemData { get; set; }
+        public DbSet<HomesInventory> HomesInventory { get; set; }
+
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

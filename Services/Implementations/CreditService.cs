@@ -21,6 +21,23 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        public async Task<bool> Purchase(int credit, int userId)
+        {
+            var user = await _context.Users.Where(s => s.Id == userId).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                var newCredits = user.Credits - credit;
+                if(newCredits >= 0)
+                {
+                    user.Credits = newCredits;
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public async Task<bool> RedeemCode(string code, int userId)
         {
             if (code == null) return false;

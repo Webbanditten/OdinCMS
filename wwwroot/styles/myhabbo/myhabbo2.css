@@ -21,14 +21,18 @@
 
 #mypage-bg {
     position: relative;
-    padding: 0 3px;
+    padding: 0px 0px;
     clear: both;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #playground {
     position: relative;
 }
-
+#playground, #playground-outer {
+    height: 1360px;
+}
 body#editmode #playground-outer {
     border: 1px dotted white;
 }
@@ -1092,7 +1096,11 @@ ul.web-item-list li:hover {
     width: 240px;
     clear: both;
 }
-
+div.progressbar {
+    width: 32px;
+    margin-left: auto;
+    margin-right: auto;
+}
 #webstore-items div.progressbar {
     margin-top: 136px;
 }
@@ -1608,4 +1616,28 @@ div#linktool-inline input#linktool-find {
 div#linktool-results {
     display: none;
     margin-top: 3px;
+}
+h2.title.dialog-handle.rounded-done {
+    margin: 0;
+    padding: 4px 10px;
+    font-size: 14px;
+    background-color: #fc6204;
+    position: relative;
+    line-height: 17px;
+    padding: 0px 10px;
+    height: 25px;
+    margin-left: 4px;
+    margin-right: 4px;
+    border-radius: 4px;
+    top: -4px;
+}
+
+
+.topdialog p {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.rounded-container {
+    height:25px;
 }

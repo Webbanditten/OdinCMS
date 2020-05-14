@@ -1,4 +1,5 @@
-﻿@{
+﻿@model KeplerCMS.Areas.MyHabbo.Models.CatalogItem;
+@{
     Layout = null;
 }
 
@@ -8,13 +9,13 @@
 
 <div id="webstore-preview-price">
     Price:<br /><b>
-        1 credit
+        @Model.Details.Price credit
     </b>
 </div>
 
 <div id="webstore-preview-purse">
     You have:<br /><b>720 credits</b><br />
-    <a href="https://classichabbo.com/credits" target=_blank>Get Credits</a>
+    <a href="/credits" target=_blank>Get Credits</a>
 </div>
 
 <div id="webstore-preview-purchase" class="clearfix">

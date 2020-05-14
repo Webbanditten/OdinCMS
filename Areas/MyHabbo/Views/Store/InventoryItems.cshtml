@@ -1,72 +1,35 @@
-﻿@{Layout = null;}
-
-
+﻿@model List<KeplerCMS.Areas.MyHabbo.Models.InventoryItem>;
+@{Layout = null;}
 <ul id="inventory-item-list">
+    @{
+        foreach (var item in Model)
+        {
+            <li id="webstore-item-@item.Details.Id" title="@item.Definition.Name">
+                <div class="webstore-item-preview @(item.Definition.CssClass)_pre">
+                    <div class="webstore-item-mask">
+                        @{
+                            if (item.Details.Amount > 1)
+                            {
+                                <div class="webstore-item-count"><div>@("x" + item.Details.Amount)</div></div>
+                            }
+                        }
+                    </div>
+                </div>
+            </li>
+        }
+
+        var amountOfEmptyToGenerate = 20 - Model.Count();
+
+        if (amountOfEmptyToGenerate > 0)
+        {
+            for (int i = 0; i < amountOfEmptyToGenerate; i++)
+            {
+                <li class="webstore-item-empty"></li>
+            }
+        }
+    }
 
 
-    <li id="inventory-item-31473" title="Bonbon Mouse">
-        <div class="webstore-item-preview s_bonbon_mouse_146x146_pre">
-            <div class="webstore-item-mask">
-
-            </div>
-        </div>
-
-    </li>
-
-    <li id="inventory-item-31465" title="Bonbon Duck">
-        <div class="webstore-item-preview s_bonbon_duck_146x146_pre">
-            <div class="webstore-item-mask">
-
-            </div>
-        </div>
-
-    </li>
-
-    <li id="inventory-item-31257" title="Needle 3">
-        <div class="webstore-item-preview s_needle_3_pre">
-            <div class="webstore-item-mask">
-
-            </div>
-        </div>
-
-    </li>
-
-
-
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
-
-    <li class="webstore-item-empty"></li>
 
 
 

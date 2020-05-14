@@ -26,6 +26,7 @@ ul.box-tabs li {
     height: 25px;
     margin: 0 0 0 4px;
     position: relative;
+    list-style: none;
 }
 
 ul.box-tabs li strong,

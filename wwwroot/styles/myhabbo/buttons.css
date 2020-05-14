@@ -253,3 +253,209 @@ a.group-memberlist-button-disabled span {
 #group-memberlist-button-close, #group-memberlist-button-close2, #join-button, #creategrp-button, #gethome-button {
 	float: right;
 }
+a.new-button {
+	margin: 0 0 5px 10px;
+	display: block;
+	float: right;
+	height: 25px;
+	position: relative;
+	text-decoration: none;
+	cursor: pointer;
+	overflow: hidden;
+    white-space:nowrap;
+}
+
+a.new-button.disabled-button, a.new-button:disabled {
+	cursor: default;
+	-moz-opacity: .5;
+	opacity: .50;
+	filter: alpha(opacity=50);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+}
+html > body a.new-button.fill, html > body a.new-button.fill b {
+	display: block;
+	float: none;
+}
+/* hide this from IE6 */
+html > body a.new-button.fill, html > body a.new-button.fill b {
+	display: block;
+	float: none;
+}
+
+a.new-button b {
+	float: left;
+	padding: 5px 17px 4px 20px;
+	font-size: 11px;
+	height: 17px;
+	margin-right: 3px;
+	background: transparent url(/images/new_button.png) no-repeat -3px 0;
+	color: #000 !important;
+	font-weight: bold;
+	text-align: center;
+	display: inline;
+}
+
+
+a.new-button:hover {
+	text-decoration: none;
+}
+
+	a.new-button:hover b {
+		background-position: -3px -25px;
+	}
+
+a.new-button.disabled-button:hover b {
+	background-position: -3px 0;
+}
+
+a.new-button i {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 3px;
+	height: 25px;
+	background: transparent url(/images/new_button.png) no-repeat 0px 0px;
+}
+
+/* red background ------------------------------ */
+
+a.new-button.red-button b {
+	background-position: -3px -100px;
+	color: #fff !important;
+}
+
+a.new-button.red-button i {
+	background-position: 0px -100px;
+}
+
+a.new-button.red-button:hover b {
+	background-position: -3px -125px;
+}
+
+/* green background ------------------------------ */
+
+a.new-button.green-button b {
+	background-position: -3px -150px;
+	color: #fff !important;
+}
+
+a.new-button.green-button i {
+	background-position: 0px -150px;
+}
+
+a.new-button.green-button:hover b {
+	background-position: -3px -175px;
+}
+
+/* dark background ------------------------------ */
+a.new-button.dark-button b {
+	background-position: -3px -50px;
+	color: #fff !important;
+}
+
+a.new-button.dark-button i {
+	background-position: 0px -50px;
+}
+
+a.new-button.dark-button:hover b {
+	background-position: -3px -75px;
+}
+
+/* icons --------------------------------------- */
+
+a.new-button.edit-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -193px;
+	margin-right: 5px;
+}
+
+a.new-button.edit-icon b {
+	padding-left: 10px;
+}
+
+a.new-button.save-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -96px;
+	margin-right: 5px;
+}
+
+a.new-button.save-icon b {
+	padding-left: 10px;
+}
+
+a.new-button.cancel-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -145px;
+	margin-right: 5px;
+}
+
+a.new-button.cancel-icon b {
+	padding-left: 10px;
+}
+
+a.new-button.search-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px 0px;
+	margin-right: 5px;
+}
+
+a.new-button.search-icon b {
+	padding-left: 10px;
+	padding-right: 3px;
+}
+
+a.new-button.envelope-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -49px;
+	margin-right: 5px;
+}
+
+a.new-button.envelope-icon b {
+	padding-left: 10px;
+	padding-right: 3px;
+}
+
+a.new-button.purse-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -241px;
+	margin-right: 5px;
+}
+
+a.new-button.purse-icon b {
+	padding-left: 10px;
+}
+
+a.new-button.newtopic-icon {
+	margin-left: 0;
+}
+
+a.new-button.newtopic-icon span {
+	float: left;
+	display: inline;
+	height: 16px;
+	width: 16px;
+	background: transparent url(/images/button_icons2.png) no-repeat 0px -289px;
+	margin-right: 5px;
+}
+
+a.new-button.newtopic-icon b {
+	padding-left: 10px;
+}

@@ -1,20 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using KeplerCMS.Areas.MyHabbo.Models;
+using KeplerCMS.Services.Interfaces;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
     [Area("MyHabbo")]
     public class SaveController : Controller
     {
-        public SaveController()
+        public readonly IHomeService _homeService;
+        public SaveController(IHomeService homeService)
         {
+            _homeService = homeService;
         }
 
-        [HousekeepingFilter(Fuse.housekeeping)]
-        public IActionResult Index()
+
+        [HttpPost]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> Index(SaveModel input)
         {
-            return View();
+            var result = await _homeService.Save(User.Identity.Name, input);
+            if(result)
+            {
+                Response.Cookies.Delete("editmode");
+                return Content("<script>window.location.reload()</script>");
+            } else
+            {
+                return Content("ERROR");
+            }
         }
     }
 

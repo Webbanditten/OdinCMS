@@ -1,54 +1,133 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using KeplerCMS.Services.Interfaces;
+using System.Linq;
+using System.Threading.Tasks;
+using Westwind.Globalization;
+using KeplerCMS.Areas.MyHabbo.Models;
+using Google.Protobuf.WellKnownTypes;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
 	[Area("MyHabbo")]
 	public class StoreController : Controller
 	{
-		public StoreController()
+		private readonly IHomeService _homeService;
+		private readonly ICreditService _creditService;
+
+		public StoreController(IHomeService homeService, ICreditService creditService)
 		{
+			_creditService = creditService;
+			_homeService = homeService;
 		}
 		[HttpPost]
-		public IActionResult Main()
+		[LoggedInFilter]
+		public async Task<IActionResult> Main()
 		{
-			Response.Headers.Add("x-json", "[[\"Inventory\",\"Web Store\"],[\"s_needle_3_pre\", \"needle_3\", \"Needle 3\", \"Stickers\", null,1]]");
-			return View();
+
+			var categories = await _homeService.GetStoreCategories();
+			var firstCategoryItems = await _homeService.GetStoreCatelog(categories.OrderBy(s => s.Order).FirstOrDefault().Id, 0);
+			var cssClassForFirstItem = "";
+			if(firstCategoryItems.Count > 0)
+			{
+				cssClassForFirstItem = firstCategoryItems.FirstOrDefault().Definition.CssClass;
+			}
+			Response.Headers.Add("x-json", "[[\""+ DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[{\"itemCount\":1,\"previewCssClass\":\"" + cssClassForFirstItem + "_pre\", \"titleKey\":\"\"}]]");
+			return View(new MainViewModel { Categories = categories, Items = firstCategoryItems, Type = DialogType.WebStore, InventoryItems = new List<InventoryItem>() });
 		}
 		[HttpPost]
-		public IActionResult Inventory()
+		[LoggedInFilter]
+		public async Task<IActionResult> Inventory(string type)
 		{
-			Response.Headers.Add("x-json", "[[\"Inventory\",\"Web Store\"],[\"s_needle_3_pre\", \"needle_3\", \"Needle 3\", \"Stickers\", null,1]]");
-			return View();
+			var userId = int.Parse(User.Identity.Name);
+			var categories = await _homeService.GetStoreCategories();
+			var InventoryItems = await _homeService.GetInventory(type, userId);
+			var cssClassForFirstItem = "";
+			var firstItemName = "";
+			if (InventoryItems.Count > 0)
+			{
+				cssClassForFirstItem = InventoryItems.FirstOrDefault().Definition.CssClass;
+				firstItemName = InventoryItems.FirstOrDefault().Definition.Name;
+			}
+			Response.Headers.Add("x-json", "[[\"" + DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[\"" + cssClassForFirstItem + "_pre\", \"" + cssClassForFirstItem + "\", \"" + firstItemName + "\", \"\", null,1]]");
+			return View("Main", new MainViewModel { Items = new List<CatalogItem>(), Categories = categories, InventoryItems = InventoryItems, Type = DialogType.Inventory, }); ;
 		}
 
 		[HttpPost]
+		[LoggedInFilter]
 		[Route("myhabbo/store/inventory_preview")]
-		public IActionResult InventoryPreview()
+		public async Task<IActionResult> InventoryPreview(int itemId)
 		{
-			Response.Headers.Add("x-json", "[\"s_bonbon_duck_146x146_pre\",\"bonbon_duck_146x146\", \"Bonbon Duck\", \"Sticker\", null,1]");
+			var userId = int.Parse(User.Identity.Name);
+			var invItem = await _homeService.GetInventoryItem(itemId, userId);
+			if(invItem != null)
+			{
+				Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",\"" + invItem.Definition.CssClass + "\", \"" + invItem.Definition.Name + "\", \"\", null,1]");
+			}
 			return View();
 		}
 
 		[HttpPost]
-		public IActionResult Preview()
+		[LoggedInFilter]
+		[Route("myhabbo/store/purchase_confirm")]
+		public async Task<IActionResult> PurchaseConfirm(int productId)
 		{
-			Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"s_bling_e_pre\", \"titleKey\":\"Bling e\"}]");
+			var product = await _homeService.GetProduct(productId);
+			return View(product);
+		}
+
+		[HttpPost]
+		[LoggedInFilter]
+		[Route("myhabbo/store/purchase_stickers")]
+		public async Task<IActionResult> PurchaseStickers(int selectedId)
+		{
+			var userId = int.Parse(User.Identity.Name);
+			var product = await _homeService.GetProduct(selectedId);
+			var purchase = await _creditService.Purchase(product.Details.Price, userId);
+			if(purchase)
+			{
+				await _homeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId);
+				return Content("OK");
+			}
+			return Content("You dont have enough credits");
+		}
+
+		[HttpPost]
+		[LoggedInFilter]
+		public async Task<IActionResult> Preview(int productId)
+		{
+			var itemInCategory = await _homeService.GetProduct(productId);
+			Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+			return View(itemInCategory);
+		}
+
+		[HttpPost]
+		[LoggedInFilter]
+		public async Task<IActionResult> Items(int categoryId, int subCategory)
+		{
+			var items = await _homeService.GetStoreCatelog(categoryId, subCategory);
+			return View(items);
+		}
+
+		[HttpPost]
+		[LoggedInFilter]
+		[Route("myhabbo/store/background_warning")]
+		public IActionResult BackgroundWarning()
+		{
 			return View();
 		}
 
 		[HttpPost]
-		public IActionResult Items()
-		{
-			return View();
-		}
-
-		[HttpPost]
+		[LoggedInFilter]
 		[Route("myhabbo/store/inventory_items")]
-		public IActionResult InventoryItems()
+		public async Task<IActionResult> InventoryItems(string type)
 		{
-			return View();
+			var userId = int.Parse(User.Identity.Name);
+			var items = await _homeService.GetInventory(type, userId);
+			return View(items);
 		}
 	}
 	///////////////////// Inventory
