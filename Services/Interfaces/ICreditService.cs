@@ -7,5 +7,6 @@ namespace KeplerCMS.Services.Interfaces
     {
         Task<bool> RedeemCode(string code, int userId);
         Task<bool> Purchase(int credit, int userId);
+        Task<bool> CanPurchase(int credit, int userId);
     }
 }

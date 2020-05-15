@@ -1,32 +1,54 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using System.Threading.Tasks;
+using KeplerCMS.Services.Interfaces;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
-
-	/////////////////// ADD 
-	// widgetId: 31263, privileged: true, zindex: 240
-
-
-	// Response er det samme som edit 
-
-
-
-
+    [Area("MyHabbo")]
+    public class WidgetController : Controller
+    {
+        public readonly IHomeService _homeService;
+        public WidgetController(IHomeService homeService)
+        {
+            _homeService = homeService;
+        }
 
 
+        [HttpPost]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> Edit(int skinId, int widgetId)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var updatedItem = await _homeService.EditItem(widgetId, skinId, userId);
+
+            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + updatedItem.Item.Skin + "\",\"type\":\"widget\"}");
+            return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
+        }
+    }
+    /////////////////// ADD 
+    // widgetId: 31263, privileged: true, zindex: 240
+
+
+    // Response er det samme som edit 
 
 
 
 
-	// edit
-	/*
+
+
+
+
+
+
+    // edit
+    /*
 skinId: 3
 widgetId: 31253
 
      */
-	/*
+    /*
 
 
 
@@ -109,6 +131,6 @@ Event.observe("widget-31263-edit", "click", function(e) { openEditMenu(e, 31263,
 
 
 
-	////////////////// Remove
-	/// widgetId: 31263
+    ////////////////// Remove
+    /// widgetId: 31263
 }

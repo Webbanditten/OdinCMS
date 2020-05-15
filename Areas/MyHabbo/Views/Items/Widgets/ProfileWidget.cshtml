@@ -1,73 +1,95 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{Layout = null;}
-<div class="movable widget ProfileWidget" id="widget-31253" style="left: 443px; top: 33px; z-index: 234">
-    <div class="w_skin_metalskin">
-        <div class="widget-corner" id="widget-31253-handle">
-            <div class="widget-headline">
-                <h3>
 
-                    <img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-31253-edit">
+<div class="widget-corner" id="widget-@Model.Item.Id-handle">
+    <div class="widget-headline">
+        <h3>
+            @{
+                if (Model.EnableEditing)
+                {
+                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
                     <script language="JavaScript" type="text/javascript">
-                        Event.observe("widget-31253-edit", "click", function (e) { openEditMenu(e, 31253, "widget", "widget-31253-edit"); }, false);
+                                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
                     </script>
+                }
+            }
 
-                    <span class="header-left">&nbsp;</span><span class="header-middle">MY PROFILE</span><span class="header-right">&nbsp;</span>
-                </h3>
+
+            <span class="header-left">&nbsp;</span><span class="header-middle">MIN PROFIL</span><span class="header-right">&nbsp;</span>
+        </h3>
+    </div>
+</div>
+<div class="widget-body">
+    <div class="widget-content">
+        <div class="profile-info">
+
+            <div class="name" style="float: left">
+                <span class="name-text">@Model.WidgetData.User.Username</span>
+                <img id="name-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
             </div>
-        </div>
-        <div class="widget-body">
-            <div class="widget-content">
-                <div class="profile-info">
 
-                    <div class="name" style="float: left">
-                        <span class="name-text">@Model.WidgetData.User.Username</span>
-                        <img id="name-4-report" class="report-button report-n" alt="report" src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/buttons/report_button.gif" style="display: none;">
-                    </div>
-
-                    <br class="clear">
+            <br class="clear">
 
 
-                    <img alt="online" src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/profile/habbo_offline.gif">
+            <img alt="online" src="~/c_images/myhabbo/habbo_offline.gif">
 
-                    <div class="birthday text">
-                        Created on:
-                    </div>
-                    <div class="birthday date">
-                        2020-03-21
-                    </div>
-
+            <div class="birthday text">
+                Fødselsdag
+            </div>
+            <div class="birthday date">
+                @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
+            </div>
+            @{
+                if (Model.WidgetData.User.BadgeActive)
+                {
                     <div>
-
-
-
-                        <img src="https://cdn.classichabbo.com/c_images/album1584/DK.gif">
-
+                        <img src="@Configuration["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
                     </div>
+                }
 
+            }
+
+
+        </div>
+        <div class="profile-figure">
+            <img alt="Wizter" src="@Configuration["figureUrl"]?figure=@Model.WidgetData.User.Figure&amp;size=b&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=sml&amp;frame=1">
+        </div>
+
+        <div class="profile-motto">
+            @Model.WidgetData.User.Motto
+            <img id="motto-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
+            <div class="clear"></div>
+        </div>
+        @{
+            if (User.Identity.Name != Model.WidgetData.User.Id.ToString())
+            {
+                <div class="profile-friend-request clearfix">
+                    <a class="new-button" id="add-friend" style="float: left"><b>Add as friend</b><i></i></a>
                 </div>
-                <div class="profile-figure">
-                    <img alt="Wizter" src="https://habbo.com/habbo-imaging/avatarimage?figure=hd-185-1.hr-100-.ch-210-62.lg-275-90.sh-300-62.ca-1815-62.he-1607-.ha-1004-62.ea-1401-62.fa-1209-62&amp;size=b&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1">
-                </div>
+            }
+        }
 
-                <div class="profile-motto">
-                    <img id="motto-4-report" class="report-button report-n" alt="report" src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/buttons/report_button.gif" style="display: none;">
-                    <div class="clear"></div>
-                </div>
+        <div id="profile-tags-panel">
+            <div id="profile-tag-list">
 
-                <script type="text/javascript">
-                    document.observe("dom:loaded", function () {
-                        new ProfileWidget('7975', '7975', {
-                            headerText: "Are you sure?",
-                            messageText: "Are you sure you want to ask <strong\>Wizter</strong\> to be your friend? Think twice before you hit OK!",
-                            loginText: "You must sign in before sending a friend request.",
-                            buttonText: "Ok",
-                            cancelButtonText: "Cancel"
-                        });
-                    });
-                </script>
 
-                <div class="clear"></div>
+
             </div>
         </div>
+        <script type="text/javascript">
+                        document.observe("dom:loaded", function () {
+                            new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
+                                headerText: "Are you sure?",
+                                messageText: "Are you sure you want to ask <strong\>Wizter</strong\> to be your friend? Think twice before you hit OK!",
+                                loginText: "You must sign in before sending a friend request.",
+                                buttonText: "Ok",
+                                cancelButtonText: "Cancel"
+                            });
+                        });
+        </script>
+
+        <div class="clear"></div>
     </div>
 </div>

@@ -21,7 +21,7 @@ namespace KeplerCMS.Areas.MyHabbo
         [LoggedInFilter(false)]
         public async Task<IActionResult> Index(SaveModel input)
         {
-            var result = await _homeService.Save(User.Identity.Name, input);
+            var result = await _homeService.Save(int.Parse(User.Identity.Name), input);
             if(result)
             {
                 Response.Cookies.Delete("editmode");

@@ -31,16 +31,8 @@ namespace KeplerCMS.Services.Implementations
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser };
 
             foreach (var item in itemsInHome)
-            {
-                var itemData = await _context.HomesItemData.Where(s => s.Id == item.ItemId).FirstOrDefaultAsync();
-                var itemDataWithDefinition = new ItemViewModel { Definition = itemData, Item = item, EnableEditing = enableEditing };
-
-                if(itemData.Type == "widgets" && itemData.CssClass == "ProfileWidget")
-                {
-                    itemDataWithDefinition.WidgetData = new ItemWidgetDataModel { User = homeUser };
-                }
-                
-                homeViewModel.Items.Add(itemDataWithDefinition);
+            {               
+                homeViewModel.Items.Add(await GetItem(item.Id, enableEditing));
             }
             
             return homeViewModel;
@@ -146,22 +138,34 @@ namespace KeplerCMS.Services.Implementations
 
 
 
-        public async Task<bool> Save(string userId, SaveModel data)
+        public async Task<bool> Save(int userId, SaveModel data)
         {
-            var user = await _userService.GetUserById(userId);
+            var user = await _userService.GetUserById(userId.ToString());
             if (user == null) return false;
 
             var itemsChanged = new List<HomesItems>();
             itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.Stickers));
             itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.Widgets));
             itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.StickieNotes));
-
+            if(data.Background != null)
+            {
+                var bgData = data.Background.Split(":");
+                var bgItemId = bgData[0];
+                var dbItem = await GetInventoryItem(int.Parse(bgItemId), user.Id);
+                // If I plan to make groups work the following line needs to be fixed
+                var home = await _context.Homes.Where(s => s.UserId == user.Id).FirstOrDefaultAsync();
+                if(dbItem != null && home != null)
+                {
+                    home.Background = dbItem.Definition.CssClass;
+                    _context.Homes.Update(home);
+                }
+            }
             foreach (var item in itemsChanged)
             {
-                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id).FirstOrDefaultAsync();
+                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id && s.OwnerId == userId).FirstOrDefaultAsync();
                 if(dbItem != null)
                 {
-                    // Lets check if they actually own the item
+                    // Lets check if the home actually exists
                     var home = await _context.Homes.Where(s => s.Id == dbItem.HomeId).FirstOrDefaultAsync();
                     if (home != null && home.UserId == user.Id)
                     {
@@ -198,6 +202,10 @@ namespace KeplerCMS.Services.Implementations
             var similarProductInInventory = await _context.HomesInventory.Where(s => s.ItemId == itemId).FirstOrDefaultAsync();
             if(similarProductInInventory != null)
             {
+                var itemDef = await GetItemDetail(similarProductInInventory.ItemId);
+                if (itemDef == null) return false;
+                if(itemDef.Type == "backgrounds") return false;
+                
                 similarProductInInventory.Amount++;
                 _context.HomesInventory.Update(similarProductInInventory);
             } else
@@ -231,6 +239,39 @@ namespace KeplerCMS.Services.Implementations
 
             return invItem;
         }
+
+        public async Task<ItemViewModel> EditItem(int itemId, int skinId, int userId, string data = null)
+        {
+            var item = await _context.HomesItems.Where(s => s.Id == itemId && s.OwnerId == userId).FirstOrDefaultAsync();
+            var skin = SkinIdToString.Convert(skinId);
+            var homeUser = await _userService.GetUserById(userId.ToString());
+            if (item != null)
+            {
+                item.Skin = skin;
+                _context.HomesItems.Update(item);
+                await _context.SaveChangesAsync();
+            }
+
+            return await GetItem(itemId, true);
+        }
+        public async Task<ItemViewModel> GetItem(int id, bool enableEditing = false)
+        {
+            var item = await _context.HomesItems.Where(s => s.Id == id).FirstOrDefaultAsync();
+            if (item != null)
+            {
+                var itemData = await _context.HomesItemData.Where(s => s.Id == item.ItemId).FirstOrDefaultAsync();
+                var itemDataWithDefinition = new ItemViewModel { Definition = itemData, Item = item, EnableEditing = enableEditing };
+
+                if (itemData.Type == "widgets" && itemData.CssClass == "ProfileWidget")
+                {
+                    var userData = await _userService.GetUserById(item.OwnerId.ToString());
+                    itemDataWithDefinition.WidgetData = new ItemWidgetDataModel { User = userData };
+                }
+                return itemDataWithDefinition;
+            }
+            return null;
+        }
+
     }
 
 }

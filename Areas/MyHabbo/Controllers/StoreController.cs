@@ -81,16 +81,22 @@ namespace KeplerCMS.Areas.MyHabbo
 
 		[HttpPost]
 		[LoggedInFilter]
+		[Route("myhabbo/store/purchase_backgrounds")]
 		[Route("myhabbo/store/purchase_stickers")]
-		public async Task<IActionResult> PurchaseStickers(int selectedId)
+		public async Task<IActionResult> PurchaseItem(int selectedId)
 		{
 			var userId = int.Parse(User.Identity.Name);
 			var product = await _homeService.GetProduct(selectedId);
-			var purchase = await _creditService.Purchase(product.Details.Price, userId);
-			if(purchase)
+			var canPurchase = await _creditService.CanPurchase(product.Details.Price, userId);
+			if(canPurchase)
 			{
-				await _homeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId);
-				return Content("OK");
+				var giveItem = await _homeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId); ;
+				if (giveItem)
+				{
+					var purchase = await _creditService.Purchase(product.Details.Price, userId);
+					return Content("OK");
+				}
+				return Content("Du ejer allerede dette produkt");
 			}
 			return Content("You dont have enough credits");
 		}

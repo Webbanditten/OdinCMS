@@ -1622,22 +1622,28 @@ h2.title.dialog-handle.rounded-done {
     padding: 4px 10px;
     font-size: 14px;
     background-color: #fc6204;
+    color: white;
     position: relative;
     line-height: 17px;
     padding: 0px 10px;
-    height: 25px;
+    height: 22px;
     margin-left: 4px;
     margin-right: 4px;
     border-radius: 4px;
     top: -4px;
+    padding-top: 3px;
+    text-align: center;
 }
 
 
 .topdialog p {
-    margin-top: 1em;
     margin-bottom: 1em;
 }
 
 .rounded-container {
     height:25px;
+}
+
+#confirm-dialogcontent {
+    margin-top:0px;
 }
