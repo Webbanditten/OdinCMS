@@ -12,7 +12,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<CatalogItem>> GetStoreCatelog(int category, int subCategory);
         Task<HomesItems> SaveItem(HomesItems item);
         Task<HomesInventory> RemoveItem(int itemId, int userId);
-        Task<PlaceItem> PlaceItem(int userId, int z, int inventoryId, string data = null);
+        Task<ItemViewModel> PlaceItem(int userId, int z, int inventoryId, string data = null);
         Task<ItemViewModel> EditItem(int itemId, int skinId, int userId, string data = null);
         Task<ItemViewModel> GetItem(int id, bool enableEditing = false);
         Task<List<InventoryItem>> GetInventory(string type, int userId);

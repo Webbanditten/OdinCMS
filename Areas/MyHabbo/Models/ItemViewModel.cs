@@ -18,6 +18,7 @@ namespace KeplerCMS.Areas.MyHabbo.Models
     public class ItemWidgetDataModel
     {
         public Users User { get; set; }
+        public List<Rooms> Rooms { get; set; }
         // Badges
         //Guest book
         // Rating

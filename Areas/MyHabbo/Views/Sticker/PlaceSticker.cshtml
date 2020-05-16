@@ -1,12 +1,12 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.PlaceItem
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel
 @{
     Layout = null;
 }
-    <div class="movable sticker @Model.Definition.CssClass" style="left: @(Model.Details.X)px; top: @(Model.Details.Y)px; z-index: @(Model.Details.Z)" id="sticker-@Model.Details.Id">
+    <div class="movable sticker @Model.Definition.CssClass" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)" id="sticker-@Model.Item.Id">
 
-        <img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="sticker-@Model.Details.Id-edit" />
+        <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="sticker-@Model.Item.Id-edit" />
         <script language="JavaScript" type="text/javascript">
-            Event.observe("sticker-@Model.Details.Id-edit", "click", function(e) { openEditMenu(e, @Model.Details.Id, "sticker", "sticker-@Model.Details.Id-edit", false); }, false);
+            Event.observe("sticker-@Model.Item.Id-edit", "click", function(e) { openEditMenu(e, @Model.Item.Id, "sticker", "sticker-@Model.Item.Id-edit", false); }, false);
         </script>
 
     </div>

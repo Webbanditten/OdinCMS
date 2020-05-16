@@ -2,17 +2,24 @@
 @{Layout = null;}
 
 
+@{ 
+    string specificClass = Model.Definition.CssClass switch
+    {
+        "w_traxplayerwidget" => "TraxPlayerWidget",
+        "w_badgeswidget" => "BadgesWidget",
+        "w_friendswidget" => "FriendsWidget",
+        "w_guestbookwidget" => "GuestbookWidget",
+        "w_highscoreswidget" => "HighScoresWidget",
+        "w_ratingwidget" => "RatingWidget",
+        "w_roomswidget" => "RoomsWidget",
+        "w_profilewidget" => "ProfileWidget"
+    };
+}
 
-
-<div class="@((Model.EnableEditing) ? "movable" : "") widget ProfileWidget" id="widget-@Model.Item.Id" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)">
+<div class="@((Model.EnableEditing) ? "movable" : "") widget @specificClass" id="widget-@Model.Item.Id" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)">
     <div class="@Model.Item.Skin">
-        @{
-            switch (Model.Definition.CssClass)
-            {
-                case "ProfileWidget":
-                    <partial name="~/Areas/MyHabbo/Views/Items/Widgets/ProfileWidget.cshtml" model=Model />
-                    break;
-            }
-        }
+
+        <partial name="~/Areas/MyHabbo/Views/Items/Widgets/@(Model.Definition.CssClass).cshtml" model=Model />
+
     </div>
 </div>

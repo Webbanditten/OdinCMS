@@ -16,5 +16,6 @@ namespace KeplerCMS.Areas.MyHabbo.Models
         public List<CatalogItem> Items { get; set; }
         public List<InventoryItem> InventoryItems { get; set; }
         public DialogType Type { get; set; }
+        public string InventoryType { get; set; }
     }
 }

@@ -15,6 +15,15 @@ namespace KeplerCMS.Areas.MyHabbo
             _homeService = homeService;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Add(int widgetId, int zIndex)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var item = await _homeService.PlaceItem(widgetId, zIndex, userId);
+
+            Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
+            return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", item);
+        }
 
         [HttpPost]
         [LoggedInFilter(false)]

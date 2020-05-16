@@ -1,0 +1,85 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
+
+
+
+<div class="widget-corner" id="widget-@Model.Item.Id-handle">
+    <div class="widget-headline">
+        <h3>
+            @{
+                if (Model.EnableEditing)
+                {
+
+                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
+                    <script language="JavaScript" type="text/javascript">
+                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
+                    </script>
+                }
+            }
+
+
+
+            <span class="header-left">&nbsp;</span><span class="header-middle">My Guestbook(<span id="guestbook-size">0</span>) <span id="guestbook-type" class="public"><img src="~/c_images/myhabbo/status_exclusive.gif" title="myhabbo.guestbook.unknown.private" alt="myhabbo.guestbook.unknown.private"></span></span><span class="header-right">&nbsp;</span>
+        </h3>
+    </div>
+</div>
+<div class="widget-body">
+    <div class="widget-content">
+        <!-- gb-public/gb-private  -->
+        <div id="guestbook-wrapper" class="gb-public">
+            <ul class="guestbook-entries" id="guestbook-entry-container">
+
+
+
+
+
+                <li id="guestbook-entry-2364" class="guestbook-entry" style="">
+                    <div class="guestbook-author">
+                        <img src="https://habbo.com/habbo-imaging/avatarimage?figure=hd-180-1.ch-215-62.lg-275-62.hr-100-&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt="Alex" title="Alex">
+                    </div>
+
+                    <div class="guestbook-actions">
+                        <img src="~/c_images/myhabbo/delete_entry_button.gif" id="gbentry-delete-2364" class="gbentry-delete" style="cursor:pointer" alt="">
+                        <br>
+                    </div>
+
+                    <div class="guestbook-message">
+
+                        <div class="offline">
+
+                            <a href="https://classichabbo.com/home/Wizter">Wizter</a>
+                        </div>
+                        <p>asdas</p>
+                    </div>
+                    <div class="guestbook-cleaner">&nbsp;</div>
+                    <div class="guestbook-entry-footer metadata">May 16, 2020 01:09:39 PM</div>
+                </li>
+
+
+
+            </ul>
+        </div>
+
+
+        <div class="guestbook-toolbar clearfix">
+            <a href="#" class="new-button envelope-icon" id="guestbook-open-dialog">
+                <b><span></span>Post new message</b><i></i>
+            </a>
+        </div>
+
+
+        <script type="text/javascript">
+            document.observe("dom:loaded", function () {
+                var gb@(Model.Item.Id) = new GuestbookWidget('', '@Model.Item.Id', 500);
+                var editMenuSection = $('guestbook-privacy-options');
+                if (editMenuSection) {
+                    gb@(Model.Item.Id).updateOptionsList('public');
+                }
+            });
+        </script>
+        <div class="clear"></div>
+    </div>
+
+</div>

@@ -23,6 +23,7 @@ namespace KeplerCMS.Data
         public DbSet<HomesItems> HomesItems { get; set; }
         public DbSet<HomesItemData> HomesItemData { get; set; }
         public DbSet<HomesInventory> HomesInventory { get; set; }
+        public DbSet<Rooms> Rooms { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }

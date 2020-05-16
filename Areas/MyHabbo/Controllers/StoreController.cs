@@ -53,7 +53,7 @@ namespace KeplerCMS.Areas.MyHabbo
 				firstItemName = InventoryItems.FirstOrDefault().Definition.Name;
 			}
 			Response.Headers.Add("x-json", "[[\"" + DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[\"" + cssClassForFirstItem + "_pre\", \"" + cssClassForFirstItem + "\", \"" + firstItemName + "\", \"\", null,1]]");
-			return View("Main", new MainViewModel { Items = new List<CatalogItem>(), Categories = categories, InventoryItems = InventoryItems, Type = DialogType.Inventory, }); ;
+			return View("Main", new MainViewModel { InventoryType = type, Items = new List<CatalogItem>(), Categories = categories, InventoryItems = InventoryItems, Type = DialogType.Inventory, }); ;
 		}
 
 		[HttpPost]
@@ -133,6 +133,10 @@ namespace KeplerCMS.Areas.MyHabbo
 		{
 			var userId = int.Parse(User.Identity.Name);
 			var items = await _homeService.GetInventory(type, userId);
+			if(type == "widgets")
+			{
+				return View("InventoryItemsWidgets", items);
+			}
 			return View(items);
 		}
 	}

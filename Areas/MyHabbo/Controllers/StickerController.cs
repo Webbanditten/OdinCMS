@@ -22,7 +22,7 @@ namespace KeplerCMS.Areas.MyHabbo
         {
             var userId = int.Parse(User.Identity.Name);
             var item = await _homeService.PlaceItem(selectedStickerId, zIndex, userId);
-            Response.Headers.Add("x-json", "[\"" + item.Details.Id + "\"]");
+            Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
             return View(item);
         }
 

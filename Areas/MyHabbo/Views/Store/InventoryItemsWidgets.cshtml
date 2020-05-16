@@ -1,0 +1,31 @@
+﻿@model List<KeplerCMS.Areas.MyHabbo.Models.InventoryItem>;
+@{Layout = null;}
+    <div id="inventory-items">
+
+        <ul id="inventory-item-list">
+            @{
+                foreach (var item in Model)
+                {
+                    var first = (item == Model.First()) ? "selected" : "";
+                    var disabled = (item.Details.Amount == 0) ? "webstore-widget-disabled" : "";
+                    <li id="inventory-item-p-@item.Details.Id" title="@item.Definition.Name" class="webstore-widget-item  @disabled">
+                        <div class="webstore-item-preview @(item.Definition.CssClass)_pre">
+                            <div class="webstore-item-mask">
+
+                            </div>
+                        </div>
+
+                        <div class="webstore-widget-description">
+                            <h3>@item.Definition.Name</h3>
+                            <p>@item.Definition.Description</p>
+                        </div>
+
+                    </li>
+                }
+            }
+
+
+
+
+        </ul>
+    </div>

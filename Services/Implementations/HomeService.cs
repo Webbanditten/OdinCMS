@@ -16,11 +16,13 @@ namespace KeplerCMS.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IUserService _userService;
+        private readonly IRoomService _roomService;
 
-        public HomeService(DataContext context, IUserService userService)
+        public HomeService(DataContext context, IUserService userService, IRoomService roomService)
         {
             _userService = userService;
             _context = context;
+            _roomService = roomService;
         }
         public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
         {
@@ -83,27 +85,37 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<PlaceItem> PlaceItem(int inventoryId, int z, int userId, string data = null)
+        public async Task<ItemViewModel> PlaceItem(int inventoryId, int z, int userId, string data = null)
         {
             var item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId).FirstOrDefaultAsync();
             var homeForUser = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
             HomesItems newItem = null;
             if(item != null && homeForUser != null)
             {
-                if(item.Amount > 1)
+                var def = await GetItemDetail(item.ItemId);
+                if(def.Type == "widgets")
                 {
-                    item.Amount--;
+                    item.Amount = 0;
                     _context.HomesInventory.Update(item);
                 } else
                 {
-                    _context.HomesInventory.Remove(item);
+                    if (item.Amount > 1)
+                    {
+                        item.Amount--;
+                        _context.HomesInventory.Update(item);
+                    }
+                    else
+                    {
+                        _context.HomesInventory.Remove(item);
+                    }
                 }
+                
                 newItem = new HomesItems { HomeId = homeForUser.Id, OwnerId = userId, ItemId = item.ItemId, X = 0, Z = z, Y = 0, Skin = "w_skin_defaultskin" };
                 _context.HomesItems.Add(newItem);
                 await _context.SaveChangesAsync();
             }
 
-            return new PlaceItem { Details = newItem, Definition = await GetItemDetail(newItem.ItemId)  };
+            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId)  };
         }
 
         public async Task<HomesInventory> RemoveItem(int itemId, int userId)
@@ -262,10 +274,13 @@ namespace KeplerCMS.Services.Implementations
                 var itemData = await _context.HomesItemData.Where(s => s.Id == item.ItemId).FirstOrDefaultAsync();
                 var itemDataWithDefinition = new ItemViewModel { Definition = itemData, Item = item, EnableEditing = enableEditing };
 
-                if (itemData.Type == "widgets" && itemData.CssClass == "ProfileWidget")
+                if (itemData.Type == "widgets")
                 {
                     var userData = await _userService.GetUserById(item.OwnerId.ToString());
-                    itemDataWithDefinition.WidgetData = new ItemWidgetDataModel { User = userData };
+                    itemDataWithDefinition.WidgetData = new ItemWidgetDataModel { 
+                        User = userData, 
+                        Rooms = await _roomService.GetRoomsByOwner(item.OwnerId) 
+                    };
                 }
                 return itemDataWithDefinition;
             }

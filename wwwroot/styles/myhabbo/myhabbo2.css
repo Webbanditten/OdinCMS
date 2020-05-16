@@ -410,11 +410,11 @@ hr.divider {
 }
 
 .guestbook-message .offline {
-    background: transparent url(/c_images/myhabbo/habbo_offline.gif) no-repeat top left;
+    background: transparent url(/c_images/myhabbo/status/habbo_offline.gif) no-repeat top left;
 }
 
 .guestbook-message .online {
-    background: transparent url(/c_images/myhabbo/habbo_online_anim.gif) no-repeat top left;
+    background: transparent url(/c_images/myhabbo/status/habbo_online_anim.gif) no-repeat top left;
 }
 
 .rating-unit-rating {
@@ -1646,4 +1646,15 @@ h2.title.dialog-handle.rounded-done {
 
 #confirm-dialogcontent {
     margin-top:0px;
+}
+#badgelist-content ul {
+    list-style: none;
+    padding-left: 0px;
+}
+#badgelist-content ul li {
+    width: 53px;
+    height: 45px;
+    float: left;
+    background-repeat: no-repeat;
+    background-position: center center;
 }

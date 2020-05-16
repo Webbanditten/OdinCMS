@@ -125,6 +125,20 @@
         <div id="inventory-items-container">
             <h4>Select an item by clicking it</h4>
             <div id="inventory-items">
+                @{
+                    if (Model.InventoryType == null)
+                    {
+
+                        if (Model.InventoryType == "stickers" || Model.InventoryType == "backgrounds" || Model.InventoryType == "notes")
+                        {
+                            <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
+                        }
+                        else if (Model.InventoryType == "widgets")
+                        {
+                            <partial name="~/Areas/MyHabbo/Views/Store/InventoryItemsWidgets.cshtml" model=Model.InventoryItems />
+                        }
+                    }
+                }
                 <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
             </div>
         </div>

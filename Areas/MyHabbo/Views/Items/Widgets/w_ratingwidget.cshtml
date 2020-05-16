@@ -1,0 +1,60 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
+
+
+<div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
+    <div class="widget-headline">
+        <h3>
+            @{
+                if (Model.EnableEditing)
+                {
+                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
+                    <script language="JavaScript" type="text/javascript">
+                                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
+                    </script>
+                }
+            }
+            <span class="header-left">&nbsp;</span><span class="header-middle">My Rating</span><span class="header-right">&nbsp;</span>
+        </h3>
+    </div>
+</div>
+<div class="widget-body">
+    <div class="widget-content">
+        <div id="rating-main">
+
+
+
+
+
+            <script type="text/javascript">
+
+	        var ratingWidget;
+	        document.observe("dom:loaded", function() {
+		        ratingWidget = new RatingWidget('@User.Identity.Name', @(Model.Item.Id));
+	        });
+
+            </script><div class="rating-average">
+                <b>Average rating: 5</b><br>
+                <div id="rating-stars" class="rating-stars">
+                    <ul id="rating-unit_ul1" class="rating-unit-rating">
+                        <li class="rating-current-rating" style="width: 150px;">
+
+                        </li>
+                        <li><a href="#" class="r1-unit rater">1</a></li>
+                        <li><a href="#" class="r2-unit rater">2</a></li>
+                        <li><a href="#" class="r3-unit rater">3</a></li>
+                        <li><a href="#" class="r4-unit rater">4</a></li>
+                        <li><a href="#" class="r5-unit rater">5</a></li>
+
+                    </ul>
+                </div>
+                1 votes total
+                <br>
+                (1 users voted 4 or better)
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>

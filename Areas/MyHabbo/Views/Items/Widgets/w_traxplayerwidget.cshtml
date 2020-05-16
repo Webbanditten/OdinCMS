@@ -1,0 +1,53 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
+
+
+
+<div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
+    <div class="widget-headline">
+        <h3>
+
+
+            <img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@(Model.Item.Id)-edit">
+            <script language="JavaScript" type="text/javascript">
+                Event.observe("widget-@(Model.Item.Id)-edit", "click", function (e) { openEditMenu(e, @(Model.Item.Id), "widget", "widget-@(Model.Item.Id)-edit"); }, false);
+            </script>
+
+
+            <span class="header-left">&nbsp;</span><span class="header-middle">TRAXPLAYER</span><span class="header-right">&nbsp;</span>
+        </h3>
+    </div>
+</div>
+<div class="widget-body">
+    <div class="widget-content">
+
+        <div id="traxplayer-content" style="text-align: center;">
+            @{
+
+                if (Model.Item.Data == null || Model.EnableEditing)
+                {
+
+                    <img src="~/c_images/myhabbo/traxplayer/player.png">
+                }
+                else
+                {
+                    <embed type="application/x-shockwave-flash" src="~/flash/trax/traxplayer.swf" name="traxplayer" quality="high" base="/flash/trax/" allowscriptaccess="always" menu="false" wmode="transparent" flashvars="songUrl=/trax/song/@(Model.Item.Data)&amp;sampleUrl=@(Configuration["traxUrl"])/" height="66" width="210">
+                }
+            }
+        </div>
+
+
+        <div id="edit-menu-trax-select-temp" style="display:none">
+            <select id="trax-select-options-temp">
+                <option value="0">- Choose song -</option>
+
+
+                <option value="1326" selected="">aws</option>
+            </select>
+        </div>
+
+        <div class="clear"></div>
+    </div>
+</div>
