@@ -1,58 +1,70 @@
-﻿<div id="badgelist-content">
+﻿@model KeplerCMS.Areas.MyHabbo.Models.BadgesViewModel;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{ 
+    var prPage = 12;
+    var maxPages = Math.Ceiling(Decimal.Divide(Model.Item.WidgetData.Badges.Count(), prPage));
+    var pagedBadges = Model.Item.WidgetData.Badges.Skip((Model.PageNumber - 1) * prPage).Take(prPage).ToList();
+}
+<div id="badgelist-content">
     <ul class="clearfix">
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/MAL02.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/SGD.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/Z20.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/Z02.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/NL249.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/Z04.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ES819.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ES467.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_RespectEarned4.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/VA5.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ITC54.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ESO.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_AllTimeHotelPresence7.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/UK037.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/CLUBS.gif)"></li>
-
-        <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_Login5.gif)"></li>
-
+        @{
+            foreach (var badge in pagedBadges)
+            {
+                <li style="background-image: url(@Configuration["badgeUrl"]/@(badge.Badge).gif)"></li>
+            }
+        }
     </ul>
 
 
     <div id="badge-list-paging">
-        16 - 2 / 2<br />
+        @pagedBadges.Count() - @Model.PageNumber / @maxPages<br>
+
+        @{
+            if (Model.PageNumber != 1)
+            {
+                @:<a href="#" id="badge-list-search-first">@DbRes.T("badgefirst", "habbohome")</a> |
+            }
+            else
+            {
+                @:@DbRes.T("badgefirst", "habbohome") |
+            }
+            if (Model.PageNumber > 1)
+            {
+                @:<a href="#" id="badge-list-search-previous">&lt;&lt;</a> |
+            }
+            else
+            {
+                @:&lt; &lt; |
+            }
 
 
-        <a href="#" id="badge-list-search-first">First</a> |
-        <a href="#" id="badge-list-search-previous">&lt;&lt;</a> |
+            if (Model.PageNumber < maxPages)
+            {
+                @:<a href="#" id="badge-list-search-next">&gt;&gt;</a> |
+            }
+            else
+            {
+                @:&gt;&gt;
+            }
+
+            if (Model.PageNumber != maxPages)
+            {
+                @:<a href="#" id="badge-list-search-last">@DbRes.T("badgelast", "habbohome")</a>
+            }
+            else
+            {
+                @:@DbRes.T("badgelast", "habbohome")
+            }
+        }
 
 
-
-        &gt;&gt; | Last
-
-        <input type="hidden" id="badgeListPageNumber" value="2" />
-        <input type="hidden" id="badgeListTotalPages" value="2" />
+        <input type="hidden" id="badgeListPageNumber" value="@Model.PageNumber">
+        <input type="hidden" id="badgeListTotalPages" value="@maxPages">
         <script type="text/javascript">
-            document.observe('dom:loaded', function () {
-                window.badgesWidget22037 = new BadgesWidget('', '22037');
-            });
+                    document.observe('dom:loaded', function () {
+                        window.badgesWidget@(Model.Item.Item.Id) = new BadgesWidget('@Model.Item.WidgetData.User.Id', '@Model.Item.Item.Id');
+                    });
         </script>
     </div>
 </div>

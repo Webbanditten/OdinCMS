@@ -4,6 +4,11 @@ namespace KeplerCMS.Data
 {
     public class DataContext : DbContext
     {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UsersBadges>()
+                .HasKey(c => new { c.UserId, c.Badge });
+        }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
         public DbSet<Menu> Menu { get; set; }
@@ -23,7 +28,10 @@ namespace KeplerCMS.Data
         public DbSet<HomesItems> HomesItems { get; set; }
         public DbSet<HomesItemData> HomesItemData { get; set; }
         public DbSet<HomesInventory> HomesInventory { get; set; }
+        public DbSet<HomesRating> HomesRating { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
+        public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
+        public DbSet<UsersBadges> UsersBadges { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }

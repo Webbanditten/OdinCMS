@@ -1,20 +1,37 @@
-﻿
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 
-
-<script type="text/javascript">
-    var ratingWidget;
-
-    ratingWidget = new RatingWidget(7975, 3080);
-
-</script><div class="rating-average">
-    <b>Average rating: 4</b><br />
+@{ 
+    var avgRating = (Model.WidgetData.Ratings.Count() > 0) ? Math.Floor(Model.WidgetData.Ratings.Average(s => s.Rating)) : 0;
+    var pixelPrVote = 30;
+    var ratingWidth = pixelPrVote * avgRating;
+}
+    <script type="text/javascript">
+        var ratingWidget;
+	    document.observe("dom:loaded", function() {
+		    ratingWidget = new RatingWidget('@Model.Item.HomeId', @(Model.Item.Id));
+	    });
+    </script>
+<div class="rating-average">
+    <b>@DbRes.T("averagerating", "habbohome"): @avgRating</b><br />
     <div id="rating-stars" class="rating-stars">
         <ul id="rating-unit_ul1" class="rating-unit-rating">
-            <li class="rating-current-rating" style="width:120px;" />
-
+            <li class="rating-current-rating" style="width:@(ratingWidth)px;" />
+            @{
+                if (User.Identity.IsAuthenticated)
+                {
+                    if (!(Model.WidgetData.Ratings.FindIndex(s => s.UserId == int.Parse(User.Identity.Name)) >= 0) && Model.Item.OwnerId != int.Parse(User.Identity.Name))
+                    {
+                        <li><a href="#" class="r1-unit rater">1</a></li>
+                        <li><a href="#" class="r2-unit rater">2</a></li>
+                        <li><a href="#" class="r3-unit rater">3</a></li>
+                        <li><a href="#" class="r4-unit rater">4</a></li>
+                        <li><a href="#" class="r5-unit rater">5</a></li>
+                    }
+                }
+            }
         </ul>
     </div>
-    2 votes total
-    <br />
-    (1 users voted 4 or better)
+    @Model.WidgetData.Ratings.Count() @DbRes.T("usersvoted", "habbohome")
+    <br>
+    (@Model.WidgetData.Ratings.Count(s=>s.Rating >= 4) @DbRes.T("votedgood", "habbohome"))
 </div>

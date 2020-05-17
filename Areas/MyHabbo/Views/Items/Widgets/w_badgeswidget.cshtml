@@ -1,7 +1,8 @@
-﻿@using Microsoft.Extensions.Configuration
-@inject IConfiguration Configuration
-@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
-@{Layout = null;}
+﻿@using KeplerCMS.Areas.MyHabbo.Models; 
+@model ItemViewModel;
+@{
+    var badges = new BadgesViewModel { Item = Model, PageNumber = 1 };
+}
 
 
 <div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
@@ -16,57 +17,12 @@
                     </script>
                 }
             }
-            <span class="header-left">&nbsp;</span><span class="header-middle">Badges &amp; Achievements</span><span class="header-right">&nbsp;</span>
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("badges", "habbohome")</span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>
 <div class="widget-body">
     <div class="widget-content">
-        <div id="badgelist-content">
-            <ul class="clearfix">
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_TraderPass1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/Z63.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/DK.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_RoomEntry1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_Graduate1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_AllTimeHotelPresence1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/HC1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_AvatarLooks1.gif)"></li>
-
-                <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_RegistrationDuration3.gif)"></li>
-
-            </ul>
-
-
-            <div id="badge-list-paging">
-                16 - 1 / 2<br>
-
-
-                First | &lt;&lt; |
-
-
-
-                <a href="#" id="badge-list-search-next">&gt;&gt;</a> |
-                <a href="#" id="badge-list-search-last">Last</a>
-
-                <input type="hidden" id="badgeListPageNumber" value="1">
-                <input type="hidden" id="badgeListTotalPages" value="2">
-                <script type="text/javascript">
-                    document.observe('dom:loaded', function () {
-                        window.badgesWidget@(Model.Item.Id) = new BadgesWidget('@Model.WidgetData.User.Id', '@Model.Item.Id');
-                    });
-                </script>
-            </div>
-        </div>
-        <div class="clear"></div>
-
+        <partial name="~/Areas/MyHabbo/Views/BadgeList/BadgePaging.cshtml" model=badges />
     </div>
 </div>

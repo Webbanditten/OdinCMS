@@ -8,15 +8,17 @@
 <div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
     <div class="widget-headline">
         <h3>
+            @{
+                if (Model.EnableEditing)
+                {
+                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
+                    <script language="JavaScript" type="text/javascript">
+                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
+                    </script>
+                }
+            }
 
-
-            <img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@(Model.Item.Id)-edit">
-            <script language="JavaScript" type="text/javascript">
-                Event.observe("widget-@(Model.Item.Id)-edit", "click", function (e) { openEditMenu(e, @(Model.Item.Id), "widget", "widget-@(Model.Item.Id)-edit"); }, false);
-            </script>
-
-
-            <span class="header-left">&nbsp;</span><span class="header-middle">TRAXPLAYER</span><span class="header-right">&nbsp;</span>
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("traxplayer", "habbohome")</span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>
@@ -24,27 +26,22 @@
     <div class="widget-content">
 
         <div id="traxplayer-content" style="text-align: center;">
-            @{
-
-                if (Model.Item.Data == null || Model.EnableEditing)
-                {
-
-                    <img src="~/c_images/myhabbo/traxplayer/player.png">
-                }
-                else
-                {
-                    <embed type="application/x-shockwave-flash" src="~/flash/trax/traxplayer.swf" name="traxplayer" quality="high" base="/flash/trax/" allowscriptaccess="always" menu="false" wmode="transparent" flashvars="songUrl=/trax/song/@(Model.Item.Data)&amp;sampleUrl=@(Configuration["traxUrl"])/" height="66" width="210">
-                }
-            }
+            <partial name="~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml" model=Model />
         </div>
 
 
         <div id="edit-menu-trax-select-temp" style="display:none">
             <select id="trax-select-options-temp">
-                <option value="0">- Choose song -</option>
-
-
-                <option value="1326" selected="">aws</option>
+                @{
+                    if (Model.EnableEditing)
+                    {
+                        <option value="0">- @DbRes.T("choosesong", "habbohome") -</option>
+                        foreach (var song in Model.WidgetData.SongList)
+                        {
+                            <option value="@song.Id" selected="@(song.Id.ToString() == Model.Item.Data)">@song.Title</option>
+                        }
+                    }
+                }
             </select>
         </div>
 

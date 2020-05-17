@@ -94,6 +94,7 @@ namespace KeplerCMS
             services.AddScoped<IPromoService, PromoService>();
             services.AddScoped<IHomeService, HomeService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<ITraxService, TraxService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

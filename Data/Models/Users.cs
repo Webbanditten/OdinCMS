@@ -39,6 +39,8 @@ namespace KeplerCMS.Data.Models
 
         [Column("credits")]
         public int Credits { get; set; }
+        [Column("battleball_points")]
+        public int BattleballPoints { get; set; }
 
         public bool HasHabboClub
         {

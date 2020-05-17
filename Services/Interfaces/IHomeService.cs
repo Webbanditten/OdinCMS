@@ -10,7 +10,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<bool> Save(int currentUserId, SaveModel data);
         Task<List<HomesCategories>> GetStoreCategories();
         Task<List<CatalogItem>> GetStoreCatelog(int category, int subCategory);
-        Task<HomesItems> SaveItem(HomesItems item);
         Task<HomesInventory> RemoveItem(int itemId, int userId);
         Task<ItemViewModel> PlaceItem(int userId, int z, int inventoryId, string data = null);
         Task<ItemViewModel> EditItem(int itemId, int skinId, int userId, string data = null);
@@ -25,6 +24,12 @@ namespace KeplerCMS.Services.Interfaces
         Task<bool> GiveItem(int itemId, int amount, int userId);
         Task<InventoryItem> GetInventoryItem(int inventoryId, int userId);
 
-        
+        Task<ItemWidgetDataModel> GetWidgetData(int userId);
+        Task<ItemViewModel> SelectSong(int itemId, int songId, int userId);
+
+        Task<ItemViewModel> Rate(int rating, int itemId, int userId);
+        Task<List<HomesRating>> GetRatings(int userId);
+
+
     }
 }

@@ -19,6 +19,9 @@ namespace KeplerCMS.Areas.MyHabbo.Models
     {
         public Users User { get; set; }
         public List<Rooms> Rooms { get; set; }
+        public List<SoundMachineSongs> SongList { get; set; }
+        public List<HomesRating> Ratings { get; set; }
+        public List<UsersBadges> Badges { get; set; }
         // Badges
         //Guest book
         // Rating

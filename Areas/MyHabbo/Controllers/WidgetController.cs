@@ -16,6 +16,7 @@ namespace KeplerCMS.Areas.MyHabbo
         }
 
         [HttpPost]
+        [LoggedInFilter]
         public async Task<IActionResult> Add(int widgetId, int zIndex)
         {
             var userId = int.Parse(User.Identity.Name);
@@ -26,7 +27,18 @@ namespace KeplerCMS.Areas.MyHabbo
         }
 
         [HttpPost]
-        [LoggedInFilter(false)]
+        [LoggedInFilter]
+        [Route("myhabbo/traxplayer/select_song")]
+        public async Task<IActionResult> SelectSong(int songId, int widgetId)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var item = await _homeService.SelectSong(widgetId, songId, userId);
+            
+            return View("~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml", item);
+        }
+
+        [HttpPost]
+        [LoggedInFilter]
         public async Task<IActionResult> Edit(int skinId, int widgetId)
         {
             var userId = int.Parse(User.Identity.Name);
@@ -35,6 +47,15 @@ namespace KeplerCMS.Areas.MyHabbo
             Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + updatedItem.Item.Skin + "\",\"type\":\"widget\"}");
             return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
         }
+        [HttpPost]
+        [LoggedInFilter]
+        public async Task<IActionResult> Delete(int widgetId)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            await _homeService.RemoveItem(widgetId, userId);
+            return Content("SUCCESS");
+        }
+
     }
     /////////////////// ADD 
     // widgetId: 31263, privileged: true, zindex: 240
