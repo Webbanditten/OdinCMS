@@ -6,7 +6,7 @@
 
 <div style="position: relative;">
     <div id="webstore-categories-container">
-        <h4>Categories:</h4>
+        <h4>@DbRes.T("store_categories", "habbohome"):</h4>
         <div id="webstore-categories">
             <ul class="purchase-main-category">
                 @{
@@ -59,7 +59,7 @@
 
     <div id="webstore-content-container">
         <div id="webstore-items-container">
-            <h4>Select an item by clicking it</h4>
+            <h4>@DbRes.T("store_select_an_item", "habbohome")</h4>
             <div id="webstore-items">
                <partial name="~/Areas/MyHabbo/Views/Store/Items.cshtml" model=Model.Items />
             </div>
@@ -75,23 +75,23 @@
                         <div id="webstore-preview-box"></div>
 
                         <div id="webstore-preview-price">
-                            Price:<br /><b>
-                                @Model.Items.First().Details.Price credits
+                            @DbRes.T("store_price", "habbohome"):<br /><b>
+                                @Model.Items.First().Details.Price @DbRes.T("coins", "credits")
                             </b>
                         </div>
 
                         <div id="webstore-preview-purse">
-                            You have:<br /><b>@userData.Credits credits</b><br />
-                            <a href="https://classichabbo.com/credits" target=_blank>Get Credits</a>
+                            @DbRes.T("store_you_have", "habbohome"):<br /><b>@userData.Credits @DbRes.T("coins", "credits")</b><br />
+                            <a href="/credits" target=_blank>@DbRes.T("store_getcredits", "habbohome")</a>
                         </div>
 
                         <div id="webstore-preview-purchase" class="clearfix">
                             <div class="clearfix">
-                                <a href="#" class="new-button" id="webstore-purchase"><b>Purchase</b><i></i></a>
+                                <a href="#" class="new-button" id="webstore-purchase"><b>@DbRes.T("store_purchase", "habbohome")</b><i></i></a>
                             </div>
                         </div>
 
-                        <span id="webstore-preview-bg-text" style="display: none">Preview</span>
+                        <span id="webstore-preview-bg-text" style="display: none">@DbRes.T("store_preview", "habbohome")</span>
                     }
                 }
 
@@ -101,20 +101,20 @@
     </div>
 
     <div id="inventory-categories-container">
-        <h4>Categories:</h4>
+        <h4>@DbRes.T("store_categories", "habbohome"):</h4>
         <div id="inventory-categories">
             <ul class="purchase-main-category">
                 <li id="inv-cat-stickers" class="selected-main-category-no-subcategories">
-                    <div>Stickers</div>
+                    <div>@DbRes.T("store_stickers", "habbohome")</div>
                 </li>
                 <li id="inv-cat-backgrounds" class="main-category-no-subcategories">
-                    <div>Backgrounds</div>
+                    <div>@DbRes.T("store_backgrounds", "habbohome")</div>
                 </li>
                 <li id="inv-cat-widgets" class="main-category-no-subcategories">
-                    <div>Widgets</div>
+                    <div>@DbRes.T("store_widgets", "habbohome")</div>
                 </li>
                 <li id="inv-cat-notes" class="main-category-no-subcategories">
-                    <div>Notes</div>
+                    <div>@DbRes.T("store_notes", "habbohome")</div>
                 </li>
             </ul>
 
@@ -123,13 +123,13 @@
 
     <div id="inventory-content-container">
         <div id="inventory-items-container">
-            <h4>Select an item by clicking it</h4>
+            <h4>@DbRes.T("store_select_an_item", "habbohome")</h4>
             <div id="inventory-items">
                 @{
                     if (Model.InventoryType == null)
                     {
 
-                        if (Model.InventoryType == "stickers" || Model.InventoryType == "backgrounds" || Model.InventoryType == "notes")
+                        if (Model.InventoryType == "stickers" || Model.InventoryType == "backgrounds" || Model.InventoryType == "stickie")
                         {
                             <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
                         }
@@ -138,8 +138,11 @@
                             <partial name="~/Areas/MyHabbo/Views/Store/InventoryItemsWidgets.cshtml" model=Model.InventoryItems />
                         }
                     }
+                    else
+                    {
+                        <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
+                    }
                 }
-                <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
             </div>
         </div>
         <div id="inventory-preview-container">
@@ -151,7 +154,7 @@
 
                 <div id="inventory-preview-place" class="clearfix">
                     <div class="clearfix">
-                        <a href="#" class="new-button" id="inventory-place"><b>Place</b><i></i></a>
+                        <a href="#" class="new-button" id="inventory-place"><b>@DbRes.T("place", "habbohome")</b><i></i></a>
                     </div>
                 </div>
 
@@ -160,6 +163,6 @@
     </div>
 
     <div id="webstore-close-container">
-        <div class="clearfix"><a href="#" id="webstore-close" class="new-button"><b>Close</b><i></i></a></div>
+        <div class="clearfix"><a href="#" id="webstore-close" class="new-button"><b>@DbRes.T("close", "habbohome")</b><i></i></a></div>
     </div>
 </div>

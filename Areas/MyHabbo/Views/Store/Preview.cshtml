@@ -1,6 +1,7 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.CatalogItem;
 @{
     Layout = null;
+    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
 }
 
 <h4 title=""></h4>
@@ -8,20 +9,20 @@
 <div id="webstore-preview-box"></div>
 
 <div id="webstore-preview-price">
-    Price:<br /><b>
-        @Model.Details.Price credit
+    @DbRes.T("store_price", "habbohome"):<br /><b>
+        @Model.Details.Price @DbRes.T("coins", "credits")
     </b>
 </div>
 
 <div id="webstore-preview-purse">
-    You have:<br /><b>720 credits</b><br />
-    <a href="/credits" target=_blank>Get Credits</a>
+    @DbRes.T("store_you_have", "habbohome"):<br /><b>@userData.Credits @DbRes.T("place", "habbohome")</b><br />
+    <a href="/credits" target=_blank>@DbRes.T("store_getcredits", "habbohome")</a>
 </div>
 
 <div id="webstore-preview-purchase" class="clearfix">
     <div class="clearfix">
-        <a href="#" class="new-button" id="webstore-purchase"><b>Purchase</b><i></i></a>
+        <a href="#" class="new-button" id="webstore-purchase"><b>@DbRes.T("store_purchase", "habbohome")</b><i></i></a>
     </div>
 </div>
 
-<span id="webstore-preview-bg-text" style="display: none">Preview</span>		
+<span id="webstore-preview-bg-text" style="display: none">@DbRes.T("store_preview", "habbohome")</span>		

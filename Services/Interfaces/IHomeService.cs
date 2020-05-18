@@ -30,6 +30,14 @@ namespace KeplerCMS.Services.Interfaces
         Task<ItemViewModel> Rate(int rating, int itemId, int userId);
         Task<List<HomesRating>> GetRatings(int userId);
 
+        Task<GuestbookEntry> AddGuestbookEntry(int homeid, string message, int userId);
+        Task<HomesGuestbook> DeleteGuestbookEntry(int id, int userId);
+        Task<List<GuestbookEntry>> GetGuestbook(int homeId);
+        Task<ItemViewModel> ConfigureGuestbook(int widgetId);
+        Task<List<GuestbookEntry>> GetGuestbookForUser(int userId);
+        Task<ItemViewModel> ResetRating(int widgetid, int userId);
+        Task<ItemViewModel> PlaceNote(int skin, string text, int userId);
+
 
     }
 }

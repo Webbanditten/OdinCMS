@@ -1,6 +1,8 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.HomeViewModel
 @{
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    ViewData["title"] = DbRes.T("home", "habbohome") + ":" + Model.HomeUser.Username;
+
 }
 @section Styles {
     <link href="~/styles/myhabbo/style.css" rel="stylesheet" />
@@ -38,34 +40,33 @@
 
         </div>
         <div id="page-headline-text">
-            Habbo Home: Patrick
+            @DbRes.T("home", "habbohome"): @Model.HomeUser.Username
         </div>
     </div>
-    <div class="box-tabs-container box-tabs-left clearfix">
+</div>
+<div id="top-toolbar" class="clearfix" style="height: 30px; padding-top: 32px;">
+    <div style="padding-right: 10px; padding-left:10px;">
 
+        @{
+            if (Model.IsEditing)
+            {
+                <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
+                <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
+                <a id="cancel-button" class="toolbutton cancel" href="#"><span>@DbRes.T("cancel_editing", "habbohome")</span></a>
+                <a id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+            }
+            else
+            {
+                <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("Edit", "habbohome")</span></a>
+            }
 
-
-        <a href="/home/edit/@Model.Home.Id" id="edit-button" class="new-button dark-button edit-icon" style="float:left"><b><span></span>Edit</b><i></i></a>
-
-
+        }
     </div>
 </div>
 <div id="mypage-wrapper">
 
 
     <div id="mypage-content">
-        <div id="top-toolbar" class="clearfix">
-            <ul>
-                <li><a href="#" id="inventory-button">Inventory</a></li>
-                <li><a href="#" id="webstore-button">Web Store</a></li>
-            </ul>
-
-            <form action="#" method="get" style="width: 50%">
-                <a id="cancel-button" class="new-button red-button cancel-icon" href="#"><b><span></span>Cancel editing</b><i></i></a>
-
-                <a id="save-button" class="new-button green-button save-icon" href="#"><b><span></span>Save changes</b><i></i></a>
-            </form>
-        </div>
 
 
         <div id="mypage-bg" class="@Model.Home.Background">
@@ -82,14 +83,6 @@
                         }
 
                     }
-
-
-
-
-
-
-
-
 
 
                 </div>
@@ -118,7 +111,7 @@
 <div id="edit-menu" class="menu">
     <div class="menu-header">
         <div class="menu-exit" id="edit-menu-exit"><img src="https://cdn.classichabbo.com/web-gallery/images/dialogs/menu-exit.gif" alt="" width="11" height="11" /></div>
-        <h3>Edit</h3>
+        <h3>@DbRes.T("edit", "habbohome")</h3>
 
     </div>
     <div class="menu-body">
@@ -126,18 +119,18 @@
             <form action="#" onsubmit="return false;">
                 <div id="edit-menu-skins">
                     <select id="edit-menu-skins-select">
-                        <option value="1" id="edit-menu-skins-select-defaultskin">Default</option>
-                        <option value="6" id="edit-menu-skins-select-goldenskin">Golden</option>
+                        <option value="1" id="edit-menu-skins-select-defaultskin">@DbRes.T("theme_1", "habbohome")</option>
+                        <option value="6" id="edit-menu-skins-select-goldenskin">@DbRes.T("theme_6", "habbohome")</option>
 
-                        <option value="3" id="edit-menu-skins-select-metalskin">Metal</option>
-                        <option value="5" id="edit-menu-skins-select-notepadskin">Notepad</option>
-                        <option value="2" id="edit-menu-skins-select-speechbubbleskin">Speech Bubble</option>
-                        <option value="4" id="edit-menu-skins-select-noteitskin">Stickie Note</option>
+                        <option value="3" id="edit-menu-skins-select-metalskin">@DbRes.T("theme_3", "habbohome")</option>
+                        <option value="5" id="edit-menu-skins-select-notepadskin">@DbRes.T("theme_5", "habbohome")</option>
+                        <option value="2" id="edit-menu-skins-select-speechbubbleskin">@DbRes.T("theme_2", "habbohome")</option>
+                        <option value="4" id="edit-menu-skins-select-noteitskin">@DbRes.T("theme_4", "habbohome")</option>
                         @{
                             if (userData != null && userData.HasHabboClub)
                             {
-                                <option value="8" id="edit-menu-skins-select-hc_pillowskin">HC Bling</option>
-                                <option value="7" id="edit-menu-skins-select-hc_machineskin">HC Scifi</option>
+                                <option value="8" id="edit-menu-skins-select-hc_pillowskin">@DbRes.T("theme_8", "habbohome")</option>
+                                <option value="7" id="edit-menu-skins-select-hc_machineskin">@DbRes.T("theme_7", "habbohome")</option>
                             }
                         }
 
@@ -145,7 +138,7 @@
                 </div>
                 <div id="edit-menu-stickie">
 
-                    <p>Warning! If you click 'Remove', the note will be permanently deleted.</p>
+                    <p>@DbRes.T("stickie_warning_delete", "habbohome")</p>
                 </div>
                 <div id="rating-edit-menu">
                     <input type="button" id="ratings-reset-link"
@@ -165,8 +158,8 @@
                 </div>
                 <div id="edit-menu-gb-availability">
                     <select id="guestbook-privacy-options">
-                        <option value="private">Friends only</option>
-                        <option value="public" selected>Public</option>
+                        <option value="private">@DbRes.T("guestbook_friendsonly", "habbohome")</option>
+                        <option value="public">@DbRes.T("guestbook_public", "habbohome")</option>
                     </select>
                 </div>
                 <div id="edit-menu-trax-select">
@@ -174,7 +167,7 @@
                     <select id="trax-select-options"></select>
                 </div>
                 <div id="edit-menu-remove">
-                    <input type="button" id="edit-menu-remove-button" value="Remove" />
+                    <input type="button" id="edit-menu-remove-button" value="@DbRes.T("remove", "habbohome")" />
                 </div>
             </form>
             <div class="clear"></div>
@@ -190,7 +183,7 @@
 
 
 <div class="cbb topdialog" id="guestbook-form-dialog">
-    <h2 class="title dialog-handle">Edit Guestbook entry</h2>
+    <h2 class="title dialog-handle">@DbRes.T("guestbook_newentry", "habbohome")</h2>
 
     <a class="topdialog-exit" href="#" id="guestbook-form-dialog-exit">X</a>
     <div class="topdialog-body" id="guestbook-form-dialog-body">
@@ -198,32 +191,32 @@
         <div id="guestbook-form-tab">
             <form method="post" id="guestbook-form">
                 <p>
-                    Note: the message length must not exceed 200 characters        <input type="hidden" name="ownerId" value="1" />
+                    @DbRes.T("guestbook_warning_maxlength_200", "habbohome")        <input type="hidden" name="ownerId" value="1" />
                 </p>
                 <div>
                     <textarea cols="15" rows="5" name="message" id="guestbook-message"></textarea>
                     <script type="text/javascript">
                         bbcodeToolbar = new Control.TextArea.ToolBar.BBCode("guestbook-message");
                         bbcodeToolbar.toolbar.toolbar.id = "bbcode_toolbar";
-                                var colors = { "red" : ["#d80000", "Red"],
-                            "orange" : ["#fe6301", "Orange"],
-                            "yellow" : ["#ffce00", "Yellow"],
-                            "green" : ["#6cc800", "Green"],
-                            "cyan" : ["#00c6c4", "Cyan"],
-                            "blue" : ["#0070d7", "Blue"],
-                            "gray" : ["#828282", "Gray"],
-                            "black" : ["#000000", "Black"]
+                                var colors = { "red" : ["#d80000", "@DbRes.T("bbcode_color_red", "habbohome")"],
+                            "orange" : ["#fe6301", "@DbRes.T("bbcode_color_orange", "habbohome")"],
+                            "yellow" : ["#ffce00", "@DbRes.T("bbcode_color_yellow", "habbohome")"],
+                            "green" : ["#6cc800", "@DbRes.T("bbcode_color_green", "habbohome")"],
+                            "cyan" : ["#00c6c4", "@DbRes.T("bbcode_color_cyan", "habbohome")"],
+                            "blue" : ["#0070d7", "@DbRes.T("bbcode_color_blue", "habbohome")"],
+                            "gray" : ["#828282", "@DbRes.T("bbcode_color_gray", "habbohome")"],
+                            "black" : ["#000000", "@DbRes.T("bbcode_color_black", "habbohome")"]
                         };
-                        bbcodeToolbar.addColorSelect("Color", colors, true);
+                        bbcodeToolbar.addColorSelect("@DbRes.T("bbcode_color", "habbohome")", colors, true);
                     </script>
 
                     <div id="linktool">
                         <div id="linktool-scope">
-                            <label for="linktool-query-input">Create link:</label>
-                            <input type="radio" name="scope" class="linktool-scope" value="1" checked="checked" />Habbos        <input type="radio" name="scope" class="linktool-scope" value="2" />Rooms        <input type="radio" name="scope" class="linktool-scope" value="3" />Groups
+                            <label for="linktool-query-input">@DbRes.T("linktool_createlink", "habbohome")</label>
+                            <input type="radio" name="scope" class="linktool-scope" value="1" checked="checked" />@DbRes.T("linktool_habbos", "habbohome")        <input type="radio" name="scope" class="linktool-scope" value="2" />@DbRes.T("linktool_rooms", "habbohome")
                         </div>
                         <input id="linktool-query" type="text" name="query" value="" />
-                        <a href="#" class="new-button" id="linktool-find"><b>Find</b><i></i></a>
+                        <a href="#" class="new-button" id="linktool-find"><b>@DbRes.T("linktool_search", "habbohome")</b><i></i></a>
                         <div class="clear" style="height: 0;"><!-- --></div>
 
                         <div id="linktool-results" style="display: none">
@@ -235,8 +228,8 @@
                 </div>
 
                 <div class="guestbook-toolbar clearfix">
-                    <a href="#" class="new-button" id="guestbook-form-cancel"><b>Cancel</b><i></i></a>
-                    <a href="#" class="new-button" id="guestbook-form-preview"><b>Preview</b><i></i></a>
+                    <a href="#" class="new-button" id="guestbook-form-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+                    <a href="#" class="new-button" id="guestbook-form-preview"><b>@DbRes.T("preview", "habbohome")</b><i></i></a>
                 </div>
 
             </form>
@@ -245,17 +238,17 @@
     </div>
 </div>
 <div class="cbb topdialog" id="guestbook-delete-dialog">
-    <h2 class="title dialog-handle">Delete entry</h2>
+    <h2 class="title dialog-handle">@DbRes.T("guestbook_warning_delete_title", "habbohome")</h2>
 
     <a class="topdialog-exit" href="#" id="guestbook-delete-dialog-exit">X</a>
     <div class="topdialog-body" id="guestbook-delete-dialog-body">
         <form method="post" id="guestbook-delete-form">
             <input type="hidden" name="entryId" id="guestbook-delete-id" value="" />
 
-            <p>Are you sure you want to delete this entry?</p>
+            <p>@DbRes.T("guestbook_warning_delete", "habbohome")</p>
             <p>
-                <a href="#" id="guestbook-delete-cancel" class="new-button"><b>Cancel</b><i></i></a>
-                <a href="#" id="guestbook-delete" class="new-button"><b>Delete</b><i></i></a>
+                <a href="#" id="guestbook-delete-cancel" class="new-button"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+                <a href="#" id="guestbook-delete" class="new-button"><b>@DbRes.T("delete", "habbohome")</b><i></i></a>
             </p>
         </form>
     </div>
@@ -286,12 +279,12 @@
 
 
 <script type="text/javascript">
-    document.observe("dom:loaded", function () { initView(7975, 7975); });
+    document.observe("dom:loaded", function () { initView(@Model.Home.Id, @Model.Home.Id); });
 
 
     function isElementLimitReached() {
         if (getElementCount() >= 350) {
-            showHabboHomeMessageBox("Error", "You have already reached the maximum number of elements on the page. Remove a sticker, note or widget to be able to place this item.", "Close");
+            showHabboHomeMessageBox("Error", "@DbRes.T("error_limit", "habbohome")", "@DbRes.T("close", "habbohome")");
             return true;
         }
         return false;
@@ -308,7 +301,7 @@
     function showEditErrorDialog() {
         var closeEditErrorDialog = function (e) { if (e) { Event.stop(e); } Element.remove($("myhabbo-error")); Overlay.hide(); }
         var dialog = Dialog.createDialog("myhabbo-error", "", false, false, false, closeEditErrorDialog);
-        Dialog.setDialogBody(dialog, '<p>Error occurred! Please try again in couple of minutes.</p><p><a href="#" class="new-button" id="myhabbo-error-close"><b>Close</b><i></i></a></p><div class="clear"></div>');
+        Dialog.setDialogBody(dialog, '<p>@DbRes.T("error_unknown", "habbohome")</p><p><a href="#" class="new-button" id="myhabbo-error-close"><b>@DbRes.T("close", "habbohome")</b><i></i></a></p><div class="clear"></div>');
         Event.observe($("myhabbo-error-close"), "click", closeEditErrorDialog);
         Dialog.moveDialogToCenter(dialog);
         Dialog.makeDialogDraggable(dialog);
@@ -319,10 +312,10 @@
         var invalidPos = getElementsInInvalidPositions();
         if (invalidPos.length > 0) {
             $A(invalidPos).each(function (el) { Element.scrollTo(el); Effect.Pulsate(el); });
-            showHabboHomeMessageBox("Whoops! You can\'t do that!", "Sorry, but you can\'t place your stickers, notes or widgets here. Close the window to continue editing your page.", "Close");
+            showHabboHomeMessageBox("@DbRes.T("error_cantplacehere", "habbohome")", "@DbRes.T("close", "habbohome")");
             return false;
         } else {
-            Overlay.show(null, 'Saving');
+            Overlay.show(null, '@DbRes.T("saving", "habbohome")');
             return true;
         }
     }

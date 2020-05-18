@@ -143,6 +143,8 @@ div.menu-bottom {
 
 #edit-menu-stickie {
     padding-top: 1em;
+    text-align: center;
+    padding-bottom: 1em;
 }
 
 #dialog-name-report div.menu-header,

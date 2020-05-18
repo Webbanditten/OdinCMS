@@ -36,7 +36,7 @@
             <img alt="online" src="~/c_images/myhabbo/habbo_offline.gif">
 
             <div class="birthday text">
-                Fødselsdag
+                @DbRes.T("profile_birthday", "habbohome")
             </div>
             <div class="birthday date">
                 @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
@@ -63,10 +63,10 @@
             <div class="clear"></div>
         </div>
         @{
-            if (User.Identity.Name != Model.WidgetData.User.Id.ToString())
+            if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString())
             {
                 <div class="profile-friend-request clearfix">
-                    <a class="new-button" id="add-friend" style="float: left"><b>Add as friend</b><i></i></a>
+                    <a class="new-button" id="add-friend" style="float: left"><b>@DbRes.T("friend_add", "habbohome")</b><i></i></a>
                 </div>
             }
         }
@@ -79,15 +79,15 @@
             </div>
         </div>
         <script type="text/javascript">
-                        document.observe("dom:loaded", function () {
-                            new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
-                                headerText: "Are you sure?",
-                                messageText: "Are you sure you want to ask <strong\>Wizter</strong\> to be your friend? Think twice before you hit OK!",
-                                loginText: "You must sign in before sending a friend request.",
-                                buttonText: "Ok",
-                                cancelButtonText: "Cancel"
-                            });
-                        });
+            document.observe("dom:loaded", function () {
+                new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
+                    headerText: "@DbRes.T("friend_header", "habbohome")?",
+                    messageText: "@DbRes.T("friend_message", "habbohome").Replace("{username}", Model.WidgetData.User.Username)",
+                    loginText: "@DbRes.T("friend_login", "habbohome")",
+                    buttonText: "@DbRes.T("ok", "habbohome")",
+                    cancelButtonText: "@DbRes.T("cancel", "habbohome")"
+                });
+            });
         </script>
 
         <div class="clear"></div>

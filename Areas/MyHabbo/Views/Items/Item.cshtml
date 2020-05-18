@@ -27,7 +27,11 @@
     }
     else if (Model.Definition.Type == "stickers")
     {
-        await Sticker();
+        <partial name="~/Areas/MyHabbo/Views/Items/Sticker.cshtml" model=Model />
+    }
+    else if (Model.Definition.Type == "notes")
+    {
+        <partial name="~/Areas/MyHabbo/Views/Items/Stickie.cshtml" model=Model />
     }
     else
     {

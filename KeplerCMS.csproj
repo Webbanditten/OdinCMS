@@ -80,6 +80,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.2" />
     <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.19" />
+    <PackageReference Include="Narochno.BBCode" Version="2.1.0" />
     <PackageReference Include="Westwind.Globalization.AspnetCore" Version="3.1.0-preview1" />
   </ItemGroup>
 

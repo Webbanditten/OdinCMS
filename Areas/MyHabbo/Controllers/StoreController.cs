@@ -65,8 +65,16 @@ namespace KeplerCMS.Areas.MyHabbo
 			var invItem = await _homeService.GetInventoryItem(itemId, userId);
 			if(invItem != null)
 			{
-				Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",\"" + invItem.Definition.CssClass + "\", \"" + invItem.Definition.Name + "\", \"\", null,1]");
+				if (invItem.Definition.Type == "notes")
+				{
+					Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",null,null,\"WebCommodity\",null,1]");
+				} else
+				{
+					Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",\"" + invItem.Definition.CssClass + "\", \"" + invItem.Definition.Name + "\", \"\", null,1]");
+				}
 			}
+
+			
 			return View();
 		}
 
@@ -83,6 +91,7 @@ namespace KeplerCMS.Areas.MyHabbo
 		[LoggedInFilter]
 		[Route("myhabbo/store/purchase_backgrounds")]
 		[Route("myhabbo/store/purchase_stickers")]
+		[Route("myhabbo/store/purchase_stickie_notes")]
 		public async Task<IActionResult> PurchaseItem(int selectedId)
 		{
 			var userId = int.Parse(User.Identity.Name);
@@ -96,9 +105,9 @@ namespace KeplerCMS.Areas.MyHabbo
 					var purchase = await _creditService.Purchase(product.Details.Price, userId);
 					return Content("OK");
 				}
-				return Content("Du ejer allerede dette produkt");
+				return Content(DbRes.T("store_owned", "habbohome"));
 			}
-			return Content("You dont have enough credits");
+			return Content(DbRes.T("store_notenough_credits", "habbohome"));
 		}
 
 		[HttpPost]
@@ -106,7 +115,14 @@ namespace KeplerCMS.Areas.MyHabbo
 		public async Task<IActionResult> Preview(int productId)
 		{
 			var itemInCategory = await _homeService.GetProduct(productId);
-			Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+			if (itemInCategory.Definition.Type == "backgrounds")
+			{
+				Response.Headers.Add("x-json", "[{\"bgCssClass\":\"" + itemInCategory.Definition.CssClass + "\",\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+			}
+			else {
+				Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+			}
+
 			return View(itemInCategory);
 		}
 

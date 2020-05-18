@@ -1,0 +1,32 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
+@{
+    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
+}
+<div id="webstore-notes-container">
+
+    <div class="movable stickie @KeplerCMS.Areas.MyHabbo.Helpers.SkinIdToString.ConvertNote(Model.Skin)-c" style=" left: 0px; top: 0px; z-index: 1;" id="stickie--1">
+        <div class="@KeplerCMS.Areas.MyHabbo.Helpers.SkinIdToString.ConvertNote(Model.Skin)">
+            <div class="stickie-header">
+                <h3>
+                </h3>
+                <div class="clear"></div>
+            </div>
+            <div class="stickie-body">
+                <div class="stickie-content">
+                    <div class="stickie-markup">@Html.Raw(KeplerCMS.Areas.MyHabbo.Helpers.BBCodeToString.Convert(Model.NoteText))</div>
+                    <div class="stickie-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="warning">@DbRes.T("note_warning", "habbohome")</p>
+
+<p>
+    <a href="#" class="new-button" id="webstore-notes-edit"><b>@DbRes.T("note_edit", "habbohome")</b><i></i></a>
+    <a href="#" class="new-button" id="webstore-notes-add"><b>@DbRes.T("note_add", "habbohome")</b><i></i></a>
+</p>
+
+<div class="clear"></div>

@@ -7,6 +7,22 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Data.Models
 {
+    [Table("cms_homes_guestbook")]
+    public class HomesGuestbook
+    {
+        [Column("id")]
+        public int Id { get; set; }
+        [Column("home_id")]
+        public int HomeId { get; set; }
+        [Column("message")]
+        public string Message { get; set; }
+        [Column("timestamp")]
+        public DateTime Timestamp { get; set; }
+        [Column("user_id")]
+        public int UserId { get; set; }
+       
+
+    }
     [Table("cms_homes_rating")]
     public class HomesRating
     {

@@ -2,7 +2,25 @@
 @inject IConfiguration Configuration
 @model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{Layout = null;}
+@{
+    var showAddBtn = true;
+    var guestbookAccess = (Model.Item.Data == "private") ? "private" : "public";
+    if(User.Identity.IsAuthenticated)
+    {
+        if (guestbookAccess == "private")
+        {
+            var userId = int.Parse(User.Identity.Name);
+            if (Model.Item.OwnerId != userId && Model.WidgetData.Friends.Where(s => s.FriendDetails.FromId == userId || s.FriendDetails.ToId == userId).Count() == 0)
+            {
+                showAddBtn = false;
+            }
+        }
+    } else
+    {
+        showAddBtn = false;
+    }
 
+}
 
 
 <div class="widget-corner" id="widget-@Model.Item.Id-handle">
@@ -21,7 +39,7 @@
 
 
 
-            <span class="header-left">&nbsp;</span><span class="header-middle">My Guestbook(<span id="guestbook-size">0</span>) <span id="guestbook-type" class="public"><img src="~/c_images/myhabbo/status_exclusive.gif" title="myhabbo.guestbook.unknown.private" alt="myhabbo.guestbook.unknown.private"></span></span><span class="header-right">&nbsp;</span>
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("guestbook", "habbohome") (<span id="guestbook-size">@Model.WidgetData.Guestbook.Count()</span>) <span id="guestbook-type" class="@guestbookAccess"><img src="~/c_images/myhabbo/status_exclusive.gif" title="myhabbo.guestbook.unknown.private" alt="myhabbo.guestbook.unknown.private"></span></span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>
@@ -30,44 +48,35 @@
         <!-- gb-public/gb-private  -->
         <div id="guestbook-wrapper" class="gb-public">
             <ul class="guestbook-entries" id="guestbook-entry-container">
+                @{
+                    foreach (var entry in Model.WidgetData.Guestbook)
+                    {
+                        <partial name="~/Areas/MyHabbo/Views/Guestbook/Add.cshtml" model=entry />
+                    }
 
+                }
 
-
-
-
-                <li id="guestbook-entry-2364" class="guestbook-entry" style="">
-                    <div class="guestbook-author">
-                        <img src="https://habbo.com/habbo-imaging/avatarimage?figure=hd-180-1.ch-215-62.lg-275-62.hr-100-&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt="Alex" title="Alex">
-                    </div>
-
-                    <div class="guestbook-actions">
-                        <img src="~/c_images/myhabbo/delete_entry_button.gif" id="gbentry-delete-2364" class="gbentry-delete" style="cursor:pointer" alt="">
-                        <br>
-                    </div>
-
-                    <div class="guestbook-message">
-
-                        <div class="offline">
-
-                            <a href="https://classichabbo.com/home/Wizter">Wizter</a>
-                        </div>
-                        <p>asdas</p>
-                    </div>
-                    <div class="guestbook-cleaner">&nbsp;</div>
-                    <div class="guestbook-entry-footer metadata">May 16, 2020 01:09:39 PM</div>
-                </li>
-
-
+                @{
+                    if (Model.WidgetData.Guestbook.Count() == 0)
+                    {
+                        <div>@DbRes.T("guestbook_noentries", "habbohome")</div>
+                    }
+                }
 
             </ul>
         </div>
 
+        @{
+            if (showAddBtn)
+            {
+                <div class="guestbook-toolbar clearfix">
+                    <a href="#" class="new-button envelope-icon" id="guestbook-open-dialog">
+                        <b><span></span>@DbRes.T("guestbook_newmessage", "habbohome")</b><i></i>
+                    </a>
+                </div>
+            }
+        }
 
-        <div class="guestbook-toolbar clearfix">
-            <a href="#" class="new-button envelope-icon" id="guestbook-open-dialog">
-                <b><span></span>Post new message</b><i></i>
-            </a>
-        </div>
 
 
         <script type="text/javascript">

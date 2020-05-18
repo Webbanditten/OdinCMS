@@ -1,20 +1,23 @@
-﻿@{Layout = null;}
-<div class="movable stickie n_skin_speechbubbleskin-c" style="left: 56px; top: 229px; z-index: 151" id="stickie-31259">
-    <div class="n_skin_speechbubbleskin">
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+<div class="@((Model.EnableEditing) ? "movable" : "") widget stickie @(Model.Item.Skin)-c" id="stickie-@Model.Item.Id" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)">
+    <div class="@(Model.Item.Skin)">
         <div class="stickie-header">
             <h3>
-
-                <img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="stickie-31259-edit">
-                <script language="JavaScript" type="text/javascript">
-                    Event.observe("stickie-31259-edit", "click", function (e) { openEditMenu(e, 31259, "stickie", "stickie-31259-edit"); }, false);
-                </script>
-
+                @{
+                    if (Model.EnableEditing)
+                    {
+                        <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="stickie-@Model.Item.Id-edit">
+                        <script language="JavaScript" type="text/javascript">
+                            Event.observe("stickie-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "stickie", "stickie-@Model.Item.Id-edit", false); }, false);
+                        </script>
+                    }
+                }
             </h3>
             <div class="clear"></div>
         </div>
         <div class="stickie-body">
             <div class="stickie-content">
-                <div class="stickie-markup">Welcome to a brand new Habbo Home page!<br>This is the place where you can express yourself with a wild and unique variety of stickers, hoot yo<br>trap off with colourful notes and showcase your Habbo rooms! To<br>start editing just click the edit button.<br></div>
+                <div class="stickie-markup">@Html.Raw(KeplerCMS.Areas.MyHabbo.Helpers.BBCodeToString.Convert(Model.Item.Data))</div>
                 <div class="stickie-footer">
                 </div>
             </div>

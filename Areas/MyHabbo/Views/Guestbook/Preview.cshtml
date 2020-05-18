@@ -1,0 +1,13 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.GuestbookEntry;
+@using KeplerCMS.Areas.MyHabbo.Helpers;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<ul class="guestbook-entries">
+    <partial name="~/Areas/MyHabbo/Views/Guestbook/Add.cshtml" model=Model />
+</ul>
+
+<div class="guestbook-toolbar clearfix">
+    <a href="#" class="new-button" id="guestbook-form-continue"><b>@DbRes.T("guestbook_editentry", "habbohome")</b><i></i></a>
+    <a href="#" class="new-button" id="guestbook-form-post"><b>@DbRes.T("guestbook_addentry", "habbohome")</b><i></i></a>
+</div>

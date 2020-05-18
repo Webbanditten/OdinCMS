@@ -8,6 +8,12 @@ namespace KeplerCMS.Data
         {
             modelBuilder.Entity<UsersBadges>()
                 .HasKey(c => new { c.UserId, c.Badge });
+
+            modelBuilder.Entity<Friends>()
+                .HasKey(c => new { c.FromId, c.ToId });
+
+            modelBuilder.Entity<FriendRequests>()
+                .HasKey(c => new { c.FromId, c.ToId });
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
@@ -29,10 +35,13 @@ namespace KeplerCMS.Data
         public DbSet<HomesItemData> HomesItemData { get; set; }
         public DbSet<HomesInventory> HomesInventory { get; set; }
         public DbSet<HomesRating> HomesRating { get; set; }
+        public DbSet<HomesGuestbook> HomesGuestbook { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
         public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
         public DbSet<UsersBadges> UsersBadges { get; set; }
 
+        public DbSet<Friends> Friends { get; set; }
+        public DbSet<FriendRequests> FriendRequests { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

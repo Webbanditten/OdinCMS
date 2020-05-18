@@ -8,6 +8,7 @@ namespace KeplerCMS.Areas.MyHabbo.Models
 {
     public class HomeViewModel
     {
+        public bool IsEditing { get; set; }
         public Homes Home { get; set; }
         public List<ItemViewModel> Items { get; set; }
         public Users HomeUser { get; set; }

@@ -22,9 +22,11 @@ namespace KeplerCMS.Areas.MyHabbo.Models
         public List<SoundMachineSongs> SongList { get; set; }
         public List<HomesRating> Ratings { get; set; }
         public List<UsersBadges> Badges { get; set; }
+        public List<GuestbookEntry> Guestbook { get; set; }
+        public List<FriendsViewModel> Friends { get; set; }
         // Badges
         //Guest book
         // Rating
-        
+
     }
 }

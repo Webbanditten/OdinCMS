@@ -1,0 +1,72 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
+@{
+    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
+}
+<form action="#" method="post" id="webstore-notes-form">
+
+    <input type="hidden" name="maxlength" id="webstore-notes-maxlength" value="500" />
+
+    <div id="webstore-notes-counter">500</div>
+
+    <p>
+        <select id="webstore-notes-skin" name="skin">
+            <option value="1" id="webstore-notes-skins-select-defaultskin">@DbRes.T("theme_1", "habbohome")</option>
+            <option value="6" id="webstore-notes-skins-select-goldenskin">@DbRes.T("theme_6", "habbohome")</option>
+
+            <option value="3" id="webstore-notes-skins-select-metalskin">@DbRes.T("theme_3", "habbohome")</option>
+            <option value="5" id="webstore-notes-skins-select-notepadskin">@DbRes.T("theme_5", "habbohome")</option>
+            <option value="2" id="webstore-notes-skins-select-speechbubbleskin">@DbRes.T("theme_2", "habbohome")</option>
+            <option value="4" id="webstore-notes-skins-select-noteitskin">@DbRes.T("theme_4", "habbohome")</option>
+            @{
+                if (userData != null && userData.HasHabboClub)
+                {
+                    <option value="8" id="webstore-notes-skins-select-hc_pillowskin">@DbRes.T("theme_8", "habbohome")</option>
+                    <option value="7" id="webstore-notes-skins-select-hc_machineskin">@DbRes.T("theme_7", "habbohome")</option>
+                }
+            }
+        </select>
+    </p>
+
+    <p class="warning">@DbRes.T("note_warning", "habbohome")</p>
+
+    <div id="webstore-notes-edit-container">
+<textarea id="webstore-notes-text" rows="7" cols="42" name="noteText">@Model.NoteText</textarea>
+        <script type="text/javascript">
+        bbcodeToolbar = new Control.TextArea.ToolBar.BBCode("webstore-notes-text");
+        bbcodeToolbar.toolbar.toolbar.id = "bbcode_toolbar";
+                var colors = { "red" : ["#d80000", "@DbRes.T("bbcode_color_red", "habbohome")"],
+            "orange" : ["#fe6301", "@DbRes.T("bbcode_color_orange", "habbohome")"],
+            "yellow" : ["#ffce00", "@DbRes.T("bbcode_color_yellow", "habbohome")"],
+            "green" : ["#6cc800", "@DbRes.T("bbcode_color_green", "habbohome")"],
+            "cyan" : ["#00c6c4", "@DbRes.T("bbcode_color_cyan", "habbohome")"],
+            "blue" : ["#0070d7", "@DbRes.T("bbcode_color_blue", "habbohome")"],
+            "gray" : ["#828282", "@DbRes.T("bbcode_color_gray", "habbohome")"],
+            "black" : ["#000000", "@DbRes.T("bbcode_color_black", "habbohome")"]
+        };
+        bbcodeToolbar.addColorSelect("@DbRes.T("bbcode_color", "habbohome")", colors, true);
+        </script>
+        <div id="linktool">
+            <div id="linktool-scope">
+                <label for="linktool-query-input">@DbRes.T("linktool_createlink", "habbohome")</label>
+                <input type="radio" name="scope" class="linktool-scope" value="1" checked="checked" />@DbRes.T("linktool_habbos", "habbohome")        <input type="radio" name="scope" class="linktool-scope" value="2" />@DbRes.T("linktool_rooms", "habbohome")
+            </div>
+            <input id="linktool-query" type="text" name="query" value="" />
+            <a href="#" class="new-button" id="linktool-find"><b>@DbRes.T("linktool_search", "habbohome")</b><i></i></a>
+            <div class="clear" style="height: 0;"><!-- --></div>
+
+            <div id="linktool-results" style="display: none">
+            </div>
+            <script type="text/javascript">
+                linkTool = new LinkTool(bbcodeToolbar.textarea);
+            </script>
+        </div>
+    </div>
+
+</form>
+
+<p>
+    <a href="#" class="new-button" id="webstore-confirm-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+    <a href="#" class="new-button" id="webstore-notes-continue"><b>@DbRes.T("store_continue", "habbohome")</b><i></i></a>
+</p>
+
+<div class="clear"></div>

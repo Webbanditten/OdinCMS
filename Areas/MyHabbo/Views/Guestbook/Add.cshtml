@@ -1,0 +1,33 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.GuestbookEntry;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+
+
+
+<li id="guestbook-entry-@Model.Entry.Id" class="guestbook-entry">
+    <div class="guestbook-author">
+        <img src="@Configuration["figureUrl"]?figure=@(Model.User.Figure)&size=s&direction=4&head_direction=4&crr=0&gesture=&frame=1" alt="@Model.User.Username" title="@Model.User.Username" />
+    </div>
+    @{
+        if (User.Identity.IsAuthenticated && Model.Entry.UserId == int.Parse(User.Identity.Name))
+        {
+            <div class="guestbook-actions">
+                <img src="~/c_images/myhabbo/delete_entry_button.gif" id="gbentry-delete-@Model.Entry.Id" class="gbentry-delete" style="cursor:pointer" alt="" />
+                <br />
+            </div>
+        }
+    }
+
+
+    <div class="guestbook-message">
+
+        <div class="offline">
+
+            <a href="/home/@Model.User.Username">@Model.User.Username</a>
+        </div>
+        <p>@Model.Entry.Message</p>
+    </div>
+    <div class="guestbook-cleaner">&nbsp;</div>
+    <div class="guestbook-entry-footer metadata">@Model.Entry.Timestamp.ToString("dd-MM-yyyy")</div>
+</li>

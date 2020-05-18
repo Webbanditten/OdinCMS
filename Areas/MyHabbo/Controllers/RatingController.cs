@@ -22,5 +22,14 @@ namespace KeplerCMS.Areas.MyHabbo
             var item = await _homeService.Rate(givenRate, ratingId, userId);
             return View(item);
         }
+
+        [Route("myhabbo/rating/reset_ratings")]
+        [LoggedInFilter]
+        public async Task<IActionResult> RemoveRating(int ratingId)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var item = await _homeService.ResetRating(ratingId, userId);
+            return View("~/Areas/MyHabbo/Views/Rating/Rate.cshtml", item);
+        }
     }
 }
