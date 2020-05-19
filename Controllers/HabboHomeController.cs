@@ -44,11 +44,13 @@ namespace KeplerCMS.Controllers
 
                 if (home != null)
                 {
-                    ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
+                    if(User.Identity.IsAuthenticated)
+                    {
+                        ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
+                    }
                     return View(home);
                 }
             }
-
             return View("HomeNotFound");
             
         }
