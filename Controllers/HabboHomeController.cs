@@ -13,11 +13,12 @@ namespace KeplerCMS.Controllers
     {
         private readonly IUserService _userService;
         private readonly IHomeService _homeService;
-
-        public HabboHomeController(IUserService userService, IHomeService homeService)
+        private readonly IFriendService _friendService;
+        public HabboHomeController(IUserService userService, IHomeService homeService, IFriendService friendService)
         {
             _userService = userService;
             _homeService = homeService;
+            _friendService = friendService;
         }
 
         [Route("home/{username:minlength(1)}")]
@@ -26,16 +27,43 @@ namespace KeplerCMS.Controllers
         {
             var habboHomeUser = await _userService.GetUserByUsername(username);
             var enableEditing = false;
-            if(User.Identity.IsAuthenticated && User.Identity.Name == habboHomeUser.Id.ToString())
+            if(habboHomeUser != null)
             {
-                if(Request.Cookies["editmode"] != null && Request.Cookies["editmode"] == "true")
+                if (User.Identity.IsAuthenticated && User.Identity.Name != habboHomeUser.Id.ToString())
                 {
-                    enableEditing = true;
+                    Response.Cookies.Delete("editmode");
+                }
+                else
+                {
+                    if (Request.Cookies["editmode"] != null && Request.Cookies["editmode"] == "true")
+                    {
+                        enableEditing = true;
+                    }
+                }
+                var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);
+
+                if (home != null)
+                {
+                    ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
+                    return View(home);
                 }
             }
-            var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);
-            return View(home);
+
+            return View("HomeNotFound");
             
+        }
+
+        [Route("home/{id}/id")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> HomeById(int id)
+        {
+            var habboHomeUser = await _userService.GetUserById(id.ToString());
+            if(habboHomeUser != null)
+            {
+                return Redirect("~/home/" + habboHomeUser.Username);
+            }
+            return View("HomeNotFound");
+
         }
 
         [Route("home/edit/{homeId}")]

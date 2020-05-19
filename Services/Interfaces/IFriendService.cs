@@ -13,5 +13,6 @@ namespace KeplerCMS.Services.Interfaces
 
         Task<FriendRequests> AddFriend(int to, int from);
         Task<bool> RequestExists(int from, int to);
+        Task<bool> IsFriends(int from, int to);
     }
 }

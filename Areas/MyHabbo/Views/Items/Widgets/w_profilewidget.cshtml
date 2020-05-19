@@ -42,7 +42,7 @@
                 @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
             </div>
             @{
-                if (Model.WidgetData.User.BadgeActive)
+                if (Model.WidgetData.User.BadgeActive && Model.WidgetData.User.Badge != string.Empty)
                 {
                     <div>
                         <img src="@Configuration["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
@@ -63,7 +63,7 @@
             <div class="clear"></div>
         </div>
         @{
-            if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString())
+            if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString() && !(bool)ViewData["canFriend"])
             {
                 <div class="profile-friend-request clearfix">
                     <a  class="toolbutton tell"  id="add-friend" style="float: left"><span>@DbRes.T("friend_add", "habbohome")</span></a>
