@@ -34,6 +34,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Place(NoteEditorViewModel model)
         {
             var item = await _homeService.PlaceNote(model.Skin, model.NoteText, int.Parse(User.Identity.Name));
+            Response.Headers.Add("x-json", item.Item.Id.ToString());
             return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", item);
         }
 

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Westwind.Globalization;
 
 namespace KeplerCMS.Services.Implementations
 {
@@ -31,22 +32,25 @@ namespace KeplerCMS.Services.Implementations
         public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
         {
             // Get home for type user
-            var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
-            var itemsInHome = await _context.HomesItems.Where(s => s.HomeId == home.Id).ToListAsync();
             var homeUser = await _userService.GetUserById(userId.ToString());
+
+            Homes home = (homeUser != null) ? await InitHome(homeUser.Id) : null;
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser, IsEditing = enableEditing };
 
             var widgetData = await GetWidgetData(homeUser.Id);
 
+            homeViewModel.Items = await (from item in _context.HomesItems
+                                              join def in _context.HomesItemData
+                                              on item.ItemId equals def.Id
+                                              where item.OwnerId == userId
+                                              select new ItemViewModel
+                                              {
+                                                  Item = item,
+                                                  EnableEditing = enableEditing,
+                                                  Definition = def,
+                                                  WidgetData = widgetData
+                                              }).ToListAsync();
 
-            foreach (var item in itemsInHome)
-            {
-                var dbItem = await GetItem(item.Id, enableEditing);
-                dbItem.WidgetData = widgetData;
-
-                homeViewModel.Items.Add(dbItem);
-            }
-            
             return homeViewModel;
         }
 
@@ -62,28 +66,47 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<CatalogItem>> GetCatelogItemsInCategory(int category)
         {
-            var items = new List<CatalogItem>();
-            var itemsInCategory = await _context.HomesCatalog.Where(s => s.Category == category).ToListAsync();
-            foreach (var i in itemsInCategory)
-            {
-                items.Add(new CatalogItem { Details = i, Definition = await GetItemDetail(i.ItemId) });
-            }
-            return items;
+            List<CatalogItem> data = await (from item in _context.HomesCatalog
+                                      join def in _context.HomesItemData
+                                      on item.ItemId equals def.Id
+                                      where item.Category == category
+                                      select new CatalogItem
+                                      {
+                                          Details = item,
+                                          Definition = def
+                                      }).ToListAsync();
+            return data;
         }
 
         public async Task<List<CatalogItem>> GetStoreCatelog(int categoryId, int subCategoryId)
         {
-            var category = await _context.HomesCategories.Where(s => s.Id == categoryId).FirstOrDefaultAsync();
-            var subCategory = await _context.HomesCategories.Where(s => s.Id == subCategoryId).FirstOrDefaultAsync();
+            var categories = await _context.HomesCategories.ToListAsync();
+            var category = categories.Where(s => s.Id == categoryId).FirstOrDefault();
+            var subCategory = categories.Where(s => s.Id == subCategoryId).FirstOrDefault();
             if(category != null)
             {
                 var items = new List<CatalogItem>();
+
                 if (subCategory != null)
                 {
                     items.AddRange(await GetCatelogItemsInCategory(subCategory.Id));
                 } else
                 {
-                    items.AddRange(await GetCatelogItemsInCategory(category.Id));
+                    // If the category is stickers we might want to see if the category has any children
+                    if (category.Type == "stickers")
+                    {
+                        var firstchild = categories.Where(s => s.ParentId == category.Id).FirstOrDefault();
+                        if(firstchild != null)
+                        {
+                            items.AddRange(await GetCatelogItemsInCategory(firstchild.Id));
+                        } else
+                        {
+                            items.AddRange(await GetCatelogItemsInCategory(category.Id));
+                        }
+                    } else
+                    {
+                        items.AddRange(await GetCatelogItemsInCategory(category.Id));
+                    }
                 }
                 return items;
             }
@@ -186,7 +209,7 @@ namespace KeplerCMS.Services.Implementations
                 }
 
             }
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return true;
         }
 
@@ -227,14 +250,18 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<InventoryItem>> GetInventory(string type, int userId)
         {
-            var items = new List<InventoryItem>();
-            var itemsInCategory = await _context.HomesInventory.Where(s=>s.UserId == userId).ToListAsync();
-            foreach (var i in itemsInCategory)
-            {
-                items.Add(new InventoryItem { Details = i, Definition = await GetItemDetail(i.ItemId) });
-            }
 
-            return items.Where(s=>s.Definition.Type == type).ToList();
+            List<InventoryItem> data = await (from item in _context.HomesInventory
+                                            join def in _context.HomesItemData
+                                            on item.ItemId equals def.Id
+                                            where def.Type == type && item.UserId == userId
+                                            select new InventoryItem
+                                              {
+                                                Details = item,
+                                                Definition = def
+                                            }).ToListAsync();
+
+            return data;
         }
 
         public async Task<InventoryItem> GetInventoryItem(int inventoryId, int userId)
@@ -249,7 +276,7 @@ namespace KeplerCMS.Services.Implementations
             return invItem;
         }
 
-        public async Task<ItemViewModel> EditItem(int itemId, int skinId, int userId, string data = null)
+        public async Task<ItemViewModel> EditItem(int itemId, int skinId, int userId)
         {
             var item = await GetItem(itemId);
             var homeUser = await _userService.GetUserById(userId.ToString());
@@ -474,6 +501,67 @@ namespace KeplerCMS.Services.Implementations
                 
             }
             return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeForUser.UserId) };
+        }
+
+        public async Task<Homes> InitHome(int userId)
+        {
+            var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
+            if(home == null)
+            {
+                var newHome = new Homes { UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
+                _context.Homes.Add(newHome);
+                await _context.SaveChangesAsync();
+                // Default items
+
+                // Default items 
+                var needle = await GetItemDataByClass("s_needle_3");
+                var duck = await GetItemDataByClass("s_sticker_spaceduck");
+                var clip = await GetItemDataByClass("s_paper_clip_1");
+
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = needle.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 106, Y = 31, Z = 564 });
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = duck.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 257, Y = 340, Z = 582 });
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = clip.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 167, Y = 411, Z = 576 });
+
+                // Default notes
+                var noteItem = await GetItemDataByClass("commodity_stickienote");
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_noteitskin", X = 124, Y = 49, Z = 550, Data = DbRes.T("default_note1", "habbohome") });
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_speechbubbleskin", X = 31, Y = 247, Z = 568, Data = DbRes.T("default_note2", "habbohome") });
+                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_notepadskin", X = 115, Y = 447, Z = 570, Data = DbRes.T("default_note3", "habbohome") });
+
+                // Default Widgets
+                var defaultWidgets = await _context.HomesItemData.Where(s => s.CssClass == "w_roomswidget" ||
+                s.CssClass == "w_roomswidget" ||
+                s.CssClass == "w_ratingwidget" ||
+                s.CssClass == "w_highscoreswidget" ||
+                s.CssClass == "w_guestbookwidget" ||
+                s.CssClass == "w_friendswidget" ||
+                s.CssClass == "w_badgeswidget" ||
+                s.CssClass == "w_traxplayerwidget" ||
+                s.CssClass == "w_profilewidget").ToListAsync();
+
+                foreach(var widget in defaultWidgets)
+                {
+                    if(widget.CssClass == "w_profilewidget")
+                    {
+                        _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 445, Y = 28, Z = 546 });
+                    } else if (widget.CssClass == "w_roomswidget")
+                    {
+                        _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 428, Y = 291, Z = 558 });
+                    } else
+                    {
+                        _context.HomesInventory.Add(new HomesInventory { Amount = 1, ItemId = widget.Id, UserId = userId });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return newHome;
+            }
+            return home;
+        }
+
+        public async Task<HomesItemData> GetItemDataByClass(string className)
+        {
+            return await _context.HomesItemData.Where(s => s.CssClass == className).FirstOrDefaultAsync();
         }
     }
 

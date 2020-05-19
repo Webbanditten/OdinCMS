@@ -76,7 +76,10 @@
 
                         <div id="webstore-preview-price">
                             @DbRes.T("store_price", "habbohome"):<br /><b>
-                                @Model.Items.First().Details.Price @DbRes.T("coins", "credits")
+                                @if (Model.Items.Count() > 0)
+                                {
+                                    @:@Model.Items.First().Details.Price @DbRes.T("coins", "credits")
+                                }
                             </b>
                         </div>
 

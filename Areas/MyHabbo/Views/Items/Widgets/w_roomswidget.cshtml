@@ -59,7 +59,7 @@
                                                 </div>
                                                 <div class="clear"></div>
                                                 <div>@room.Description</div>
-                                                <a href="/client?forwardId=2&amp;roomId=@room.Id" target="client" id="room-navigation-link_@room.Id" onclick="HabboClient.roomForward(this, '@room.Id', 'private', false); return false;">@DbRes.T("enterroom", "habbohome") </a>
+                                                <a href="/client?forwardId=2&amp;roomId=@room.Id" target="client" id="room-navigation-link_@room.Id" onclick="roomForward(this, '@room.Id', 'private'); return false;">@DbRes.T("enterroom", "habbohome") </a>
                                             </div>
                                             <br class="clear">
 

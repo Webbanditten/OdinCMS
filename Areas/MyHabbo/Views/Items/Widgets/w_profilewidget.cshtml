@@ -66,7 +66,7 @@
             if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString())
             {
                 <div class="profile-friend-request clearfix">
-                    <a class="new-button" id="add-friend" style="float: left"><b>@DbRes.T("friend_add", "habbohome")</b><i></i></a>
+                    <a  class="toolbutton tell"  id="add-friend" style="float: left"><span>@DbRes.T("friend_add", "habbohome")</span></a>
                 </div>
             }
         }
@@ -81,7 +81,7 @@
         <script type="text/javascript">
             document.observe("dom:loaded", function () {
                 new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
-                    headerText: "@DbRes.T("friend_header", "habbohome")?",
+                    headerText: "@DbRes.T("friend_header", "habbohome")",
                     messageText: "@DbRes.T("friend_message", "habbohome").Replace("{username}", Model.WidgetData.User.Username)",
                     loginText: "@DbRes.T("friend_login", "habbohome")",
                     buttonText: "@DbRes.T("ok", "habbohome")",

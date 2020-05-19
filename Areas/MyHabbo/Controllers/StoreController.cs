@@ -102,7 +102,7 @@ namespace KeplerCMS.Areas.MyHabbo
 				var giveItem = await _homeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId); ;
 				if (giveItem)
 				{
-					var purchase = await _creditService.Purchase(product.Details.Price, userId);
+					await _creditService.Purchase(product.Details.Price, userId);
 					return Content("OK");
 				}
 				return Content(DbRes.T("store_owned", "habbohome"));
@@ -128,9 +128,9 @@ namespace KeplerCMS.Areas.MyHabbo
 
 		[HttpPost]
 		[LoggedInFilter]
-		public async Task<IActionResult> Items(int categoryId, int subCategory)
+		public async Task<IActionResult> Items(int categoryId, int subCategoryId)
 		{
-			var items = await _homeService.GetStoreCatelog(categoryId, subCategory);
+				var items = await _homeService.GetStoreCatelog(categoryId, subCategoryId);
 			return View(items);
 		}
 

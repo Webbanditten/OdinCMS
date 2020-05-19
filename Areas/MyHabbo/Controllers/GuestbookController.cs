@@ -21,7 +21,7 @@ namespace KeplerCMS.Areas.MyHabbo
 
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Add(int ownerId, string message, int scope, string query, int widgetId)
+        public async Task<IActionResult> Add(string message, int widgetId)
         {
             var widget = await _homeService.GetItem(widgetId);
             if (widget != null)
@@ -34,7 +34,7 @@ namespace KeplerCMS.Areas.MyHabbo
 
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Preview(int ownerId, string message, int scope, string query, int widgetId)
+        public async Task<IActionResult> Preview(string message)
         {
 
             return View(new GuestbookEntry { Entry = new HomesGuestbook { Message = message }, User = await _userService.GetUserById(User.Identity.Name) });

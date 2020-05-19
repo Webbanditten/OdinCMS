@@ -1,25 +1,4 @@
-﻿@{Layout = null;}
-
-
-@functions {
-    async Task Sticker()
-    {
-        <div class="@((Model.EnableEditing) ? "movable" : "") sticker @Model.Definition.CssClass" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)" id="sticker-@Model.Item.Id">
-
-            @{
-                if (Model.EnableEditing)
-                {
-                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="sticker-@Model.Item.Id-edit">
-                    <script language="JavaScript" type="text/javascript">
-                Event.observe("sticker-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "sticker", "sticker-@Model.Item.Id-edit", false); }, false);
-                    </script>
-                }
-            }
-
-        </div>
-    }
-}
-
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{
     if (Model.Definition.Type == "widgets")
     {

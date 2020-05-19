@@ -1,7 +1,7 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.HomeViewModel
 @{
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
-    ViewData["title"] = DbRes.T("home", "habbohome") + ":" + Model.HomeUser.Username;
+    ViewData["title"] = DbRes.T("home", "habbohome") + ": " + Model.HomeUser.Username;
 
 }
 @section Styles {
@@ -33,7 +33,6 @@
 
 
 
-<div id="mypage-top-nav">
 
     <div id="page-headline">
         <div id="page-headline-breadcrums">
@@ -43,26 +42,29 @@
             @DbRes.T("home", "habbohome"): @Model.HomeUser.Username
         </div>
     </div>
-</div>
-<div id="top-toolbar" class="clearfix" style="height: 30px; padding-top: 32px;">
-    <div style="padding-right: 10px; padding-left:10px;">
 
-        @{
-            if (Model.IsEditing)
-            {
-                <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
-                <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
-                <a id="cancel-button" class="toolbutton cancel" href="#"><span>@DbRes.T("cancel_editing", "habbohome")</span></a>
-                <a id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
-            }
-            else
-            {
-                <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("Edit", "habbohome")</span></a>
-            }
 
-        }
-    </div>
-</div>
+@{ if (User.Identity.IsAuthenticated && Model.HomeUser.Id == int.Parse(User.Identity.Name))
+    {
+        <div id="top-toolbar" class="clearfix" style="height: 30px;">
+            <div style="padding-right: 10px; padding-left:10px;">
+                @{
+                    if (Model.IsEditing)
+                    {
+                        <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
+                        <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
+                        <a id="cancel-button" class="toolbutton cancel" href="#"><span>@DbRes.T("cancel_editing", "habbohome")</span></a>
+                        <a id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+                    }
+                    else
+                    {
+                        <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
+                    }
+                }
+            </div>
+        </div>
+    }
+}
 <div id="mypage-wrapper">
 
 
@@ -97,11 +99,16 @@
 
 
 <script language="JavaScript" type="text/javascript">
+    @{
+        if(Model.IsEditing)
+        {
+            @:initEditToolbar();
+            @:initMovableItems();
+            @:document.observe("dom:loaded", initDraggableDialogs);
+            //Utils.setAllEmbededObjectsVisibility('hidden');
+        }
+    }
 
-    initEditToolbar();
-    initMovableItems();
-    document.observe("dom:loaded", initDraggableDialogs);
-    //Utils.setAllEmbededObjectsVisibility('hidden');
 
 </script>
 

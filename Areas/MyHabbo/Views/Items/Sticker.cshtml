@@ -1,6 +1,6 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{Layout = null;}
-    <div class="@((Model.EnableEditing) ? "movable" : "") sticker @Model.Definition.CssClass" style="left: 360px; top: 395px; z-index: 253" id="sticker-@Model.Item.Id">
+    <div class="@((Model.EnableEditing) ? "movable" : "") sticker @Model.Definition.CssClass" style="left: @(Model.Item.X)px; top: @(Model.Item.Y)px; z-index: @(Model.Item.Z)" id="sticker-@Model.Item.Id">
 
         @{
             if (Model.EnableEditing)
