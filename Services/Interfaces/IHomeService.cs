@@ -22,7 +22,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<CatalogItem>> GetCatelogItemsInCategory(int category);
         Task <CatalogItem> GetProduct(int productId);
         Task<bool> GiveItem(int itemId, int amount, int userId);
-        Task<InventoryItem> GetInventoryItem(int inventoryId, int userId);
+        InventoryItem GetInventoryItem(int inventoryId, int userId);
 
         Task<ItemWidgetDataModel> GetWidgetData(int userId);
         Task<ItemViewModel> SelectSong(int itemId, int songId, int userId);

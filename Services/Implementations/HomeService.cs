@@ -185,7 +185,7 @@ namespace KeplerCMS.Services.Implementations
             {
                 var bgData = data.Background.Split(":");
                 var bgItemId = bgData[0];
-                var dbItem = await GetInventoryItem(int.Parse(bgItemId), user.Id);
+                var dbItem = GetInventoryItem(int.Parse(bgItemId), user.Id);
                 // If I plan to make groups work the following line needs to be fixed
                 if(dbItem != null && home != null)
                 {
@@ -264,16 +264,17 @@ namespace KeplerCMS.Services.Implementations
             return data;
         }
 
-        public async Task<InventoryItem> GetInventoryItem(int inventoryId, int userId)
+        public InventoryItem GetInventoryItem(int inventoryId, int userId)
         {
-            InventoryItem invItem = null;
-            var dbItem = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId).FirstOrDefaultAsync();
-            if(dbItem != null)
-            {
-                invItem = new InventoryItem { Definition = await GetItemDetail(dbItem.ItemId), Details = dbItem };
-            }
-
-            return invItem;
+            return (from item in _context.HomesInventory
+                   join def in _context.HomesItemData
+                   on item.ItemId equals def.Id
+                   where item.Id == inventoryId && item.UserId == userId
+                   select new InventoryItem
+                   {
+                       Details = item,
+                       Definition = def
+                   }).FirstOrDefault();
         }
 
         public async Task<ItemViewModel> EditItem(int itemId, int skinId, int userId)
