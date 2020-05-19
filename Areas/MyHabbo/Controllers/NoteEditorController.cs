@@ -4,6 +4,7 @@ using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
 using KeplerCMS.Areas.MyHabbo.Models;
+using System.Web;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
@@ -46,7 +47,7 @@ namespace KeplerCMS.Areas.MyHabbo
             var userId = int.Parse(User.Identity.Name);
             var updatedItem = await _homeService.EditItem(stickieId, skinId, userId);
 
-            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + updatedItem.Item.Skin + "\",\"type\":\"stickie\"}");
+            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"stickie\"}");
             return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", updatedItem);
         }
 

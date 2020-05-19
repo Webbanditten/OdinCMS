@@ -420,7 +420,7 @@ var WebStore = {
     var currItem = WebStore.previewItems[WebStore.previewItemPointer];
     var pre = $("webstore-preview-pre");
     pre.className = currItem.previewCssClass;
-    pre.title = currItem.titleKey;
+    pre.title = decodeURIComponent(currItem.titleKey);
     if ($("webstore-preview-count")) {
       $("webstore-preview-count").innerHTML = "<div>x" + currItem.itemCount + "</div>";
     }
@@ -956,7 +956,7 @@ WebStore.Inventory = {
   _setPreviewItem: function() {
     var pre = $("inventory-preview-pre");
     pre.className = WebStore.Inventory.previewItem[0];
-    pre.title = WebStore.Inventory.previewItem[2];
+      pre.title = decodeURIComponent(WebStore.Inventory.previewItem[2]);
     if (WebStore.Inventory.previewItem[3] == "DynamicSticker") {
       pre.style.backgroundImage = "url(" + habboImagerUrl + WebStore.Inventory.previewItem[4] + ")";
     }

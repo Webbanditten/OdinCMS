@@ -9,6 +9,7 @@ using KeplerCMS.Areas.MyHabbo.Models;
 using Google.Protobuf.WellKnownTypes;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Internal;
+using System.Web;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
@@ -35,7 +36,7 @@ namespace KeplerCMS.Areas.MyHabbo
 			{
 				cssClassForFirstItem = firstCategoryItems.FirstOrDefault().Definition.CssClass;
 			}
-			Response.Headers.Add("x-json", "[[\""+ DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[{\"itemCount\":1,\"previewCssClass\":\"" + cssClassForFirstItem + "_pre\", \"titleKey\":\"\"}]]");
+			Response.Headers.Add("x-json", "[[\""+ DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[{\"itemCount\":1,\"previewCssClass\":\"" + HttpUtility.UrlEncode(cssClassForFirstItem) + "_pre\", \"titleKey\":\"\"}]]");
 			return View(new MainViewModel { Categories = categories, Items = firstCategoryItems, Type = DialogType.WebStore, InventoryItems = new List<InventoryItem>() });
 		}
 		[HttpPost]
@@ -52,25 +53,25 @@ namespace KeplerCMS.Areas.MyHabbo
 				cssClassForFirstItem = InventoryItems.FirstOrDefault().Definition.CssClass;
 				firstItemName = InventoryItems.FirstOrDefault().Definition.Name;
 			}
-			Response.Headers.Add("x-json", "[[\"" + DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[\"" + cssClassForFirstItem + "_pre\", \"" + cssClassForFirstItem + "\", \"" + firstItemName + "\", \"\", null,1]]");
+			Response.Headers.Add("x-json", "[[\"" + DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"],[\"" + HttpUtility.UrlEncode(cssClassForFirstItem) + "_pre\", \"" + HttpUtility.UrlEncode(cssClassForFirstItem) + "\", \"" + HttpUtility.UrlEncode(firstItemName) + "\", \"\", null,1]]");
 			return View("Main", new MainViewModel { InventoryType = type, Items = new List<CatalogItem>(), Categories = categories, InventoryItems = InventoryItems, Type = DialogType.Inventory, }); ;
 		}
 
 		[HttpPost]
 		[LoggedInFilter]
 		[Route("myhabbo/store/inventory_preview")]
-		public IActionResult InventoryPreview(int itemId)
+		public async Task<IActionResult> InventoryPreview(int itemId)
 		{
 			var userId = int.Parse(User.Identity.Name);
-			var invItem = _homeService.GetInventoryItem(itemId, userId);
+			var invItem = await _homeService.GetInventoryItem(itemId, userId);
 			if(invItem != null)
 			{
 				if (invItem.Definition.Type == "notes")
 				{
-					Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",null,null,\"WebCommodity\",null,1]");
+					Response.Headers.Add("x-json", "[\"" + HttpUtility.UrlEncode(invItem.Definition.CssClass) + "_pre\",null,null,\"WebCommodity\",null,1]");
 				} else
 				{
-					Response.Headers.Add("x-json", "[\"" + invItem.Definition.CssClass + "_pre\",\"" + invItem.Definition.CssClass + "\", \"" + invItem.Definition.Name + "\", \"\", null,1]");
+					Response.Headers.Add("x-json", "[\"" + HttpUtility.UrlEncode(invItem.Definition.CssClass) + "_pre\",\"" + HttpUtility.UrlEncode(invItem.Definition.CssClass) + "\", \"" + HttpUtility.UrlEncode(invItem.Definition.Name) + "\", \"\", null,1]");
 				}
 			}
 
@@ -117,10 +118,10 @@ namespace KeplerCMS.Areas.MyHabbo
 			var itemInCategory = await _homeService.GetProduct(productId);
 			if (itemInCategory.Definition.Type == "backgrounds")
 			{
-				Response.Headers.Add("x-json", "[{\"bgCssClass\":\"" + itemInCategory.Definition.CssClass + "\",\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+				Response.Headers.Add("x-json", "[{\"bgCssClass\":\"" + HttpUtility.UrlEncode(itemInCategory.Definition.CssClass) + "\",\"itemCount\":1,\"previewCssClass\":\"" + HttpUtility.UrlEncode(itemInCategory.Definition.CssClass) + "_pre\", \"titleKey\":\"" + HttpUtility.UrlEncode(itemInCategory.Definition.Name) + "\"}]");
 			}
 			else {
-				Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"" + itemInCategory.Definition.CssClass + "_pre\", \"titleKey\":\"" + itemInCategory.Definition.Name + "\"}]");
+				Response.Headers.Add("x-json", "[{\"itemCount\":1,\"previewCssClass\":\"" + HttpUtility.UrlEncode(itemInCategory.Definition.CssClass) + "_pre\", \"titleKey\":\"" + HttpUtility.UrlEncode(itemInCategory.Definition.Name) + "\"}]");
 			}
 
 			return View(itemInCategory);

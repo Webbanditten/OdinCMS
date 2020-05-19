@@ -3,6 +3,7 @@ using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using System.Threading.Tasks;
 using KeplerCMS.Services.Interfaces;
+using System.Web;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
@@ -44,7 +45,7 @@ namespace KeplerCMS.Areas.MyHabbo
             var userId = int.Parse(User.Identity.Name);
             var updatedItem = await _homeService.EditItem(widgetId, skinId, userId);
 
-            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + updatedItem.Item.Skin + "\",\"type\":\"widget\"}");
+            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"widget\"}");
             return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
         }
         [HttpPost]
