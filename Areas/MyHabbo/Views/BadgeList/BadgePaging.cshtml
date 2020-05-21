@@ -11,7 +11,7 @@
         @{
             foreach (var badge in pagedBadges)
             {
-                <li style="background-image: url(@Configuration["badgeUrl"]/@(badge.Badge).gif)"></li>
+                <li style="background-image: url(@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif)"></li>
             }
         }
     </ul>

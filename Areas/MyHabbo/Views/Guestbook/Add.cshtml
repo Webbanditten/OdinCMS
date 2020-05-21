@@ -7,7 +7,7 @@
 
 <li id="guestbook-entry-@Model.Entry.Id" class="guestbook-entry">
     <div class="guestbook-author">
-        <img src="@Configuration["figureUrl"]?figure=@(Model.User.Figure)&size=s&direction=4&head_direction=4&crr=0&gesture=&frame=1" alt="@Model.User.Username" title="@Model.User.Username" />
+        <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(Model.User.Figure)&size=s&direction=4&head_direction=4&crr=0&gesture=&frame=1" alt="@Model.User.Username" title="@Model.User.Username" />
     </div>
     @{
         if (User.Identity.IsAuthenticated && Model.Entry.UserId == int.Parse(User.Identity.Name))

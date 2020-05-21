@@ -7,6 +7,15 @@
             updateHabboCreditAmounts(msg);
     });
 }
+function refreshOnlineCount() {
+    j.ajax({
+        method: "GET",
+        url: habboReqPath + "/api/hotel/online",
+    })
+        .done(function (msg) {
+            j(".online-count").text(msg);
+        });
+}
 function f() {
     document.getElementById('sol').style.visibility = 'visible';
 }
@@ -80,7 +89,6 @@ j(document).ready(function () {
         '</div>');
     }
 
-    riddles();
 
     // tips
     function tips() {
@@ -134,5 +142,10 @@ j(document).ready(function () {
 
     }
     tips();
+    riddles();
 
+    setInterval(function () {
+        refreshOnlineCount();
+    }, 20000);
+    refreshOnlineCount();
 });

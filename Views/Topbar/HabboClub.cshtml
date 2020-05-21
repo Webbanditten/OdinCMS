@@ -5,13 +5,13 @@
 }
 
 
-<h3>Você possui @userData.HabboClubInDays dias restantes no Habbo Clube</h3>
+    <h3>@DbRes.T("club_youhave", "topbar") @userData.HabboClubInDays @DbRes.T("club_daysleft", "topbar")</h3>
 <div class="tabmenu-inner-content">
     <p>
-        Habbo Club te dá os melhores benefícios
+        @DbRes.T("club_benefits", "topbar")
     </p>
     <p>
-        <a href="/habboclub" class="arrow">Últimas Notícias</a>
+        <a href="/club" class="arrow">@DbRes.T("club_news", "topbar")</a>
     </p>
 </div>
 <script>habboClubUpdated = false;</script>

@@ -11,6 +11,6 @@
     }
     else
     {
-        <embed type="application/x-shockwave-flash" src="~/flash/trax/traxplayer.swf" name="traxplayer" quality="high" base="/flash/trax/" allowscriptaccess="always" menu="false" wmode="transparent" flashvars="songUrl=/trax/song/@(Model.Item.Data)&amp;sampleUrl=@(Configuration["traxUrl"])/" height="66" width="210">
+        <embed type="application/x-shockwave-flash" src="~/flash/trax/traxplayer.swf" name="traxplayer" quality="high" base="/flash/trax/" allowscriptaccess="always" menu="false" wmode="transparent" flashvars="songUrl=/trax/song/@(Model.Item.Data)&amp;sampleUrl=@(Configuration.GetSection("keplercms")["traxUrl"])/" height="66" width="210">
     }
 }

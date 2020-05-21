@@ -21,7 +21,7 @@
                 {
                     <li id="avatar-list-@Model.Widget.Item.Id-@friend.UserDetails.Id" title="@friend.UserDetails.Username">
                         <div class="avatar-list-open"><a href="#" id="avatar-list-open-link-@Model.Widget.Item.Id-@friend.UserDetails.Id" class="avatar-list-open-link"></a></div>
-                        <div class="avatar-list-avatar"><img src="@Configuration["figureUrl"]?figure=@(friend.UserDetails.Figure)&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt=""></div>
+                        <div class="avatar-list-avatar"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(friend.UserDetails.Figure)&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt=""></div>
                         <h4><a href="/home/@friend.UserDetails.Username">@friend.UserDetails.Username</a></h4>
                         <p class="avatar-list-birthday">@friend.UserDetails.CreateAt.ToString("dd-MM-yyyy")</p>
                         <p>

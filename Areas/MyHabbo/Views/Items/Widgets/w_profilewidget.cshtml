@@ -45,7 +45,7 @@
                 if (Model.WidgetData.User.BadgeActive && Model.WidgetData.User.Badge != string.Empty)
                 {
                     <div>
-                        <img src="@Configuration["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
+                        <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
                     </div>
                 }
 
@@ -54,7 +54,7 @@
 
         </div>
         <div class="profile-figure">
-            <img alt="Wizter" src="@Configuration["figureUrl"]?figure=@Model.WidgetData.User.Figure&amp;size=b&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=sml&amp;frame=1">
+            <img alt="Wizter" src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@Model.WidgetData.User.Figure&amp;size=b&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=sml&amp;frame=1">
         </div>
 
         <div class="profile-motto">

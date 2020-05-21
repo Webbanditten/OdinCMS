@@ -5,7 +5,7 @@
     <div class="avatar-info-basic clearfix">
         <div class="avatar-list-info-close-container"><a href="#" class="avatar-list-info-close" id="avatar-list-info-close"></a></div>
         <div class="avatar-info-image">
-            <img src="@Configuration["figureUrl"]?figure=@Model.Figure&size=b&direction=4&head_direction=4&crr=0&gesture=&frame=1" alt="@Model.Username" />
+            <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@Model.Figure&size=b&direction=4&head_direction=4&crr=0&gesture=&frame=1" alt="@Model.Username" />
         </div>
         <h4><a href="/home/@Model.Username">@Model.Username</a></h4>
         <p>

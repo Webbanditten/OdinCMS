@@ -6,6 +6,7 @@
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
+    var scheme = Context.Request.Scheme;
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -20,7 +21,7 @@
     @RenderSection("Styles", required: false)
 
     <script type='text/javascript'>
-        var habboReqPath = window.location.href.split("/")[0] + '//@baseUrl';
+        var habboReqPath = '@scheme://@baseUrl';
         var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
         document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
@@ -72,7 +73,7 @@
                             <td class="ad-header-ml"></td>
                             <td class="ad-header-m">
 
-                                <h5><span class="lang-Advertissement_Title">Annonce</span></h5>
+                                <h5><span class="lang-Advertissement_Title">@DbRes.T("ad", "shared")</span></h5>
                             </td>
                             <td class="ad-header-mr"></td>
                         </tr>
@@ -100,35 +101,35 @@
                     <table id="topbar">
                         <tr>
                             <!-- TOPBAR INCLUDE ( User Status ) -->
-                            <td id="topbar-count">2,222 <span class="lang-topbar-count">Online på Habbo</span></td>
+                            <td id="topbar-count"><span class="online-count"></span> @DbRes.T("online_on_habbo", "shared")</td>
                             <td id="topbar-menu" align="center">
                                 <ul>
                                     <li id="myhabbo" class="selected" onmouseover="switchTab('myhabbo')">
-                                        <div><a href="http://www.test1.webbanditten.dk/tab/myhabbo" class="topbar-menu-link" onclick="return false;"><span class="lang-topbar-myhabbo">Min Habbo</span></a></div>
+                                        <div><a href="/tab/myhabbo" class="topbar-menu-link" onclick="return false;">@DbRes.T("myhabbo", "topbar")</a></div>
                                     </li>
                                     <li id="mycredits" onmouseover="if (switchTab('mycredits') && document.habboLoggedIn) updateCredits()" onmouseout="fadeTab('myhabbo')">
-                                        <div><a href="http://www.test1.webbanditten.dk/tab/credits" class="topbar-menu-link" onclick="return false;"><span class="lang-topbar-mycredits">Mine Habbo Mønter</span></a></div>
+                                        <div><a href="/tab/credits" class="topbar-menu-link" onclick="return false;">@DbRes.T("mycoins", "topbar")</a></div>
                                     </li>
                                     <li id="habboclub" onmouseover="if (switchTab('habboclub') && document.habboLoggedIn) updateHabboClub()" onmouseout="fadeTab('myhabbo')">
-                                        <div><a href="http://www.test1.webbanditten.dk/tab/habboclub" class="topbar-menu-link" onclick="return false;"><span class="lang-topbar-habboclub">Habbo Club</span></a></div>
+                                        <div><a href="/tab/habboclub" class="topbar-menu-link" onclick="return false;">@DbRes.T("habboclub", "topbar")</a></div>
                                     </li>
                                 </ul>
                             </td>
                             <!-- TOPBAR INCLUDE ( User Status ) -->
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <td id="topbar-status" class="loggedin">Logget ind som <strong>@userData.Username</strong></td>
+                                <td id="topbar-status" class="loggedin">@DbRes.T("loggedinas", "topbar") <strong>@userData.Username</strong></td>
                             }
                             else
                             {
-                                <td id="topbar-status" class="notloggedin">Ikke logget ind</td>
+                                <td id="topbar-status" class="notloggedin">@DbRes.T("notloggedin", "topbar")</td>
                             }
                         </tr>
                     </table>
-                    <div id="habbologo"><a href="http://www.test1.webbanditten.dk"></a></div>
+                    <div id="habbologo"><a href="/"></a></div>
                     <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
                     <div id="enter-hotel">
-                        <a href="http://www.test1.webbanditten.dk/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                        <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
                     </div>
 
                     <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">
@@ -142,18 +143,18 @@
                                     <div class="habbo-avatar">
                                         <img src="https://dcr.webbanditten.dk/habbo-imager/avatar.php?figure=@userData.Figure&amp;size=b&amp;action=wav,&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;size=m" alt="" class="tabmenu-image myimage" style="margin-right: 5px; margin-right: 0px;">
                                     </div>
-                                    <h3 style="">Velkommen @userData.Username</h3>
+                                    <h3 style="">@DbRes.T("welcome", "topbar") @userData.Username</h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
-                                            <a href="/client" class="arrow" target="client" onclick="openOrFocusHabbo(this); return false;">Gå til hotellet</a>
+                                            <a href="/client" class="arrow" target="client" onclick="openOrFocusHabbo(this); return false;">@DbRes.T("gotohotel", "topbar")</a>
                                         </p>
                                         <p>
-                                            <a href="/home/@userData.Username" class="arrow">Dit Habbo Home</a>
+                                            <a href="/home/@userData.Username" class="arrow">@DbRes.T("myhabbohome", "topbar")</a>
                                         </p>
                                         <p>
-                                            <a href="@Url.Action("index", "profile")" class="arrow">Ændre din profil</a>
+                                            <a href="@Url.Action("index", "profile")" class="arrow">@DbRes.T("editprofile", "topbar")</a>
                                         </p>
-                                        <a href="/account/logout" class="colorlink orange last"><span>Log af</span></a>
+                                        <a href="/account/logout" class="colorlink orange last"><span>@DbRes.T("signoff", "topbar")</span></a>
                                     </div>
                                 </div>
                             }
@@ -164,13 +165,13 @@
                                     <!-- TOPMENU INCLUDE (MYHABBO) -->
 
                                     <img src="~/images/top_bar/myhabbo_frank.gif" alt="" width="60" height="85" class="tabmenu-image" />
-                                    <h3><span class="lang-topbar-myhabbo-content-notLoggedin">Velkommen! Log venligst ind eller opret en profil</span></h3>
+                                    <h3>@DbRes.T("welcome_notsignedin", "topbar")</h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
-                                            <a href="/account" class="colorlink orange" style="margin-left: 0px; margin-right: 2px;"><span class="lang-topbar-myhabbo-inner-register">Opret en profil, det gratis</span></a>
+                                            <a href="/account" class="colorlink orange" style="margin-left: 0px; margin-right: 2px;">@DbRes.T("createprofile", "topbar")</a>
                                         </p>
                                         <p>
-                                            <a href="/account" class="colorlink orange last" style="margin-left: 0px; margin-right: 2px;"><span class="lang-topbar-myhabbo-inner-login">Log ind</span></a>
+                                            <a href="/account" class="colorlink orange last" style="margin-left: 0px; margin-right: 2px;">@DbRes.T("login", "topbar")</a>
                                         </p>
                                     </div>
                                 </div>
@@ -180,14 +181,14 @@
                                 <div id="credits-status">
                                     <!-- TOPMENU INCLUDE (MYCREDITS) -->
 
-                                    <h3><span class="lang-topbar-mycredits-content-notloggedinBefore">Por favor,</span> <a href="http://www.test1.webbanditten.dk/login"><span class="lang-sign">entre</span></a> <span class="lang-topbar-mycredits-content-notloggedinAfter">para ver seu saldo</span></h3>
+                                    <h3><a href="/login">@DbRes.T("credits_pleaselogin", "topbar")</a> @DbRes.T("credits_toseetransactions", "topbar")</h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
                                             <img src="~/images/top_bar/mycredits_coins.gif" alt="" width="47" height="21" class="tabmenu-image coins" />
-                                            <a href="http://www.test1.webbanditten.dk/tab/credits" class="arrow"><span class="lang-topbar-mycredits-inner-buy">Comprar Moedas</span></a>
+                                            <a href="/credits" class="arrow">@DbRes.T("buy_credit", "topbar")</a>
                                         </p>
                                         <p>
-                                            <a href="http://www.test1.webbanditten.dk/tab/redeem" class="arrow"><span class="lang-topbar-mycredits-inner-redeem">Inserir Código de Moedas ou Mobis</span></a>
+                                            <a href="/credits" class="arrow">@DbRes.T("redeem", "topbar")</a>
                                         </p>
                                     </div>
                                     <script>CreditsUpdated = false;</script>
@@ -197,14 +198,14 @@
                                 <div id="habboclub-status">
                                     <!-- TOPMENU INCLUDE (HABBOCLUB) -->
 
-                                    <h3><span class="lang-topbar-habboclub-content-notloggedinBefore">Por favor,</span> <a href="http://www.test1.webbanditten.dk/login"><span class="lang-sign">entre</span></a> <span class="lang-topbar-habboclub-content-notloggedinAfter">para ver suas informações do Habbo Club</span></h3>
+                                    <h3><a href="/login">@DbRes.T("club_pleaselogin", "topbar")</a> @DbRes.T("club_toseestatus", "topbar")</h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
-                                            <span class="lang-topbar-habboclub-inner-about">Habbo Club te dá os melhores benefícios</span>
+                                            <span class="lang-topbar-habboclub-inner-about">@DbRes.T("club_benefits", "topbar")</span>
 
                                         </p>
                                         <p>
-                                            <a href="http://www.test1.webbanditten.dk/tab/habboclub" class="arrow"><span class="lang-topbar-habboclub-inner-club">Últimas Notícias</span></a>
+                                            <a href="/club" class="arrow">@DbRes.T("club_news", "topbar")</a>
                                         </p>
                                     </div>
                                     <script>habboClubUpdated = false;</script>

@@ -1,0 +1,86 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using KeplerCMS.Data.Models
+@{
+    Layout = null;
+    var userData = (Users)ViewData["user"];
+    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+    var baseUrl = Context.Request.Host;
+    var scheme = Context.Request.Scheme;
+    var url = $"{scheme}://{baseUrl}";
+}
+<!DOCTYPE html>
+
+<html xmlns="XHTML namespace">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Habbo ~ Client</title>
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
+
+    <script language="JavaScript" type="text/javascript">
+        var habboClient = true;
+        var habboReqPath = "@url";
+        var habboStaticFilePath = habboReqPath + '/@Url.Content("~")';
+        document.habboLoggedIn = true;
+    </script>
+
+    <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
+    <script type='text/javascript'>var j = jQuery.noConflict();</script>
+
+    <script language='JavaScript' type='text/javascript' src='~/js/site.js'></script>
+    <script language="JavaScript" type="text/javascript">
+        window.onload = resizeWin;
+        window.onerror = function () { return true; };
+        window.onunload = clearOpener;
+        ensureOpenerIsLoggedIn();
+        addClientUnloadHook();
+        Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
+    </script>
+
+
+
+    <!--[if IE]>
+    <link href="~/styles/ie-all.css" type="text/css" rel="stylesheet" />
+    <![endif]-->
+    <!--[if lt IE 7]>
+    <link href="~/styles/ie6.css" type="text/css" rel="stylesheet" />
+    <![endif]-->
+</head>
+<body id="client">
+    <div id="client-topbar" style="display:none">
+        <div class="logo"><img src="~/images/popup/popup_topbar_habbologo.gif" alt="" align="middle" /></div>
+        <div class="habbocount">
+            <div id="habboCountUpdateTarget">
+                <span class="online-count"></span> @DbRes.T("online_on_habbo", "shared")
+            </div>
+        </div>
+        <div class="logout"><a href="/account/disconnected?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
+    </div>
+    <div>
+        <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
+            <param name='src' value='@Configuration.GetSection("keplercms")["dcr"]'>
+            <param name='swRemote' value='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' '>
+            <param name='swStretchStyle' value='none'>
+            <param name='swText' value=''>
+
+            <param name='bgColor' value='#000000'>
+            <param name='sw6' value='use.sso.ticket=1;sso.ticket=ST-347895-d73d697cdde0265b3bce--fe2'>
+            <param name='sw2' value='connection.info.host=home.wohlk.com;connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
+            <param name='sw4' value='connection.mus.host=home.wohlk.com;connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
+            <param name='sw3' value='client.reload.url=@url/client'>
+            <param name='sw1' value='site.url=@url;url.prefix=@url'>
+            <param name='sw5' value='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'>
+            <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540' swRemote='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' ' swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
+                   sw6='use.sso.ticket=1;sso.ticket=ST-347895-d73d697cdde0265b3bce--fe2'
+                   sw2='connection.info.host=home.wohlk.com;connection.info.port=@Configuration.GetSection("keplercms")["port"]'
+                   sw4='connection.mus.host=home.wohlk.com;connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
+                   sw3='client.reload.url=@url'
+                   sw1='site.url=@url;url.prefix=@url'
+                   sw5='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]' />
+        </object>
+    </div>
+</body>
+</html>
+
