@@ -46,11 +46,15 @@
                 <h2>@Model.Details.NewsHeader</h2>
                 <ul style="display: block;" id="promoheader-selectors">
                     @{
-                        for (var i = 0; i < Model.Promos.Count(); i++)
+                        if (Model.Promos != null && Model.Promos.Count() > 1)
                         {
-                            var selected = (i == 0) ? "class=selected" : "";
-                            <li><a href="#" onclick="showPromo(@i); return false;" @selected>@(i+1)</a></li>
+                            for (var i = 0; i < Model.Promos.Count(); i++)
+                            {
+                                var selected = (i == 0) ? "class=selected" : "";
+                                <li><a href="#" onclick="showPromo(@i); return false;" @selected>@(i+1)</a></li>
+                            }
                         }
+
                     }
 
                 </ul>
@@ -61,7 +65,7 @@
                     if (Model.Promos != null && Model.Promos.Count() > 0)
                     {
                         <div id="promobody">
-                            <p id="promoimage"><img src="@Model.Promos[0].Img" alt=""></p>
+                            <p id="promoimage"><a href="@Model.Promos[0].Link1Href" id="promo-link"><img src="@Model.Promos[0].Img" alt=""></a></p>
                             <div class="promotext">
                                 <p id="promotext-content">@Model.Promos[0].Teaser</p>
                             </div>

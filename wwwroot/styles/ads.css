@@ -1,9 +1,14 @@
 .ad-scale.ad-leader .ad-content-m {
-	height:92px;
+	height:;
 	width:728px;
 }
 div.ad-scale {
 	margin-top: 8px;
+}
+
+div.ad-scale a {
+	height:0px;
+	display:block;
 }
 
 div.ad-scale h5 {
@@ -122,7 +127,7 @@ td.ad-content-mr
 	background-image: url(../images/ads-scale/bg-banner-scale-r.gif);
 	background-repeat: no-repeat;
 	background-position: right -15px;
-	height:92px;
+	height:90px;
 }
 
 td.ad-content-bl {

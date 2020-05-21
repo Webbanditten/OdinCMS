@@ -26,6 +26,10 @@ j(document).ready(function () {
             });
 
     });
+    j(".openClient").click(function (e) {
+        e.preventDefault();
+        openOrFocusHabbo(this); return false;
+    });
 
     j(".roomForward").click(function (e) {
         e.preventDefault();
