@@ -52,6 +52,18 @@ namespace KeplerCMS.Services.Implementations
 
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.refresh_appearance, userId);
         }
+
+        public async Task<Users> GenerateSSO(int userId)
+        {
+            var user = await GetUserById(userId.ToString());
+            if(user != null)
+            {
+                user.SSOTicket = Guid.NewGuid().ToString();
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            return user;
+        }
     }
 
 }

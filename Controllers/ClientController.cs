@@ -9,9 +9,16 @@ namespace KeplerCMS.Controllers
 {
     public class ClientController : Controller
     {
-        [LoggedInFilter]
-        public IActionResult Index()
+        private IUserService _userService;
+        public ClientController(IUserService userService)
         {
+            _userService = userService;
+        }
+        [LoggedInFilter]
+        public async Task<IActionResult> Index()
+        {
+            var userWithSSO = await _userService.GenerateSSO(int.Parse(User.Identity.Name));
+            ViewData["sso"] = userWithSSO.SSOTicket;
             return View();
         }
 

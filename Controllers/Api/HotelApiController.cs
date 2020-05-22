@@ -18,6 +18,7 @@ namespace KeplerCMS.Controllers
         }
 
         [HttpGet("online")]
+        [ResponseCache(Duration = 0)]
         public async Task<string> Online()
         {
             return (await _settingService.GetValue("players.online")).Value;

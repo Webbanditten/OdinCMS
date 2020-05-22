@@ -18,6 +18,7 @@ namespace KeplerCMS.Controllers
         }
 
         [HttpGet("credits")]
+        [ResponseCache(Duration = 0)]
         public async Task<int> Credits()
         {
             var user = await _userService.GetUserById(User.Identity.Name);

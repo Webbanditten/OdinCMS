@@ -21,7 +21,7 @@
     @RenderSection("Styles", required: false)
 
     <script type='text/javascript'>
-        var habboReqPath = '@scheme://@baseUrl';
+        var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
         var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
         document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
@@ -168,10 +168,10 @@
                                     <h3>@DbRes.T("welcome_notsignedin", "topbar")</h3>
                                     <div class="tabmenu-inner-content">
                                         <p>
-                                            <a href="/account" class="colorlink orange" style="margin-left: 0px; margin-right: 2px;">@DbRes.T("createprofile", "topbar")</a>
+                                            <a href="/account" class="colorlink orange" style="margin-left: 0px; margin-right: 2px;"><span>@DbRes.T("createprofile", "topbar")</span></a>
                                         </p>
                                         <p>
-                                            <a href="/account" class="colorlink orange last" style="margin-left: 0px; margin-right: 2px;">@DbRes.T("login", "topbar")</a>
+                                            <a href="/account" class="colorlink orange last" style="margin-left: 0px; margin-right: 2px;"><span>@DbRes.T("login", "topbar")</span></a>
                                         </p>
                                     </div>
                                 </div>

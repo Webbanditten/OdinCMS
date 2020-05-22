@@ -7,7 +7,7 @@
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
     var scheme = Context.Request.Scheme;
-    var url = $"{scheme}://{baseUrl}";
+    var url = $"https://{baseUrl}";
 }
 <!DOCTYPE html>
 
@@ -19,7 +19,7 @@
 
     <script language="JavaScript" type="text/javascript">
         var habboClient = true;
-        var habboReqPath = "@url";
+        var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
         var habboStaticFilePath = habboReqPath + '/@Url.Content("~")';
         document.habboLoggedIn = true;
     </script>
@@ -66,16 +66,16 @@
             <param name='swText' value=''>
 
             <param name='bgColor' value='#000000'>
-            <param name='sw6' value='use.sso.ticket=1;sso.ticket=ST-347895-d73d697cdde0265b3bce--fe2'>
-            <param name='sw2' value='connection.info.host=home.wohlk.com;connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
-            <param name='sw4' value='connection.mus.host=home.wohlk.com;connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
+            <param name='sw6' value='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'>
+            <param name='sw2' value='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
+            <param name='sw4' value='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
             <param name='sw3' value='client.reload.url=@url/client'>
             <param name='sw1' value='site.url=@url;url.prefix=@url'>
             <param name='sw5' value='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'>
             <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540' swRemote='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' ' swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
                    sw6='use.sso.ticket=1;sso.ticket=ST-347895-d73d697cdde0265b3bce--fe2'
-                   sw2='connection.info.host=home.wohlk.com;connection.info.port=@Configuration.GetSection("keplercms")["port"]'
-                   sw4='connection.mus.host=home.wohlk.com;connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
+                   sw2='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'
+                   sw4='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
                    sw3='client.reload.url=@url'
                    sw1='site.url=@url;url.prefix=@url'
                    sw5='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]' />

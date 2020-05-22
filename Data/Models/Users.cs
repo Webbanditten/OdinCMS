@@ -37,6 +37,8 @@ namespace KeplerCMS.Data.Models
         [Column("badge_active")]
         public int IBadgeActive { get; set; }
 
+        [Column("sso_ticket")]
+        public string SSOTicket { get; set; }
         [Column("credits")]
         public int Credits { get; set; }
         [Column("battleball_points")]

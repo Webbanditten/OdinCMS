@@ -146,6 +146,6 @@ j(document).ready(function () {
 
     setInterval(function () {
         refreshOnlineCount();
-    }, 20000);
+    }, 5000);
     refreshOnlineCount();
 });

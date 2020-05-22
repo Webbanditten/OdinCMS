@@ -10,5 +10,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<Users> GetUserById(string id);
 
         public void UpdateFigure(string userId, string figureData, string newGender);
+        public Task<Users> GenerateSSO(int userId);
     }
 }
