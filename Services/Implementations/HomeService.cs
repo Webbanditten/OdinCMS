@@ -404,7 +404,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<GuestbookEntry> AddGuestbookEntry(int homeId, string message, int userId)
         {
-            var home = await _context.Homes.Where(s => s.Id == homeId && s.UserId == userId).FirstOrDefaultAsync();
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             var user = await _userService.GetUserById(userId.ToString());
             if(home != null && user != null)
             {

@@ -10,7 +10,16 @@
         <h4><a href="/home/@Model.Username">@Model.Username</a></h4>
         <p>
             <a href="/client" target="client" onclick="HabboClient.openOrFocus(this); return false;">
-                <img src="~/c_images/myhabbo/habbo_offline.gif" />
+                @{
+                    if (Model.Status == "online")
+                    {
+                        <img src="~/c_images/myhabbo/habbo_online_anim.gif" />
+                    }
+                    else
+                    {
+                        <img src="~/c_images/myhabbo/habbo_offline.gif" />
+                    }
+                }
             </a>
 
         </p>

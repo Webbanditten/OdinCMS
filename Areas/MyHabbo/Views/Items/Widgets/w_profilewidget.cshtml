@@ -32,8 +32,16 @@
 
             <br class="clear">
 
-
-            <img alt="online" src="~/c_images/myhabbo/habbo_offline.gif">
+            @{
+                if (Model.WidgetData.User.Status == "online")
+                {
+                    <img src="~/c_images/myhabbo/habbo_online_anim.gif" />
+                }
+                else
+                {
+                    <img src="~/c_images/myhabbo/habbo_offline.gif" />
+                }
+            }
 
             <div class="birthday text">
                 @DbRes.T("profile_birthday", "habbohome")

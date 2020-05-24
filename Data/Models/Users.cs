@@ -39,6 +39,8 @@ namespace KeplerCMS.Data.Models
 
         [Column("sso_ticket")]
         public string SSOTicket { get; set; }
+        [Column("status")]
+        public string Status { get; set; }
         [Column("credits")]
         public int Credits { get; set; }
         [Column("battleball_points")]
