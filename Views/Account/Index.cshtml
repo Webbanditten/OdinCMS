@@ -1,4 +1,5 @@
-﻿@{
+﻿@model string
+@{
     Layout = "_Register";
     ViewData["Title"] = DbRes.T("orange_box_header", "register");
 }
@@ -40,7 +41,7 @@
                 <div class="content-white">
                     <div class="content-white-body">
                         <div class="content-white-content">
-                            <form method="post" action="http://www.test1.webbanditten.dk/register/start" id="registration-form">
+                            <form method="post" action="/register/start" id="registration-form">
                                 <p>
                                     <label for="day" class="registration-text">@DbRes.T("orange_box_birthday_header", "register")</label>
                                     <br /><br />@DbRes.T("orange_box_birthday_text", "register")
@@ -294,6 +295,7 @@
                     <div class="content-white-body">
                         <div class="content-white-content">
                             <form action="/account/login" method="post" id="login-form">
+                                <input type="hidden" name="returnUrl" value="@Model" />
                                 @Html.AntiForgeryToken()
                                 <p>
                                     <label for="login-username" class="registration-text">@DbRes.T("blue_box_username", "register")</label>

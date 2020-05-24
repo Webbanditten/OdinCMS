@@ -1,19 +1,22 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+﻿@{
+    var baseUrl = Context.Request.Host;
+}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <title>@ViewData["Title"] Habbo ~ Habbo</title>
+    <title>Habbo ~ @ViewData["Title"]</title>
     <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
     <link href='~/styles/process.css' type='text/css' rel='stylesheet' />
 
-    <script language='JavaScript' type='text/javascript'>
-        var habboReqPath = 'http://www.test1.webbanditten.dk';
-        var habboStaticFilePath = '~';
+    <script type='text/javascript'>
+        var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
+        var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
-        document.habboLoggedIn = false;
+        document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
         window.name = 'habboMain';
     </script>
 
@@ -24,8 +27,10 @@
     <script language='JavaScript' type='text/javascript' src='~/js/swfobject.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/ads.js'></script>
     <script type='text/javascript' language='JavaScript' src='~/js/validation.js'></script>
+    <script type="text/javascript" src="/js/registration.js"></script>
 
-    <script>var j = jQuery.noConflict();</script>
+
+    <script type='text/javascript'>var j = jQuery.noConflict();</script>
 
 
 
@@ -46,6 +51,7 @@
             <div id="process-header-body">
                 <div id="process-header-content">
                     <div id="habbologo"><a href="http://www.test1.webbanditten.dk"></a></div>
+                    @RenderSection("Steps", required: false)
                 </div>
             </div>
         </div>
@@ -64,6 +70,6 @@
         </div>
     </div>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)    
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

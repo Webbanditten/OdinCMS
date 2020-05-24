@@ -1,4 +1,5 @@
-﻿using KeplerCMS.Data;
+﻿using Isopoh.Cryptography.Argon2;
+using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
 using KeplerCMS.Helpers;
 using KeplerCMS.Services.Interfaces;
@@ -63,6 +64,23 @@ namespace KeplerCMS.Services.Implementations
                 await _context.SaveChangesAsync();
             }
             return user;
+        }
+
+        public async Task<Users> Create(Users user)
+        {
+            var existingUser = await GetUserByUsername(user.Username);
+            if(existingUser == null)
+            {
+                user.CreateAt = DateTime.Now;
+                user.Badge = "";
+                user.Motto = "";
+                user.Password = Argon2.Hash(user.Password);
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                return user;
+            }
+            return null;
         }
     }
 

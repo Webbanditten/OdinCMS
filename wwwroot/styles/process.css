@@ -39,8 +39,8 @@ body {
 #habbologo {
 	position: relative;
 	background-image: url(../images/logos/habbo_logo_nourl.gif);
-	top: 0;
-	left: 0;
+	top: 15px;
+	left: 5px;
 }
 
 #retrologo {

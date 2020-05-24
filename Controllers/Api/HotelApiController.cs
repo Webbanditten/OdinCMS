@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 namespace KeplerCMS.Controllers
 {
     [Route("api/hotel")]
-    [ApiController]
-    [Authorize]
-    public class HotelApiController : ControllerBase
+    public class HotelApiController : Controller
     {
         private readonly ISettingsService _settingService;
+        private readonly IUserService _userService;
 
-        public HotelApiController(ISettingsService settingsService)
+        public HotelApiController(ISettingsService settingsService, IUserService userService)
         {
             _settingService = settingsService;
+            _userService = userService;
         }
 
         [HttpGet("online")]
@@ -22,6 +22,13 @@ namespace KeplerCMS.Controllers
         public async Task<string> Online()
         {
             return (await _settingService.GetValue("players.online")).Value;
+        }
+
+        [HttpPost("habboname_exists")]
+        public async Task<IActionResult> HabboNameExists(string habboName)
+        {
+                    var user = await _userService.GetUserByUsername(habboName);
+            return Content((user != null ? true : false).ToString());
         }
     }
 }

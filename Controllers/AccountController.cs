@@ -26,14 +26,14 @@ namespace KeplerCMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string returnUrl)
         {
-            return View();
+            return View("index", returnUrl);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password, string returnUrl)
         {
             if(username != null && password != null)
             {
@@ -41,10 +41,7 @@ namespace KeplerCMS.Controllers
                 if (user != null && Argon2.Verify(user.Password, password))
                 {
 
-                    var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                };
+                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Id.ToString()) };
 
                     var claimsIdentity = new ClaimsIdentity(
                         claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -80,18 +77,22 @@ namespace KeplerCMS.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
+                    if(returnUrl != null && returnUrl != "")
+                    {
+                        return Redirect(returnUrl);
+                    }
                     return RedirectToAction("index", "home");
                 }
                 else
                 {
 
                     ViewData["wrong_users_or_password"] = true;
-                    return View("index");
+                    return View("index", returnUrl);
                 }
             } else
             {
                 ViewData["please_enter_username"] = true;
-                return View("index");
+                return View("index", returnUrl);
             }
         }
 
@@ -99,6 +100,67 @@ namespace KeplerCMS.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("index", "home");
+        }
+        [HttpPost]
+        [Route("register/start")]
+        public async Task<IActionResult> RegisterStart(RegistrationViewModel model)
+        {
+            return View(model);
+        }
+        [HttpPost]
+        [Route("register/step/2")]
+        public async Task<IActionResult> RegisterInformation(RegistrationViewModel model)
+        {
+            return View(model);
+        }
+        [HttpPost]
+        [Route("register/step/3")]
+        public async Task<IActionResult> Email(RegistrationViewModel model)
+        {
+            return View(model);
+        }
+        [HttpPost]
+        [Route("register/step/4")]
+        public async Task<IActionResult> TermsOfService(RegistrationViewModel model)
+        {
+            return View(model);
+        }
+        [HttpPost]
+        [Route("register/done")]
+        public async Task<IActionResult> Done(RegistrationViewModel model)
+        {
+            var newUser = await _userService.Create(new Data.Models.Users
+            {
+                Figure = model.FigureData,
+                Username = model.Username,
+                Password = model.Password,
+                Gender = model.Gender
+            });
+            // Lets sign the user in if its created
+            if(newUser != null)
+            {
+                var user = await _userService.GetUserById(newUser.Id.ToString());
+                if (user != null && Argon2.Verify(user.Password, model.Password))
+                {
+
+                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Id.ToString()) };
+
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    var authProperties = new AuthenticationProperties(); ;
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+                }
+            }
+            if(newUser == null )
+            {
+                return Redirect("/");
+            }
+            return View(newUser);
         }
     }
 }
