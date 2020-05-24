@@ -9,6 +9,8 @@ namespace KeplerCMS.Models.Enums
     {
         refresh_appearance,
         update_credits,
-        send_friend_request
+        reduce_credits,
+        send_friend_request,
+        purchase_furni
     }
 }

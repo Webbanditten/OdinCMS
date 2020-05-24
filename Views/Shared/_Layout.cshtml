@@ -234,12 +234,12 @@
                                     string active = isActive ? "active" : "";
                                     bool needsAuthentication = item.State == Enum.GetName(typeof(MenuState), MenuState.authenticated);
                                     string disabledClass = (needsAuthentication && !User.Identity.IsAuthenticated) ? "disabled" : "";
-                                    string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href="+item.Href : "";
+                                    string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href=" + item.Href : "";
                                     if (isActive)
                                         subMenu = menu.Where(m => m.Parent == item.Id).ToList();
                                     <li id="@active" class="@disabledClass @lastClass">
                                         <span class="left"></span>
-                                            <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
+                                        <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
                                         <span class="right"></span>
                                     </li>
                                 }
@@ -266,7 +266,9 @@
                                     if (pathList.Count() > 1 && cleanPath.Replace("/", "") == pathList[1])
                                     {
                                         isActive = true;
-                                    } else if(pathList.Count() == 1 && Context.Request.Path.ToString().Contains(item.Href)) {
+                                    }
+                                    else if (pathList.Count() == 1 && Context.Request.Path.ToString().Contains(item.Href))
+                                    {
                                         isActive = true;
                                     }
                                     if (isActive)
@@ -302,6 +304,7 @@
         </div>
         <div id="outer-bottom"><div id="outer-bottom-content"></div></div>
     </div>
+    <script src="~/api/JavaScriptLocalizationResources?ResourceSet=shared&VarName=resources&localeId=auto&ResourceMode=ResDb"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>

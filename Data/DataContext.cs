@@ -42,6 +42,9 @@ namespace KeplerCMS.Data
 
         public DbSet<Friends> Friends { get; set; }
         public DbSet<FriendRequests> FriendRequests { get; set; }
+        public DbSet<CatalogueItems> CatalogueItems { get; set; }
+        public DbSet<CataloguePages> CataloguePages { get; set; }
+        public DbSet<Items> Items { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

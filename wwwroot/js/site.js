@@ -19,10 +19,15 @@ function refreshOnlineCount() {
 function f() {
     document.getElementById('sol').style.visibility = 'visible';
 }
+function closePurchaseDialog() {
+    Element.remove("purchase_dialog");
+    hideOverlay();
+    refreshCredits();
+}
 j(document).ready(function () {
     j(".buy-btn").click(function (e) {
         e.preventDefault();
-        var dialog = createDialog("purchase_dialog", "Bekræft køb", 9001, 0, -1000, closePurchase);
+        var dialog = createDialog("purchase_dialog", resources.dbRes("confirm_purchase"), 9001, 0, -1000, closePurchase);
         appendDialogBody(dialog, "<p style=\"text-align:center\"><img src=\"/images/progress_bubbles.gif\" alt=\"\" width=\"29\" height=\"5\" /></p><div style=\"clear\"></div>", true);
         moveDialogToCenter(dialog);
         showOverlay();
