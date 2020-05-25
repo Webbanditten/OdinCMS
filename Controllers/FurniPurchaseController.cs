@@ -49,9 +49,6 @@ namespace KeplerCMS.Controllers
             {
                 return Content("<p style=\"height:30px;\">" + DbRes.T("need_to_be_signed_in", "shared") + " <a href=\"#\" class=\"colorlink arrow\" onclick=\"closePurchaseDialog(); return false;\" style =\"margin-top:10px\" ><span>" + DbRes.T("close", "dialogs") + "</span></a></p>");
             }
-            // TODO: Actually check if the user is logged in, look up catalogitem, then check if the user has enough credits, give the user the item 
-            //and queue update in command queue - Otherwise let the user know that they dont have enough coins. Or det item has been delisted/hidden.
-            return Content("Hah ... This will work eventually.. I have a shit ton of other shit to deal with.");
         }
     }
 }
