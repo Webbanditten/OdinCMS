@@ -11,6 +11,7 @@ namespace KeplerCMS.Models.Enums
         update_credits,
         reduce_credits,
         send_friend_request,
-        purchase_furni
+        purchase_furni,
+        roomForward
     }
 }

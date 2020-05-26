@@ -1,34 +1,45 @@
-﻿using KeplerCMS.Services.Interfaces;
+﻿using KeplerCMS.Filters;
+using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
-    [Route("api/hotel")]
+    [ApiController]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class HotelApiController : Controller
     {
         private readonly ISettingsService _settingService;
         private readonly IUserService _userService;
+        private readonly ICommandQueueService _commandQueueService;
 
-        public HotelApiController(ISettingsService settingsService, IUserService userService)
+        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService)
         {
             _settingService = settingsService;
             _userService = userService;
+            _commandQueueService = commandQueueService;
         }
 
-        [HttpGet("online")]
-        [ResponseCache(Duration = 0)]
+        [HttpGet("api/hotel/online")]
         public async Task<string> Online()
         {
             return (await _settingService.GetValue("players.online")).Value;
         }
 
-        [HttpPost("habboname_exists")]
+        [HttpPost("api/hotel/habboname_exists")]
         public async Task<IActionResult> HabboNameExists(string habboName)
         {
-                    var user = await _userService.GetUserByUsername(habboName);
+            var user = await _userService.GetUserByUsername(habboName);
             return Content((user != null ? true : false).ToString());
+        }
+
+        [LoggedInFilter]
+        [Route("components/roomNavigation")]
+        public IActionResult RoomNavigation(int roomId, string roomType)
+        {
+            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, $"{User.Identity.Name},{roomId},{roomType}");
+            return Content("ok");
         }
     }
 }

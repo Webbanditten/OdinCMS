@@ -9,7 +9,9 @@ namespace KeplerCMS.Controllers
 {
     public class ClientController : Controller
     {
-        private IUserService _userService;
+        private readonly IUserService _userService;
+
+
         public ClientController(IUserService userService)
         {
             _userService = userService;
@@ -23,7 +25,6 @@ namespace KeplerCMS.Controllers
             ViewData["roomId"] = roomId;
             return View();
         }
-
 
     }
 }
