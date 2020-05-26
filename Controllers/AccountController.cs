@@ -134,7 +134,8 @@ namespace KeplerCMS.Controllers
                 Figure = model.FigureData,
                 Username = model.Username,
                 Password = model.Password,
-                Gender = model.Gender
+                Gender = model.Gender,
+                Status = "offline"
             });
             // Lets sign the user in if its created
             if(newUser != null)
