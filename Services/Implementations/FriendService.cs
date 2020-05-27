@@ -28,7 +28,7 @@ namespace KeplerCMS.Services.Implementations
         {
             if(!(await RequestExists(from, to))) {
 
-                _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.send_friend_request, $"${from},${to}");
+                _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.send_friend_request, $"{from},{to}");
                 var friendRequest = new FriendRequests { FromId = from, ToId = to };
                 _context.FriendRequests.Add(friendRequest);
                 await _context.SaveChangesAsync();
