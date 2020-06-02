@@ -1,4 +1,5 @@
 ﻿using Isopoh.Cryptography.Argon2;
+using KeplerCMS.Areas.Habbowood;
 using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
 using KeplerCMS.Helpers;
@@ -41,6 +42,26 @@ namespace KeplerCMS.Services.Implementations
         public async Task<Movies> GetMovieBySession(string key)
         {
             return await _context.Movies.Where(s => s.SessionId == key).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<TopMovie>> GetTopMovies()
+        {
+            var avg = _context.MovieVotes
+                  .GroupBy(g => g.MovieId, c => c.Rating)
+                  .Select(g => new
+                  {
+                      MovieId = g.Key,
+                      Average = g.Average()
+                  }).Take(10);
+
+            List<TopMovie> movies = new List<TopMovie>();
+            foreach(var a in avg)
+            {
+                var movie = await GetMovie(a.MovieId);
+                movies.Add( new TopMovie { Name = movie.Name, Id = movie.Id });
+            }
+
+           return movies;
         }
 
         public async Task<List<Movies>> GetUsersMovies(int userId)

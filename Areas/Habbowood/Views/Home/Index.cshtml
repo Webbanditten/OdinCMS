@@ -1,4 +1,4 @@
-﻿@model KeplerCMS.Data.Models.Movies
+﻿@model KeplerCMS.Areas.Habbowood.MovieViewModel
 @using KeplerCMS.Data.Models 
 @using KeplerCMS.Models.Enums
 @{
@@ -20,7 +20,7 @@
         </a>
     </div>
     <div class="wrapper">
-        <div class="editor @((Model.Published) ? "player" : "")" id="flashcontent">
+        <div class="editor @((Model.Movie.Published) ? "player" : "")" id="flashcontent">
 
             <div style="margin:20px;padding:20px;background-color:#FFFFFF;">
                 <h2>Error!</h2>
@@ -28,18 +28,24 @@
                 <p><a href="http://www.adobe.com/go/EN_US-H-GET-FLASH"><img src="~/images/get_flash.png" alt="Please install Flash Player" width="88" height="31" border="0" /></a></p>
             </div>
         </div>
-        <div class="rating">
-            <span>Vote</span>
-            <ul class="star-rating">
-                <li class="star filled" data-rating="1"></li>
-                <li class="star filled" data-rating="2"></li>
-                <li class="star filled" data-rating="3"></li>
-                <li class="star" data-rating="4"></li>
-                <li class="star" data-rating="5"></li>
+        @{
+            if (Model.Movie.Published)
+            {
+                <div class="rating">
+                    <span>Vote</span>
+                    <ul class="star-rating">
+                        <li class="star @((Model.AvgRating >= 1) ? "filled" : "")" data-rating="1"></li>
+                        <li class="star @((Model.AvgRating >= 2) ? "filled" : "")" data-rating="2"></li>
+                        <li class="star @((Model.AvgRating >= 3) ? "filled" : "")" data-rating="3"></li>
+                        <li class="star @((Model.AvgRating >= 4) ? "filled" : "")" data-rating="4"></li>
+                        <li class="star @((Model.AvgRating >= 5) ? "filled" : "")" data-rating="5"></li>
 
-                <li class="result">Score: <span class="score">3</span>/5</li>
-            </ul>
-        </div>
+                        <li class="result">Score: <span class="score">@Model.Votes</span>/5</li>
+                    </ul>
+                </div>
+            }
+        }
+
 
         <div class="scoreboard">
             <div class="header">
@@ -47,16 +53,12 @@
             </div>
             <div class="inner">
                 <ol>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
-                    <li><a href="">Movie</a></li>
+                    @{
+                        foreach (var movie in Model.TopMovies)
+                        {
+                            <li><a href="@(Url.Action("Watch", "Home", new { id = movie.Id }))">@movie.Name</a></li>
+                        }
+                    }
                 </ol>
             </div>
         </div>
@@ -64,7 +66,7 @@
 
     <script type="text/javascript">
 
-	    var habbowood = new FlashObject("@Url.Content((Model.Published) ? "~/habbowood/flash/movie_player_skin.swf" : "~/habbowood/flash/habbowood_movie_editor.swf")", "habbowood", "100%", "100%", "7", "#292929");
+	    var habbowood = new FlashObject("@Url.Content((Model.Movie.Published) ? "~/habbowood/flash/movie_player_skin.swf" : "~/habbowood/flash/habbowood_movie_editor.swf")", "habbowood", "100%", "100%", "7", "#292929");
 	    habbowood.addParam("allowScriptAccess", "always");
 	    habbowood.addParam("scale", "noscale");
 	    habbowood.addParam("name", "editor");
@@ -72,12 +74,12 @@
 	    habbowood.addParam("base", "@(Url.Content("~/habbowood/flash"))");
 
 	    habbowood.addVariable("figuredata_url", "@(Url.Content("~/habbowood/xml/figure_data_xml_hc.xml"))");
-        habbowood.addVariable("movie_data_url", "@(Url.Action("Movie", "Movie", new { movie_id = Model.Id }))");
+        habbowood.addVariable("movie_data_url", "@(Url.Action("Movie", "Movie", new { movie_id = Model.Movie.Id }))");
         habbowood.addVariable("localization_url", "@(Url.Content("~/habbowood/xml/locale.xml"))");
-        @{ 
-            if(Model.Data != null)
+        @{
+            if (Model.Movie.Data != null)
             {
-                @:habbowood.addVariable("movie_id", "@Model.Id");
+                @:habbowood.addVariable("movie_id", "@Model.Movie.Id");
             }
         }
 
@@ -85,7 +87,7 @@
         habbowood.addVariable("meet_filmmakers_url", "/");
         habbowood.addVariable("shoot_movie_url", "/habbowood/");
         @{
-            if(!Model.Published)
+            if (!Model.Movie.Published)
             {
                 @:habbowood.addVariable("avatar_name", "@userData.Username");
                 @:habbowood.addVariable("usersearch_url", "/api/hotel/usersearch");
@@ -94,7 +96,7 @@
                 @:habbowood.addVariable("end_page_url", "@Url.Action("Publish", "Movie")");
                 @:habbowood.addVariable("is_habbo_club_member", @(userData.HasHabboClub ? "true" : "false"));
                 @:habbowood.addVariable("session_update_url", "@Url.Action("Ping", "Movie")");
-                @:habbowood.addVariable("session_id", "@Model.SessionId");
+                @:habbowood.addVariable("session_id", "@Model.Movie.SessionId");
             }
         }
 
@@ -103,37 +105,50 @@
 
     </script>
 
+    @{
+        if (Model.Movie.Published && Model.CanVote)
+        {
+        <script>
+                $(document).ready(function () {
+                    $(".star-rating").mouseout(function () {
 
-    <script>
-        $(document).ready(function () {
-            $(".star-rating").mouseout(function () {
-
-                $(".star-rating li").removeClass("hover");
-                console.log("SDfdsf")
-            });
-            $(".star-rating li").each(function () {
-
-
-                $(this).hover(function () {
-                    var selectedRating = $(this).data("rating");
-                    $(".star-rating li").each(function () {
-                        var rating = $(this).data("rating");
-                        if (rating <= selectedRating) {
-                            $(this).addClass("hover");
-                        } else {
-                            $(this).removeClass("hover");
-                        }
+                        $(".star-rating li").removeClass("hover");
+                        console.log("SDfdsf")
                     });
+                    $(".star-rating li").each(function () {
+
+
+                        $(this).hover(function () {
+                            var selectedRating = $(this).data("rating");
+                            $(".star-rating li").each(function () {
+                                var rating = $(this).data("rating");
+                                if (rating <= selectedRating) {
+                                    $(this).addClass("hover");
+                                } else {
+                                    $(this).removeClass("hover");
+                                }
+                            });
+                        });
+                    });
+
+                    $(".star-rating li").click(function () {
+                        var selectedRating = $(this).data("rating");
+                        console.log("call backend with vote: " + selectedRating);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("Vote", "Movie")",
+                            data: { "movieId": @Model.Movie.Id, "Rating": selectedRating },
+                            success: location.reload(),
+                            dataType: "text/json"
+                        });
+
+                        $(".star-rating li").removeClass("hover");
+                    });
+
                 });
-            });
-
-            $(".star-rating li").click(function () {
-                var selectedRating = $(this).data("rating");
-                console.log("call backend with vote: " + selectedRating);
-                $(".star-rating li").removeClass("hover");
-            });
-
-        });
-    </script>
+        </script>
+        }
+    }
 </body>
 </html>

@@ -68,10 +68,19 @@ namespace KeplerCMS.Areas.Habbowood
             }
             return RedirectToAction("Watch", "Home", new { id = movieId });
         }
-
         public async Task<IActionResult> Ping()
         {
             return Content("pong");
         }
+
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Vote(int movieId, int rating)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var vote = await _habbowoodService.Vote(movieId, rating, userId);
+            return Content(vote.ToString());
+        }
+
     }
 }

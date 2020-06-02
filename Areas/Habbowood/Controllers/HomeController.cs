@@ -24,7 +24,15 @@ namespace KeplerCMS.Areas.Habbowood
             if(movie == null) {
                 movie = await _habbowoodService.SaveMovie(new Data.Models.Movies { SessionId = "0000" }, int.Parse(User.Identity.Name));
             }
-            return View(movie);
+
+            
+            return View(new MovieViewModel { 
+                Movie = movie, 
+                Votes = await _habbowoodService.GetAvgRating(movie.Id), 
+                TopMovies = await _habbowoodService.GetTopMovies(), 
+                CanVote = await _habbowoodService.CanVote(movie.Id, int.Parse(User.Identity.Name)),
+                AvgRating = await _habbowoodService.GetAvgRating(movie.Id)
+            });
         }
 
         [LoggedInFilter]
@@ -32,7 +40,14 @@ namespace KeplerCMS.Areas.Habbowood
         public async Task<IActionResult> Watch(int id)
         {
             var movie = await _habbowoodService.GetMovie(id);
-            return View("Index", movie);
+            return View("Index", new MovieViewModel
+            {
+                Movie = movie,
+                Votes = await _habbowoodService.GetAvgRating(movie.Id),
+                TopMovies = await _habbowoodService.GetTopMovies(),
+                CanVote = await _habbowoodService.CanVote(movie.Id, int.Parse(User.Identity.Name)),
+                AvgRating = await _habbowoodService.GetAvgRating(movie.Id)
+            });
         }
     }
 }

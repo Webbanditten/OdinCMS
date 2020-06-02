@@ -1,4 +1,5 @@
-﻿using KeplerCMS.Data.Models;
+﻿using KeplerCMS.Areas.Habbowood;
+using KeplerCMS.Data.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,5 +18,7 @@ namespace KeplerCMS.Services.Interfaces
 
         Task<bool> Vote(int movieId, int rating, int userId);
         Task<Movies> GetMovieBySession(string key);
+
+        Task<List<TopMovie>> GetTopMovies();
     }
 }
