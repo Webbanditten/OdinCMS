@@ -45,6 +45,8 @@ namespace KeplerCMS.Data
         public DbSet<CatalogueItems> CatalogueItems { get; set; }
         public DbSet<CataloguePages> CataloguePages { get; set; }
         public DbSet<Items> Items { get; set; }
+        public DbSet<Movies> Movies { get; set; }
+        public DbSet<MovieVotes> MovieVotes { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }
