@@ -20,6 +20,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\habbowood\flash\avatars_big.swf" />
+    <None Include="wwwroot\habbowood\flash\habbowood_movie_editor.swf" />
+    <None Include="wwwroot\habbowood\flash\habbowood_movie_player.swf" />
+    <None Include="wwwroot\habbowood\flash\movie_player_skin.swf" />
+    <None Include="wwwroot\habbowood\flash\player_external.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_barber.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_beach.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_cafe.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_car.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_club.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_factory.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_fightclub.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_genericroom1.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_prison.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_street.swf" />
+    <None Include="wwwroot\habbowood\flash\scenes\habbowood_title_1.swf" />
+    <None Include="wwwroot\habbowood\js\flashobject.js" />
     <None Include="wwwroot\housekeeping\js\tinymce\jquery.tinymce.min.js" />
     <None Include="wwwroot\housekeeping\js\tinymce\langs\readme.md" />
     <None Include="wwwroot\housekeeping\js\tinymce\plugins\advlist\plugin.min.js" />

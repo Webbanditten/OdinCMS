@@ -1,0 +1,160 @@
+
+<keys>
+
+<!--
+   KEYS FOR GENERAL USAGE
+-->
+
+<key name="ok">ok</key>
+<key name="cancel">Anullere</key>
+
+
+<!--
+   TITLE SCREEN RELATED KEYS
+-->
+
+
+<key name="titlescreen_directed_by">Instrueret af</key>
+<key name="titlescreen_titles">Film Titel & Roller</key>
+<key name="titlescreen_movie_title">[b]Film Titel[/b]</key>
+<key name="titlescreen_actor_1">[b]Hoved rolle[/b]</key>
+<key name="titlescreen_actor_2">[b]Skuespiller 2[/b]</key>
+<key name="titlescreen_actor_3">[b]Skuespiller 3[/b]</key>
+<key name="titlescreen_text">[b]VÆLG FILM TITEL OG SLOGAN[/b]</key>
+<key name="titlescreen_type_title">Skriv titlen her (Max. 25 tegn)</key>
+<key name="titlescreen_type_tagline_max">Skriv slogan her (Max. 40 tegn)</key>
+<key name="titlescreen_continue_button">[B]Rediger[/B]</key>
+
+<key name="titlescreen_casting_text_1">[B]HOVED ROLLE[/B][br][br]Du kan endten caste en [b]fiktionel[/b] skuespiller (vælg med pilene til venstre) eller en [b]HABBO[/b]</key>
+<key name="titlescreen_casting_text_2">[B]CAST SKUESPILLER 2[/B][br][br]Du kan endten caste en [b]fiktionel[/b] skuespiller (vælg med pilene til venstre) eller en [b]HABBO[/b]</key>
+<key name="titlescreen_casting_text_3">[B]CAST SKUESPILLER 3[/B][br][br]Du kan endten caste en [b]fiktionel[/b] skuespiller (vælg med pilene til venstre) eller en [b]HABBO[/b]</key>
+
+<key name="titlescreen_casthabbo_button">[b]Cast Habbo[/b]</key>
+<key name="titlescreen_character_name">[br][b]Karakterens navn[/b]:</key>
+<key name="titlescreen_shoot_movie">[b]Rediger film[/b]</key>
+<key name="titlescreen_casthabbo_text">[b]Cast en Habbo[/b][br][br]Skriv Habbo'ens navn og tryk "Cast"</key>
+<key name="titlescreen_cancel_button">[b]Anullere[/b]</key>
+<key name="titlescreen_cast_button">[b]Cast[/b]</key>
+
+
+<!--
+   EDITOR AREA RELATED KEYS
+-->
+
+<key name="editor_main_preview">[b]Forhåndsvis filmen[/b]</key>
+<key name="editor_main_save">[b]Gem[/b]</key>
+<key name="editor_main_exit">[b]Afbryd[/b]</key>
+<key name="editor_main_help">[b]Hjælp[/b]</key>
+<key name="editor_scene_title">[b]Scene Set-up[/b]</key>
+<key name="editor_scene_set">[b]Sæt[/b]</key>
+<key name="editor_scene_props">[b]Rekvisitter[/b]</key>
+<key name="editor_scene_soundtracks">[b]Baggrundslyd[/b]</key>
+<key name="editor_actions_title">[b]Drag&Drop[b]</key>
+<key name="editor_actions_fx">FX</key>
+<key name="editor_actions_surprises">Overraskelser</key>
+<key name="editor_actions_sounds">Lyd FX</key>
+<key name="editor_actions_dialogues">Dialog</key>
+<key name="editor_actions_body">kropssprog</key>
+<key name="editor_actions_effects">ssd</key>
+<key name="editor_actions_stunts">Stunts</key>
+<key name="editor_timeline_title">[b]Tidslinje[/b]</key>
+<key name="editor_trash">[b]Affald[/b]</key>
+<key name="editor_exit">[b]Til hotellet[/b]</key>
+<key name="editor scenes_editmovietitle">[b]Tilbage til titlerne[/b]</key>
+<key name="instructions_continuebtn">[b]Redigere[/b]</key>
+<key name="instructions_title">[b]SÅDAN LAVER DU EN HABBOWOOD FILM[/b]</key>
+<key name="instructions_text">Film består af en eller flere scener. Her er en mini-guide til at lave en film med flere scener:</key>
+<key name="instructions_text_1">[b]1. VÆLG SCENE SET-UP:[/b] Vælg den første scenes indstillinger, rekvisitter og baggrundslyd</key>
+<key name="instructions_text_2">[b]2. TILFØJ HANDLING:[/b] Vælg handlings elementer (lyd, FX, dialog, osv) for scenen og dets skuespillere, drag&drop dem på tidslinjen til højre</key>
+<key name="instructions_text_3">[b]3. ARBEJDE MED TIDSLINJEN:[/b] Tidslinjen er splittet i billeder og definere rækkefølgen af handlinger. F.eks. hvis du vil have en skuespiller til at sige "Bøvs!" og smile , så træk og slip en talebobble ind på skuespilleren tidslinje og tilføj "Bøvs!" til taleboblen. For at slette en handling trækkes den ud fra tidslinjen, ned i "Affald".</key>
+<key name="instructions_text_4">[b]4. TILFØJ SCENER:[/b] for at tilføje en ny scene (max. 10), klik "Tilføj scene" knappen. For at slette scenen trækkes den i "Affald". Du kan rette en scene ved at trykke på dets ikon.</key>
+<key name="instructions_text_5">[b]5. GEM & UDGIV:[/b] Lav de sidste rettelser og klik "Gem" og følg instruktionerne for at udgive. Du kan altid senere gå tilbage og rette din film.</key>
+<key name="instructions_text_6">Øvelse gør mester, prøv dig frem og lav den fedeste film!</key>
+<key name="editor scenes_title">[b]Film scener[/b]</key>
+<key name="editor scenes_add">[b]Tilføj scene[/b]</key>
+<key name="scene_default_length_value">7</key>
+
+
+<!-- POPUP WINDOW KEYS -->
+
+<key name="save_error_header">[b]Du ved at afbryde uden at gemme?[/b]</key>
+<key name="save_error_content">Du har ikke gemt din film! Er du sikker på du vil afbryde?</key>
+<key name="save_error_button_yes">[b]Ja[/b]</key>
+<key name="save_error_button_no">[b]Nej, gå tilbage![/b]</key>
+<key name="movie_saved_header">[b]Gemt[/b]</key>
+<key name="movie_saved_content">Din film er nu gemt[br]Du kan nu gå tilbage og redigere eller fortsætte med at [b]udgive[/b] din film:</key>
+<key name="movie_saved_button_continue">[b]Redigere[/b]</key>
+<key name="movie_saved_button_exit">[b]UDGIV![/b]</key>
+
+
+<key name="speechbubble_default_text">write here</key>
+
+
+<!-- MOVIE END CHOICES -->
+
+<key name="end_shoot_movie">[b]Lav din egen film![/b]</key>
+<key name="end_replay_movie">[b]Spil igen[/b]</key>
+<key name="end_share_movie">[b]Del film[/b]</key>
+<key name="end_meet_filmmakers">[b]Mød instruktørene[/b]</key>
+
+
+<!-- TITLE MOVIE TEXTS -->
+
+<key name="titlemovie_as">I rollen som:</key>
+<key name="titlemovie_directed_by">Instruktør:</key>
+
+<!-- DEFAULT VALUES FOR MOVIE NAME AND SUBTITLE -->
+
+<key name="default_movie_name">Skriv titlen</key>
+<key name="default_movie_subtitle">Skriv slogan</key>
+
+<!--
+   SCENE NAME LOCALIZATION
+-->
+
+<key name="scenes_club">Club</key>
+<key name="scenes_barber">Hår Salon</key>
+<key name="scenes_fightclub">Fight Club</key>
+<key name="scenes_cafe">Cafeteria</key>
+<key name="scenes_beach">Strand</key>
+<key name="scenes_prison">Fængsel</key>
+<key name="scenes_genericroom1">Rum scene 1</key>
+<key name="scenes_genericroom2">Rum scene 2</key>
+<key name="scenes_genericroom3">Rum scene 3</key>
+<key name="scenes_genericroom4">Rum scene 4</key>
+<key name="scenes_street">Gade</key>
+<key name="scenes_factory">Fabrik</key>
+<key name="scenes_car">Kørende bil</key>
+<key name="scenes_winter">Vinter</key>
+<key name="scenes_oriental">Kampsport</key>
+<key name="scenes_plane">Fly</key>
+<key name="scenes_train">Tog</key>
+<key name="scenes_rooftop">Tagtop Cafe</key>
+<key name="scenes_cinema">Biograf</key>
+<key name="scenes_boat">Båd</key>
+<key name="scenes_scifi1">Sci-fi Rumskib</key>
+<key name="scenes_scifi2">Sci-fi Planet</key>
+<key name="scenes_habboween">Habboween</key>
+<key name="scenes_valentine">Valentines</key>
+<key name="scenes_xmas">Xmas</key>
+<key name="scenes_fantasy">Fantasi</key>
+<key name="scenes_exploration">Expedition</key>
+<key name="scenes_lab">Forsknings laboratorium</key>
+<key name="scenes_police">Politi Station</key>
+<key name="scenes_street2">Gade Ghetto</key>
+<key name="scenes_poker">Poker Bord</key>
+<key name="scenes_western">Western</key>
+<key name="scenes_war">Kig</key>
+<key name="scenes_school">Skole</key>
+<key name="scenes_stadium">Stadium</key>
+<key name="scenes_gala">Gala</key>
+<key name="scenes_basketball">Basketball</key>
+<key name="scenes_love">Kærligheds Scene</key>
+<key name="scenes_concert">Koncert</key>
+<key name="scenes_ripoff1">Ripoff 1</key>
+<key name="scenes_ripoff2">Ripoff 2</key>
+<key name="scenes_ripoff3">Ripoff 3</key>
+<key name="scenes_ripoff4">Ripoff 4</key>
+
+
+</keys>

@@ -1,0 +1,231 @@
+@font-face {
+    font-family: 'HabboTwelve';
+    src: url('./15_HabboTwelveBold.woff') format('woff'), /* Pretty Modern Browsers */
+    url('./15_HabboTwelveBold.ttf') format('truetype'); /* Safari, Android, iOS */
+    font-weight:bold;
+}
+@font-face {
+    font-family: 'HabboTwelve';
+    src: url('./260_HabboTwelveRg.woff') format('woff'), /* Pretty Modern Browsers */
+    url('./260_HabboTwelveRg.ttf') format('truetype'); /* Safari, Android, iOS */
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Volter';
+    src: url('./volter.woff') format('woff'), /* Pretty Modern Browsers */
+    url('./volter.ttf') format('truetype'); /* Safari, Android, iOS */
+}
+* {
+    margin:0px;
+    padding:0px;
+}
+
+body {
+    background: url(../images/studio.png), url(../images/bg.png);
+    background-repeat: no-repeat, repeat;
+    background-position: top left, top left;
+}
+
+body:after {
+    content: "";
+    position: absolute;
+    top: 26px;
+    left: 725px;
+    right: 0;
+    bottom: 0;
+    background: url(../images/rail.png) repeat-x;
+}
+.habbo {
+    position: absolute;
+    background: url(../images/habbo_logo.png);
+    background-repeat: no-repeat;
+    width: 172px;
+    height: 253px;
+    z-index: 2;
+    top: 0px;
+    position:absolute;
+}
+.habbo .url {
+    font-family: Volter;
+    position: absolute;
+    font-size: 9px;
+    top: 75px;
+    width: 172px;
+    text-align: center;
+}
+.habbo .checkin {
+    position: absolute;
+    top: 24px;
+    left: 17px;
+    width: 140px;
+    height: 120px;
+}
+.habbo .checkin .key {
+    width: 66px;
+    height: 67px;
+    position: absolute;
+    background: url(../images/habbo_key_animated.gif);
+    left: -18px;
+    top: 60px;
+}
+
+.habbo .checkin span {
+    font-weight: bold;
+    position: absolute;
+    display: block;
+    font-size: 0.8rem;
+    font-family: HabboTwelve;
+    color: #fff;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    left: 50px;
+    top: 86px;
+}
+
+.wrapper {
+    width: 930px;
+    margin:0 auto;
+    position:relative;
+}
+.editor {
+    background: url(../images/editor.png);
+    background-repeat: no-repeat;
+    width: 930px;
+    height: 810px;
+    margin-top: 35px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.editor embed {
+    width: 920px;
+    height: 655px;
+    margin-top: 124px;
+    min-height: 650px !important;
+}
+
+.editor.player embed {
+    height: 366px !important;
+    min-height: 366px !important;
+    width: 542px;
+    margin-top:256px;   
+}
+
+.scoreboard {
+    background: url(../images/scoreboard.png);
+    background-repeat: no-repeat;
+    height: 264px;
+    width: 239px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 20px;
+    position:absolute;
+    right:0px;
+    font-family: HabboTwelve;
+    z-index:1;
+}
+
+.scoreboard .inner {
+    padding-top: 1px;
+    padding-left: 2px;
+}
+
+.scoreboard .header {
+    font-weight: bold;
+    font-size:12px;
+    color:#fff;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    position:relative;
+    width: 34px;
+    margin: 0 auto;
+    margin-top: -13px;
+}
+
+.scoreboard ol {
+    list-style:none;
+}
+.scoreboard ol li {
+    font-size: 0.9rem;
+    color: #fff;
+    margin-top: 0px;
+    margin-top: -1px;
+}
+.scoreboard ol li a {
+    color: #fff;
+    font-family: HabboTwelve;
+    text-decoration: none;
+}
+
+.hanger {
+    width: 200px;
+    height: 200px;
+    background: #565656;
+    position: relative;
+    border: 1px solid #000;
+    margin: 20px;
+    border-radius: 5px;
+    box-shadow: inset 0 0 1px 1px white;
+}
+
+
+
+.rating {
+    position: absolute;
+    width: 400px;
+    height: 28px;
+    bottom: 0px;
+    z-index: 1;
+    left: 10px;
+}
+
+.rating span {
+    float: left;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.87rem;
+    color: #fff;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    font-family: HabboTwelve;
+    line-height: 18px;
+    margin-right: 10px;
+    padding-top: 5px;
+}
+
+.rating .star-rating {
+    list-style: none;
+    margin-left: 10px;
+    padding-top: 4px;
+    height:24px;
+}
+.rating .star-rating .star {
+    cursor:pointer;
+    float: left;
+    width: 17px;
+    height: 16px;
+    background: url(../images/icon_star.gif);
+}
+
+.rating .star-rating .star.hover {
+    background-position: 0px 16px !important;
+}
+
+.rating .star-rating .star.filled {
+    background-position:0px 32px;
+}
+
+.rating .star-rating .result span {
+    float: none;
+    margin: 0px;
+}
+.rating .star-rating .result {
+    float: left;
+    margin-left: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.87rem;
+    color: #fff;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    line-height: 19px;
+    font-family: HabboTwelve;
+}

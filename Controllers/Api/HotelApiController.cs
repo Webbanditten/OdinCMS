@@ -34,6 +34,17 @@ namespace KeplerCMS.Controllers
             return Content((user != null ? true : false).ToString());
         }
 
+        [HttpGet("api/hotel/usersearch")]
+        public async Task<IActionResult> _UserSearch(string user)
+        {
+            var userObj = await _userService.GetUserByUsername(user);
+            if(userObj != null)
+            {
+                return Content($"{userObj.Gender};{userObj.Figure}");
+            }
+            return NotFound();
+        }
+
         [LoggedInFilter]
         [Route("components/roomNavigation")]
         public IActionResult RoomNavigation(int roomId, string roomType)
