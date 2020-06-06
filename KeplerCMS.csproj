@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\data\figuredata.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\data\figuredata.json" />
     <None Include="wwwroot\habbowood\flash\avatars_big.swf" />
     <None Include="wwwroot\habbowood\flash\habbowood_movie_editor.swf" />
     <None Include="wwwroot\habbowood\flash\habbowood_movie_player.swf" />

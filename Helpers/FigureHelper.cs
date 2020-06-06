@@ -1,4 +1,7 @@
-﻿namespace KeplerCMS.Helpers
+﻿using System;
+using System.IO;
+
+namespace KeplerCMS.Helpers
 {
     public class FigureHelper
     {
@@ -12,6 +15,17 @@
 
             return hr + hd + lg + sh + ch; 
         }
-            
+        
+        public static string ConvertFigure(string oldFigure)
+        {
+            var oldFigureData = "./wwwroot/data/figuredata.json";
+            var directory = Directory.GetCurrentDirectory();
+            var test = "";
+            if (File.Exists(directory + oldFigureData))
+            {
+                test = File.ReadAllText(oldFigureData);
+            }
+            return test;
+        }
     }
 }

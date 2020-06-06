@@ -35,7 +35,7 @@ namespace KeplerCMS.Controllers
         }
 
         [HttpGet("api/hotel/usersearch")]
-        public async Task<IActionResult> _UserSearch(string user)
+        public async Task<IActionResult> UserSearch(string user)
         {
             var userObj = await _userService.GetUserByUsername(user);
             if(userObj != null)
@@ -43,6 +43,13 @@ namespace KeplerCMS.Controllers
                 return Content($"{userObj.Gender};{userObj.Figure}");
             }
             return NotFound();
+        }
+
+        [HttpGet("api/hotel/convertFigure")]
+        public async Task<IActionResult> ConvertFigure(string figure)
+        {
+            var test = Helpers.FigureHelper.ConvertFigure(figure);
+            return Content(test);
         }
 
         [LoggedInFilter]
