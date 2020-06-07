@@ -1,8 +1,11 @@
-﻿using KeplerCMS.Filters;
+﻿using KeplerCMS.Data;
+using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace KeplerCMS.Controllers
 {
@@ -45,11 +48,16 @@ namespace KeplerCMS.Controllers
             return NotFound();
         }
 
-        [HttpGet("api/hotel/convertFigure")]
-        public async Task<IActionResult> ConvertFigure(string figure)
+        [HttpGet("avatarimage")]
+        public async Task<IActionResult> AvatarImage()
         {
-            var test = Helpers.FigureHelper.ConvertFigure(figure);
-            return Content(test);
+            var nameValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
+            if(nameValues.Get("figure") != null)
+            {
+                var figure = Helpers.FigureHelper.ConvertFigure(nameValues.Get("figure"), nameValues.Get("direction") != null ? int.Parse(nameValues.Get("direction")) : 0);
+                nameValues.Set("figure", figure);
+            }
+            return Redirect("http://www.habbo.com/habbo-imaging/avatarimage?" + nameValues.ToString());
         }
 
         [LoggedInFilter]

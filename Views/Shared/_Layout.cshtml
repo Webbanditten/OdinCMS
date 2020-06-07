@@ -1,5 +1,7 @@
-﻿@using KeplerCMS.Data.Models 
+﻿@using KeplerCMS.Data.Models
 @using KeplerCMS.Models.Enums
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
@@ -141,7 +143,7 @@
                                     <!-- TOPMENU INCLUDE (MYHABBO) -->
 
                                     <div class="habbo-avatar">
-                                        <img src="https://dcr.webbanditten.dk/habbo-imager/avatar.php?figure=@userData.Figure&amp;size=b&amp;action=wav,&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;size=m" alt="" class="tabmenu-image myimage" style="margin-right: 5px; margin-right: 0px;">
+                                        <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@userData.Figure&amp;size=b&amp;action=wav,&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;size=m" alt="" class="tabmenu-image myimage" style="margin-right: 5px; margin-right: 0px;">
                                     </div>
                                     <h3 style="">@DbRes.T("welcome", "topbar") @userData.Username</h3>
                                     <div class="tabmenu-inner-content">
