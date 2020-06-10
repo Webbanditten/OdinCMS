@@ -57,7 +57,7 @@ namespace KeplerCMS.Controllers
                 var figure = Helpers.FigureHelper.ConvertFigure(nameValues.Get("figure"), nameValues.Get("direction") != null ? int.Parse(nameValues.Get("direction")) : 0);
                 nameValues.Set("figure", figure);
             }
-            return Redirect("http://www.habbo.com/habbo-imaging/avatarimage?" + nameValues.ToString());
+            return Redirect("https://www.habbo.com/habbo-imaging/avatarimage?" + nameValues.ToString());
         }
 
         [LoggedInFilter]

@@ -43,16 +43,31 @@ namespace KeplerCMS.Helpers
         public static Figure GetFigureFromString(string input)
         {
             var figure = new Figure();
+
+
             var hr = input.Substring(0, 5);
             figure.HR = new FigurePart(hr.Substring(0,3), hr.Substring(3,2));
+
+
             var hd = input.Substring(5, 5);
             figure.HD = new FigurePart(hd.Substring(0, 3), hd.Substring(3, 2));
-            var ch = input.Substring(10, 5);
-            figure.CH = new FigurePart(ch.Substring(0, 3), ch.Substring(3, 2));
-            var lg = input.Substring(15, 5);
+
+
+            var lg = input.Substring(10, 5);
             figure.LG = new FigurePart(lg.Substring(0, 3), lg.Substring(3, 2));
-            var sh = input.Substring(20, 5);
+
+
+
+            var sh = input.Substring(15, 5);
             figure.SH = new FigurePart(sh.Substring(0, 3), sh.Substring(3, 2));
+
+            var ch = input.Substring(20, 5);
+            figure.CH = new FigurePart(ch.Substring(0, 3), ch.Substring(3, 2));
+
+
+            
+
+
 
             return figure;
         }
