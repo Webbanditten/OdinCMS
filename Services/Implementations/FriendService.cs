@@ -26,9 +26,9 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<FriendRequests> AddFriend(int from, int to)
         {
-            if(!(await RequestExists(from, to))) {
+            if (!(await RequestExists(from, to))) {
 
-                _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.send_friend_request, $"{from},{to}");
+                _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.send_friend_request, new CommandTemplate { UserId = from, FriendRequestTo = to });
                 var friendRequest = new FriendRequests { FromId = from, ToId = to };
                 _context.FriendRequests.Add(friendRequest);
                 await _context.SaveChangesAsync();

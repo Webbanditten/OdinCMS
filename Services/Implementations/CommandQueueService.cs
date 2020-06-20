@@ -1,7 +1,9 @@
 ﻿using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
+using KeplerCMS.Models;
 using KeplerCMS.Models.Enums;
 using KeplerCMS.Services.Interfaces;
+using Newtonsoft.Json;
 using System;
 
 namespace KeplerCMS.Services
@@ -14,9 +16,10 @@ namespace KeplerCMS.Services
         {
             _context = context;
         }
-        public void QueueCommand(CommandQueueType command, string arguments)
+        public void QueueCommand(CommandQueueType command, CommandTemplate template)
         {
-            _context.CommandQueue.Add(new CommandQueue { Executed = 0, Command = Enum.GetName(typeof(CommandQueueType), command), Arguments = arguments });
+            var json = JsonConvert.SerializeObject(template);
+            _context.CommandQueue.Add(new CommandQueue { Executed = 0, Command = Enum.GetName(typeof(CommandQueueType), command), Arguments = json });
             _context.SaveChanges();
         }
     }

@@ -32,7 +32,7 @@ namespace KeplerCMS.Services.Implementations
                     user.Credits = newCredits;
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
-                    _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.reduce_credits, $"{userId},{credit}");
+                    _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.reduce_credits, new Models.CommandTemplate { UserId = userId, Credits = credit });
 
                     return true;
                 }
@@ -80,7 +80,7 @@ namespace KeplerCMS.Services.Implementations
                     if (user != null)
                     {
                         // Tell server to update credits if redeemed 
-                        _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.update_credits, $"{userId},{voucher.Credits}");
+                        _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.update_credits, new Models.CommandTemplate { UserId = userId, Credits = voucher.Credits });
 
                         // Add to history
                         await _context.VoucherHistory.AddAsync(new VoucherHistory { CreditsRedeemed = voucher.Credits, UsedAt = DateTime.Now, UserId = user.Id, VoucherCode = voucher.VoucherCode });
@@ -118,7 +118,7 @@ namespace KeplerCMS.Services.Implementations
                         var newItem = new Items { DefinitionId = catalogItem.DefinitionId, UserId = userId, CustomData = "" };
                         _context.Items.Add(newItem);
                         await _context.SaveChangesAsync();
-                        _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.purchase_furni, $"{userId},{catalogItem.DefinitionId}");
+                        _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.purchase_furni, new Models.CommandTemplate { UserId = userId, DefinitionId = catalogItem.DefinitionId });
                         return newItem;
                     }
                 }

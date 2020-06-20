@@ -14,6 +14,7 @@ namespace KeplerCMS.Models
         housekeeping_localization,
         housekeeping_campaign,
         housekeeping_upload,
-        housekeeping_news
+        housekeeping_news,
+        fuse_administrator_access
     }
 }

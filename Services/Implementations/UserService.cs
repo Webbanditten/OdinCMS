@@ -2,6 +2,7 @@
 using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
 using KeplerCMS.Helpers;
+using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -51,7 +52,7 @@ namespace KeplerCMS.Services.Implementations
             user.Gender = newGender;
             _context.SaveChanges();
 
-            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.refresh_appearance, userId);
+            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.refresh_appearance, new CommandTemplate { UserId = user.Id });
         }
 
         public async Task<Users> GenerateSSO(int userId)

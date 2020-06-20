@@ -1,0 +1,43 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.MessengerCampaign
+
+@if (ViewData["message"] != null)
+{
+    <div class="message">
+        @ViewData["message"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Send messenger campaign to users</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index">
+            <div class="form-group">
+                <label asp-for="Text" class="label-control"></label>
+                <textarea id="editor" style="height:150px; width:200px" asp-for="Text" class="form-control"></textarea>
+                <span asp-validation-for="Text" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Url" class="label-control"></label>
+                <input asp-for="Url" class="form-control" />
+                <span asp-validation-for="Url" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Link" class="label-control"></label>
+                <input asp-for="Link" class="form-control" />
+                <span asp-validation-for="Link" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="OnlineOnly" class="label-control"></label>
+                <input asp-for="OnlineOnly" class="form-control" />
+                <span asp-validation-for="OnlineOnly" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>

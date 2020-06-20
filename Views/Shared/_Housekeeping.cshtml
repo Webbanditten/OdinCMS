@@ -28,6 +28,12 @@
         case "/housekeeping/upload":
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
+        case "/housekeeping/admin":
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
+        case "/housekeeping/messengercampaign":
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
         default:
             activeMenuItem = HousekeepingMenu.Frontpage;
             break;
@@ -54,7 +60,7 @@
                 <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
                 <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")><a href="">Hobba tools</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="">Admin tools</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="">Localization</a></li>
             </ul>
         </div>
@@ -72,6 +78,21 @@
                                     <li><a href="@Url.Action("Index", "Pages")">Pages</a></li>
                                     <li><a href="@Url.Action("Index", "Upload")">Upload</a></li>
                                     <li><a href="@Url.Action("Index", "News")">News</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @{if (activeMenuItem == HousekeepingMenu.AdminTools)
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Admin tools
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
                                 </ul>
                             </div>
                         </div>
