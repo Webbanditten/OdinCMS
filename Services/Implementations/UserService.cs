@@ -48,7 +48,8 @@ namespace KeplerCMS.Services.Implementations
         public void UpdateFigure(string userId, string figureData, string newGender)
         {
             var user = _context.Users.Where(u => u.Id == int.Parse(userId)).FirstOrDefault();
-            user.Figure = FigureHelper.FixFigure(figureData);
+            //user.Figure = FigureHelper.FixFigure(figureData);
+            user.Figure = figureData;
             user.Gender = newGender;
             _context.SaveChanges();
 

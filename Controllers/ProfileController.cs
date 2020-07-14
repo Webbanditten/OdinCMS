@@ -26,10 +26,10 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public IActionResult UpdateFigure(string newGender, string figureData)
         {
-            if((newGender == "M" || newGender == "F") && figureData.Length == 25)
-            {
+            //if((newGender == "M" || newGender == "F") && figureData.Length == 25)
+            //{
                 _userService.UpdateFigure(User.Identity.Name, figureData, newGender);
-            }
+            //}
             return RedirectToAction("index");
         }
     }
