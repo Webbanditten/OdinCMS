@@ -1,0 +1,35 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel
+@{
+    Layout = null;
+}
+<div id="profile-tags-container">
+
+
+    <span class="tag-search-rowholder">
+
+        <a href="/tag/test" class="tag">test</a>
+
+
+        <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
+
+    </span>
+
+    <span class="tag-search-rowholder">
+
+        <a href="/tag/dd" class="tag">dd</a>
+
+        <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
+
+    </span>
+    <img id="tag-img-added" border="0" src="~/images/myhabbo/buttons/tag_button_added.gif" style="display:none" />
+
+</div>
+
+<script type="text/javascript">
+    document.observe("dom:loaded", function () {
+        TagHelper.setTexts({
+            buttonText: "@DbRes.T("ok", "habbohome")",
+            tagLimitText: "@DbRes.T("tag_limit", "habbohome")"
+        });
+    });
+</script>
