@@ -10,21 +10,33 @@ namespace KeplerCMS.Areas.MyHabbo
     public class TagController : Controller
     {
 
-        private readonly IHomeService _homeService;
-        public TagController(IHomeService homeService)
+        private readonly IUserService _userService;
+        public TagController(IUserService userService)
         {
-            _homeService = homeService;
+            _userService = userService;
         }
         [HttpPost]
         [Route("myhabbo/tag/add")]
         public async Task<IActionResult> Add(int accountId, string tagName)
         {
+            /*
+               invalidtag, taglimit, valid
+            */
+            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck"))
+            {
+                return Content("invalidtag");
+            }
 
             var userId = int.Parse(User.Identity.Name);
-            /*
-                invalidtag, taglimit, valid
-            */
-            return Content("taglimit");
+            var tags = await _userService.Tags(userId);
+
+            if(tags.Count >= 8) {
+                return Content("taglimit");
+            }
+
+            var tag = await _userService.AddTag(new Data.Models.Tags { UserId = userId, Tag = tagName.ToLower() });
+
+            return Content("valid");
         }
 
         [HttpPost]
@@ -32,14 +44,17 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Remove(int accountId, string tagName)
         {
             var userId = int.Parse(User.Identity.Name);
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml");
+            _userService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
+            var tags = await _userService.Tags(userId);
+            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
 
         [Route("myhabbo/tag/list")]
         public async Task<IActionResult> List(string tagMsgCode, int accountId)
         {
             var userId = int.Parse(User.Identity.Name);
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml");
+            var tags = await _userService.Tags(userId);
+            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
     }
 

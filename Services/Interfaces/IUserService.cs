@@ -1,4 +1,5 @@
 ﻿using KeplerCMS.Data.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Services.Interfaces
@@ -13,6 +14,13 @@ namespace KeplerCMS.Services.Interfaces
         public Task<Users> GenerateSSO(int userId);
 
         public Task<Users> Create(Users user);
+
+        public Task<ICollection<Tags>> Tags(int userId);
+
+        public Task<Tags> AddTag(Tags tag);
+
+        public void RemoveTag(Tags tag);
+
 
     }
 }

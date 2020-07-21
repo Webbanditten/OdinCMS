@@ -80,12 +80,9 @@
         }
 
         <div id="profile-tags-panel">
+            
             <div id="profile-tag-list">
-                <div id="profile-tags-container">
-
-                    @DbRes.T("tag_notags", "habbohome")
-
-                </div>
+                <partial name="~/Areas/MyHabbo/Views/Tag/List.cshtml" model=Model.WidgetData.Tags />
 
                 <script type="text/javascript">
                     document.observe("dom:loaded", function () {

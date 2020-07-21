@@ -343,6 +343,7 @@ namespace KeplerCMS.Services.Implementations
             return new ItemWidgetDataModel
             {
                 User = await _userService.GetUserById(userId.ToString()),
+                Tags = await _userService.Tags(userId),
                 Rooms = await _roomService.GetRoomsByOwner(userId),
                 SongList = await _traxService.GetSongsByOwner(userId),
                 Ratings = await GetRatings(userId),

@@ -1,27 +1,34 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel
+﻿@model ICollection<KeplerCMS.Data.Models.Tags>
 @{
     Layout = null;
 }
 <div id="profile-tags-container">
 
-
+    @foreach(var tag in Model)
+    {
     <span class="tag-search-rowholder">
 
-        <a href="/tag/test" class="tag">test</a>
+        <a href="/tag/@tag.Tag" class="tag">@tag.Tag</a>
 
-
-        <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
+        @{
+            if (User.Identity.IsAuthenticated && tag.UserId.ToString() != User.Identity.Name)
+            {
+                <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
+            }
+            else
+            {
+                <img id="tag-img-added" border="0" src="~/images/myhabbo/buttons/tag_button_dim.gif" />
+            }
+        }
 
     </span>
-
-    <span class="tag-search-rowholder">
-
-        <a href="/tag/dd" class="tag">dd</a>
-
-        <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
-
-    </span>
-    <img id="tag-img-added" border="0" src="~/images/myhabbo/buttons/tag_button_added.gif" style="display:none" />
+    }
+    @{ 
+        if(Model == null)
+        {
+            @DbRes.T("tag_notags", "habbohome")
+        }
+    }
 
 </div>
 
