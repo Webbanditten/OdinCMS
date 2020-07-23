@@ -55,6 +55,31 @@ namespace KeplerCMS.Controllers
             
         }
 
+        [Route("group/{groupname:minlength(1)}")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> Group(string groupname)
+        {
+            var enableEditing = false;
+            if (Request.Cookies["editgroup"] != null && Request.Cookies["editgroup"] == "true")
+            {
+                enableEditing = true;
+            }
+
+
+            var group = await _homeService.GetHomeByGroupName(groupname, int.Parse(User.Identity.Name), enableEditing);
+            if (group != null)
+            {
+                if (User.Identity.IsAuthenticated && User.Identity.Name != group.Home.UserId.ToString())
+                {
+                    Response.Cookies.Delete("editgroup");
+                }
+
+                return View(group);
+            }
+            return View("HomeNotFound");
+
+        }
+
         [Route("home/{id}/id")]
         [LoggedInFilter(false)]
         public async Task<IActionResult> HomeById(int id)

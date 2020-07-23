@@ -25,6 +25,23 @@ function closePurchaseDialog() {
     refreshCredits();
 }
 j(document).ready(function () {
+
+    j(".purchase-group").click(function (e) {
+        e.preventDefault();
+        var dialog = createDialog("group_purchase_form", "Opret en Gruppe", 9001, 0, -1000, cancelGroupPurchase);
+        appendDialogBody(dialog, "<p style=\"text-align:center\"><img src=\"/images/progress_bubbles.gif\" alt=\"\" width=\"29\" height=\"5\" /></p><div style=\"clear\"></div>", true);
+        moveDialogToCenter(dialog);
+        showOverlay();
+        new Ajax.Request(
+            habboReqPath + "/grouppurchase/group_create_form",
+            {
+                method: "post", parameters: "product=" + encodeURIComponent("g0"), onComplete: function (req, json) {
+                    setDialogBody(dialog, req.responseText);
+                }
+            });
+
+    });
+
     j(".buy-btn").click(function (e) {
         e.preventDefault();
         var dialog = createDialog("purchase_dialog", resources.dbRes("confirm_purchase"), 9001, 0, -1000, closePurchase);

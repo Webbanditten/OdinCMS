@@ -29,6 +29,40 @@ namespace KeplerCMS.Services.Implementations
             _traxService = traxService;
             _friendService = friendService;
         }
+
+
+        public async Task<HomeViewModel> GetHomeByGroupName(string groupname, int userId, bool enableEditing)
+        {
+            var group = await _context.Homes.Where(s => s.GroupName != null && s.GroupName.Equals(groupname, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
+            if(group != null)
+            {
+                return await GetHomeByGroupId(group.Id, userId, enableEditing);
+            }
+            return null;
+        }
+
+        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, int userId, bool enableEditing)
+        {
+            var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
+            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing };
+
+            //var widgetData = await GetWidgetData(homeUser.Id);
+
+            homeViewModel.Items = await (from item in _context.HomesItems
+                                         join def in _context.HomesItemData
+                                         on item.ItemId equals def.Id
+                                         where item.OwnerId == home.Id
+                                         select new ItemViewModel
+                                         {
+                                             Item = item,
+                                             EnableEditing = enableEditing,
+                                             Definition = def,
+                                             WidgetData = null
+                                         }).ToListAsync();
+            return homeViewModel;
+        }
+
+
         public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
         {
             // Get home for type user

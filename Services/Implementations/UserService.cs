@@ -85,7 +85,7 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<ICollection<Tags>> Tags(int userId)
+        public async Task<List<Tags>> Tags(int userId)
         {
             var user = await GetUserById(userId.ToString());
             if (user != null)

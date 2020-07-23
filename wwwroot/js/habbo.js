@@ -853,9 +853,9 @@ function showGroupPurchaseConfirmation(productCode, dialog_title) {
     new Ajax.Request(
         habboReqPath + "/grouppurchase/purchase_confirmation",
         {
-            method: "post", parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent($("group_name").value) + "&description=" + encodeURIComponent($("group_description").value),
+            method: "post", parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent($("#group_name").value) + "&description=" + encodeURIComponent($("#group_description").value),
             onComplete: function (req) {
-                var groupPurchaseDialog = $('group_purchase_form');
+                var groupPurchaseDialog = $('#group_purchase_form');
                 if (req.responseText.indexOf('purchase-group-form-id') < 0) {
                     moveOverlay('9002');
                     groupPurchaseDialog = createDialog("group_purchase_confirmation", dialog_title, "9003", 0, -1000, cancelGroupPurchase);

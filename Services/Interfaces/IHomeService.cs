@@ -17,6 +17,8 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<InventoryItem>> GetInventory(string type, int userId);
 
         Task<HomeViewModel> GetHome(int userId, bool enableEditing);
+        Task<HomeViewModel> GetHomeByGroupName(string groupname, int userId, bool enableEditing);
+        Task<HomeViewModel> GetHomeByGroupId(int groupId, int userId, bool enableEditing);
         Task<Homes> GetHomeDetailsById(int homeId);
         Task<HomesItemData> GetItemDetail(int id);
         Task<List<CatalogItem>> GetCatelogItemsInCategory(int category);

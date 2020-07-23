@@ -1,0 +1,332 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.HomeViewModel
+@{
+    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    ViewData["title"] = DbRes.T("group", "groups") + ": " + Model.Home.GroupName;
+
+}
+@section Styles {
+    <link href="~/styles/myhabbo/style.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/assets.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/skins.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/dialogs.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/myhabbo2.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/buttons.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/control.textarea.css" rel="stylesheet" />
+}
+@section ScriptsTop {
+    <script src="~/js/myhabbo/libs2.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/visual.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/libs.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/common.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/fullcontent.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/visual.js"></script>
+    <script src="~/js/myhabbo/fullcontent.js"></script>
+
+
+    <script src="~/js/myhabbo/homeview.js"></script>
+    <script src="~/js/myhabbo/homeauth.js"></script>
+
+    <script src="~/js/myhabbo/homeedit.js"></script>
+}
+
+
+
+
+
+
+    <div id="page-headline">
+        <div id="page-headline-breadcrums">
+
+        </div>
+        <div id="page-headline-text">
+            @DbRes.T("group", "groups"): @Model.Home.GroupName
+        </div>
+    </div>
+
+
+@{ if (User.Identity.IsAuthenticated && Model.Home.UserId == int.Parse(User.Identity.Name))
+    {
+        <div id="top-toolbar" class="clearfix" style="height: 30px;">
+            <div style="padding-right: 10px; padding-left:10px;">
+                @{
+                    if (Model.IsEditing)
+                    {
+                        <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
+                        <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
+                        <a id="cancel-button" class="toolbutton cancel" href="#"><span>@DbRes.T("cancel_editing", "habbohome")</span></a>
+                        <a id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+                    }
+                    else
+                    {
+                        <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
+                    }
+                }
+            </div>
+        </div>
+    }
+}
+<div id="mypage-wrapper">
+
+
+    <div id="mypage-content">
+
+
+        <div id="mypage-bg" class="@Model.Home.Background">
+
+            <div id="playground-outer">
+                <div id="playground">
+
+
+
+                    @{
+                        foreach (var item in Model.Items)
+                        {
+                            <partial name="~/Areas/MyHabbo/Views/Items/Item.cshtml" model=item />
+                        }
+
+                    }
+
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<script language="JavaScript" type="text/javascript">
+    @{
+        if(Model.IsEditing)
+        {
+            @:initEditToolbar();
+            @:initMovableItems();
+            @:document.observe("dom:loaded", initDraggableDialogs);
+            //Utils.setAllEmbededObjectsVisibility('hidden');
+        }
+    }
+
+
+</script>
+
+
+<div id="edit-save" style="display:none;"></div>
+
+<div id="edit-menu" class="menu">
+    <div class="menu-header">
+        <div class="menu-exit" id="edit-menu-exit"><img src="https://cdn.classichabbo.com/web-gallery/images/dialogs/menu-exit.gif" alt="" width="11" height="11" /></div>
+        <h3>@DbRes.T("edit", "habbohome")</h3>
+
+    </div>
+    <div class="menu-body">
+        <div class="menu-content">
+            <form action="#" onsubmit="return false;">
+                <div id="edit-menu-skins">
+                    <select id="edit-menu-skins-select">
+                        <option value="1" id="edit-menu-skins-select-defaultskin">@DbRes.T("theme_1", "habbohome")</option>
+                        <option value="6" id="edit-menu-skins-select-goldenskin">@DbRes.T("theme_6", "habbohome")</option>
+
+                        <option value="3" id="edit-menu-skins-select-metalskin">@DbRes.T("theme_3", "habbohome")</option>
+                        <option value="5" id="edit-menu-skins-select-notepadskin">@DbRes.T("theme_5", "habbohome")</option>
+                        <option value="2" id="edit-menu-skins-select-speechbubbleskin">@DbRes.T("theme_2", "habbohome")</option>
+                        <option value="4" id="edit-menu-skins-select-noteitskin">@DbRes.T("theme_4", "habbohome")</option>
+                        @{
+                            if (userData != null && userData.HasHabboClub)
+                            {
+                                <option value="8" id="edit-menu-skins-select-hc_pillowskin">@DbRes.T("theme_8", "habbohome")</option>
+                                <option value="7" id="edit-menu-skins-select-hc_machineskin">@DbRes.T("theme_7", "habbohome")</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+                <div id="edit-menu-stickie">
+
+                    <p>@DbRes.T("stickie_warning_delete", "habbohome")</p>
+                </div>
+                <div id="rating-edit-menu">
+                    <input type="button" id="ratings-reset-link"
+                           value="Reset rating" />
+                </div>
+                <div id="highscorelist-edit-menu" style="display:none">
+                    <select id="highscorelist-game">
+                        <option value="">Select game</option>
+                        <option value="1">Battle Ball: Rebound!</option>
+                        <option value="2">SnowStorm</option>
+                        <option value="0">Wobble Squabble</option>
+                    </select>
+                </div>
+                <div id="edit-menu-remove-group-warning">
+                    <p>This item belongs to another user. If you remove it, it will return to their inventory.</p>
+
+                </div>
+                <div id="edit-menu-gb-availability">
+                    <select id="guestbook-privacy-options">
+                        <option value="private">@DbRes.T("guestbook_friendsonly", "habbohome")</option>
+                        <option value="public">@DbRes.T("guestbook_public", "habbohome")</option>
+                    </select>
+                </div>
+                <div id="edit-menu-trax-select">
+
+                    <select id="trax-select-options"></select>
+                </div>
+                <div id="edit-menu-remove">
+                    <input type="button" id="edit-menu-remove-button" value="@DbRes.T("remove", "habbohome")" />
+                </div>
+            </form>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+    <div class="menu-bottom"></div>
+</div>
+
+
+
+
+
+
+<div class="cbb topdialog" id="guestbook-form-dialog">
+    <h2 class="title dialog-handle">@DbRes.T("guestbook_newentry", "habbohome")</h2>
+
+    <a class="topdialog-exit" href="#" id="guestbook-form-dialog-exit">X</a>
+    <div class="topdialog-body" id="guestbook-form-dialog-body">
+
+        <div id="guestbook-form-tab">
+            <form method="post" id="guestbook-form">
+                <p>
+                    @DbRes.T("guestbook_warning_maxlength_200", "habbohome")        <input type="hidden" name="ownerId" value="1" />
+                </p>
+                <div>
+                    <textarea cols="15" rows="5" name="message" id="guestbook-message"></textarea>
+                    <script type="text/javascript">
+                        bbcodeToolbar = new Control.TextArea.ToolBar.BBCode("guestbook-message");
+                        bbcodeToolbar.toolbar.toolbar.id = "bbcode_toolbar";
+                                var colors = { "red" : ["#d80000", "@DbRes.T("bbcode_color_red", "habbohome")"],
+                            "orange" : ["#fe6301", "@DbRes.T("bbcode_color_orange", "habbohome")"],
+                            "yellow" : ["#ffce00", "@DbRes.T("bbcode_color_yellow", "habbohome")"],
+                            "green" : ["#6cc800", "@DbRes.T("bbcode_color_green", "habbohome")"],
+                            "cyan" : ["#00c6c4", "@DbRes.T("bbcode_color_cyan", "habbohome")"],
+                            "blue" : ["#0070d7", "@DbRes.T("bbcode_color_blue", "habbohome")"],
+                            "gray" : ["#828282", "@DbRes.T("bbcode_color_gray", "habbohome")"],
+                            "black" : ["#000000", "@DbRes.T("bbcode_color_black", "habbohome")"]
+                        };
+                        bbcodeToolbar.addColorSelect("@DbRes.T("bbcode_color", "habbohome")", colors, true);
+                    </script>
+
+                    <div id="linktool">
+                        <div id="linktool-scope">
+                            <label for="linktool-query-input">@DbRes.T("linktool_createlink", "habbohome")</label>
+                            <input type="radio" name="scope" class="linktool-scope" value="1" checked="checked" />@DbRes.T("linktool_habbos", "habbohome")        <input type="radio" name="scope" class="linktool-scope" value="2" />@DbRes.T("linktool_rooms", "habbohome")
+                        </div>
+                        <input id="linktool-query" type="text" name="query" value="" />
+                        <a href="#" class="new-button" id="linktool-find"><b>@DbRes.T("linktool_search", "habbohome")</b><i></i></a>
+                        <div class="clear" style="height: 0;"><!-- --></div>
+
+                        <div id="linktool-results" style="display: none">
+                        </div>
+                        <script type="text/javascript">
+                            linkTool = new LinkTool(bbcodeToolbar.textarea);
+                        </script>
+                    </div>
+                </div>
+
+                <div class="guestbook-toolbar clearfix">
+                    <a href="#" class="new-button" id="guestbook-form-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+                    <a href="#" class="new-button" id="guestbook-form-preview"><b>@DbRes.T("preview", "habbohome")</b><i></i></a>
+                </div>
+
+            </form>
+        </div>
+        <div id="guestbook-preview-tab">&nbsp;</div>
+    </div>
+</div>
+<div class="cbb topdialog" id="guestbook-delete-dialog">
+    <h2 class="title dialog-handle">@DbRes.T("guestbook_warning_delete_title", "habbohome")</h2>
+
+    <a class="topdialog-exit" href="#" id="guestbook-delete-dialog-exit">X</a>
+    <div class="topdialog-body" id="guestbook-delete-dialog-body">
+        <form method="post" id="guestbook-delete-form">
+            <input type="hidden" name="entryId" id="guestbook-delete-id" value="" />
+
+            <p>@DbRes.T("guestbook_warning_delete", "habbohome")</p>
+            <p>
+                <a href="#" id="guestbook-delete-cancel" class="new-button"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+                <a href="#" id="guestbook-delete" class="new-button"><b>@DbRes.T("delete", "habbohome")</b><i></i></a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<script language="JavaScript" type="text/javascript">
+    Event.observe(window, "resize", function () { if (editMenuOpen) closeEditMenu(); }, false);
+    Event.observe(document, "click", function () { if (editMenuOpen) closeEditMenu(); }, false);
+    Event.observe("edit-menu", "click", Event.stop, false);
+    Event.observe("edit-menu-exit", "click", function () { closeEditMenu(); }, false);
+    Event.observe("edit-menu-remove-button", "click", handleEditRemove, false);
+    Event.observe("edit-menu-skins-select", "click", Event.stop, false);
+    Event.observe("edit-menu-skins-select", "change", handleEditSkinChange, false);
+    Event.observe("guestbook-privacy-options", "click", Event.stop, false);
+    Event.observe("guestbook-privacy-options", "change", handleGuestbookPrivacySettings, false);
+    Event.observe("trax-select-options", "click", Event.stop, false);
+    Event.observe("trax-select-options", "change", handleTraxplayerTrackChange, false);
+</script>
+
+
+
+
+
+<script type="text/javascript">
+    HabboView.run();
+</script>
+
+
+
+<script type="text/javascript">
+    document.observe("dom:loaded", function () { initView(@Model.Home.Id, @Model.Home.Id); });
+
+
+    function isElementLimitReached() {
+        if (getElementCount() >= 350) {
+            showHabboHomeMessageBox("Error", "@DbRes.T("error_limit", "habbohome")", "@DbRes.T("close", "habbohome")");
+            return true;
+        }
+        return false;
+    }
+
+    function cancelEditing(expired) {
+        location.replace("/home/cancel/@Model.Home.Id" + (expired ? "?expired=true" : ""));
+    }
+
+    function getSaveEditingActionName() {
+        return '/myhabbo/save';
+    }
+
+    function showEditErrorDialog() {
+        var closeEditErrorDialog = function (e) { if (e) { Event.stop(e); } Element.remove($("myhabbo-error")); Overlay.hide(); }
+        var dialog = Dialog.createDialog("myhabbo-error", "", false, false, false, closeEditErrorDialog);
+        Dialog.setDialogBody(dialog, '<p>@DbRes.T("error_unknown", "habbohome")</p><p><a href="#" class="new-button" id="myhabbo-error-close"><b>@DbRes.T("close", "habbohome")</b><i></i></a></p><div class="clear"></div>');
+        Event.observe($("myhabbo-error-close"), "click", closeEditErrorDialog);
+        Dialog.moveDialogToCenter(dialog);
+        Dialog.makeDialogDraggable(dialog);
+    }
+
+
+    function showSaveOverlay() {
+        var invalidPos = getElementsInInvalidPositions();
+        if (invalidPos.length > 0) {
+            $A(invalidPos).each(function (el) { Element.scrollTo(el); Effect.Pulsate(el); });
+            showHabboHomeMessageBox("@DbRes.T("error_cantplacehere", "habbohome")", "@DbRes.T("close", "habbohome")");
+            return false;
+        } else {
+            Overlay.show(null, '@DbRes.T("saving", "habbohome")');
+            return true;
+        }
+    }
+
+
+</script>
+

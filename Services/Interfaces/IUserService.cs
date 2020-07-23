@@ -15,7 +15,7 @@ namespace KeplerCMS.Services.Interfaces
 
         public Task<Users> Create(Users user);
 
-        public Task<ICollection<Tags>> Tags(int userId);
+        public Task<List<Tags>> Tags(int userId);
 
         public Task<Tags> AddTag(Tags tag);
 

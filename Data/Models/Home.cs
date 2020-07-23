@@ -48,6 +48,12 @@ namespace KeplerCMS.Data.Models
         public string Type { get; set; }
         [Column("background")]
         public string Background { get; set; }
+        [Column("group_badge")]
+        public string GroupBadge { get; set; }
+        [Column("group_name")]
+        public string GroupName { get; set; }
+        [Column("group_description")]
+        public string GroupDescription { get; set; }
 
         [NotMapped]
         public bool AllowDisplay

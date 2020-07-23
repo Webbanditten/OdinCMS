@@ -11,12 +11,12 @@
         <a href="/tag/@tag.Tag" class="tag">@tag.Tag</a>
 
         @{
-            if (User.Identity.IsAuthenticated && tag.UserId.ToString() != User.Identity.Name)
+            if (User.Identity.IsAuthenticated && tag.UserId.ToString() == User.Identity.Name)
             {
                 <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
             }
             else
-            {
+            {   
                 <img id="tag-img-added" border="0" src="~/images/myhabbo/buttons/tag_button_dim.gif" />
             }
         }
@@ -24,7 +24,7 @@
     </span>
     }
     @{ 
-        if(Model == null)
+        if(Model.Count == 0)
         {
             @DbRes.T("tag_notags", "habbohome")
         }

@@ -22,15 +22,15 @@ namespace KeplerCMS.Areas.MyHabbo
             /*
                invalidtag, taglimit, valid
             */
-            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck"))
+            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck") || tagName.Length == 0)
             {
                 return Content("invalidtag");
             }
 
             var userId = int.Parse(User.Identity.Name);
             var tags = await _userService.Tags(userId);
-
-            if(tags.Count >= 8) {
+            tagName = tagName.ToLower();
+            if (tags.Count >= 12 || tags.Find(s=>s.Tag == tagName) != null) {
                 return Content("taglimit");
             }
 
