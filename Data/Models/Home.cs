@@ -54,6 +54,12 @@ namespace KeplerCMS.Data.Models
         public string GroupName { get; set; }
         [Column("group_description")]
         public string GroupDescription { get; set; }
+        [Column("group_type")]
+        public int GroupType { get; set; }
+        [Column("group_url")]
+        public string GroupUrl { get; set; }
+        [Column("group_room")]
+        public int? GroupRoom { get; set; }
 
         [NotMapped]
         public bool AllowDisplay

@@ -55,7 +55,7 @@ namespace KeplerCMS.Controllers
             
         }
 
-        [Route("group/{groupname:minlength(1)}")]
+        [Route("groups/{groupname:minlength(1)}")]
         [LoggedInFilter(false)]
         public async Task<IActionResult> Group(string groupname)
         {
@@ -78,6 +78,30 @@ namespace KeplerCMS.Controllers
             }
             return View("HomeNotFound");
 
+        }
+
+        [Route("groups/{id}/id")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> GroupById(int id)
+        {
+            var enableEditing = false;
+            if (Request.Cookies["editgroup"] != null && Request.Cookies["editgroup"] == "true")
+            {
+                enableEditing = true;
+            }
+
+
+            var group = await _homeService.GetHomeByGroupId(id, int.Parse(User.Identity.Name), enableEditing);
+            if (group != null)
+            {
+                if (User.Identity.IsAuthenticated && User.Identity.Name != group.Home.UserId.ToString())
+                {
+                    Response.Cookies.Delete("editgroup");
+                }
+
+                return View("Group", group);
+            }
+            return View("HomeNotFound");
         }
 
         [Route("home/{id}/id")]
@@ -113,6 +137,28 @@ namespace KeplerCMS.Controllers
 
             return Redirect("/home");
         }
+
+        [Route("groups/edit/{homeId}")]
+        [LoggedInFilter]
+        public async Task<IActionResult> GroupEdit(int homeId)
+        {
+            var currentUser = await _userService.GetUserById(User.Identity.Name);
+            var home = await _homeService.GetHomeDetailsById(homeId);
+            if (home.UserId == currentUser.Id)
+            {
+                // Set editing mode
+                CookieOptions option = new CookieOptions
+                {
+                    Expires = DateTime.Now.AddMinutes(30)
+                };
+                Response.Cookies.Append("editgroup", "true", option);
+
+                return Redirect("/groups/" + home.Id + "/id");
+            }
+
+            return Redirect("/groups");
+        }
+
 
         [Route("home/cancel/{homeId}")]
         [LoggedInFilter]
