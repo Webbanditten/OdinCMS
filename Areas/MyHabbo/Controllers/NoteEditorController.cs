@@ -34,9 +34,15 @@ namespace KeplerCMS.Areas.MyHabbo
         [LoggedInFilter]
         public async Task<IActionResult> Place(NoteEditorViewModel model)
         {
-            var item = await _homeService.PlaceNote(model.Skin, model.NoteText, int.Parse(User.Identity.Name));
-            Response.Headers.Add("x-json", item.Item.Id.ToString());
-            return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", item);
+            var userId = int.Parse(User.Identity.Name);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
+            {
+                var item = await _homeService.PlaceNote(homeId, model.Skin, model.NoteText, userId);
+                Response.Headers.Add("x-json", item.Item.Id.ToString());
+                return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", item);
+            }
+            return Content("ERROR");
         }
 
         [HttpPost]
@@ -45,10 +51,15 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Edit(int skinId, int stickieId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var updatedItem = await _homeService.EditItem(stickieId, skinId, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
+            {
+                var updatedItem = await _homeService.EditItem(homeId, stickieId, skinId, userId);
 
-            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"stickie\"}");
-            return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", updatedItem);
+                Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"stickie\"}");
+                return View("~/Areas/MyHabbo/Views/Items/Stickie.cshtml", updatedItem);
+            }
+            return Content("ERROR");
         }
 
         [HttpPost]
@@ -56,8 +67,14 @@ namespace KeplerCMS.Areas.MyHabbo
         [Route("myhabbo/stickie/delete")]
         public async Task<IActionResult> Delete(int stickieId)
         {
-            await _homeService.RemoveItem(stickieId, int.Parse(User.Identity.Name));
-            return Content("SUCCESS");
+            var userId = int.Parse(User.Identity.Name);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if(await _homeService.CanEditHome(homeId, userId))
+            {
+                await _homeService.RemoveItem(homeId, stickieId, userId);
+                return Content("SUCCESS");
+            }
+            return Content("ERROR");
         }
     }
 

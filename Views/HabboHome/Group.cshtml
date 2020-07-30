@@ -59,6 +59,9 @@
                     else
                     {
                         <a href="/groups/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
+                        <a href="/groups/@Model.Home.Id/manage" id="edit-button" class="toolbutton widgets" style="float:left"><span>@DbRes.T("settings", "habbohome")</span></a>
+                        <a href="/groups/@Model.Home.Id/manage/badge" id="edit-button" class="toolbutton backgrounds" style="float:left"><span>@DbRes.T("badge", "habbohome")</span></a>
+                        <a href="/groups/@Model.Home.Id/manage/members" id="edit-button" class="toolbutton tell" style="float:left"><span>@DbRes.T("manage_members", "habbohome")</span></a>
                     }
                 }
             </div>

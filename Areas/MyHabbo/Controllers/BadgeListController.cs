@@ -19,7 +19,8 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> BadgePaging(int pageNumber, int widgetId)
         {
             var item = await _homeService.GetItem(widgetId);
-            item.WidgetData = await _homeService.GetWidgetData(item.Item.OwnerId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            item.WidgetData = await _homeService.GetWidgetData(homeId, item.Item.OwnerId);
             return View(new BadgesViewModel { Item = item, PageNumber = pageNumber });
         }
     }

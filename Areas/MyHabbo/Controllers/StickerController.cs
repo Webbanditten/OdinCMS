@@ -21,9 +21,14 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> PlaceSticker(int selectedStickerId, int zIndex)
         {
             var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.PlaceItem(selectedStickerId, zIndex, userId);
-            Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
-            return View(item);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if(await _homeService.CanEditHome(homeId, userId))
+            {
+                var item = await _homeService.PlaceItem(homeId, selectedStickerId, zIndex, userId);
+                Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
+                return View(item);
+            }
+            return Content("ERROR");
         }
 
         [HttpPost]
@@ -31,7 +36,8 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> RemoveSticker(int stickerId)
         {
             var userId = int.Parse(User.Identity.Name);
-            await _homeService.RemoveItem(stickerId, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            await _homeService.RemoveItem(homeId, stickerId, userId);
             return Content("SUCCESS");
         }
     }

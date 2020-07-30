@@ -29,22 +29,22 @@ namespace KeplerCMS.Controllers
             var enableEditing = false;
             if(habboHomeUser != null)
             {
-                if (User.Identity.IsAuthenticated && User.Identity.Name != habboHomeUser.Id.ToString())
+                if (Request.Cookies["editid"] != null)
                 {
-                    Response.Cookies.Delete("editmode");
+                    enableEditing = true;
                 }
-                else
-                {
-                    if (Request.Cookies["editmode"] != null && Request.Cookies["editmode"] == "true")
-                    {
-                        enableEditing = true;
-                    }
-                }
-                var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);
+
+                var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);              
 
                 if (home != null)
                 {
-                    if(User.Identity.IsAuthenticated)
+                    if (User.Identity.IsAuthenticated && User.Identity.Name != habboHomeUser.Id.ToString() || (Request.Cookies["editid"] != null && home.Home.Id != int.Parse(Request.Cookies["editid"])))
+                    {
+                        Response.Cookies.Delete("editid");
+                        home.IsEditing = false;
+                    }
+
+                    if (User.Identity.IsAuthenticated)
                     {
                         ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
                     }
@@ -60,7 +60,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> Group(string groupname)
         {
             var enableEditing = false;
-            if (Request.Cookies["editgroup"] != null && Request.Cookies["editgroup"] == "true")
+            if (Request.Cookies["editid"] != null)
             {
                 enableEditing = true;
             }
@@ -69,9 +69,10 @@ namespace KeplerCMS.Controllers
             var group = await _homeService.GetHomeByGroupName(groupname, int.Parse(User.Identity.Name), enableEditing);
             if (group != null)
             {
-                if (User.Identity.IsAuthenticated && User.Identity.Name != group.Home.UserId.ToString())
+                if (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"])))
                 {
-                    Response.Cookies.Delete("editgroup");
+                    Response.Cookies.Delete("editid");
+                    group.IsEditing = false;
                 }
 
                 return View(group);
@@ -85,7 +86,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> GroupById(int id)
         {
             var enableEditing = false;
-            if (Request.Cookies["editgroup"] != null && Request.Cookies["editgroup"] == "true")
+            if (Request.Cookies["editid"] != null)
             {
                 enableEditing = true;
             }
@@ -94,9 +95,10 @@ namespace KeplerCMS.Controllers
             var group = await _homeService.GetHomeByGroupId(id, int.Parse(User.Identity.Name), enableEditing);
             if (group != null)
             {
-                if (User.Identity.IsAuthenticated && User.Identity.Name != group.Home.UserId.ToString())
+                if (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"])))
                 {
-                    Response.Cookies.Delete("editgroup");
+                    Response.Cookies.Delete("editid");
+                    group.IsEditing = false;
                 }
 
                 return View("Group", group);
@@ -130,7 +132,7 @@ namespace KeplerCMS.Controllers
                 {
                     Expires = DateTime.Now.AddMinutes(30)
                 };
-                Response.Cookies.Append("editmode", "true", option);
+                Response.Cookies.Append("editid", homeId.ToString(), option);
 
                 return Redirect("/home/" + currentUser.Username);
             }
@@ -144,14 +146,14 @@ namespace KeplerCMS.Controllers
         {
             var currentUser = await _userService.GetUserById(User.Identity.Name);
             var home = await _homeService.GetHomeDetailsById(homeId);
-            if (home.UserId == currentUser.Id)
+            if (await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
                 // Set editing mode
                 CookieOptions option = new CookieOptions
                 {
                     Expires = DateTime.Now.AddMinutes(30)
                 };
-                Response.Cookies.Append("editgroup", "true", option);
+                Response.Cookies.Append("editid", homeId.ToString(), option);
 
                 return Redirect("/groups/" + home.Id + "/id");
             }
@@ -166,7 +168,7 @@ namespace KeplerCMS.Controllers
         {
             var home = await _homeService.GetHomeDetailsById(homeId);
             var homeUser = await _userService.GetUserById(home.UserId.ToString());
-            Response.Cookies.Delete("editmode");
+            Response.Cookies.Delete("editid");
             return Redirect("/home/" + homeUser.Username);
         }
 

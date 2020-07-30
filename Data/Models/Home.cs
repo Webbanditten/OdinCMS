@@ -166,6 +166,8 @@ namespace KeplerCMS.Data.Models
         public int Amount { get; set; }
         [Column("item_id")]
         public int ItemId { get; set; }
+        [Column("home_id")]
+        public int HomeId { get; set; }
 
 
     }

@@ -46,7 +46,8 @@ namespace KeplerCMS.Areas.MyHabbo
         {
             await _homeService.DeleteGuestbookEntry(entryId, int.Parse(User.Identity.Name));
             var item = await _homeService.GetItem(widgetId);
-            item.WidgetData = await _homeService.GetWidgetData(item.Item.OwnerId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            item.WidgetData = await _homeService.GetWidgetData(homeId, item.Item.OwnerId);
             return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", item);
         }
 

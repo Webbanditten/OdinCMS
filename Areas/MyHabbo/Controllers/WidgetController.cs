@@ -21,10 +21,15 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Add(int widgetId, int zIndex)
         {
             var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.PlaceItem(widgetId, zIndex, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
+            {
+                var item = await _homeService.PlaceItem(homeId, widgetId, zIndex, userId);
 
-            Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
-            return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", item);
+                Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
+                return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", item);
+            }
+            return Content("ERROR");
         }
 
         [HttpPost]
@@ -33,9 +38,15 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> SelectSong(int songId, int widgetId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.SelectSong(widgetId, songId, userId);
-            
-            return View("~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml", item);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
+            {
+                var item = await _homeService.SelectSong(homeId, widgetId, songId, userId);
+
+                return View("~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml", item);
+            }
+
+            return Content("ERROR");
         }
 
         [HttpPost]
@@ -43,18 +54,28 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Edit(int skinId, int widgetId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var updatedItem = await _homeService.EditItem(widgetId, skinId, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
+            {
+                var updatedItem = await _homeService.EditItem(homeId, widgetId, skinId, userId);
 
-            Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"widget\"}");
-            return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
+                Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"widget\"}");
+                return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
+            }
+            return Content("ERROR");
         }
         [HttpPost]
         [LoggedInFilter]
         public async Task<IActionResult> Delete(int widgetId)
         {
             var userId = int.Parse(User.Identity.Name);
-            await _homeService.RemoveItem(widgetId, userId);
-            return Content("SUCCESS");
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if(await _homeService.CanEditHome(homeId, userId))
+            {
+                await _homeService.RemoveItem(homeId, widgetId, userId);
+                return Content("SUCCESS");
+            }
+            return Content("ERROR");
         }
 
     }
