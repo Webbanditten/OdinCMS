@@ -150,6 +150,10 @@ namespace KeplerCMS.Services.Implementations
         public async Task<ItemViewModel> PlaceItem(int homeId, int inventoryId, int z, int userId, string data = null)
         {
             var item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.HomeId == homeId).FirstOrDefaultAsync();
+            if(item == null)
+            {
+                item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId && s.HomeId == 0).FirstOrDefaultAsync();
+            }
             var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             HomesItems newItem = null;
             if(item != null && home != null)
@@ -399,7 +403,8 @@ namespace KeplerCMS.Services.Implementations
                 Ratings = await GetRatings(userId),
                 Badges = await _context.UsersBadges.Where(s => s.UserId == userId).ToListAsync(),
                 Guestbook = await GetGuestbook(homeId),
-                Friends = await _friendService.GetFriendsWithUserData(userId)
+                Friends = await _friendService.GetFriendsWithUserData(userId),
+                Groups = await GetGroupsForUser(userId)
             };
         }
 
@@ -624,6 +629,29 @@ namespace KeplerCMS.Services.Implementations
                 }
             }
             return false;
+        }
+
+        public async Task<List<GroupViewModel>> GetGroupsForUser(int userId)
+        {
+            var groups = new List<GroupViewModel>();
+
+            // Own groups
+            
+
+            var ownGroups = await _context.Homes.Where(s => s.Type == "group" && s.UserId == userId).ToListAsync();
+            foreach(Homes home in ownGroups)
+            {
+                groups.Add(new GroupViewModel { Home = home, GroupMember = null});
+            }
+
+            // Member of
+            groups.AddRange(await (from g in _context.GroupMembers
+                                                    join home in _context.Homes
+                                                    on g.GroupId equals home.Id
+                                                    where g.UserId == userId
+                                                    select new GroupViewModel { Home = home, GroupMember = g}).ToListAsync());
+
+            return groups;
         }
     }
 

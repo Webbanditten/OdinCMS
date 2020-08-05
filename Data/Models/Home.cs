@@ -61,6 +61,9 @@ namespace KeplerCMS.Data.Models
         [Column("group_room")]
         public int? GroupRoom { get; set; }
 
+        [Column("created")]
+        public DateTime Created { get; set; }
+
         [NotMapped]
         public bool AllowDisplay
         {

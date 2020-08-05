@@ -14,7 +14,7 @@ namespace KeplerCMS.Data.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("group_")]
+        [Column("group_id")]
         public int GroupId { get; set; }
         [Column("user_id")]
         public int UserId { get; set; }

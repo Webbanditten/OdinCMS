@@ -44,6 +44,6 @@ namespace KeplerCMS.Services.Interfaces
 
         Task<bool> CanEditHome(int homeId, int userId);
 
-
+        Task<List<GroupViewModel>> GetGroupsForUser(int userId);
     }
 }

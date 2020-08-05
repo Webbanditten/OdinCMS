@@ -49,15 +49,26 @@
             <div class="birthday date">
                 @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
             </div>
+            <div>
+            @{ 
+                if(Model.WidgetData.User.Group != 0)
+                {
+                    var group = Model.WidgetData.Groups.FirstOrDefault(s => s.Home.Id == Model.WidgetData.User.Group);
+                    if (group != null)
+                    {
+                        var url = (string.IsNullOrEmpty(group.Home.GroupUrl)) ? "/groups/" + group.Home.Id + "/id/" : "/groups/" + group.Home.GroupUrl;
+                        <a href="@url" title="@group.Home.GroupName"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(group.Home.GroupBadge).gif"></a>
+                    }
+                }
+            }
             @{
                 if (Model.WidgetData.User.BadgeActive && Model.WidgetData.User.Badge != string.Empty)
                 {
-                    <div>
-                        <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
-                    </div>
+                    <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
                 }
 
             }
+            </div>
 
 
         </div>
