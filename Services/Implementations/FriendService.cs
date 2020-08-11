@@ -52,13 +52,13 @@ namespace KeplerCMS.Services.Implementations
                 Users friendDetails = null;
                 if(friend.ToId != userId)
                 {
-                    var getFriend = await _userService.GetUserById(friend.ToId.ToString());
+                    var getFriend = await _userService.GetUserById(friend.ToId);
                     if(getFriend != null)
                         friendDetails = getFriend;
                     
                 } else if(friend.FromId != userId)
                 {
-                    var getFriend = await _userService.GetUserById(friend.FromId.ToString());
+                    var getFriend = await _userService.GetUserById(friend.FromId);
                     if (getFriend != null)
                         friendDetails = getFriend;
                 }

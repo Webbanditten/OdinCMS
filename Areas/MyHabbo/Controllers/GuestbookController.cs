@@ -37,7 +37,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Preview(string message)
         {
 
-            return View(new GuestbookEntry { Entry = new HomesGuestbook { Message = message, Timestamp = System.DateTime.Now }, User = await _userService.GetUserById(User.Identity.Name) });
+            return View(new GuestbookEntry { Entry = new HomesGuestbook { Message = message, Timestamp = System.DateTime.Now }, User = await _userService.GetUserById(int.Parse(User.Identity.Name)) });
         }
 
         [HttpPost]

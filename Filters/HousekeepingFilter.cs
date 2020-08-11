@@ -34,7 +34,7 @@ namespace KeplerCMS.Filters
                     return;
                 } else {
                     //injecting the fuses into view
-                    var user = await _userService.GetUserById(context.HttpContext.User.Identity.Name);
+                    var user = await _userService.GetUserById(int.Parse(context.HttpContext.User.Identity.Name));
                     controller.ViewData["user"] = user;
 
                     // IF fuse doesnt exist in users fuses

@@ -34,7 +34,7 @@ namespace KeplerCMS.Filters
                 else
                 {
                     //injecting values in the ViewData
-                    var user = await _userService.GetUserById(context.HttpContext.User.Identity.Name);
+                    var user = await _userService.GetUserById(int.Parse(context.HttpContext.User.Identity.Name));
                     controller.ViewData["user"] = user;
                 }
             }

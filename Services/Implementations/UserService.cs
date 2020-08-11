@@ -35,9 +35,9 @@ namespace KeplerCMS.Services.Implementations
             return user;
         }
 
-        public async Task<Users> GetUserById(string id)
+        public async Task<Users> GetUserById(int id)
         {
-            var user = await _context.Users.Where(user => user.Id == int.Parse(id)).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
             if (user != null)
             {
                 user.Fuses = await _fuseService.GetFusesByRank(user.Rank);
@@ -58,7 +58,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<Users> GenerateSSO(int userId)
         {
-            var user = await GetUserById(userId.ToString());
+            var user = await GetUserById(userId);
             if(user != null)
             {
                 user.SSOTicket = Guid.NewGuid().ToString();
@@ -87,7 +87,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<Tags>> Tags(int userId)
         {
-            var user = await GetUserById(userId.ToString());
+            var user = await GetUserById(userId);
             if (user != null)
             {
                 return await _context.Tags.Where(s => s.UserId == userId).ToListAsync();

@@ -25,7 +25,13 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter]
         public async Task<IActionResult> BadgeEditor(int groupId)
         {
-            return View();
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                return View(home);
+            }
+            return Content("Nope");
         }
 
         [Route("groups/actions/update_group_badge")]
@@ -34,9 +40,14 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> UpdateBadge(int groupId, string code)
         {
             // Redirect to group page
-            var currentUser = await _userService.GetUserById(User.Identity.Name);
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(groupId);
-            return View();
+            if (home != null && currentUser != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                await _homeService.UpdateGroupBadge(home.Id, code, currentUser.Id);
+                return Redirect("/groups/" + home.Id + "/id");
+            }
+            return Content("Nope");
 
         }
 
@@ -96,7 +107,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter]
         public async Task<IActionResult> GroupEdit(int homeId)
         {
-            var currentUser = await _userService.GetUserById(User.Identity.Name);
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(homeId);
             if (await _homeService.CanEditHome(home.Id, currentUser.Id))
             {

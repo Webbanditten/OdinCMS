@@ -61,7 +61,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         public async Task<IActionResult> HomeById(int id)
         {
-            var habboHomeUser = await _userService.GetUserById(id.ToString());
+            var habboHomeUser = await _userService.GetUserById(id);
             if(habboHomeUser != null)
             {
                 return Redirect("~/home/" + habboHomeUser.Username);
@@ -74,7 +74,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter]
         public async Task<IActionResult> Edit(int homeId)
         {
-            var currentUser = await _userService.GetUserById(User.Identity.Name);
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(homeId);
             if(home.UserId == currentUser.Id)
             {
@@ -97,7 +97,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> CancelEditing(int homeId)
         {
             var home = await _homeService.GetHomeDetailsById(homeId);
-            var homeUser = await _userService.GetUserById(home.UserId.ToString());
+            var homeUser = await _userService.GetUserById(home.UserId);
             Response.Cookies.Delete("editid");
             return Redirect("/home/" + homeUser.Username);
         }

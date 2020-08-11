@@ -22,7 +22,7 @@ namespace KeplerCMS.Areas.MyHabbo
         [HttpPost]
         public async Task<IActionResult> AvatarInfo(int anAccountId)
         {
-            var user = await _userService.GetUserById(anAccountId.ToString());
+            var user = await _userService.GetUserById(anAccountId);
             if (user != null)
             {
                 return View(user);

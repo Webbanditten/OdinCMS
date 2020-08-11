@@ -45,5 +45,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<bool> CanEditHome(int homeId, int userId);
 
         Task<List<GroupViewModel>> GetGroupsForUser(int userId);
+        Task<Homes> UpdateGroupBadge(int homeId, string code, int userId);
     }
 }

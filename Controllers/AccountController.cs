@@ -141,7 +141,7 @@ namespace KeplerCMS.Controllers
             // Lets sign the user in if its created
             if(newUser != null)
             {
-                var user = await _userService.GetUserById(newUser.Id.ToString());
+                var user = await _userService.GetUserById(newUser.Id);
                 if (user != null && Argon2.Verify(user.Password, model.Password))
                 {
 

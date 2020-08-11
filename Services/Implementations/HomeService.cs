@@ -66,7 +66,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
         {
             // Get home for type user
-            var homeUser = await _userService.GetUserById(userId.ToString());
+            var homeUser = await _userService.GetUserById(userId);
 
             Homes home = (homeUser != null) ? await InitHome(homeUser.Id) : null;
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser, IsEditing = enableEditing };
@@ -211,7 +211,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<bool> Save(int homeId, int userId, SaveModel data)
         {
-            var user = await _userService.GetUserById(userId.ToString());
+            var user = await _userService.GetUserById(userId);
             var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             if (user == null || home == null) return false;
 
@@ -334,7 +334,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<ItemViewModel> EditItem(int homeId, int itemId, int skinId, int userId)
         {
             var item = await GetItem(itemId);
-            var homeUser = await _userService.GetUserById(userId.ToString());
+            var homeUser = await _userService.GetUserById(userId);
             if (item != null && await CanEditHome(homeId, homeUser.Id))
             {
                 if(item.Definition.Type == "notes")
@@ -356,7 +356,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId)
         {
             var item = await _context.HomesItems.Where(s => s.Id == itemId && s.OwnerId == userId).FirstOrDefaultAsync();
-            var homeUser = await _userService.GetUserById(userId.ToString());
+            var homeUser = await _userService.GetUserById(userId);
             var song = await _traxService.GetSingleSongById(songId);
             if (item != null && song != null)
             {
@@ -396,7 +396,7 @@ namespace KeplerCMS.Services.Implementations
         {
             return new ItemWidgetDataModel
             {
-                User = await _userService.GetUserById(userId.ToString()),
+                User = await _userService.GetUserById(userId),
                 Tags = await _userService.Tags(userId),
                 Rooms = await _roomService.GetRoomsByOwner(userId),
                 SongList = await _traxService.GetSongsByOwner(userId),
@@ -461,7 +461,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<GuestbookEntry> AddGuestbookEntry(int homeId, string message, int userId)
         {
             var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            var user = await _userService.GetUserById(userId.ToString());
+            var user = await _userService.GetUserById(userId);
             if(home != null && user != null)
             {
                 var entry = new HomesGuestbook { UserId = userId, HomeId = homeId, Message = message, Timestamp = DateTime.Now };
@@ -490,7 +490,7 @@ namespace KeplerCMS.Services.Implementations
             var dbEntries = await _context.HomesGuestbook.Where(s => s.HomeId == homeId).ToListAsync();
             foreach(var entry in dbEntries)
             {
-                var user = await _userService.GetUserById(entry.UserId.ToString());
+                var user = await _userService.GetUserById(entry.UserId);
                 if(user != null)
                 {
                     entries.Add(new GuestbookEntry { Entry = entry, User = user });
@@ -652,6 +652,19 @@ namespace KeplerCMS.Services.Implementations
                                                     select new GroupViewModel { Home = home, GroupMember = g}).ToListAsync());
 
             return groups;
+        }
+
+        public async Task<Homes> UpdateGroupBadge(int homeId, string code, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            var user = _userService.GetUserById(userId);
+            if(home != null && user != null && await CanEditHome(homeId, userId))
+            {
+                home.GroupBadge = code;
+                _context.Update(home);
+                await _context.SaveChangesAsync();
+            }
+            return home;
         }
     }
 

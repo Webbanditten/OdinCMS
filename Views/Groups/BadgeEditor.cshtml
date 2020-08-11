@@ -12,8 +12,8 @@
     swfobj.addParam("bgcolor", "#FFFFFF");
     swfobj.addVariable("post_url", "/groups/actions/update_group_badge?");
     swfobj.addVariable("__app_key", "");
-    swfobj.addVariable("groupId", "352");
-    swfobj.addVariable("badge_data", "s14114");
+    swfobj.addVariable("groupId", "@Model.Id");
+    swfobj.addVariable("badge_data", "@Model.GroupBadge");
     swfobj.addVariable("localization_url", "@Url.Content("~/xml/badge_editor_da.xml")");
     swfobj.addVariable("xml_url", "@Url.Content("~/xml/badge_data.xml")");
     swfobj.addParam("allowScriptAccess", "always");
