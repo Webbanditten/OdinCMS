@@ -20,5 +20,8 @@ namespace KeplerCMS.Data.Models
 
         [Column("group_id")]
         public int GroupId { get; set; }
+        
+        [NotMapped]
+        public bool CanEdit { get; set; }
     }
 }
