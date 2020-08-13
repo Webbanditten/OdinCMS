@@ -11,9 +11,13 @@ namespace KeplerCMS.Areas.MyHabbo
     {
 
         private readonly IUserService _userService;
-        public TagController(IUserService userService)
+        private readonly IHomeService _homeService;
+        private readonly ITagService _tagService;
+        public TagController(IUserService userService, IHomeService homeService, ITagService tagService)
         {
             _userService = userService;
+            _tagService = tagService;
+            _homeService = homeService;
         }
         [HttpPost]
         [Route("myhabbo/tag/add")]
@@ -28,13 +32,38 @@ namespace KeplerCMS.Areas.MyHabbo
             }
 
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _userService.Tags(userId);
+            var tags = await _tagService.TagsForUser(userId);
             tagName = tagName.ToLower();
             if (tags.Count >= 12 || tags.Find(s=>s.Tag == tagName) != null) {
                 return Content("taglimit");
             }
 
-            var tag = await _userService.AddTag(new Data.Models.Tags { UserId = userId, Tag = tagName.ToLower() });
+            var tag = await _tagService.AddTag(new Data.Models.Tags { UserId = userId, Tag = tagName.ToLower() });
+
+            return Content("valid");
+        }
+
+        [HttpPost]
+        [Route("myhabbo/tag/addgrouptag")]
+        public async Task<IActionResult> AddGroupTag(int groupId, string tagName)
+        {
+            /*
+               invalidtag, taglimit, valid
+            */
+            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck") || tagName.Length == 0)
+            {
+                return Content("invalidtag");
+            }
+
+            var userId = int.Parse(User.Identity.Name);
+            var tags = await _tagService.TagsForGroup(groupId);
+            tagName = tagName.ToLower();
+            if (tags.Count >= 12 || tags.Find(s=>s.Tag == tagName) != null) {
+                return Content("taglimit");
+            }
+            if(await _homeService.CanEditHome(groupId, userId)) {
+                var tag = await _tagService.AddTag(new Data.Models.Tags { Tag = tagName.ToLower(), GroupId = groupId });
+            }
 
             return Content("valid");
         }
@@ -44,8 +73,21 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Remove(int accountId, string tagName)
         {
             var userId = int.Parse(User.Identity.Name);
-            _userService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
-            var tags = await _userService.Tags(userId);
+            _tagService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
+            var tags = await _tagService.TagsForUser(userId);
+            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+        }
+
+        [HttpPost]
+        [Route("myhabbo/tag/removegrouptag")]
+        public async Task<IActionResult> RemoveGroupTag(int groupId, string tagName)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, userId)) {
+                var tag = await _tagService.AddTag(new Data.Models.Tags { Tag = tagName.ToLower(), GroupId = groupId });
+            }
+            _tagService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
+            var tags = await _tagService.TagsForGroup(groupId);
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
 
@@ -53,17 +95,17 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> List(string tagMsgCode, int accountId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _userService.Tags(userId);
+            var tags = await _tagService.TagsForUser(userId);
+            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+        }
+
+        [Route("myhabbo/tag/listgrouptags")]
+        public async Task<IActionResult> ListGroupTags(string tagMsgCode, int groupId)
+        {
+            var userId = int.Parse(User.Identity.Name);
+            var tags = await _tagService.TagsForGroup(groupId);
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
     }
 
-
-
-    /////////////// place_sticker
-    /// selectedStickerId: 31276, zindex: 217
-    /// 
-
-    ////////////// remove_sticker
-    /// stickerId: 31257
 }

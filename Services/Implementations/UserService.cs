@@ -85,34 +85,6 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<List<Tags>> Tags(int userId)
-        {
-            var user = await GetUserById(userId);
-            if (user != null)
-            {
-                return await _context.Tags.Where(s => s.UserId == userId).ToListAsync();
-            }
-            return null;
-        }
-
-        public async Task<Tags> AddTag(Tags tag)
-        {
-            _context.Tags.Add(tag);
-            await _context.SaveChangesAsync();
-            return tag;
-
-        }
-
-
-        public void RemoveTag(Tags tag)
-        {
-            var dbTag = _context.Tags.Where(s=>s.Tag.ToLower() == tag.Tag.ToLower() && s.UserId == tag.UserId).FirstOrDefault();
-            if (dbTag != null)
-                _context.Remove(dbTag);
-
-            _context.SaveChanges();
-
-        }
 
     }
 

@@ -20,14 +20,16 @@ namespace KeplerCMS.Services.Implementations
         private readonly IRoomService _roomService;
         private readonly ITraxService _traxService;
         private readonly IFriendService _friendService;
+        private readonly ITagService _tagService;
 
-        public HomeService(DataContext context, IUserService userService, IRoomService roomService, ITraxService traxService, IFriendService friendService)
+        public HomeService(DataContext context, IUserService userService, IRoomService roomService, ITraxService traxService, IFriendService friendService, ITagService tagService)
         {
             _userService = userService;
             _context = context;
             _roomService = roomService;
             _traxService = traxService;
             _friendService = friendService;
+            _tagService = tagService;
         }
 
 
@@ -394,11 +396,12 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<ItemWidgetDataModel> GetWidgetData(int homeId, int userId)
         {
+            var home = await GetHomeDetailsById(homeId);
             return new ItemWidgetDataModel
             {
-                Home = await GetHomeDetailsById(homeId),
+                Home = home,
                 User = await _userService.GetUserById(userId),
-                Tags = await _userService.Tags(userId),
+                Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id) : await _tagService.TagsForUser(userId),
                 Rooms = await _roomService.GetRoomsByOwner(userId),
                 SongList = await _traxService.GetSongsByOwner(userId),
                 Ratings = await GetRatings(userId),

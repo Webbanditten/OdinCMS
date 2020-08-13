@@ -98,6 +98,7 @@ namespace KeplerCMS
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<ISettingsService, SettingsService>();
             services.AddScoped<IHabbowoodService, HabbowoodService>();
+            services.AddScoped<ITagService, TagService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

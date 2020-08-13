@@ -1,9 +1,9 @@
 ﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
-@{Layout = null;}
 
-<div class="widget-corner" id="widget-@Model.Item.Id-handle">
+
+<div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
     <div class="widget-headline">
         <h3>
             @{
@@ -15,132 +15,17 @@
                     </script>
                 }
             }
-
-
-            <span class="header-left">&nbsp;</span><span class="header-middle">MIN PROFIL</span><span class="header-right">&nbsp;</span>
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("highscores", "habbohome")</span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>
 <div class="widget-body">
     <div class="widget-content">
-        <div class="profile-info">
-
-            <div class="name" style="float: left">
-                <span class="name-text">@Model.WidgetData.User.Username</span>
-                <img id="name-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
-            </div>
-
-            <br class="clear">
-
-            @{
-                if (Model.WidgetData.User.Status == "online")
-                {
-                    <img src="~/c_images/myhabbo/habbo_online_anim.gif" />
-                }
-                else
-                {
-                    <img src="~/c_images/myhabbo/habbo_offline.gif" />
-                }
-            }
-
-            <div class="birthday text">
-                @DbRes.T("profile_birthday", "habbohome")
-            </div>
-            <div class="birthday date">
-                @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
-            </div>
-            <div>
-            @{ 
-                if(Model.WidgetData.User.Group != 0)
-                {
-                    var group = Model.WidgetData.Groups.FirstOrDefault(s => s.Home.Id == Model.WidgetData.User.Group);
-                    if (group != null)
-                    {
-                        var url = (string.IsNullOrEmpty(group.Home.GroupUrl)) ? "/groups/" + group.Home.Id + "/id/" : "/groups/" + group.Home.GroupUrl;
-                        <a href="@url" title="@group.Home.GroupName"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(group.Home.GroupBadge).gif"></a>
-                    }
-                }
-            }
-            @{
-                if (Model.WidgetData.User.BadgeActive && Model.WidgetData.User.Badge != string.Empty)
-                {
-                    <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(Model.WidgetData.User.Badge).gif">
-                }
-
-            }
-            </div>
-
-
-        </div>
-        <div class="profile-figure">
-            <img alt="Wizter" src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@Model.WidgetData.User.Figure&amp;size=b&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=sml&amp;frame=1">
-        </div>
-
-        <div class="profile-motto">
-            @Model.WidgetData.User.Motto
-            <img id="motto-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
-            <div class="clear"></div>
-        </div>
-        @{
-            if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString() && !(bool)ViewData["canFriend"])
-            {
-                <div class="profile-friend-request clearfix">
-                    <a  class="toolbutton tell"  id="add-friend" style="float: left"><span>@DbRes.T("friend_add", "habbohome")</span></a>
-                </div>
-            }
-        }
-
-        <div id="profile-tags-panel">
-            
-            <div id="profile-tag-list">
-                <partial name="~/Areas/MyHabbo/Views/Tag/List.cshtml" model=Model.WidgetData.Tags />
-
-                <script type="text/javascript">
-                    document.observe("dom:loaded", function () {
-                        TagHelper.setTexts({
-                            buttonText: "@DbRes.T("ok", "habbohome")",
-                            tagLimitText: "@DbRes.T("tag_limit", "habbohome")"
-                        });
-                    });
-                </script>
-
-            </div>
-            @{
-                if (User.Identity.IsAuthenticated && User.Identity.Name == Model.WidgetData.User.Id.ToString())
-                {
-                    <div id="profile-tags-status-field">
-                        <div style="display: block;">
-                            <div class="content-red">
-                                <div class="content-red-body">
-                                    <span id="tag-limit-message"><img src="~/images/myhabbo/buttons/icon_error.gif">@DbRes.T("tag_limit", "habbohome")</span>
-                                    <span id="tag-invalid-message"><img src="~/images/myhabbo/buttons/icon_error.gif">@DbRes.T("tag_invalid", "habbohome")</span>
-                                </div>
-                            </div>
-                            <div class="content-red-bottom">
-                                <div class="content-red-bottom-body"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="profile-add-tag">
-                        <input type="text" id="profile-add-tag-input" maxlength="30"><br clear="all">
-                        <a href="#" class="new-button" style="float:left;margin:5px 0 0 0;" id="profile-add-tag"><b>@DbRes.T("tag_add", "habbohome")</b><i></i></a>
-                    </div>
-                }
-            }
-            
-        </div>
-        <script type="text/javascript">
-            document.observe("dom:loaded", function () {
-                new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
-                    headerText: "@DbRes.T("friend_header", "habbohome")",
-                    messageText: "@DbRes.T("friend_message", "habbohome").Replace("{username}", Model.WidgetData.User.Username)",
-                    loginText: "@DbRes.T("friend_login", "habbohome")",
-                    buttonText: "@DbRes.T("ok", "habbohome")",
-                    cancelButtonText: "@DbRes.T("cancel", "habbohome")"
-                });
-            });
-        </script>
-
+        <table>
+            <tbody>
+                ddd
+            </tbody>
+        </table>
         <div class="clear"></div>
     </div>
 </div>
