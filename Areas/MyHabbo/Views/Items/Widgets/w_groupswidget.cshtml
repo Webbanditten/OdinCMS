@@ -28,53 +28,43 @@
         <div class="groups-list-container">
             <ul class="groups-list">
 
+                @foreach (var group in Model.WidgetData.Groups)
+                {
+                    var url = (string.IsNullOrEmpty(group.Home.GroupUrl)) ? "/groups/" + group.Home.Id + "/id/" : "/groups/" + group.Home.GroupUrl;
+                    <li title="@group.Home.GroupName" id="groups-list-@Model.Item.Id-@group.Home.Id">
+                        <div class="groups-list-icon"><a href="@url"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(group.Home.GroupBadge).gif"></a></div>
 
-                <li title="Arco-?ris" id="groups-list-31265-398">
-                    <div class="groups-list-icon"><a href="https://classichabbo.com/groups/arcoiris"><img src="https://cdn.classichabbo.com/habbo-imaging/badge/s35091s54114.gif"></a></div>
+                        <h4>
+                            <a href="@url">@group.Home.GroupName</a>
+                        </h4>
+                        <p>
+                            @DbRes.T("group_created", "habbohome"):<br>
+                            <b>@group.Home.Created.ToString("d MMM yyyy")</b>
 
-                    <h4>
+                            @{
+                                if(group.Home.Id == Model.WidgetData.User.Group) {
+                                    <img src="~/images/groups/favourite_group_icon.gif" width="15" height="15" class="groups-list-icon" alt="@DbRes.T("favorite", "habbohome")" title="@DbRes.T("favorite", "habbohome")">                   
+                                }
+                                if(group.Home.UserId == Model.WidgetData.User.Id) {
+                                    <img src="~/images/groups/owner_icon.gif" width="15" height="15" class="groups-list-icon" alt="@DbRes.T("owner", "habbohome")" title="@DbRes.T("owner", "habbohome")">
+                                } else if(group.GroupMember.Rights) {
+                                    <img src="~/images/groups/administrator_icon.gif" width="15" height="15" class="groups-list-icon" alt="@DbRes.T("administrator", "habbohome")" title="@DbRes.T("administrator", "habbohome")">
+                                }
+                            }
 
-                        <a href="https://classichabbo.com/groups/arcoiris">Arco-?ris</a>
-                    </h4>
-                    <p>
-                        Group created:<br>
-                        <b>Jun 27, 2020</b>
+                            
+                        </p>
+                        <div class="clear"></div>
+                    </li>
+                }
 
-
-
-
-
-                    </p>
-                    <div class="clear"></div>
-
-                </li>
-
-                <li title="We like horses" id="groups-list-31265-352">
-                    <div class="groups-list-icon"><a href="https://classichabbo.com/groups/horse"><img src="https://cdn.classichabbo.com/habbo-imaging/badge/s14114.gif"></a></div>
-
-                    <h4>
-
-                        <a href="https://classichabbo.com/groups/horse">We like horses</a>
-                    </h4>
-                    <p>
-                        Group created:<br>
-                        <b>May 21, 2020</b>
-
-
-
-                        <img src="https://cdn.classichabbo.com/web-gallery/images/groups/favourite_group_icon.gif" width="15" height="15" class="groups-list-icon" alt="Favorite" title="Favorite">
-
-
-                        <img src="https://cdn.classichabbo.com/web-gallery/images/groups/owner_icon.gif" width="15" height="15" class="groups-list-icon" alt="Owner" title="Owner">
-
-
-                    </p>
-                    <div class="clear"></div>
-
-                </li>
-
-
+                
             </ul>
+            @{
+                if(Model.WidgetData.Groups.Count() == 0) {
+                    @DbRes.T("no_groups", "habbohome")
+                }
+            }
         </div>
 
         <div class="clear"></div>
