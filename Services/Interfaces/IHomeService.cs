@@ -16,9 +16,9 @@ namespace KeplerCMS.Services.Interfaces
         Task<ItemViewModel> GetItem(int id, bool enableEditing = false);
         Task<List<InventoryItem>> GetInventory(int homeId, string type, int userId);
 
-        Task<HomeViewModel> GetHome(int userId, bool enableEditing);
-        Task<HomeViewModel> GetHomeByGroupName(string groupname, int userId, bool enableEditing);
-        Task<HomeViewModel> GetHomeByGroupId(int groupId, int userId, bool enableEditing);
+        Task<HomeViewModel> GetHome(int userId, bool enableEditing, int? currentUserId = null);
+        Task<HomeViewModel> GetHomeByGroupName(string groupname, bool enableEditing, int? currentUserId = null);
+        Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId = null);
         Task<Homes> GetHomeDetailsById(int homeId);
         Task<HomesItemData> GetItemDetail(int id);
         Task<List<CatalogItem>> GetCatelogItemsInCategory(int category);
@@ -26,7 +26,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<bool> GiveItem(int itemId, int amount, int userId);
         Task<InventoryItem> GetInventoryItem(int inventoryId, int userId);
 
-        Task<ItemWidgetDataModel> GetWidgetData(int homeId, int userId);
+        Task<ItemWidgetDataModel> GetWidgetData(int homeId, int? userId);
         Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId);
 
         Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId);
@@ -42,7 +42,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<Homes> InitGroup(string name, string badge, string description, int userId);
         Task<HomesItemData> GetItemDataByClass(string className);
 
-        Task<bool> CanEditHome(int homeId, int userId);
+        Task<bool> CanEditHome(int homeId, int? userId);
 
         Task<List<GroupViewModel>> GetGroupsForUser(int userId);
         Task<Homes> UpdateGroupBadge(int homeId, string code, int userId);

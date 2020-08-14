@@ -72,7 +72,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<bool> IsFriends(int from, int to)
         {
-            var request = await _context.Friends.Where(s => s.FromId == from && s.ToId == to).FirstOrDefaultAsync();
+            var request = await _context.Friends.Where(s => (s.FromId == from && s.ToId == to) || (s.FromId == to && s.ToId == from)).FirstOrDefaultAsync();
             if (request != null)
             {
                 return true;

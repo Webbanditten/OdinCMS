@@ -62,10 +62,12 @@ namespace KeplerCMS.Controllers
             }
 
 
-            var group = await _homeService.GetHomeByGroupName(groupname, int.Parse(User.Identity.Name), enableEditing);
+            var group = (User.Identity.IsAuthenticated) ? 
+            await _homeService.GetHomeByGroupName(groupname, enableEditing, int.Parse(User.Identity.Name)) : 
+            await _homeService.GetHomeByGroupName(groupname, enableEditing);
             if (group != null)
             {
-                if (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"])))
+                if (!User.Identity.IsAuthenticated || (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"]))))
                 {
                     Response.Cookies.Delete("editid");
                     group.IsEditing = false;
@@ -88,10 +90,12 @@ namespace KeplerCMS.Controllers
             }
 
 
-            var group = await _homeService.GetHomeByGroupId(id, int.Parse(User.Identity.Name), enableEditing);
+            var group = (User.Identity.IsAuthenticated) ? 
+            await _homeService.GetHomeByGroupId(id, enableEditing, int.Parse(User.Identity.Name)) : 
+            await _homeService.GetHomeByGroupId(id, enableEditing);
             if (group != null)
             {
-                if (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"])))
+                if (!User.Identity.IsAuthenticated || (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"]))))
                 {
                     Response.Cookies.Delete("editid");
                     group.IsEditing = false;

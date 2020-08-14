@@ -11,7 +11,7 @@
         <a href="/tag/@tag.Tag" class="tag">@tag.Tag</a>
 
         @{
-            if (User.Identity.IsAuthenticated && tag.UserId.ToString() == User.Identity.Name)
+            if (tag.CanEdit && User.Identity.IsAuthenticated)
             {
                 <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
             }

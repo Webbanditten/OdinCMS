@@ -34,18 +34,17 @@ namespace KeplerCMS.Controllers
                     enableEditing = true;
                 }
 
-                var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);              
+                var home = (User.Identity.IsAuthenticated) ? await _homeService.GetHome(habboHomeUser.Id, enableEditing, int.Parse(User.Identity.Name)) : await _homeService.GetHome(habboHomeUser.Id, enableEditing);
 
                 if (home != null)
                 {
-                    if (User.Identity.IsAuthenticated && User.Identity.Name != habboHomeUser.Id.ToString() || (Request.Cookies["editid"] != null && home.Home.Id != int.Parse(Request.Cookies["editid"])))
-                    {
-                        Response.Cookies.Delete("editid");
-                        home.IsEditing = false;
-                    }
-
                     if (User.Identity.IsAuthenticated)
                     {
+                        if (User.Identity.Name != habboHomeUser.Id.ToString() || (Request.Cookies["editid"] != null && home.Home.Id != int.Parse(Request.Cookies["editid"])))
+                        {
+                            Response.Cookies.Delete("editid");
+                            home.IsEditing = false;
+                        }
                         ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
                     }
                     return View(home);

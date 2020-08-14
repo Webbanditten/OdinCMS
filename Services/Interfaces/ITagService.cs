@@ -7,8 +7,8 @@ namespace KeplerCMS.Services.Interfaces
     public interface ITagService
     {
 
-        public Task<List<Tags>> TagsForUser(int userId);
-        public Task<List<Tags>> TagsForGroup(int userId);
+        public Task<List<Tags>> TagsForUser(int userId, bool editMode);
+        public Task<List<Tags>> TagsForGroup(int groupId, bool editMode);
 
         public Task<Tags> AddTag(Tags tag);
 

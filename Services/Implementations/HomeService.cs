@@ -33,22 +33,22 @@ namespace KeplerCMS.Services.Implementations
         }
 
 
-        public async Task<HomeViewModel> GetHomeByGroupName(string groupname, int userId, bool enableEditing)
+        public async Task<HomeViewModel> GetHomeByGroupName(string groupname, bool enableEditing, int? currentUserId)
         {
             var group = await _context.Homes.Where(s => s.GroupName != null && s.GroupName.Equals(groupname, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
             if(group != null)
             {
-                return await GetHomeByGroupId(group.Id, userId, enableEditing);
+                return await GetHomeByGroupId(group.Id, enableEditing, currentUserId);
             }
             return null;
         }
 
-        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, int userId, bool enableEditing)
+        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId)
         {
             var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing };
 
-            var widgetData = await GetWidgetData(home.Id, userId);
+            var widgetData = await GetWidgetData(home.Id, currentUserId);
 
             homeViewModel.Items = await (from item in _context.HomesItems
                                          join def in _context.HomesItemData
@@ -65,7 +65,7 @@ namespace KeplerCMS.Services.Implementations
         }
 
 
-        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
+        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing, int? currentUserId)
         {
             // Get home for type user
             var homeUser = await _userService.GetUserById(userId);
@@ -73,7 +73,7 @@ namespace KeplerCMS.Services.Implementations
             Homes home = (homeUser != null) ? await InitHome(homeUser.Id) : null;
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser, IsEditing = enableEditing };
 
-            var widgetData = await GetWidgetData(home.Id, homeUser.Id);
+            var widgetData = await GetWidgetData(home.Id, currentUserId);
 
             homeViewModel.Items = await (from item in _context.HomesItems
                                               join def in _context.HomesItemData
@@ -394,21 +394,23 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<ItemWidgetDataModel> GetWidgetData(int homeId, int userId)
+        public async Task<ItemWidgetDataModel> GetWidgetData(int homeId, int? userId)
         {
             var home = await GetHomeDetailsById(homeId);
+            var canEdit = await CanEditHome(homeId, userId);
             return new ItemWidgetDataModel
             {
                 Home = home,
-                User = await _userService.GetUserById(userId),
-                Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id) : await _tagService.TagsForUser(userId),
-                Rooms = await _roomService.GetRoomsByOwner(userId),
-                SongList = await _traxService.GetSongsByOwner(userId),
-                Ratings = await GetRatings(userId),
+                User = await _userService.GetUserById(home.UserId),
+                Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
+                Rooms = await _roomService.GetRoomsByOwner(home.UserId),
+                SongList = await _traxService.GetSongsByOwner(home.UserId),
+                Ratings = await GetRatings(home.UserId),
                 Badges = await _context.UsersBadges.Where(s => s.UserId == userId).ToListAsync(),
                 Guestbook = await GetGuestbook(homeId),
-                Friends = await _friendService.GetFriendsWithUserData(userId),
-                Groups = await GetGroupsForUser(userId)
+                Friends = await _friendService.GetFriendsWithUserData(home.UserId),
+                Groups = await GetGroupsForUser(home.UserId),
+                CanEdit = canEdit
             };
         }
 
@@ -616,8 +618,10 @@ namespace KeplerCMS.Services.Implementations
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CanEditHome(int homeId, int userId)
+        public async Task<bool> CanEditHome(int homeId, int? userId)
         {
+            if(userId == null) return false;
+
             var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             if(home != null)
             {

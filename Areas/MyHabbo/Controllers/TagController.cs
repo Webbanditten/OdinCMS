@@ -32,9 +32,9 @@ namespace KeplerCMS.Areas.MyHabbo
             }
 
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForUser(userId);
+            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
             tagName = tagName.ToLower();
-            if (tags.Count >= 12 || tags.Find(s=>s.Tag == tagName) != null) {
+            if (tags.Count >= 12 || tags.Exists(s=>s.Tag == tagName) != null) {
                 return Content("taglimit");
             }
 
@@ -56,12 +56,13 @@ namespace KeplerCMS.Areas.MyHabbo
             }
 
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForGroup(groupId);
+            var canEdit = await _homeService.CanEditHome(groupId, userId);
+            var tags = await _tagService.TagsForGroup(groupId, canEdit);
             tagName = tagName.ToLower();
-            if (tags.Count >= 12 || tags.Find(s=>s.Tag == tagName) != null) {
+            if (tags.Count >= 12 || tags.Exists(s=>s.Tag == tagName)) {
                 return Content("taglimit");
             }
-            if(await _homeService.CanEditHome(groupId, userId)) {
+            if(canEdit) {
                 var tag = await _tagService.AddTag(new Data.Models.Tags { Tag = tagName.ToLower(), GroupId = groupId });
             }
 
@@ -74,7 +75,7 @@ namespace KeplerCMS.Areas.MyHabbo
         {
             var userId = int.Parse(User.Identity.Name);
             _tagService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
-            var tags = await _tagService.TagsForUser(userId);
+            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
 
@@ -83,11 +84,11 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> RemoveGroupTag(int groupId, string tagName)
         {
             var userId = int.Parse(User.Identity.Name);
-            if(await _homeService.CanEditHome(groupId, userId)) {
-                var tag = await _tagService.AddTag(new Data.Models.Tags { Tag = tagName.ToLower(), GroupId = groupId });
+            var canEdit = await _homeService.CanEditHome(groupId, userId);
+            if(canEdit) {
+                _tagService.RemoveTag(new Data.Models.Tags { GroupId = groupId, Tag = tagName });
             }
-            _tagService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
-            var tags = await _tagService.TagsForGroup(groupId);
+            var tags = await _tagService.TagsForGroup(groupId, canEdit);
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
 
@@ -95,7 +96,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> List(string tagMsgCode, int accountId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForUser(userId);
+            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
 
@@ -103,7 +104,8 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> ListGroupTags(string tagMsgCode, int groupId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForGroup(groupId);
+            var canEdit = await _homeService.CanEditHome(groupId, userId);
+            var tags = await _tagService.TagsForGroup(groupId, canEdit);
             return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
         }
     }

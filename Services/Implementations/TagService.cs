@@ -20,14 +20,22 @@ namespace KeplerCMS.Services.Implementations
         {
             _context = context;
         }
-        public async Task<List<Tags>> TagsForUser(int userId)
+        public async Task<List<Tags>> TagsForUser(int userId, bool editMode = false)
         {
-            return await _context.Tags.Where(s => s.UserId == userId).ToListAsync();
+            var tags = await _context.Tags.Where(s => s.UserId == userId).ToListAsync();
+            var canEdit = editMode;
+
+            tags.ForEach(t=>t.CanEdit = canEdit);
+            
+            return tags;
         }
 
-        public async Task<List<Tags>> TagsForGroup(int groupId)
+        public async Task<List<Tags>> TagsForGroup(int groupId, bool editMode = false)
         {
-            return await _context.Tags.Where(s => s.GroupId == groupId).ToListAsync();
+            var tags = await _context.Tags.Where(s => s.GroupId == groupId).ToListAsync();
+            tags.ForEach(t=>t.CanEdit = editMode);
+
+            return tags;
         }
 
         public async Task<Tags> AddTag(Tags tag)
