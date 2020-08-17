@@ -27,6 +27,8 @@ namespace KeplerCMS.Areas.MyHabbo.Models
         public List<GuestbookEntry> Guestbook { get; set; }
         public List<FriendsViewModel> Friends { get; set; }
         public List<GroupViewModel> Groups { get; set; }
+        public List<GroupViewModel> GroupMembers { get; set; }
+        public Rooms GroupRoom { get; set; }
         public bool CanEdit { get; internal set; }
     }
 }

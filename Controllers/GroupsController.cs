@@ -5,6 +5,7 @@ using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System;
+using KeplerCMS.Models;
 
 namespace KeplerCMS.Controllers
 {
@@ -13,12 +14,12 @@ namespace KeplerCMS.Controllers
     {
         private readonly IUserService _userService;
         private readonly IHomeService _homeService;
-        private readonly IFriendService _friendService;
-        public GroupsController(IUserService userService, IHomeService homeService, IFriendService friendService)
+        private readonly IRoomService _roomService;
+        public GroupsController(IUserService userService, IHomeService homeService, IRoomService roomService)
         {
             _userService = userService;
             _homeService = homeService;
-            _friendService = friendService;
+            _roomService = roomService;
         }
 
         [Route("groups/actions/show_badge_editor")]
@@ -30,6 +31,20 @@ namespace KeplerCMS.Controllers
             if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
                 return View(home);
+            }
+            return Content("Nope");
+        }
+
+
+        [Route("groups/actions/group_settings")]
+        [LoggedInFilter]
+        public async Task<IActionResult> GroupSettings(int groupId)
+        {
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                return View(new GroupSettingsViewModel { Details = home, Rooms = await _roomService.GetRoomsByOwner(home.UserId)});
             }
             return Content("Nope");
         }

@@ -28,8 +28,15 @@
         <h4>@Model.WidgetData.Home.GroupName</h4>
 
         <p>@DbRes.T("group_created", "habbohome"): <b>@Model.WidgetData.Home.Created.ToString("d MMM yyyy")</b></p>
-        <p>2 members</p>
-        <p><a href="https://classichabbo.com/client?forwardId=2&amp;roomId=7846" onclick="if (!window.__cfRLUnblockHandlers) return false; HabboClient.roomForward(this, '7846', 'private'); return false;" target="client" class="group-info-room">Wizter's Room</a></p>
+        <p>@Model.WidgetData.GroupMembers.Count() @DbRes.T("members", "habbohome")</p>
+        <p>
+            @{
+                if(Model.WidgetData.GroupRoom != null) {
+                    <a class="roomForward group-info-room" href="/client?forwardId=2&amp;roomId=@Model.WidgetData.GroupRoom.Id" target="client" data-type="private" data-roomid="@Model.WidgetData.GroupRoom.Id">@Model.WidgetData.GroupRoom.Name</a>
+                }
+            }
+            
+        </p>
         <div class="group-info-description"></div>
 
 

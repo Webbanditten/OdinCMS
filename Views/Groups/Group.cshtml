@@ -12,6 +12,7 @@
     <link href="~/styles/myhabbo/myhabbo2.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/buttons.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/control.textarea.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/groups.css" rel="stylesheet" />
 }
 @section ScriptsTop {
     <script src="~/js/myhabbo/libs2.js" type="text/javascript"></script>
@@ -43,10 +44,10 @@
         </div>
     </div>
 
-
+<div id="top-toolbar" class="clearfix" style="height: 30px;">
 @{ if (User.Identity.IsAuthenticated && Model.Home.UserId == int.Parse(User.Identity.Name))
     {
-        <div id="top-toolbar" class="clearfix" style="height: 30px;">
+        
             <div style="padding-right: 10px; padding-left:10px;">
                 @{
                     if (Model.IsEditing)
@@ -59,15 +60,32 @@
                     else
                     {
                         <a href="/groups/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
-                        <a href="/groups/@Model.Home.Id/manage" id="edit-button" class="toolbutton widgets" style="float:left"><span>@DbRes.T("settings", "habbohome")</span></a>
+                        <a href="#" onclick="openGroupSettings(@Model.Home.Id)" id="edit-button" class="toolbutton widgets" style="float:left"><span>@DbRes.T("settings", "habbohome")</span></a>
                         <a href="#" onclick="openGroupBadgeEditor(@Model.Home.Id)" id="edit-button" class="toolbutton backgrounds" style="float:left"><span>@DbRes.T("badge", "habbohome")</span></a>
                         <a href="/groups/@Model.Home.Id/manage/members" id="edit-button" class="toolbutton tell" style="float:left"><span>@DbRes.T("manage_members", "habbohome")</span></a>
                     }
                 }
             </div>
-        </div>
+
     }
 }
+<div class="myhabbo-view-tools">
+		
+			
+				
+					<a href="https://classichabbo.com/groups/actions/join?groupId=101" id="join-group-button">Join</a>
+					<a href="https://classichabbo.com/groups/actions/leave?groupId=101" id="leave-group-button">Leave group</a>
+					
+					
+					
+					<a href="#" id="select-favorite-button">Make favorite</a>
+                    <a href="#" id="deselect-favorite-button">Remove favorite</a>
+					
+				
+			
+		
+</div>
+</div>
 <div id="mypage-wrapper">
 
 
@@ -263,6 +281,19 @@
         </form>
     </div>
 </div>
+<div class="cbb topdialog black" id="dialog-group-settings">
+	
+	<div class="box-tabs-container">
+<ul class="box-tabs">
+	<li class="selected" id="group-settings-link-group"><a href="#">@DbRes.T("group_settings", "habbohome")</a><span class="tab-spacer"></span></li>
+	<li id="group-settings-link-room"><a href="#">@DbRes.T("group_settings_room", "habbohome")</a><span class="tab-spacer"></span></li>
+</ul>
+</div>
+	<a class="topdialog-exit" href="#" onClick="closeGroupSettings()" id="dialog-group-settings-exit">X</a>
+	<div class="topdialog-body" id="dialog-group-settings-body">
+<p style="text-align:center"><img src="~/images/progress_bubbles.gif" alt="" width="29" height="6" /></p>
+	</div>
+</div>	
 
 <script language="JavaScript" type="text/javascript">
     Event.observe(window, "resize", function () { if (editMenuOpen) closeEditMenu(); }, false);

@@ -1,31 +1,40 @@
 ﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
 
 
-<div class="widget-corner" id="widget-@(Model.Item.Id)-handle">
+<div class="widget-corner" id="widget-@Model.Item.Id-handle">
     <div class="widget-headline">
         <h3>
             @{
                 if (Model.EnableEditing)
                 {
+
                     <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
                     <script language="JavaScript" type="text/javascript">
-                                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
+                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
                     </script>
                 }
             }
-            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("highscores", "habbohome")</span><span class="header-right">&nbsp;</span>
+
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("groupmembers", "habbohome") (<span id="avatar-list-size">@Model.WidgetData.GroupMembers.Count()</span>)</span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>
 <div class="widget-body">
     <div class="widget-content">
-        <table>
-            <tbody>
-                ddd
-            </tbody>
-        </table>
+        <div id="avatar-list-search">
+            <input type="text" style="float:left;" id="avatarlist-search-string">
+            <a class="new-button" style="float:left;" id="avatarlist-search-button"><b>@DbRes.T("search", "habbohome")</b><i></i></a>
+        </div>
+        <br clear="all">
+
+        @{
+            var friendDataModel = new KeplerCMS.Areas.MyHabbo.Models.AvatarlistViewModel { Widget = Model, PageNumber = 1, Search = "" };
+        }
+        <partial name="~/Areas/MyHabbo/Views/Avatarlist/MemberSearchPaging.cshtml" model=friendDataModel />
+        
         <div class="clear"></div>
     </div>
 </div>

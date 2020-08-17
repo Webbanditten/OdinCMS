@@ -38,5 +38,11 @@ namespace KeplerCMS.Data.Models
             get { return IPending == 1; }
             set { IPending = value ? 1 : 0; }
         }
+
+        [NotMapped]
+        public bool Owner { get; set;}
+
+        [NotMapped]
+        public Users User { get; set; }
     }
 }

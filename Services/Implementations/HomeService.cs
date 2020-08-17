@@ -398,6 +398,20 @@ namespace KeplerCMS.Services.Implementations
         {
             var home = await GetHomeDetailsById(homeId);
             var canEdit = await CanEditHome(homeId, userId);
+
+            if(home.Type == "group") {
+                return new ItemWidgetDataModel
+                {
+                    Home = home,
+                    User = await _userService.GetUserById(home.UserId),
+                    Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
+                    SongList = await _traxService.GetSongsByOwner(home.UserId),
+                    Guestbook = await GetGuestbook(homeId),
+                    GroupMembers = await GetGroupMembers(home),
+                    GroupRoom = await GetGroupRoom(home),
+                    CanEdit = canEdit
+                };
+            }
             return new ItemWidgetDataModel
             {
                 Home = home,
@@ -412,6 +426,38 @@ namespace KeplerCMS.Services.Implementations
                 Groups = await GetGroupsForUser(home.UserId),
                 CanEdit = canEdit
             };
+        }
+
+        public async Task<Rooms> GetGroupRoom(Homes home)
+        {
+            return await _context.Rooms.FirstOrDefaultAsync(s=>s.Id == home.GroupRoom);
+        }
+
+        public async Task<List<GroupViewModel>> GetGroupMembers(Homes home)
+        {
+            var members = new List<GroupViewModel>();
+            var owner = await _userService.GetUserById(home.UserId);
+            members.Add(new GroupViewModel { Home = home, GroupMember = new GroupMembers { Owner= true, User = owner }});
+
+            members.AddRange(await (from member in _context.GroupMembers
+                                              join user in _context.Users
+                                              on member.UserId equals user.Id
+                                              where member.GroupId == home.Id
+                                              orderby member.Rights
+                                              select new GroupViewModel
+                                              {
+                                                  GroupMember = new GroupMembers { 
+                                                      GroupId = member.GroupId,
+                                                      Id = member.Id,
+                                                      Pending = member.Pending,
+                                                      User = user,
+                                                      Rights = member.Rights,
+                                                      UserId = member.UserId                                                      
+                                                  },
+                                                  Home = home
+                                              }).ToListAsync());
+            
+            return members;
         }
 
         public async Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId)
