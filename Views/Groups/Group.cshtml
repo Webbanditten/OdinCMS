@@ -289,11 +289,12 @@
 	<li id="group-settings-link-room"><a href="#">@DbRes.T("group_settings_room", "habbohome")</a><span class="tab-spacer"></span></li>
 </ul>
 </div>
-	<a class="topdialog-exit" href="#" onClick="closeGroupSettings()" id="dialog-group-settings-exit">X</a>
+	<a class="topdialog-exit" href="#" id="dialog-group-settings-exit">X</a>
 	<div class="topdialog-body" id="dialog-group-settings-body">
 <p style="text-align:center"><img src="~/images/progress_bubbles.gif" alt="" width="29" height="6" /></p>
 	</div>
 </div>	
+
 
 <script language="JavaScript" type="text/javascript">
     Event.observe(window, "resize", function () { if (editMenuOpen) closeEditMenu(); }, false);
@@ -307,6 +308,10 @@
     Event.observe("guestbook-privacy-options", "change", handleGuestbookPrivacySettings, false);
     Event.observe("trax-select-options", "click", Event.stop, false);
     Event.observe("trax-select-options", "change", handleTraxplayerTrackChange, false);
+    Event.observe("dialog-group-settings-exit", "click", function(e) {
+        Event.stop(e);
+        closeGroupSettings();
+    }, false);
 </script>
 
 

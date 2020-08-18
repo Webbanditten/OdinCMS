@@ -49,6 +49,36 @@ namespace KeplerCMS.Controllers
             return Content("Nope");
         }
 
+        [Route("groups/actions/check_group_url")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> CheckGroupUrl(string url, int groupId)
+        {
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                // Your group alias will be https://classichabbo.com/groups/dd. You can not alter it later on.
+                // Check if other groups has the same URL then show message
+                return Content("Blabla");
+            }
+            return Content("Something went wrong");
+        }
+
+        [Route("groups/actions/update_group_settings")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> UpdateGroupSettings(string url, string name, string description, int type, int groupId, int? roomId)
+        {
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                return View();
+            }
+            return Content("Something went wrong");
+        }
+
         [Route("groups/actions/update_group_badge")]
         [LoggedInFilter]
         [HttpPost]

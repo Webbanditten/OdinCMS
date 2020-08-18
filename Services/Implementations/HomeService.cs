@@ -33,9 +33,10 @@ namespace KeplerCMS.Services.Implementations
         }
 
 
-        public async Task<HomeViewModel> GetHomeByGroupName(string groupname, bool enableEditing, int? currentUserId)
+        public async Task<HomeViewModel> GetHomeByGroupName(string groupUrl, bool enableEditing, int? currentUserId)
         {
-            var group = await _context.Homes.Where(s => s.GroupName != null && s.GroupName.Equals(groupname, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
+            groupUrl = groupUrl.ToLower();
+            var group = await _context.Homes.Where(s => s.GroupUrl != null && s.GroupUrl == groupUrl).FirstOrDefaultAsync();
             if(group != null)
             {
                 return await GetHomeByGroupId(group.Id, enableEditing, currentUserId);
