@@ -47,6 +47,8 @@ namespace KeplerCMS.Services.Implementations
         public async Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId)
         {
             var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
+            if(home == null) return null;
+            
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing };
 
             var widgetData = await GetWidgetData(home.Id, currentUserId);
@@ -720,6 +722,52 @@ namespace KeplerCMS.Services.Implementations
                 await _context.SaveChangesAsync();
             }
             return home;
+        }
+
+        public async Task<bool> IsGroupUrlValid(string url)
+        {
+            url = url.ToLower();
+            var existingUrl = await _context.Homes.FirstOrDefaultAsync(s=>s.GroupUrl == url);
+            return (existingUrl == null);
+        }
+
+        public async Task<Homes> UpdateGroup(int groupId, string name, string description, string url, int type, int? roomId)
+        {
+            var group = await GetHomeDetailsById(groupId);
+            if(group != null) {
+                group.GroupName = (string.IsNullOrEmpty(name)) ? group.GroupName : name;
+                group.GroupDescription = description;
+                group.GroupUrl = (string.IsNullOrEmpty(group.GroupUrl) && !string.IsNullOrEmpty(url) && await IsGroupUrlValid(url)) ?  url : group.GroupUrl;
+                group.GroupType = type;
+                group.GroupRoom = roomId;
+
+                _context.Homes.Update(group);
+                await _context.SaveChangesAsync();
+            }
+            return group;
+        }
+
+        public async Task<bool> DeleteGroup(int groupId) {
+            // loop users and remove the group id 
+            var users = await _context.Users.Where(user => user.Group == groupId).ToListAsync();
+            users.ForEach(a=>a.Group = 0);
+            
+            
+            // delete group members
+            var members = await _context.GroupMembers.Where(group => group.GroupId == groupId).ToListAsync();
+            _context.GroupMembers.RemoveRange(members);
+            await _context.SaveChangesAsync();
+
+            // return habbohome items to their owner
+            var items = await _context.HomesItems.Where(s=>s.HomeId == groupId).ToListAsync();
+            items.ForEach(async (item) => { await RemoveItem(item.HomeId, item.Id, item.OwnerId); });
+
+            // delete habbohome
+            var home = await _context.Homes.FirstOrDefaultAsync(s=>s.Id == groupId);
+            _context.Homes.Remove(home);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 

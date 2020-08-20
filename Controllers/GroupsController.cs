@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System;
 using KeplerCMS.Models;
+using Westwind.Globalization;
 
 namespace KeplerCMS.Controllers
 {
@@ -58,11 +59,12 @@ namespace KeplerCMS.Controllers
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
-                // Your group alias will be https://classichabbo.com/groups/dd. You can not alter it later on.
                 // Check if other groups has the same URL then show message
-                return Content("Blabla");
+                if(await _homeService.IsGroupUrlValid(url)) {
+                    return Content(DbRes.T("url_success", "habbohome").Replace("{url}", url));
+                }
             }
-            return Content("Something went wrong");
+            return Content(DbRes.T("url_taken", "habbohome"));
         }
 
         [Route("groups/actions/update_group_settings")]
@@ -74,7 +76,8 @@ namespace KeplerCMS.Controllers
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
-                return View();
+                var updatedGroup = await _homeService.UpdateGroup(home.Id, name, description, url, type, roomId);
+                return View(updatedGroup);
             }
             return Content("Something went wrong");
         }
@@ -91,6 +94,82 @@ namespace KeplerCMS.Controllers
             {
                 await _homeService.UpdateGroupBadge(home.Id, code, currentUser.Id);
                 return Redirect("/groups/" + home.Id + "/id");
+            }
+            return Content("Nope");
+
+        }
+
+        [Route("groups/actions/confirm_delete_group")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmDeleteGroup(int groupId)
+        {
+            // Redirect to group page
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if (home != null && currentUser != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                return View(home);
+            }
+            return Content("Nope");
+
+        }
+
+
+        [Route("groups/actions/confirm_leave")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmLeave(int groupId)
+        {
+            return Content("Nope");
+        }
+
+        [Route("groups/actions/leave")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Leave(int groupId)
+        {
+            return Content("Nope");
+        }
+
+        [Route("groups/actions/join")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Join(int groupId)
+        {
+            return Content("Nope");
+        }
+
+        
+        [Route("groups/actions/select_favorite")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> SelectFavorite(int groupId)
+        {
+            return Content("Nope");
+        }
+
+        [Route("groups/actions/confirm_select_favorite")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmSelectFavorite(int groupId)
+        {
+            return View();
+        }
+
+
+        [Route("groups/actions/delete_group")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> DeleteGroup(int groupId)
+        {
+            // Redirect to group page
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if (home != null && currentUser != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            {
+                await _homeService.DeleteGroup(groupId);
+                return View();
             }
             return Content("Nope");
 

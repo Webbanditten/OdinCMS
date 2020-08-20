@@ -1670,16 +1670,19 @@ h2.title.dialog-handle.rounded-done {
 /* buttons */
 
 #join-group-button,
-#join-group-with-invite-button {
-    background-position: 0 -239px;
-    padding-left: 15px;
-    margin-left: 10px;
+#join-group-with-invite-button,
+#select-favorite-button,
+#deselect-favorite-button,
+#leave-group-button {
+    background-position: 0 1px;
 }
 
-#leave-group-button {
-    background-position: 0 -198px;
-    padding-left: 15px;
-    margin-left: 10px;
+#join-group-button span,
+#join-group-with-invite-button span,
+#select-favorite-button span,
+#deselect-favorite-button span,
+#leave-group-button span {
+    padding-left: 8px;
 }
 
 #reporting-button,
@@ -1689,14 +1692,6 @@ h2.title.dialog-handle.rounded-done {
 
 #stop-reporting-button {
     background-position: 0 -155px;
-}
-
-#select-favorite-button {
-    background-position: 0 -331px;
-}
-
-#deselect-favorite-button {
-    background-position: 0 -376px;
 }
 
 .delete-button {
@@ -1762,6 +1757,26 @@ a.urltoolbutton.reporting-start {
 a.toolbutton.reporting-stop {
     background-image: url(/images/myhabbo/buttons/tools_reporting_end.gif);
     padding-left: 23px;
+}
+
+a.toolbutton.favorite {
+    background-image: url(/images/myhabbo/buttons/tools_favorite.png);
+    padding-left: 22px;
+}
+
+a.toolbutton.remove-favorite {
+    background-image: url(/images/myhabbo/buttons/tools_remove_favorite.png);
+    padding-left: 23px;
+}
+
+a.toolbutton.join {
+    background-image: url(/images/myhabbo/buttons/tools_join.png);
+    padding-left: 17px;
+}
+
+a.toolbutton.leave {
+    background-image: url(/images/myhabbo/buttons/tools_leave.png);
+    padding-left: 17px;
 }
 
 a.toolbutton.tell {

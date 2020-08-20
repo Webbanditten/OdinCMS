@@ -69,22 +69,13 @@
 
     }
 }
-<div class="myhabbo-view-tools">
-		
-			
-				
-					<a href="https://classichabbo.com/groups/actions/join?groupId=101" id="join-group-button">Join</a>
-					<a href="https://classichabbo.com/groups/actions/leave?groupId=101" id="leave-group-button">Leave group</a>
-					
-					
-					
-					<a href="#" id="select-favorite-button">Make favorite</a>
-                    <a href="#" id="deselect-favorite-button">Remove favorite</a>
-					
-				
-			
-		
-</div>
+    <div class="myhabbo-view-tools">
+        <a href="#" id="join-group-button" class="toolbutton join"><span>Join</span></a>
+        <a href="#" id="leave-group-button" class="toolbutton leave"><span>Leave group</span></a>
+
+        <a href="#" id="select-favorite-button" class="toolbutton favorite"><span>Make favorite</span></a>
+        <a href="#" id="deselect-favorite-button" class="toolbutton remove-favorite"><span>Remove favorite</span></a>
+    </div>
 </div>
 <div id="mypage-wrapper">
 
@@ -138,7 +129,7 @@
 
 <div id="edit-menu" class="menu">
     <div class="menu-header">
-        <div class="menu-exit" id="edit-menu-exit"><img src="https://cdn.classichabbo.com/web-gallery/images/dialogs/menu-exit.gif" alt="" width="11" height="11" /></div>
+        <div class="menu-exit" id="edit-menu-exit"><img src="~/images/dialogs/menu-exit.gif" alt="" width="11" height="11" /></div>
         <h3>@DbRes.T("edit", "habbohome")</h3>
 
     </div>
@@ -186,7 +177,7 @@
                 </div>
                 <div id="edit-menu-gb-availability">
                     <select id="guestbook-privacy-options">
-                        <option value="private">@DbRes.T("guestbook_friendsonly", "habbohome")</option>
+                        <option value="private">@DbRes.T("guestbook_membersonly", "habbohome")</option>
                         <option value="public">@DbRes.T("guestbook_public", "habbohome")</option>
                     </select>
                 </div>

@@ -77,7 +77,7 @@ namespace KeplerCMS.Services.Implementations
                 user.Badge = "";
                 user.Motto = "";
                 user.Password = Argon2.Hash(user.Password);
-
+                user.Credits = 200;
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
                 return user;
