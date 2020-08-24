@@ -12,5 +12,7 @@ namespace KeplerCMS.Areas.MyHabbo.Models
         public Homes Home { get; set; }
         public List<ItemViewModel> Items { get; set; }
         public Users HomeUser { get; set; }
+        public GroupMembers Membership { get; set; }
+        public bool CanEdit { get; set; }
     }
 }

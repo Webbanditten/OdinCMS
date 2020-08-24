@@ -141,6 +141,24 @@ namespace KeplerCMS.Controllers
         }
 
         
+                
+        [Route("groups/actions/confirm_deselect_favorite")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmDeselectFavorite(int groupId)
+        {
+            return Content("Nope");
+        }
+
+        [Route("groups/actions/deselect_favorite")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> DeselectFavorite(int groupId)
+        {
+            return Content("Nope");
+        }
+
+
         [Route("groups/actions/select_favorite")]
         [LoggedInFilter]
         [HttpPost]

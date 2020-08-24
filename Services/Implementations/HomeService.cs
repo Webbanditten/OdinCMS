@@ -48,8 +48,13 @@ namespace KeplerCMS.Services.Implementations
         {
             var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
             if(home == null) return null;
-            
-            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing };
+            GroupMembers membership = null; 
+
+            if(currentUserId != null) { 
+                membership = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.UserId == currentUserId); 
+            }
+
+            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing, Membership = membership };
 
             var widgetData = await GetWidgetData(home.Id, currentUserId);
 
