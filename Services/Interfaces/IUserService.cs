@@ -15,6 +15,7 @@ namespace KeplerCMS.Services.Interfaces
 
         public Task<Users> Create(Users user);
 
+        public Task<Users> SetGroup(int userId, int groupId);
 
     }
 }

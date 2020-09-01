@@ -48,13 +48,14 @@ namespace KeplerCMS.Services.Implementations
         {
             var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
             if(home == null) return null;
-            GroupMembers membership = null; 
-
+            GroupMembers membership = null;
+            bool canEdit = false;
             if(currentUserId != null) { 
-                membership = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.UserId == currentUserId); 
+                membership = await GetMembership(groupId, currentUserId.GetValueOrDefault());
+                canEdit = await CanEditHome(groupId, currentUserId);
             }
 
-            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing, Membership = membership };
+            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing, Membership = membership, CanEdit = canEdit };
 
             var widgetData = await GetWidgetData(home.Id, currentUserId);
 
@@ -773,6 +774,11 @@ namespace KeplerCMS.Services.Implementations
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<GroupMembers> GetMembership(int groupId, int userId)
+        {
+            return await _context.GroupMembers.FirstOrDefaultAsync(s => s.GroupId == groupId && s.UserId == userId);
         }
     }
 

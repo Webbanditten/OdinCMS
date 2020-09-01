@@ -85,7 +85,17 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-
+        public async Task<Users> SetGroup(int userId, int groupId)
+        {
+            var user = await GetUserById(userId);
+            if(user != null)
+            {
+                user.Group = groupId;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            return user;
+        }
     }
 
 }

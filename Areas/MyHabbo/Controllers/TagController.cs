@@ -34,12 +34,13 @@ namespace KeplerCMS.Areas.MyHabbo
             var userId = int.Parse(User.Identity.Name);
             var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
             tagName = tagName.ToLower();
-            if (tags.Count >= 20 || tags.Exists(s=>s.Tag == tagName) != null) {
+            if (tags.Count >= 20 || tags.Exists(s => s.Tag == tagName))
+            {
                 return Content("taglimit");
             }
 
             var tag = await _tagService.AddTag(new Data.Models.Tags { UserId = userId, Tag = tagName.ToLower() });
-
+            
             return Content("valid");
         }
 

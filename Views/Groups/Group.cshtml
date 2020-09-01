@@ -44,12 +44,16 @@
         </div>
     </div>
 
-<div id="top-toolbar" class="clearfix" style="height: 30px;">
-@{ if (User.Identity.IsAuthenticated && Model.Home.UserId == int.Parse(User.Identity.Name))
-    {
-        
-            <div style="padding-right: 10px; padding-left:10px;">
-                @{
+
+        @if(User.Identity.IsAuthenticated) { 
+        <div id="top-toolbar" class="clearfix" style="height: 30px;">
+        <div style="padding-right: 10px; padding-left:10px;">
+            @{
+                if (Model.CanEdit)
+                {
+
+
+                    
                     if (Model.IsEditing)
                     {
                         <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
@@ -59,24 +63,46 @@
                     }
                     else
                     {
+                        if (Model.Home.UserId == userData.Id)
+                        {
+                            <a href="#" onclick="openGroupSettings(@Model.Home.Id)" id="edit-button" class="toolbutton widgets" style="float:left"><span>@DbRes.T("settings", "habbohome")</span></a>
+                            <a href="#" onclick="openGroupBadgeEditor(@Model.Home.Id)" id="edit-button" class="toolbutton backgrounds" style="float:left"><span>@DbRes.T("badge", "habbohome")</span></a>
+                        }
                         <a href="/groups/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
-                        <a href="#" onclick="openGroupSettings(@Model.Home.Id)" id="edit-button" class="toolbutton widgets" style="float:left"><span>@DbRes.T("settings", "habbohome")</span></a>
-                        <a href="#" onclick="openGroupBadgeEditor(@Model.Home.Id)" id="edit-button" class="toolbutton backgrounds" style="float:left"><span>@DbRes.T("badge", "habbohome")</span></a>
-                        <a href="/groups/@Model.Home.Id/manage/members" id="edit-button" class="toolbutton tell" style="float:left"><span>@DbRes.T("manage_members", "habbohome")</span></a>
+                        <a href="#" onclick="MembersList.open()" id="edit-button" class="toolbutton tell" style="float:left"><span>@DbRes.T("manage_members", "habbohome")</span></a>
                     }
                 }
-            </div>
+                <div style="float:right">
+                @{ 
+                    if (Model.Membership == null && Model.Home.GroupType != 2 && Model.Home.UserId != userData.Id)
+                    {
+                        <a href="#" id="join-group-button" class="toolbutton join"><span>@DbRes.T("join", "habbohome")</span></a>
+                    }
 
-    }
-}
-    <div class="myhabbo-view-tools">
-        <a href="#" id="join-group-button" class="toolbutton join"><span>Join</span></a>
-        <a href="#" id="leave-group-button" class="toolbutton leave"><span>Leave group</span></a>
+                    if (Model.Membership != null && !Model.Membership.Pending && Model.Home.UserId != userData.Id)
+                    {
+                        <a href="#" id="leave-group-button" class="toolbutton leave"><span>@DbRes.T("leave", "habbohome")</span></a>
+                    }
 
-        <a href="#" id="select-favorite-button" class="toolbutton favorite"><span>Make favorite</span></a>
-        <a href="#" id="deselect-favorite-button" class="toolbutton remove-favorite"><span>Remove favorite</span></a>
-    </div>
-</div>
+                    if (((Model.Membership != null && !Model.Membership.Pending) || Model.Home.UserId == userData.Id) && userData.Group == Model.Home.Id)
+                    {
+                        <a href="#" id="deselect-favorite-button" class="toolbutton remove-favorite"><span>@DbRes.T("remove_favorite", "habbohome")</span></a>
+                    }
+
+                    if (((Model.Membership != null && !Model.Membership.Pending) || Model.Home.UserId == userData.Id) && userData.Group != Model.Home.Id)
+                    {
+                        <a href="#" id="select-favorite-button" class="toolbutton favorite"><span>@DbRes.T("favorite", "habbohome")</span></a>
+                    }
+                }
+                </div>
+            }
+
+
+        </div>
+        </div>
+        }
+
+
 <div id="mypage-wrapper">
 
 
@@ -286,6 +312,39 @@
 	</div>
 </div>	
 
+<div class="cb topdialog black" id="group-memberlist" style="display: none;"><div class="bt"><div></div></div><div class="i1"><div class="i2"><div class="i3">
+	
+	<div class="box-tabs-container">
+<ul class="box-tabs">
+	<li class="selected" id="group-memberlist-link-members"><a href="#">Members</a><span class="tab-spacer"></span></li>
+	<li id="group-memberlist-link-pending"><a href="#">Pending members</a><span class="tab-spacer"></span></li>
+</ul>
+</div>
+
+	<a class="topdialog-exit" href="#" id="group-memberlist-exit">X</a>
+	<div class="topdialog-body" id="group-memberlist-body">
+<div id="group-memberlist-members-search" class="clearfix">
+    
+    <a id="group-memberlist-members-search-button" href="#" class="new-button"><b>Search</b><i></i></a>
+    <input type="text" id="group-memberlist-members-search-string">
+</div>
+<div id="group-memberlist-members" style="clear: both; display: none;"></div>
+
+<div id="group-memberlist-members-buttons" class="clearfix" style="display: none;">
+	
+	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-give-rights"><b>Give rights</b><i></i></a>
+	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-revoke-rights"><b>Revoke rights</b><i></i></a>
+	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-remove"><b>Remove</b><i></i></a>
+	<a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close"><b>Close</b><i></i></a>
+</div> 
+<div id="group-memberlist-pending" style="clear: both; display: none;"></div>
+<div id="group-memberlist-pending-buttons" class="clearfix" style="display: none;">
+	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-accept"><b>Accept</b><i></i></a>
+	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-decline"><b>Reject</b><i></i></a>
+	<a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close2"><b>Close</b><i></i></a>
+</div>
+	</div>
+</div></div></div><div class="bb"><div></div></div></div>
 
 <script language="JavaScript" type="text/javascript">
     Event.observe(window, "resize", function () { if (editMenuOpen) closeEditMenu(); }, false);
@@ -310,6 +369,11 @@
 
 
 <script type="text/javascript">
+    @{
+        if(User.Identity.IsAuthenticated) {
+            @:MembersList.init(@Model.Home.Id, @User.Identity.Name);
+        }
+    }
     HabboView.run();
 </script>
 

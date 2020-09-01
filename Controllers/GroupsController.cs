@@ -121,6 +121,11 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmLeave(int groupId)
         {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if (_homeService.GetMembership(groupId, currentUserId) != null)
+            {
+                return View();
+            }
             return Content("Nope");
         }
 
@@ -147,6 +152,10 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmDeselectFavorite(int groupId)
         {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if (_homeService.GetMembership(groupId, currentUserId) != null) {
+                return View();
+            }
             return Content("Nope");
         }
 
@@ -155,7 +164,12 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> DeselectFavorite(int groupId)
         {
-            return Content("Nope");
+            var currentUserId = int.Parse(User.Identity.Name);
+            if (_homeService.GetMembership(groupId, currentUserId) != null)
+            {
+                await _userService.SetGroup(currentUserId, 0);
+            }
+            return Content("OK");
         }
 
 
@@ -164,7 +178,12 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> SelectFavorite(int groupId)
         {
-            return Content("Nope");
+            var currentUserId = int.Parse(User.Identity.Name);
+            if (_homeService.GetMembership(groupId, currentUserId) != null)
+            {
+                await _userService.SetGroup(currentUserId, groupId);
+            }
+            return Content("OK");
         }
 
         [Route("groups/actions/confirm_select_favorite")]
@@ -172,7 +191,13 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmSelectFavorite(int groupId)
         {
-            return View();
+            var currentUserId = int.Parse(User.Identity.Name);
+            if (_homeService.GetMembership(groupId, currentUserId) != null)
+            {
+                await _userService.SetGroup(currentUserId, groupId);
+                return View();
+            }
+            return Content("Nope");
         }
 
 
@@ -182,9 +207,9 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> DeleteGroup(int groupId)
         {
             // Redirect to group page
-            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
+            var currentUserId = int.Parse(User.Identity.Name);
             var home = await _homeService.GetHomeDetailsById(groupId);
-            if (home != null && currentUser != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
+            if (home != null && home.UserId == currentUserId)
             {
                 await _homeService.DeleteGroup(groupId);
                 return View();

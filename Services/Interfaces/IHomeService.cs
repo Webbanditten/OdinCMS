@@ -53,5 +53,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<Homes> UpdateGroup(int groupId, string name, string description, string url, int type, int? roomId);
 
         Task<bool> DeleteGroup(int groupId);
+
+        Task<GroupMembers> GetMembership(int groupId, int userId);
     }
 }

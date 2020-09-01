@@ -1,0 +1,89 @@
+﻿
+@model KeplerCMS.Areas.MyHabbo.Models.Memberlist;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{ 
+    var filteredMembers = Model.Members;
+    if(Model.Search != "" && Model.Search != null)
+    {
+        filteredMembers = filteredMembers.Where(s => s.UserDetails.Username.ToLower().Contains(Model.Search.ToLower())).ToList();
+    }
+    var prPage = 32;
+    var maxPages = Math.Ceiling(Decimal.Divide(filteredMembers.Count(), prPage));
+    var pagedMembers = filteredMembers.Skip((Model.PageNumber - 1) * prPage).Take(prPage).ToList();
+}
+@{ 
+    Layout = null;
+}
+<div id="group-memberlist-members-list">
+
+<form method="post" action="#" onsubmit="return false;">
+<ul class="habblet-list two-cols clearfix">
+
+
+
+@{
+    foreach (var member in pagedMembers)
+    {
+	<li class="even online right">
+    	<div class="item" style="padding-left: 5px; padding-bottom: 4px;">
+    		<div style="float: right; width: 16px; height: 16px; margin-top: 1px">
+			</div>
+				<input type="checkbox" id="group-memberlist-m-@member.Membership.Id" style="margin: 0; padding: 0; vertical-align: middle"/>
+			<a class="home-page-link" href="/home/@member.UserDetails.Username"><span>@member.UserDetails.Username</span></a>
+        </div>
+    </li>
+    }
+}
+
+	
+</ul>
+
+</form>
+<div id="member-list-pagenumbers">
+@pagedMembers.Count() - @Model.PageNumber / @maxPages
+</div>
+<div id="member-list-paging" style="margin-top:10px">
+	
+    @{
+        if (Model.PageNumber != 1)
+        {
+            @:<a href="#" class="memberlist-paging-link" id="memberlist-search-first">@DbRes.T("badgefirst", "habbohome")</a> |
+        }
+        else
+        {
+            @:@DbRes.T("badgefirst", "habbohome") |
+        }
+        if (Model.PageNumber > 1)
+        {
+            @:<a href="#" class="memberlist-paging-link" id="memberlist-search-previous">&lt;&lt;</a> |
+        }
+        else
+        {
+            @:&lt; &lt; |
+        }
+
+
+        if (Model.PageNumber < maxPages)
+        {
+            @:<a href="#" class="memberlist-paging-link" id="memberlist-search-next">&gt;&gt;</a> |
+        }
+        else
+        {
+            @:&gt;&gt;
+        }
+
+        if (Model.PageNumber != maxPages)
+        {
+            @:<a href="#" class="memberlist-paging-link" id="memberlist-search-last">@DbRes.T("badgelast", "habbohome")</a>
+        }
+        else
+        {
+            @:@DbRes.T("badgelast", "habbohome")
+        }
+    }
+
+<input type="hidden" id="pageNumberMemberList" value="@Model.PageNumber"/>
+<input type="hidden" id="totalPagesMemberList" value="@maxPages"/>
+</div>
+</div>
