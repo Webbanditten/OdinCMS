@@ -23,6 +23,20 @@ namespace KeplerCMS.Controllers
             _roomService = roomService;
         }
 
+        [Route("myhabbo/groups/memberlist")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Memberlist(int pageNumber, int groupId, string searchString)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            var home = await _homeService.GetHomeDetailsById(groupId);
+            if(home != null && await _homeService.CanEditHome(home.Id, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
         [Route("groups/actions/show_badge_editor")]
         [LoggedInFilter]
         public async Task<IActionResult> BadgeEditor(int groupId)
