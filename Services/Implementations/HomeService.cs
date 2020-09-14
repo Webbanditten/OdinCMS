@@ -469,6 +469,29 @@ namespace KeplerCMS.Services.Implementations
             return members;
         }
 
+        public async Task<List<GroupMembers>> GetGroupMembers(int groupId)
+        {
+            var members = new List<GroupMembers>();
+
+            members.AddRange(await (from member in _context.GroupMembers
+                                              join user in _context.Users
+                                              on member.UserId equals user.Id
+                                              where member.GroupId == groupId
+                                              orderby member.Rights
+                                              select new GroupMembers { 
+                                                      GroupId = member.GroupId,
+                                                      Id = member.Id,
+                                                      Pending = member.Pending,
+                                                      User = user,
+                                                      Rights = member.Rights,
+                                                      UserId = member.UserId                                                      
+                                                  }).ToListAsync());
+            
+            return members;
+        }
+
+        
+
         public async Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId)
         {
             // Get item to find home id

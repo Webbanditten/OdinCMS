@@ -369,11 +369,7 @@
 
 
 <script type="text/javascript">
-    @{
-        if(User.Identity.IsAuthenticated) {
-            @:MembersList.init(@Model.Home.Id, @User.Identity.Name);
-        }
-    }
+  
     HabboView.run();
 </script>
 

@@ -10,11 +10,6 @@ namespace KeplerCMS.Areas.MyHabbo.Models
     {
         public string Search { get; set; }
         public int PageNumber { get; set; }
-        public List<Member> Members { get; set; }
-    }
-
-    public class Member {
-        public GroupMembers Membership { get; set; }
-        public Users UserDetails { get; set; }
+        public List<GroupMembers> Members { get; set; }
     }
 }

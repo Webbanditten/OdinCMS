@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using KeplerCMS.Models;
 using Westwind.Globalization;
+using KeplerCMS.Areas.MyHabbo.Models;
 
 namespace KeplerCMS.Controllers
 {
@@ -32,7 +33,9 @@ namespace KeplerCMS.Controllers
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUserId))
             {
-                return View();
+                var members = await _homeService.GetGroupMembers(groupId);
+                Response.Headers.Add("x-json", "{\"pending\":\"Pending members (1)\",\"members\":\"Members (0)\"}");
+                return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = members});
             }
             return Content("Nope");
         }

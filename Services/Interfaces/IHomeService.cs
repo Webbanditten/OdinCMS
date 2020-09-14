@@ -47,6 +47,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<GroupViewModel>> GetGroupsForUser(int userId);
         Task<Homes> UpdateGroupBadge(int homeId, string code, int userId);
         Task<List<GroupViewModel>> GetGroupMembers(Homes home);
+        Task<List<GroupMembers>> GetGroupMembers(int groupId);
         Task<Rooms> GetGroupRoom(Homes home);
 
         Task<bool> IsGroupUrlValid(string url);
