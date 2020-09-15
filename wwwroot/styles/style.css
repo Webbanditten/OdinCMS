@@ -2651,6 +2651,14 @@ ul.habblet-list li div.link p {
     width: 335px;
 }
 
-li.even {
+#group-memberlist ul.habblet-list {
+    list-style: none;
+}
+
+#group-memberlist ul.habblet-list li:nth-child(4n) {
+    background-color: #ececec;
+}
+
+#group-memberlist ul.habblet-list li:nth-child(4n-1) {
     background-color: #ececec;
 }
