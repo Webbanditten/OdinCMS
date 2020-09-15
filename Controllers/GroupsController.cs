@@ -8,6 +8,7 @@ using System;
 using KeplerCMS.Models;
 using Westwind.Globalization;
 using KeplerCMS.Areas.MyHabbo.Models;
+using System.Linq;
 
 namespace KeplerCMS.Controllers
 {
@@ -27,15 +28,16 @@ namespace KeplerCMS.Controllers
         [Route("myhabbo/groups/memberlist")]
         [LoggedInFilter]
         [HttpPost]
-        public async Task<IActionResult> Memberlist(int pageNumber, int groupId, string searchString)
+        public async Task<IActionResult> Memberlist(int pageNumber, int groupId, string searchString, bool pending)
         {
             var currentUserId = int.Parse(User.Identity.Name);
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUserId))
             {
                 var members = await _homeService.GetGroupMembers(groupId);
-                Response.Headers.Add("x-json", "{\"pending\":\"Pending members (1)\",\"members\":\"Members (0)\"}");
-                return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = members});
+                var filtered_members = members.Where(s=>s.Pending == pending).ToList();
+                Response.Headers.Add("x-json", "{\"pending\":\"" + DbRes.T("group_pending_members", "habbohome") + " (" + members.Count(s=>s.Pending == true) + ")\",\"members\":\"" + DbRes.T("group_members", "habbohome") + " (" + members.Count(s=>s.Pending == false) + ")\"}");
+                return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = filtered_members});
             }
             return Content("Nope");
         }

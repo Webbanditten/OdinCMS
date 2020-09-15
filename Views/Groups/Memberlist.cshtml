@@ -3,7 +3,7 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @{ 
-    if(Model.PageNumber == 0) { Model.PageNumber = 1; }
+    
     var filteredMembers = Model.Members;
     if(Model.Search != "" && Model.Search != null)
     {
@@ -11,6 +11,7 @@
     }
     var prPage = 32;
     var maxPages = Math.Ceiling(Decimal.Divide(filteredMembers.Count(), prPage));
+    if(Model.PageNumber == 0) { Model.PageNumber = 1; maxPages = 1; }
     var pagedMembers = filteredMembers.Skip((Model.PageNumber - 1) * prPage).Take(prPage).ToList();
 }
 @{ 
@@ -29,8 +30,20 @@
 	<li class="even online right">
     	<div class="item" style="padding-left: 5px; padding-bottom: 4px;">
     		<div style="float: right; width: 16px; height: 16px; margin-top: 1px">
+                @{
+                    if(member.Rights) {
+                        <img src="~/images/groups/administrator_icon.gif" width="15" height="15" alt="@DbRes.T("administrator", "habbohome")" title="@DbRes.T("administrator", "habbohome")">
+                    }
+                }
 			</div>
-				<input type="checkbox" id="group-memberlist-m-@member.Id" style="margin: 0; padding: 0; vertical-align: middle"/>
+                @{
+                    if(member.Rights) {
+                        <input type="checkbox" id="group-memberlist-a-@member.Id" style="margin: 0; padding: 0; vertical-align: middle"/>
+                    } else {
+                        <input type="checkbox" id="group-memberlist-m-@member.Id" style="margin: 0; padding: 0; vertical-align: middle"/>
+                    }
+                }
+				
 			<a class="home-page-link" href="/home/@member.User.Username"><span>@member.User.Username</span></a>
         </div>
     </li>
@@ -74,7 +87,7 @@
             @:&gt;&gt;
         }
 
-        if (Model.PageNumber != maxPages)
+        if ((Model.PageNumber != maxPages) && maxPages != 0)
         {
             @:<a href="#" class="memberlist-paging-link" id="memberlist-search-last">@DbRes.T("badgelast", "habbohome")</a>
         }

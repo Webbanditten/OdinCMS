@@ -27,10 +27,10 @@
                         <p>
                             @{
                                 if(members.GroupMember.Owner) {
-							        <img src="~/images/groups/owner_icon.gif" alt="" class="avatar-list-groupstatus">
+							        <img src="~/images/groups/owner_icon.gif" alt="@DbRes.T("owner", "habbohome")" title="@DbRes.T("owner", "habbohome")" class="avatar-list-groupstatus">
                                 }
                                 if(members.GroupMember.Rights) {
-							        <img src="~/images/groups/administrator_icon.gif" alt="" class="avatar-list-groupstatus">
+							        <img src="~/images/groups/administrator_icon.gif" alt="@DbRes.T("administrator", "habbohome")" title="@DbRes.T("administrator", "habbohome")" class="avatar-list-groupstatus">
                                 }
                                 if(members.GroupMember.User.Group == members.Home.Id) {
 							        <img src="~/images/groups/favourite_group_icon.gif" alt="" class="avatar-list-groupstatus">
