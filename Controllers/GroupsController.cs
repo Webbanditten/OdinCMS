@@ -25,14 +25,150 @@ namespace KeplerCMS.Controllers
             _roomService = roomService;
         }
 
+        [Route("myhabbo/groups/batch/confirm_accept")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmAccept(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/accept")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Accept(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                await _homeService.AcceptMembers(groupId, targetIds);
+                return Content("OK");
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/confirm_decline")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmDecline(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/decline")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Decline(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                await _homeService.RemoveMembers(groupId, targetIds);
+                return Content("OK");
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/confirm_give_rights")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmGiveRights(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/give_rights")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> GiveRights(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                await _homeService.GiveGroupRights(groupId, targetIds);
+                return Content("OK");
+            }
+            return Content("Nope");
+        }
+
+
+        [Route("myhabbo/groups/batch/confirm_revoke_rights")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmRevokeRights(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/revoke_rights")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> RevokeRights(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                await _homeService.RemoveGroupRights(groupId, targetIds);
+                return Content("OK");
+            }
+            return Content("Nope");
+        }
+
+
+        [Route("myhabbo/groups/batch/confirm_remove")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmRemove(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                return View();
+            }
+            return Content("Nope");
+        }
+
+        [Route("myhabbo/groups/batch/remove")]
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> Remove(int groupId, int[] targetIds)
+        {
+            var currentUserId = int.Parse(User.Identity.Name);
+            if(await _homeService.CanEditHome(groupId, currentUserId))
+            {
+                await _homeService.RemoveMembers(groupId, targetIds);
+                return Content("OK");
+            }
+            return Content("Nope");
+        }
+
         [Route("myhabbo/groups/memberlist")]
         [LoggedInFilter]
         [HttpPost]
         public async Task<IActionResult> Memberlist(int pageNumber, int groupId, string searchString, bool pending)
         {
             var currentUserId = int.Parse(User.Identity.Name);
-            var home = await _homeService.GetHomeDetailsById(groupId);
-            if(home != null && await _homeService.CanEditHome(home.Id, currentUserId))
+            if(await _homeService.CanEditHome(groupId, currentUserId))
             {
                 var members = await _homeService.GetGroupMembers(groupId);
                 var filtered_members = members.Where(s=>s.Pending == pending).ToList();

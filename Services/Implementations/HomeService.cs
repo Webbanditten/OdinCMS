@@ -803,6 +803,61 @@ namespace KeplerCMS.Services.Implementations
         {
             return await _context.GroupMembers.FirstOrDefaultAsync(s => s.GroupId == groupId && s.UserId == userId);
         }
+
+        public async Task<List<GroupMembers>> AcceptMembers(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Pending = false;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+
+        public async Task<List<GroupMembers>> GiveGroupRights(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Rights = true;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+        public async Task<List<GroupMembers>> RemoveGroupRights(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Rights = false;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+        public async Task<List<GroupMembers>> RemoveMembers(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                _context.GroupMembers.Remove(member);
+                members.Add(member);
+
+                var user = await _userService.GetUserById(member.UserId);
+                if(user != null && user.Group == member.GroupId) {
+                    await _userService.SetGroup(member.UserId, 0);
+                }
+            }
+
+            await  _context.SaveChangesAsync();
+            return members;
+        }
     }
 
 }
