@@ -199,8 +199,12 @@ namespace KeplerCMS.Services.Implementations
         public async Task<HomesInventory> RemoveItem(int homeId, int itemId, int userId)
         {
             var currentItem = await _context.HomesItems.Where(s => s.Id == itemId && s.HomeId == homeId).FirstOrDefaultAsync();
+            var itemDef = await GetItemDetail(currentItem.ItemId);
             var inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId).FirstOrDefaultAsync();
-            HomesInventory newInventoryItem = null;
+            if(itemDef.Type == "widgets") {
+                inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId && s.HomeId == homeId).FirstOrDefaultAsync();
+            }
+            HomesInventory newInventoryItem = inventoryItem;
             if(currentItem != null)
             {
                 if (inventoryItem != null)
@@ -210,7 +214,7 @@ namespace KeplerCMS.Services.Implementations
                 }
                 else
                 {
-                    newInventoryItem = new HomesInventory { Amount = 1, ItemId = currentItem.ItemId, UserId = userId };
+                    newInventoryItem = new HomesInventory { Amount = 1, ItemId = currentItem.ItemId, HomeId = homeId, UserId = userId };
                     _context.HomesInventory.Add(newInventoryItem);
                 }
             }
@@ -245,7 +249,7 @@ namespace KeplerCMS.Services.Implementations
             foreach (var item in itemsChanged)
             {
                 // Lets see if the user is actually the owner of the items
-                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id && s.OwnerId == userId).FirstOrDefaultAsync();
+                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id).FirstOrDefaultAsync();
                 if(dbItem != null)
                 {
                     dbItem.X = item.X;

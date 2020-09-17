@@ -301,50 +301,56 @@
 <div class="cbb topdialog black" id="dialog-group-settings">
 	
 	<div class="box-tabs-container">
-<ul class="box-tabs">
-	<li class="selected" id="group-settings-link-group"><a href="#">@DbRes.T("group_settings", "habbohome")</a><span class="tab-spacer"></span></li>
-	<li id="group-settings-link-room"><a href="#">@DbRes.T("group_settings_room", "habbohome")</a><span class="tab-spacer"></span></li>
-</ul>
-</div>
+        <ul class="box-tabs">
+            <li class="selected" id="group-settings-link-group"><a href="#">@DbRes.T("group_settings", "habbohome")</a><span class="tab-spacer"></span></li>
+            <li id="group-settings-link-room"><a href="#">@DbRes.T("group_settings_room", "habbohome")</a><span class="tab-spacer"></span></li>
+        </ul>
+    </div>
 	<a class="topdialog-exit" href="#" id="dialog-group-settings-exit">X</a>
 	<div class="topdialog-body" id="dialog-group-settings-body">
-<p style="text-align:center"><img src="~/images/progress_bubbles.gif" alt="" width="29" height="6" /></p>
+        <p style="text-align:center"><img src="~/images/progress_bubbles.gif" alt="" width="29" height="6" /></p>
 	</div>
 </div>	
 
 <div class="cb topdialog black" id="group-memberlist" style="display: none;"><div class="bt"><div></div></div><div class="i1"><div class="i2"><div class="i3">
 	
 	<div class="box-tabs-container">
-<ul class="box-tabs">
-	<li class="selected" id="group-memberlist-link-members"><a href="#">@DbRes.T("group_members", "habbohome")</a><span class="tab-spacer"></span></li>
-	<li id="group-memberlist-link-pending"><a href="#">@DbRes.T("group_pending_members", "habbohome")</a><span class="tab-spacer"></span></li>
-</ul>
-</div>
+        <ul class="box-tabs">
+            <li class="selected" id="group-memberlist-link-members"><a href="#">@DbRes.T("group_members", "habbohome")</a><span class="tab-spacer"></span></li>
+            <li id="group-memberlist-link-pending"><a href="#">@DbRes.T("group_pending_members", "habbohome")</a><span class="tab-spacer"></span></li>
+        </ul>
+    </div>
 
 	<a class="topdialog-exit" href="#" id="group-memberlist-exit">X</a>
 	<div class="topdialog-body" id="group-memberlist-body">
-<div id="group-memberlist-members-search" class="clearfix">
-    
-    <a id="group-memberlist-members-search-button" href="#" class="new-button"><b>@DbRes.T("search", "habbohome")</b><i></i></a>
-    <input type="text" id="group-memberlist-members-search-string">
-</div>
-<div id="group-memberlist-members" style="clear: both; display: none;"></div>
+        <div id="group-memberlist-members-search" class="clearfix">
+            
+            <a id="group-memberlist-members-search-button" href="#" class="new-button"><b>@DbRes.T("search", "habbohome")</b><i></i></a>
+            <input type="text" id="group-memberlist-members-search-string">
+        </div>
+        <div id="group-memberlist-members" style="clear: both; display: none;"></div>
 
-<div id="group-memberlist-members-buttons" class="clearfix" style="display: none;">
-	
-	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-give-rights"><b>@DbRes.T("group_give_rights", "habbohome")</b><i></i></a>
-	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-revoke-rights"><b>@DbRes.T("group_remove_rights", "habbohome")</b><i></i></a>
-	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-remove"><b>@DbRes.T("remove", "habbohome")</b><i></i></a>
-	<a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close"><b>@DbRes.T("close", "habbohome")</b><i></i></a>
-</div> 
-<div id="group-memberlist-pending" style="clear: both; display: none;"></div>
-<div id="group-memberlist-pending-buttons" class="clearfix" style="display: none;">
-	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-accept"><b>@DbRes.T("group_accept", "habbohome")</b><i></i></a>
-	<a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-decline"><b>@DbRes.T("group_reject", "habbohome")</b><i></i></a>
-	<a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close2"><b>@DbRes.T("close", "habbohome")</b><i></i></a>
-</div>
+        <div id="group-memberlist-members-buttons" class="clearfix" style="display: none;">
+            
+            <a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-give-rights"><b>@DbRes.T("group_give_rights", "habbohome")</b><i></i></a>
+            <a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-revoke-rights"><b>@DbRes.T("group_remove_rights", "habbohome")</b><i></i></a>
+            <a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-remove"><b>@DbRes.T("remove", "habbohome")</b><i></i></a>
+            <a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close"><b>@DbRes.T("close", "habbohome")</b><i></i></a>
+        </div> 
+        <div id="group-memberlist-pending" style="clear: both; display: none;"></div>
+        <div id="group-memberlist-pending-buttons" class="clearfix" style="display: none;">
+            <a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-accept"><b>@DbRes.T("group_accept", "habbohome")</b><i></i></a>
+            <a href="#" class="new-button group-memberlist-button-disabled" id="group-memberlist-button-decline"><b>@DbRes.T("group_reject", "habbohome")</b><i></i></a>
+            <a href="#" class="new-button group-memberlist-button" id="group-memberlist-button-close2"><b>@DbRes.T("close", "habbohome")</b><i></i></a>
+        </div>
 	</div>
-</div></div></div><div class="bb"><div></div></div></div>
+</div>
+</div>
+<div class="bb"><div>
+
+</div>
+</div>
+</div>
 
 <script language="JavaScript" type="text/javascript">
     Event.observe(window, "resize", function () { if (editMenuOpen) closeEditMenu(); }, false);
