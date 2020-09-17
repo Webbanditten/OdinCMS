@@ -35,7 +35,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         [HttpPost]
         [Route("grouppurchase/group_create_form")]
-        public async Task<IActionResult> GroupCreateForm(int product)
+        public async Task<IActionResult> GroupCreateForm(string name, string description)
         {
             return View("Form");
         }
@@ -43,12 +43,13 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         [HttpPost]
         [Route("grouppurchase/purchase_confirmation")]
-        public async Task<IActionResult> PurchaseConfirmation(int product)
+        public async Task<IActionResult> PurchaseConfirmation(string name, string description)
         {
-            if(await _creditService.CanPurchase(10, int.Parse(User.Identity.Name)))
+            var userId = int.Parse(User.Identity.Name);
+            if(await _creditService.Purchase(10, userId))
             {
-                
-                return View("Success");
+                var group = await _homeService.InitGroup(name, description, userId);
+                return View("Success", group);
             } else
             {
                 return Content("<p style=\"height:30px;\">" + DbRes.T("not_enough_credits", "shared") + " <a href=\"#\" class=\"colorlink arrow\" onclick=\"closeGroupPurchase(); return false;\" style =\"margin-top:10px\" ><span>" + DbRes.T("close", "dialogs") + "</span></a></p>");

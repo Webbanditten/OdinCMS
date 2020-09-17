@@ -635,7 +635,7 @@ namespace KeplerCMS.Services.Implementations
             var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
             if(home == null)
             {
-                var newHome = new Homes { UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
+                var newHome = new Homes { Created = DateTime.Now, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
                 _context.Homes.Add(newHome);
                 await _context.SaveChangesAsync();
                 // Default items
@@ -691,9 +691,36 @@ namespace KeplerCMS.Services.Implementations
             return await _context.HomesItemData.Where(s => s.CssClass == className).FirstOrDefaultAsync();
         }
 
-        public Task<Homes> InitGroup(string name, string badge, string description, int userId)
+        public async Task<Homes> InitGroup(string name, string description, int userId)
         {
-            throw new NotImplementedException();
+            var newHome = new Homes { GroupBadge = "b0503Xs09114s05013s05015", Created = DateTime.Now, GroupName = name, GroupDescription = description, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "group" };
+            _context.Homes.Add(newHome);
+            await _context.SaveChangesAsync();
+            // Default items
+
+            // Default Widgets
+            var defaultWidgets = await _context.HomesItemData.Where(s => 
+            s.CssClass == "w_guestbookwidget" ||
+            s.CssClass == "w_memberwidget" ||
+            s.CssClass == "w_traxplayerwidget" ||
+            s.CssClass == "w_groupinfowidget").ToListAsync();
+
+            foreach(var widget in defaultWidgets)
+            {
+                if(widget.CssClass == "w_groupinfowidget")
+                {
+                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 445, Y = 28, Z = 546 });
+                } else if (widget.CssClass == "w_memberwidget")
+                {
+                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 428, Y = 291, Z = 558 });
+                } else
+                {
+                    _context.HomesInventory.Add(new HomesInventory { HomeId = newHome.Id, Amount = 1, ItemId = widget.Id, UserId = userId });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return newHome;
         }
 
         public async Task<bool> CanEditHome(int homeId, int? userId)

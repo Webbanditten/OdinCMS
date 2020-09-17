@@ -39,7 +39,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<ItemViewModel> ResetRating(int homeid, int widgetid, int userId);
         Task<ItemViewModel> PlaceNote(int homeid, int skin, string text, int userId);
         Task<Homes> InitHome(int userId);
-        Task<Homes> InitGroup(string name, string badge, string description, int userId);
+        Task<Homes> InitGroup(string name,string description, int userId);
         Task<HomesItemData> GetItemDataByClass(string className);
 
         Task<bool> CanEditHome(int homeId, int? userId);

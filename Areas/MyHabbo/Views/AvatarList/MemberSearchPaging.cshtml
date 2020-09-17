@@ -2,7 +2,7 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @{ 
-    var filteredMembers = Model.Widget.WidgetData.GroupMembers;
+    var filteredMembers = Model.Widget.WidgetData.GroupMembers.Where(s=>s.GroupMember.Pending == false);
     if(Model.Search != "" && Model.Search != null)
     {
         filteredMembers = filteredMembers.Where(s => s.GroupMember.User.Username.ToLower().Contains(Model.Search.ToLower())).ToList();
