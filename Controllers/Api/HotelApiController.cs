@@ -63,7 +63,7 @@ namespace KeplerCMS.Controllers
                 }
                 nameValues.Set("figure", figure);
             }
-            return Redirect("https://www.habbo.de/habbo-imaging/avatarimage?" + nameValues.ToString());
+            return Redirect("https://www.habbo.com/habbo-imaging/avatarimage?" + nameValues.ToString());
         }
 
         [LoggedInFilter]
