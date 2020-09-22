@@ -24,7 +24,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> Index(int traxId)
         {
             var song = await _traxService.GetSingleSongById(traxId);
-            var songOwnerDetails = await _userService.GetUserById(song.UserId.ToString());
+            var songOwnerDetails = await _userService.GetUserById(song.UserId);
             if (song == null) { Response.StatusCode = StatusCodes.Status404NotFound; return Content("SONG NOT FOUND"); }
 
 

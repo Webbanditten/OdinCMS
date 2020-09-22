@@ -4,28 +4,28 @@ if (window.Prototype) {
 
     // from <http://www.vivabit.com/bollocks/2006/06/21/a-dom-ready-extension-for-prototype>
     Object.extend(Event, {
-        _domReady: function () {
+        _domReady: function() {
             if (arguments.callee.done) return;
             arguments.callee.done = true;
             if (this._timer) clearInterval(this._timer);
-            this._readyCallbacks.each(function (f) { f() });
+            this._readyCallbacks.each(function(f) { f() });
             this._readyCallbacks = null;
         },
-        onDOMReady: function (f) {
+        onDOMReady: function(f) {
             if (!this._readyCallbacks) {
                 var domReady = this._domReady.bind(this);
                 if (document.addEventListener) document.addEventListener("DOMContentLoaded", domReady, false);
                 /*@cc_on @*/
-				/*@if (@_win32)
-					var proto = "javascript:void(0)";
-					if (location.protocol == "https:") proto = "//0";
-					document.write("<script id=__ie_onload defer src=" + proto + "><\/script>");
-					document.getElementById("__ie_onload").onreadystatechange = function() {
-						if (this.readyState == "complete") domReady();
-					};
-				/*@end @*/
+                /*@if (@_win32)
+                	var proto = "javascript:void(0)";
+                	if (location.protocol == "https:") proto = "//0";
+                	document.write("<script id=__ie_onload defer src=" + proto + "><\/script>");
+                	document.getElementById("__ie_onload").onreadystatechange = function() {
+                		if (this.readyState == "complete") domReady();
+                	};
+                /*@end @*/
                 if (/WebKit/i.test(navigator.userAgent)) {
-                    this._timer = setInterval(function () {
+                    this._timer = setInterval(function() {
                         if (/loaded|complete/.test(document.readyState)) domReady();
                     }, 10);
                 }
@@ -37,7 +37,7 @@ if (window.Prototype) {
     });
 
     Ajax.Responders.register({
-        onCreate: function (request, transport) {
+        onCreate: function(request, transport) {
             var sc = Cookie.get("JSESSIONID");
             if (sc) {
                 if (typeof request.options.requestHeaders == 'object') {
@@ -51,7 +51,7 @@ if (window.Prototype) {
 }
 
 var Cookie = {
-    set: function (name, value, daysToExpire) {
+    set: function(name, value, daysToExpire) {
         var expire = '';
         if (daysToExpire != undefined) {
             var d = new Date();
@@ -60,16 +60,16 @@ var Cookie = {
         }
         return (document.cookie = escape(name) + '=' + escape(value || '') + '; path=/' + expire);
     },
-    get: function (name) {
+    get: function(name) {
         var cookie = document.cookie.match(new RegExp('(^|;)\\s*' + escape(name) + '=([^;\\s]*)'));
         return (cookie ? unescape(cookie[2]) : null);
     },
-    erase: function (name) {
+    erase: function(name) {
         var cookie = Cookie.get(name) || true;
         Cookie.set(name, '', -1);
         return cookie;
     },
-    accept: function () {
+    accept: function() {
         if (typeof navigator.cookieEnabled == 'boolean') {
             return navigator.cookieEnabled;
         }
@@ -89,7 +89,7 @@ function openOrFocusHabbo(link) {
     var targetUrl = (link.href ? link.href : link)
     var win = openEmptyHabboWindow("client");
     var isHabboClient = false;
-    try { isHabboClient = (win.habboClient && win.document.habboLoggedIn == true); } catch (error) { }
+    try { isHabboClient = (win.habboClient && win.document.habboLoggedIn == true); } catch (error) {}
     if (isHabboClient) {
         win.focus();
         if (win.updateHabboCount) {
@@ -102,25 +102,25 @@ function openOrFocusHabbo(link) {
 }
 
 function _openHabboWindow(url, target) { return window.open(url, target, "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,width=750,height=597"); }
+
 function openEmptyHabboWindow(target) { return _openHabboWindow('', target); }
 
 function _isHabboPopupOpen() { return openedHabbo && !openedHabbo.closed && openedHabbo.focus; }
 
 function roomForward(link, roomId, roomType) {
     var isHabboClient = false;
-    try { isHabboClient = window.habboClient; } catch (error) { }
+    try { isHabboClient = window.habboClient; } catch (error) {}
     if (isHabboClient) {
         window.location.href = link.href;
         return;
     }
 
     if (document.habboLoggedIn) {
-        new Ajax.Request(habboReqPath + "/components/roomNavigation",
-            {
-                method: "get",
-                parameters: "roomId=" + roomId + "&roomType=" + roomType + "&move=true"
+        new Ajax.Request(habboReqPath + "/components/roomNavigation", {
+            method: "get",
+            parameters: "roomId=" + roomId + "&roomType=" + roomType + "&move=true"
 
-            }, false);
+        }, false);
     }
 
     openOrFocusHabbo(link);
@@ -137,11 +137,17 @@ function resizeWin() {
     if (window.opener != null) {
         var pageSize = getPageSize();
         if (document.all) {
-            if (typeof document.body.style.maxHeight == "undefined") { pageSize[0] = 720; pageSize[1] += 20; } // IE 6
-            else { pageSize[0] = 750; pageSize[1] += 20; } // IE 7
+            if (typeof document.body.style.maxHeight == "undefined") {
+                pageSize[0] = 720;
+                pageSize[1] += 20;
+            } // IE 6
+            else {
+                pageSize[0] = 750;
+                pageSize[1] += 20;
+            } // IE 7
         }
         window.resizeTo(pageSize[0], pageSize[1]);
-        window.setTimeout(function () {
+        window.setTimeout(function() {
             var newSize = getPageSize();
             window.resizeBy(newSize[0] - newSize[2], newSize[1] - newSize[3]);
         }, 500);
@@ -153,7 +159,7 @@ var ScriptLoader = {
     loaded: [],
     callbacks: [],
 
-    load: function (scriptName, options) {
+    load: function(scriptName, options) {
         if (!options) { options = {}; }
 
         if (!ScriptLoader.loaded[scriptName]) {
@@ -171,7 +177,7 @@ var ScriptLoader = {
         }
     },
 
-    notify: function (scriptName, e) {
+    notify: function(scriptName, e) {
         ScriptLoader.loaded[scriptName] = true;
         if (ScriptLoader.callbacks[scriptName]) { ScriptLoader.callbacks[scriptName](e); }
     }
@@ -179,20 +185,21 @@ var ScriptLoader = {
 }
 
 var currentPromo = 0;
+
 function showPromo(num) {
     if (num != currentPromo) {
         $("promoimage").innerHTML = promoPages[num].image;
         $("promotext-content").innerHTML = promoPages[num].text;
         var listEl = $("promolinks-list");
-        $A(listEl.childNodes).each(function (el) {
+        $A(listEl.childNodes).each(function(el) {
             el.parentNode.removeChild(el);
         });
-        promoPages[num].links.each(function (link) {
+        promoPages[num].links.each(function(link) {
             listEl.appendChild(document.createElement("li")).innerHTML = link;
         });
 
         var i = 0;
-        $A($("promoheader-selectors").childNodes).each(function (node) {
+        $A($("promoheader-selectors").childNodes).each(function(node) {
             if (node.nodeName == "LI") {
                 if (i == num) node.firstChild.className = "selected";
                 else node.firstChild.className = "";
@@ -215,7 +222,7 @@ function validatorAddError(element, name, message, errorBoxId) {
 
 function validatorBeforeSubmit(errorBoxId) {
     var errorBoxId = errorBoxId || "process-errors";
-    $A($(errorBoxId + "-content").childNodes).each(function (el) { el.parentNode.removeChild(el); });
+    $A($(errorBoxId + "-content").childNodes).each(function(el) { el.parentNode.removeChild(el); });
     $(errorBoxId).style.display = "none";
 }
 
@@ -229,9 +236,9 @@ function hijaxLinks(componentId, action, targetId) {
     for (var i = 0; i < links.length; i++) {
         var link = links[i];
         if (Element.hasClassName(link, "hijaxTarget")) {
-            link.onclick = function () {
+            link.onclick = function() {
                 new Ajax.Updater(target, action + getParameters(this), {
-                    onComplete: function () {
+                    onComplete: function() {
                         hijaxLinks(componentId, action, targetId);
                     },
                     evalScripts: true
@@ -243,23 +250,22 @@ function hijaxLinks(componentId, action, targetId) {
 }
 
 function getParameters(obj) {
-    if (obj.name) { return obj.name; }
-    else { return ""; }
+    if (obj.name) { return obj.name; } else { return ""; }
 }
 
 var FormHijax = {
 
-    hijax: function (componentId, action, jump) {
+    hijax: function(componentId, action, jump) {
         var component = $(componentId);
 
         var forms = component.getElementsByTagName('form');
         for (var i = 0; i < forms.length; i++) {
             var f = forms[i];
-            f.onsubmit = function () {
+            f.onsubmit = function() {
                 FormHijax.disableSubmit(this);
                 new Ajax.Updater(componentId, action, {
                     postBody: FormHijax.cleanup(Form.serialize(this), componentId),
-                    onComplete: function () {
+                    onComplete: function() {
                         FormHijax.hijax(componentId, action);
                         if (jump) location.hash = componentId;
                     },
@@ -270,14 +276,14 @@ var FormHijax = {
         }
     },
 
-    disableSubmit: function (form) {
+    disableSubmit: function(form) {
         var elements = Form.getInputs(form, "submit");
         for (var i = 0; i < elements.length; i++) {
             elements[i].disabled = 'true';
         }
     },
 
-    cleanup: function (query, componentId) {
+    cleanup: function(query, componentId) {
         var params = query.replace("&amp;", "&").split("&");
         var queryComponents = new Array();
         queryComponents.push("componentId=" + componentId);
@@ -301,7 +307,7 @@ function showOverlay(clickCallback, progressText) {
     try {
         var topWidth = Element.getDimensions("top").width;
         if (topWidth > pageSize[2]) { overlay.style.minWidth = topWidth + "px"; }
-    } catch (ex) { }
+    } catch (ex) {}
     overlay.style.zIndex = "9000";
 
     if (progressText) {
@@ -310,7 +316,8 @@ function showOverlay(clickCallback, progressText) {
             Builder.node("p", progressText)
         ]), overlay.nextSibling);
         var dim = Element.getDimensions(progress);
-        var x = 0, y = 0;
+        var x = 0,
+            y = 0;
 
         x = Math.round(pageSize[2] / 2) - Math.round(dim.width / 2);
         if (x < 0) { x = 0; }
@@ -322,8 +329,8 @@ function showOverlay(clickCallback, progressText) {
     }
 
     if (clickCallback) {
-        Event.observe($("overlay"), "click", function (e) { clickCallback(); }, false);
-        if (progressText) { Event.observe($("overlay_progress"), "click", function (e) { clickCallback(); }, false); }
+        Event.observe($("overlay"), "click", function(e) { clickCallback(); }, false);
+        if (progressText) { Event.observe($("overlay_progress"), "click", function(e) { clickCallback(); }, false); }
     }
 }
 
@@ -367,7 +374,7 @@ function getPageSize() {
     }
 
     var windowWidth, windowHeight;
-    if (self.innerHeight) {	// all except Explorer
+    if (self.innerHeight) { // all except Explorer
         windowWidth = self.innerWidth;
         windowHeight = self.innerHeight;
     } else if (document.documentElement && document.documentElement.clientHeight) { // Explorer 6 Strict Mode
@@ -418,7 +425,7 @@ function ensureOpenerIsLoggedOut() {
                 window.opener.location.reload();
             }
         }
-    } catch (error) { }
+    } catch (error) {}
 }
 
 function ensureOpenerIsLoggedIn() {
@@ -427,11 +434,11 @@ function ensureOpenerIsLoggedIn() {
             if (window.opener.document.logoutPage != null && window.opener.document.logoutPage == true) {
                 window.opener.location.href = "/";
             } else
-                if (window.opener.document.habboLoggedIn != null && window.opener.document.habboLoggedIn == false) {
-                    window.opener.location.reload();
-                }
+            if (window.opener.document.habboLoggedIn != null && window.opener.document.habboLoggedIn == false) {
+                window.opener.location.reload();
+            }
         }
-    } catch (error) { }
+    } catch (error) {}
 }
 
 function clearOpener() {
@@ -447,9 +454,10 @@ function closePurchase(e) {
 function showPurchaseResult(productCode) {
     $("single-confirmation-button-area").innerHTML = getProgressNode();
     new Ajax.Request(
-        habboReqPath + "/furnipurchase/purchase_ajax",
-        {
-            method: "post", parameters: "product=" + encodeURIComponent(productCode) + "&webwork.token.name=webwork.token&webwork.token" + "=" + document.getElementsByName("webwork.token").item(0).value, onComplete: function (req, json) {
+        habboReqPath + "/furnipurchase/purchase_ajax", {
+            method: "post",
+            parameters: "product=" + encodeURIComponent(productCode) + "&webwork.token.name=webwork.token&webwork.token" + "=" + document.getElementsByName("webwork.token").item(0).value,
+            onComplete: function(req, json) {
                 if ($("purchase_dialog")) Element.remove("purchase_dialog");
                 moveOverlay("92");
                 if (!$("purchase_result")) {
@@ -474,6 +482,7 @@ function closePurchaseResult() {
 
 var currentTab = "myhabbo";
 var timer = null;
+
 function switchTab(tabName) {
     if (timer) { window.clearTimeout(timer); }
     if (tabName != currentTab) {
@@ -486,34 +495,38 @@ function switchTab(tabName) {
     }
     return false;
 }
+
 function fadeTab(tabName) { timer = window.setTimeout("switchTab('" + tabName + "')", 1500); }
+
 function lockCurrentTab() { if (timer) { window.clearTimeout(timer); } }
 
 var creditsUpdated = false;
 var creditsUpdateOn = false;
+
 function updateCredits() {
     if (!creditsUpdated && !creditsUpdateOn) {
         creditsUpdateOn = true;
         document.getElementById('credits-status').innerHTML = getProgressNode();
-        setTimeout(function () { new Ajax.Updater("credits-status", habboReqPath + "/topbar/credits", { onComplete: function () { creditsUpdateOn = false; }, evalScripts: true }); }, 500);
+        setTimeout(function() { new Ajax.Updater("credits-status", habboReqPath + "/topbar/credits", { onComplete: function() { creditsUpdateOn = false; }, evalScripts: true }); }, 500);
         creditsUpdated = true;
-        setTimeout(function () { creditsUpdated = false; }, 50000)
+        setTimeout(function() { creditsUpdated = false; }, 50000)
     }
 }
 var habboClubUpdated = false;
 var habboClubUpdateOn = false;
+
 function updateHabboClub() {
     if (!habboClubUpdated && !habboClubUpdateOn) {
         habboClubUpdateOn = true;
         document.getElementById('habboclub-status').innerHTML = getProgressNode();
-        setTimeout(function () { new Ajax.Updater("habboclub-status", habboReqPath + "/topbar/habboclub", { onComplete: function () { habboClubUpdateOn = false; }, evalScripts: true }); }, 500);
+        setTimeout(function() { new Ajax.Updater("habboclub-status", habboReqPath + "/topbar/habboclub", { onComplete: function() { habboClubUpdateOn = false; }, evalScripts: true }); }, 500);
         habboClubUpdated = true;
     }
 }
 
 function updateHabboCreditAmounts(newAmount) {
     var elements = document.getElementsByClassName('habbocredits');
-    elements.each(function (element) {
+    elements.each(function(element) {
         element.update(newAmount);
     });
 }
@@ -557,9 +570,12 @@ function showInfoDialog(dialogId, message, buttonText, buttonOnClick) {
     $(dialogId + "content").innerHTML = message;
     appendDialogBody(dialog, Builder.node("p", [link]));
     if (buttonOnClick == null) {
-        Event.observe(link, "click", function (e) { Event.stop(e); Element.hide($(dialogId)); hideOverlay(); }, false);
-    }
-    else {
+        Event.observe(link, "click", function(e) {
+            Event.stop(e);
+            Element.hide($(dialogId));
+            hideOverlay();
+        }, false);
+    } else {
         Event.observe(link, "click", buttonOnClick, false);
     }
 
@@ -587,8 +603,16 @@ function showConfirmDialog(message) {
     var link = Builder.node("a", { href: "#", className: "colorlink dialogbutton" }, [Builder.node("span", options.buttonText)]);
     var cancelLink = Builder.node("a", { href: "#", className: "colorlink noarrow dialogbutton" }, [Builder.node("span", options.cancelButtonText)]);
     appendDialogBody(dialog, Builder.node("div", [cancelLink, link]));
-    Event.observe(link, "click", function (e) { Event.stop(e); options.okHandler(); }, false);
-    Event.observe(cancelLink, "click", function (e) { Event.stop(e); Element.remove($(options.dialogId)); hideOverlay(); options.cancelHandler(); }, false);
+    Event.observe(link, "click", function(e) {
+        Event.stop(e);
+        options.okHandler();
+    }, false);
+    Event.observe(cancelLink, "click", function(e) {
+        Event.stop(e);
+        Element.remove($(options.dialogId));
+        hideOverlay();
+        options.cancelHandler();
+    }, false);
     moveOverlay("9002");
     moveDialogToCenter(dialog);
     makeDialogDraggable(dialog);
@@ -597,7 +621,11 @@ function showConfirmDialog(message) {
 
 function appendDialogBody(dialog, bodyEl, useInnerHTML) {
     var el = $(dialog);
-    if (el) { var el2 = $(el.id + "-body"); (useInnerHTML) ? el2.innerHTML += bodyEl : el2.insertBefore(bodyEl, el2.lastChild); if (bodyEl.innerHTML) bodyEl.innerHTML.evalScripts(); }
+    if (el) {
+        var el2 = $(el.id + "-body");
+        (useInnerHTML) ? el2.innerHTML += bodyEl: el2.insertBefore(bodyEl, el2.lastChild);
+        if (bodyEl.innerHTML) bodyEl.innerHTML.evalScripts();
+    }
 }
 
 function setDialogBody(dialog, bodyEl) {
@@ -622,7 +650,8 @@ function makeDialogDraggable(dialog) {
 function moveDialogToView(dialog, e, coordinates) {
     var dim = Element.getDimensions(dialog);
     var pageSize = getPageSize();
-    var x = 0, y = 0;
+    var x = 0,
+        y = 0;
 
     if (coordinates) {
         x = coordinates.x;
@@ -652,7 +681,8 @@ function moveDialogToCenter(dialog) {
 
     var dim = Element.getDimensions(dialog);
     var pageSize = getPageSize();
-    var x = 0, y = 0;
+    var x = 0,
+        y = 0;
 
     x = Math.round(pageSize[2] / 2) - Math.round(dim.width / 2);
     if ($("ad_sidebar")) {
@@ -673,7 +703,8 @@ function moveDivToCenterOfDiv(innerDiv, outerDiv) {
     var outerDim = Element.getDimensions(outerDiv);
     var outerPos = Position.cumulativeOffset(outerDiv);
 
-    var x = 0, y = 0;
+    var x = 0,
+        y = 0;
     x = outerPos[0] + Math.round((outerDim.width - innerDim.width) / 2);
     if (x < 0) { x = 0; }
     y = outerPos[1] + Math.round((outerDim.height - innerDim.height) / 2);
@@ -687,14 +718,11 @@ function getViewportScrollY() {
     var scrollY = 0;
     if (document.documentElement && document.documentElement.scrollTop) {
         scrollY = document.documentElement.scrollTop;
-    }
-    else if (document.body && document.body.scrollTop) {
+    } else if (document.body && document.body.scrollTop) {
         scrollY = document.body.scrollTop;
-    }
-    else if (window.pageYOffset) {
+    } else if (window.pageYOffset) {
         scrollY = window.pageYOffset;
-    }
-    else if (window.scrollY) {
+    } else if (window.scrollY) {
         scrollY = window.scrollY;
     }
     return scrollY;
@@ -707,13 +735,33 @@ function getProgressNode() {
 }
 
 if (window.Prototype) {
-    var imgDo = false, origImg = false, newImg = false;
-    Event.observe(window, "load", function () {
+    var imgDo = false,
+        origImg = false,
+        newImg = false;
+    Event.observe(window, "load", function() {
         if (document.habboLoggedIn) {
-            var el = $("myimage"); if (el) {
-                Event.observe(document, "keydown", function (e) { if (e.keyCode == Event.KEY_UP) { imgDo = true; } }, false);
-                Event.observe(document, "keyup", function (e) { if (imgDo) { imgDo = false; } }, false);
-                Event.observe(el, "click", function (e) { if (imgDo) { if (!origImg) { origImg = el.src; if (!newImg) { new Ajax.Request(habboReqPath + "/topbar/myimage", { onSuccess: function (t) { newImg = t.responseText; $("myimage").src = newImg; } }); } else { el.src = newImg; } } else { el.src = origImg; origImg = false; } } }, false);
+            var el = $("myimage");
+            if (el) {
+                Event.observe(document, "keydown", function(e) { if (e.keyCode == Event.KEY_UP) { imgDo = true; } }, false);
+                Event.observe(document, "keyup", function(e) { if (imgDo) { imgDo = false; } }, false);
+                Event.observe(el, "click", function(e) {
+                    if (imgDo) {
+                        if (!origImg) {
+                            origImg = el.src;
+                            if (!newImg) {
+                                new Ajax.Request(habboReqPath + "/topbar/myimage", {
+                                    onSuccess: function(t) {
+                                        newImg = t.responseText;
+                                        $("myimage").src = newImg;
+                                    }
+                                });
+                            } else { el.src = newImg; }
+                        } else {
+                            el.src = origImg;
+                            origImg = false;
+                        }
+                    }
+                }, false);
             }
         }
     }, false);
@@ -721,7 +769,7 @@ if (window.Prototype) {
 
 function addClientUnloadHook() {
     if (habboClient == true && determineSWVersion() != "undefined") {
-        Event.observe(window, "unload", function () {
+        Event.observe(window, "unload", function() {
             new Ajax.Request(habboReqPath + "/account/unloadclient", { asynchronous: false });
         });
     }
@@ -729,7 +777,7 @@ function addClientUnloadHook() {
 
 function determineSWVersion() {
     if (navigator.mimeTypes && navigator.mimeTypes["application/x-director"] && navigator.mimeTypes["application/x-director"].enabledPlugin) {
-        if (navigator.plugins && navigator.plugins["Shockwave for Director"] && (tVersionIndex = navigator.plugins["Shockwave for Director"].description.indexOf(".")) != - 1) {
+        if (navigator.plugins && navigator.plugins["Shockwave for Director"] && (tVersionIndex = navigator.plugins["Shockwave for Director"].description.indexOf(".")) != -1) {
             return navigator.plugins["Shockwave for Director"].description.substring(tVersionIndex - 2, tVersionIndex + 2);
         }
     } else {
@@ -738,13 +786,13 @@ function determineSWVersion() {
             if (swControl) {
                 return swControl.ShockwaveVersion("");
             }
-        } catch (e) { }
+        } catch (e) {}
     }
     return "undefined";
 }
 
 function limitTextarea(id, maxLength, limitCallback) {
-    new Form.Element.Observer($(id), .1, function (e) {
+    new Form.Element.Observer($(id), .1, function(e) {
         var f = $(id);
         if (limitCallback) {
             limitCallback(f.value.length >= maxLength);
@@ -771,9 +819,10 @@ function closeSubscription(e) {
 
 function showSubscriptionResult(optionNumber, res_dialog_header) {
     new Ajax.Request(
-        habboReqPath + "/myhabbo/habboclub_subscribe",
-        {
-            method: "post", parameters: "optionNumber=" + encodeURIComponent(optionNumber), onComplete: function (req, json) {
+        habboReqPath + "/myhabbo/habboclub_subscribe", {
+            method: "post",
+            parameters: "optionNumber=" + encodeURIComponent(optionNumber),
+            onComplete: function(req, json) {
                 if ($("subscription_dialog")) Element.remove("subscription_dialog");
                 var resultDialog = createDialog("subscription_result", res_dialog_header, "9003", 0, -1000, closeSubscription);
                 appendDialogBody(resultDialog, req.responseText, true);
@@ -803,22 +852,23 @@ function closeSubscriptionError() {
 /* \habbo club subscription */
 
 var HabboCounter = {
-    init: function (refreshFrequency) {
+    init: function(refreshFrequency) {
         this.refreshFrequency = refreshFrequency;
         this.start();
         this.lastValue = "0";
     },
 
-    start: function () {
+    start: function() {
         new PeriodicalExecuter(this.onTimerEvent.bind(this), this.refreshFrequency);
     },
 
-    onTimerEvent: function () {
+    onTimerEvent: function() {
         new Ajax.Request("/components/updateHabboCount", {
-            onSuccess: function (response, obj) {
+            onSuccess: function(response, obj) {
                 if (obj && typeof obj.habboCountText != "undefined" && this.lastValue != obj.habboCountText) {
                     new Effect.Fade('habboCountUpdateTarget', {
-                        duration: 0.5, afterFinish: function () {
+                        duration: 0.5,
+                        afterFinish: function() {
                             Element.update('habboCountUpdateTarget', obj.habboCountText);
                             new Effect.Appear('habboCountUpdateTarget', { duration: 0.5 });
                         }
@@ -834,9 +884,10 @@ var HabboCounter = {
 function showGroupPurchaseResult(productCode, name, description, dialog_title) {
     $("group-confirmation-button-area").innerHTML = getProgressNode();
     new Ajax.Request(
-        habboReqPath + "/grouppurchase/purchase_ajax",
-        {
-            method: "post", parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent(name) + "&description=" + encodeURIComponent(description) + "&webwork.token.name=webwork.token&webwork.token" + "=" + document.getElementsByName("webwork.token").item(0).value, onComplete: function (req, json) {
+        habboReqPath + "/grouppurchase/purchase_ajax", {
+            method: "post",
+            parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent(name) + "&description=" + encodeURIComponent(description) + "&webwork.token.name=webwork.token&webwork.token" + "=" + document.getElementsByName("webwork.token").item(0).value,
+            onComplete: function(req, json) {
                 if ($("group_purchase_form")) { Element.remove("group_purchase_form"); }
                 if ($("group_purchase_confirmation")) Element.remove("group_purchase_confirmation");
                 if (!$("group_purchase_result")) {
@@ -851,11 +902,11 @@ function showGroupPurchaseResult(productCode, name, description, dialog_title) {
 
 function showGroupPurchaseConfirmation(productCode, dialog_title) {
     new Ajax.Request(
-        habboReqPath + "/grouppurchase/purchase_confirmation",
-        {
-            method: "post", parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent($("group_name").value) + "&description=" + encodeURIComponent($("group_description").value),
-            onComplete: function (req) {
-                var groupPurchaseDialog = $('group_purchase_form');
+        habboReqPath + "/grouppurchase/purchase_confirmation", {
+            method: "post",
+            parameters: "product=" + encodeURIComponent(productCode) + "&name=" + encodeURIComponent(document.getElementById("group_name").value) + "&description=" + encodeURIComponent(document.getElementById("group_description").value),
+            onComplete: function(req) {
+                var groupPurchaseDialog = $('#group_purchase_form');
                 if (req.responseText.indexOf('purchase-group-form-id') < 0) {
                     moveOverlay('9002');
                     groupPurchaseDialog = createDialog("group_purchase_confirmation", dialog_title, "9003", 0, -1000, cancelGroupPurchase);
@@ -907,10 +958,9 @@ function closeAuthTokenDialog() {
 function confirmPhoneNumber() {
     var mobile = $F('msisdn_value');
     new Ajax.Updater("auth-token-dialog-body",
-        habboReqPath + "/authtoken/numberconfirm",
-        {
-            method: "post", parameters:
-                "mobile=" + encodeURIComponent(mobile)
+        habboReqPath + "/authtoken/numberconfirm", {
+            method: "post",
+            parameters: "mobile=" + encodeURIComponent(mobile)
         }
     );
 }
@@ -941,9 +991,9 @@ function generatePocketAuthToken(origin, title, send_btn, body_txt, important_tx
 function generateMobileAuthToken(origin, title) {
     if (origin == "adminPage") {
         new Ajax.Request(
-            habboReqPath + "/authtoken/genmobiletoken",
-            {
-                method: "post", onComplete: function (req, json) {
+            habboReqPath + "/authtoken/genmobiletoken", {
+                method: "post",
+                onComplete: function(req, json) {
                     var authTokenDialog = createDialog("auth-token-dialog", title, "9003", 0, -1000, closeAuthTokenDialog);
                     appendDialogBody(authTokenDialog, req.responseText, true);
                     moveDialogToCenter(authTokenDialog);
@@ -960,14 +1010,12 @@ function generateMobileAuthToken(origin, title) {
 
 function sendMobileNumber(mobile) {
     new Ajax.Updater("auth-token-dialog-body",
-        habboReqPath + "/authtoken/genpockettoken",
-        { method: "post", parameters: "mobile=" + encodeURIComponent(mobile) });
+        habboReqPath + "/authtoken/genpockettoken", { method: "post", parameters: "mobile=" + encodeURIComponent(mobile) });
 }
 
 function removeAuthToken(tokenid) {
     new Ajax.Updater("auth-token-dialog-body",
-        habboReqPath + "/authtoken/removetoken",
-        { method: "post", parameters: "tokenId=" + encodeURIComponent(tokenid) });
+        habboReqPath + "/authtoken/removetoken", { method: "post", parameters: "tokenId=" + encodeURIComponent(tokenid) });
 }
 
 function confirmTokenRemoval(title, msg, tokenid, removetitle, canceltitle) {
@@ -990,14 +1038,14 @@ function closeTokenDialogAndReload() {
 
 var ClientMessageHandler = {
 
-    call: function (msg, data) {
+    call: function(msg, data) {
         if (msg) {
             var msgArray = msg.split(/,+/).without("").uniq();
-            msgArray.each(function (msg) {
+            msgArray.each(function(msg) {
                 if (msg.length > 0 && typeof ClientMessageHandler[msg] == "function") {
                     try {
                         ClientMessageHandler[msg].apply(null, [data]);
-                    } catch (e) { }
+                    } catch (e) {}
                 }
             });
         }
@@ -1006,9 +1054,9 @@ var ClientMessageHandler = {
     googleClientKeepAlive: null,
     googleLastTrackingCall: 0,
 
-    google: function (data) {
+    google: function(data) {
         if (!ClientMessageHandler.googleClientKeepAlive) {
-            ClientMessageHandler.googleClientKeepAlive = window.setInterval(function () {
+            ClientMessageHandler.googleClientKeepAlive = window.setInterval(function() {
                 var now = new Date().getTime();
                 if (ClientMessageHandler.googleLastTrackingCall < now - 15 * 60 * 1000) {
                     ClientMessageHandler.google("/client/keepalive");
@@ -1020,19 +1068,20 @@ var ClientMessageHandler = {
         if (window.urchinTracker) { urchinTracker("/client" + cleanedData); }
     },
 
-    nielsen: function (data) {
+    nielsen: function(data) {
         ClientMessageHandler.url("https://web.archive.org/web/20130701113007/http://secure-dk.imrworldwide.com/cgi-bin/m?ci=Habbohotel&cg=0&si=" + data);
     },
 
-    customjs: function (data) {
+    customjs: function(data) {
         if (ClientMessageHandler.custom) { ClientMessageHandler.custom(data); }
     },
 
-    url: function (data) {
-        var img = new Image(1, 1); img.src = data;
+    url: function(data) {
+        var img = new Image(1, 1);
+        img.src = data;
     },
 
-    hello: function (data) {
+    hello: function(data) {
         alert(data);
     }
 };
@@ -1041,99 +1090,97 @@ var TagHelper = Class.create();
 /**
  * Adds a tag to the account's tag collection.
  */
-TagHelper.addAvatarTag = function (tagName, accountId) {
+TagHelper.addAvatarTag = function(tagName, accountId) {
 
-    accountId = encodeURIComponent(accountId);
+        accountId = encodeURIComponent(accountId);
 
-    new Ajax.Request("/myhabbo/tag/add", {
-        parameters: "accountId=" + accountId + "&tagName=" + encodeURIComponent(tagName),
-        onSuccess: function (transport) {
-            var tagMsgCode = transport.responseText;
+        new Ajax.Request("/myhabbo/tag/add", {
+            parameters: "accountId=" + accountId + "&tagName=" + encodeURIComponent(tagName),
+            onSuccess: function(transport) {
+                var tagMsgCode = transport.responseText;
 
-            if (tagMsgCode == "valid" && $('profile-tags-status-field')) {
-                new Ajax.Updater("profile-tag-list", "/myhabbo/tag/list", {
-                    parameters: "tagMsgCode=" + encodeURIComponent("valid") + "&accountId=" + accountId
-                });
+                if (tagMsgCode == "valid" && $('profile-tags-status-field')) {
+                    new Ajax.Updater("profile-tag-list", "/myhabbo/tag/list", {
+                        parameters: "tagMsgCode=" + encodeURIComponent("valid") + "&accountId=" + accountId
+                    });
+                }
+
+                TagHelper.errorMessage(tagMsgCode);
+
             }
+        });
+    }
+    /**
+     * Confirm dialog for adding a tag from a list.
+     */
+TagHelper.confirmAddAvatarTag = function(tagName, accountId) {
+        showConfirmDialog(this.options.messageText, {
+            okHandler: function() {
+                TagHelper.addAvatarTag(tagName, accountId);
+                Element.remove($(this.dialogId));
+                hideOverlay();
+            },
+            headerText: this.options.headerText,
+            buttonText: this.options.buttonText,
+            cancelButtonText: this.options.cancelButtonText,
+            dialogId: "add-tag-dialog"
+        });
+    }
+    /**
+     * Adds a tag to the group's tag collection.
+     */
+TagHelper.addGroupTag = function(tagName, groupId) {
 
-            TagHelper.errorMessage(tagMsgCode);
+        groupId = encodeURIComponent(groupId);
 
-        }
-    });
-}
-/**
- * Confirm dialog for adding a tag from a list.
- */
-TagHelper.confirmAddAvatarTag = function (tagName, accountId) {
-    showConfirmDialog(this.options.messageText, {
-        okHandler: function () {
-            TagHelper.addAvatarTag(tagName, accountId);
-            Element.remove($(this.dialogId));
-            hideOverlay();
-        },
-        headerText: this.options.headerText,
-        buttonText: this.options.buttonText,
-        cancelButtonText: this.options.cancelButtonText,
-        dialogId: "add-tag-dialog"
-    });
-}
-/**
- * Adds a tag to the group's tag collection.
- */
-TagHelper.addGroupTag = function (tagName, groupId) {
+        new Ajax.Request("/myhabbo/tag/addgrouptag", {
+            parameters: "groupId=" + groupId + "&tagName=" + encodeURIComponent(tagName),
+            onSuccess: function(transport) {
+                var tagMsgCode = transport.responseText;
 
-    groupId = encodeURIComponent(groupId);
+                if (tagMsgCode == "valid" && $('profile-tags-status-field')) {
+                    new Ajax.Updater("profile-tag-list", "/myhabbo/tag/listgrouptags", {
+                        parameters: "tagMsgCode=" + encodeURIComponent("valid") + "&groupId=" + groupId
+                    });
+                }
 
-    new Ajax.Request("/myhabbo/tag/addgrouptag", {
-        parameters: "groupId=" + groupId + "&tagName=" + encodeURIComponent(tagName),
-        onSuccess: function (transport) {
-            var tagMsgCode = transport.responseText;
-
-            if (tagMsgCode == "valid" && $('profile-tags-status-field')) {
-                new Ajax.Updater("profile-tag-list", "/myhabbo/tag/listgrouptags", {
-                    parameters: "tagMsgCode=" + encodeURIComponent("valid") + "&groupId=" + groupId
-                });
+                TagHelper.errorMessage(tagMsgCode);
             }
+        });
+    }
+    /**
+     * Displays the inline widget error box depending on the tag message code.
+     */
+TagHelper.errorMessage = function(code) {
+        var msgField = $('profile-tags-status-field');
 
-            TagHelper.errorMessage(tagMsgCode);
-        }
-    });
-}
-/**
- * Displays the inline widget error box depending on the tag message code.
- */
-TagHelper.errorMessage = function (code) {
-    var msgField = $('profile-tags-status-field');
-
-    if (msgField) {
-        var limitTagMsg = $('tag-limit-message');
-        var invalidTagMsg = $('tag-invalid-message');
-        if (code == "invalidtag") {
-            msgField.style.display = 'block';
-            invalidTagMsg.style.display = 'block';
-            limitTagMsg.style.display = 'none';
-        }
-        else if (code == "taglimit") {
-            msgField.style.display = 'block';
-            limitTagMsg.style.display = 'block';
-            invalidTagMsg.style.display = 'none';
-        }
-        else if (code == "valid") {
-            msgField.style.display = 'none';
+        if (msgField) {
+            var limitTagMsg = $('tag-limit-message');
+            var invalidTagMsg = $('tag-invalid-message');
+            if (code == "invalidtag") {
+                msgField.style.display = 'block';
+                invalidTagMsg.style.display = 'block';
+                limitTagMsg.style.display = 'none';
+            } else if (code == "taglimit") {
+                msgField.style.display = 'block';
+                limitTagMsg.style.display = 'block';
+                invalidTagMsg.style.display = 'none';
+            } else if (code == "valid") {
+                msgField.style.display = 'none';
+            }
         }
     }
-}
-/**
- * Sets localization texts for the tag adding dialog. Must provide texts for headerText, messageText, buttonText,
- * cancelButtonText and tagLimitText.
- */
-TagHelper.setTexts = function (options) {
-    TagHelper.options = options;
-}
-/**
- * Handles mouse clicks on the tag listing.
- */
-TagHelper.tagListClicked = function (e, loggedInAccountId) {
+    /**
+     * Sets localization texts for the tag adding dialog. Must provide texts for headerText, messageText, buttonText,
+     * cancelButtonText and tagLimitText.
+     */
+TagHelper.setTexts = function(options) {
+        TagHelper.options = options;
+    }
+    /**
+     * Handles mouse clicks on the tag listing.
+     */
+TagHelper.tagListClicked = function(e, loggedInAccountId) {
     var element = Event.element(e);
     if (element.className.indexOf('tag-add-link') >= 0) {
         var tagName = element.className.substring(element.className.lastIndexOf("-") + 1);
@@ -1142,14 +1189,14 @@ TagHelper.tagListClicked = function (e, loggedInAccountId) {
     }
 }
 
-TagHelper.addThisTagToMe = function (tagName, loggedInAccountId) {
+TagHelper.addThisTagToMe = function(tagName, loggedInAccountId) {
     new Ajax.Request("/myhabbo/tag/add", {
         parameters: "accountId=" + encodeURIComponent(loggedInAccountId) + "&tagName=" + encodeURIComponent(tagName),
-        onSuccess: function (transport) {
+        onSuccess: function(transport) {
             var tagMsgCode = transport.responseText;
             if (tagMsgCode == "valid") {
                 var elementList = document.getElementsByClassName('tag-add-link-' + tagName);
-                $$('img.tag-add-link-' + tagName).each(function (element) {
+                $$('img.tag-add-link-' + tagName).each(function(element) {
                     var sourceImg = $('tag-img-added').cloneNode(true);
                     element.src = sourceImg.src;
                     element.className = sourceImg.className;
@@ -1163,12 +1210,12 @@ TagHelper.addThisTagToMe = function (tagName, loggedInAccountId) {
     });
 }
 
-TagHelper.matchFriend = function () {
+TagHelper.matchFriend = function() {
     var friend = $F('tag-match-friend');
     if (friend) {
         new Ajax.Updater($('tag-match-result'), habboReqPath + '/tag/match', {
             parameters: { friendName: friend },
-            onComplete: function (r) {
+            onComplete: function(r) {
                 var elem = $("tag-match-value");
                 if (elem) {
                     var result = parseInt(elem.innerHTML, 10);
@@ -1176,13 +1223,11 @@ TagHelper.matchFriend = function () {
                     if (typeof TagHelper.CountEffect == 'undefined') {
                         $('tag-match-value-display').innerHTML = result + " %";
                         Element.show('tag-match-slogan');
-                    }
-                    else {
+                    } else {
                         var duration;
                         if (result > 0) {
                             duration = 1.5;
-                        }
-                        else {
+                        } else {
                             duration = 0.1;
                         }
                         new TagHelper.CountEffect('tag-match-value-display', {
@@ -1190,7 +1235,7 @@ TagHelper.matchFriend = function () {
                             transition: Effect.Transitions.sinoidal,
                             from: 0,
                             to: result,
-                            afterFinish: function () {
+                            afterFinish: function() {
                                 Effect.Appear('tag-match-slogan', { duration: 1.0 });
                             }
                         });
@@ -1208,7 +1253,7 @@ TagHelper.matchFriend = function () {
 if (typeof Effect != 'undefined') {
     TagHelper.CountEffect = Class.create();
     Object.extend(Object.extend(TagHelper.CountEffect.prototype, Effect.Base.prototype), {
-        initialize: function (element) {
+        initialize: function(element) {
             this.element = $(element);
             if (!this.element) throw (Effect._elementDoesNotExistError);
 
@@ -1219,7 +1264,7 @@ if (typeof Effect != 'undefined') {
             }, arguments[1] || {});
             this.start(options);
         },
-        update: function (position) {
+        update: function(position) {
             this.element.innerHTML = Math.floor(position) + this.options.suffix;
         }
     });
@@ -1227,7 +1272,7 @@ if (typeof Effect != 'undefined') {
 
 /* Tag search button observer */
 if ($("search_query")) {
-    Event.observe("search_query", "keypress", function (e) {
+    Event.observe("search_query", "keypress", function(e) {
         if (e.keyCode == Event.KEY_RETURN) {
             document.tag_search_form.submit();
         }
@@ -1237,32 +1282,30 @@ if ($("search_query")) {
 /* Tag Fight component */
 
 var TagFight = Class.create();
-TagFight.init = function () {
+TagFight.init = function() {
     if ($F('tag1') && $F('tag2')) {
         TagFight.start();
     } else {
         return false;
     }
 }
-TagFight.start = function () {
+TagFight.start = function() {
     $("fightForm").style.display = "none";
     $("fightanimation").src = habboStaticFilePath + "/images/tagfight/tagfight_loop.gif";
     $("fight-process").style.display = "block";
     setTimeout("TagFight.run()", 3000);
 }
-TagFight.run = function () {
-    new Ajax.Updater("fightResults", '/tag/tag_fight_ajax',
-        {
-            method: "post",
-            parameters: "tag1=" + $F('tag1') + "&tag2=" + $F('tag2'),
-            onComplete: function () {
-                $("fight-process").style.display = "none";
-                $("fightForm").style.display = "none";
-            }
+TagFight.run = function() {
+    new Ajax.Updater("fightResults", '/tag/tag_fight_ajax', {
+        method: "post",
+        parameters: "tag1=" + $F('tag1') + "&tag2=" + $F('tag2'),
+        onComplete: function() {
+            $("fight-process").style.display = "none";
+            $("fightForm").style.display = "none";
         }
-    );
+    });
 }
-TagFight.newFight = function () {
+TagFight.newFight = function() {
     $("fight-process").style.display = "none";
     $("fightForm").style.display = "block";
     $("fightResultCount").style.display = "none";
@@ -1275,6 +1318,5 @@ TagFight.newFight = function () {
 
 function setPreview(selectedoption, template, targetDiv) {
     new Ajax.Updater(targetDiv,
-        habboReqPath + "/components/roomlink_export_update",
-        { method: "post", parameters: "roomId=" + selectedoption + "&template=" + template });
+        habboReqPath + "/components/roomlink_export_update", { method: "post", parameters: "roomId=" + selectedoption + "&template=" + template });
 }

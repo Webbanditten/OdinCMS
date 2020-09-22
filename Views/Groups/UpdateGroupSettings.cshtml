@@ -1,0 +1,12 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Data.Models.Homes
+@{ 
+    Layout = null;
+}
+@DbRes.T("group_edit_success", "habbohome")
+<p>
+<a href="/groups/@Model.Id/id" class="new-button"><b>@DbRes.T("done", "habbohome")</b><i></i></a>
+</p>
+
+<div class="clear"></div>

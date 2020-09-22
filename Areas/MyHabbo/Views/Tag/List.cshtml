@@ -1,0 +1,42 @@
+﻿@model ICollection<KeplerCMS.Data.Models.Tags>
+@{
+    Layout = null;
+}
+<div id="profile-tags-container">
+
+    @foreach(var tag in Model)
+    {
+    <span class="tag-search-rowholder">
+
+        <a href="/tag/@tag.Tag" class="tag">@tag.Tag</a>
+
+        @{
+            if (tag.CanEdit && User.Identity.IsAuthenticated)
+            {
+                <img border="0" class="tag-delete-link" onMouseOver="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete_hi.gif")'" onMouseOut="this.src='@Url.Content("~/images/myhabbo/buttons/tag_button_delete.gif")'" src="~/images/myhabbo/buttons/tag_button_delete.gif" />
+            }
+            else
+            {   
+                <img id="tag-img-added" border="0" src="~/images/myhabbo/buttons/tag_button_dim.gif" />
+            }
+        }
+
+    </span>
+    }
+    @{ 
+        if(Model.Count == 0)
+        {
+            @DbRes.T("tag_notags", "habbohome")
+        }
+    }
+
+</div>
+
+<script type="text/javascript">
+    document.observe("dom:loaded", function () {
+        TagHelper.setTexts({
+            buttonText: "@DbRes.T("ok", "habbohome")",
+            tagLimitText: "@DbRes.T("tag_limit", "habbohome")"
+        });
+    });
+</script>

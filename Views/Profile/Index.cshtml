@@ -1,13 +1,15 @@
-﻿@{
+﻿@using System.Text.RegularExpressions;
+@{
+    
     ViewData["Title"] = "Ændre din profil";
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
-    var figureDataUrl =
-(userData.HasHabboClub) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
+    var figureDataUrl = (userData.HasHabboClub) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
+    bool isOldFigure = new Regex(@"^\d+").IsMatch(userData.Figure);
 }
 
 <div id="page-headline">
     <div id="page-headline-breadcrums">
-        
+
     </div>
     <div id="page-headline-text">@DbRes.T("habbo_profile", "profile")</div>
 </div>
@@ -64,8 +66,8 @@
                                                         <div id="settings-hc" style="display: none">
                                                             <div class="rounded-container">
                                                                 <div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(224, 113, 113);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div class="rounded-hcred clearfix rounded-done">
-                                                                    <a href="https://classichabbo.com/club" id="settings-hc-logo"></a>
-                                                                    Items marked with the Habbo Club symbol <img src="https://cdn.classichabbo.com/web-gallery/v2/images/habboclub/hc_mini.png"> are available only to Habbo Club members. <a href="https://classichabbo.com/club">Join now!</a>
+                                                                    <a href="/club" id="settings-hc-logo"></a>
+                                                                    Items marked with the Habbo Club symbol <img src="/images/habboclub/hc_mini.png"> are available only to Habbo Club members. <a href="/club">Join now!</a>
                                                                 </div><div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(224, 113, 113);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div></div></div>
                                                             </div>
                                                         </div>
@@ -81,26 +83,26 @@
                                                         <form method="post" action="/profile/updatefigure" id="settings-form" style="">
                                                             <input type="hidden" name="tab" value="1">
                                                             <input type="hidden" name="__app_key" value="KeplerWeb">
-                                                            <input type="hidden" name="figureData" id="settings-figure" value="hd-180-1.ch-807-85.lg-285-62.hr-829-43">
-                                                            <input type="hidden" name="newGender" id="settings-gender" value="M">
+                                                            <input type="hidden" name="figureData" id="settings-figure" value="@(isOldFigure ? "hr-100-1150.hd-180-1026.ch-210-1284.lg-270-1223.sh-290-1247" : userData.Figure)">
+                                                            <input type="hidden" name="newGender" id="settings-gender" value="@userData.Gender">
                                                             <input type="hidden" name="editorState" id="settings-state" value="">
-                                                            <button href="#" id="settings-submit" class="new-button" type="submit">Save changes</button>
+                                                            <a onClick="document.getElementById('settings-form').submit();" id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
 
                                                             <script type="text/javascript" language="JavaScript">
-                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration_v21.swf")", "habboreg", "435", "400", "8");
+                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration.swf")", "habboreg", "435", "400", "8");
                                                     swfobj.addParam("base", "@Url.Content("~/flash/")");
                                                     swfobj.addParam("wmode", "opaque");
                                                     swfobj.addParam("AllowScriptAccess", "always");
                                                     swfobj.addVariable("figuredata_url", "@Url.Content("~/xml/v21/figuredata.xml")");
                                                     swfobj.addVariable("draworder_url", "@Url.Content("~/xml/v21/draworder.xml")");
                                                     swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
-                                                    swfobj.addVariable("figure", "hd-180-1.ch-807-85.lg-285-62.hr-829-43");
-                                                    swfobj.addVariable("gender", "M");
+                                                    swfobj.addVariable("figure", "@(isOldFigure ? "hr-100-1150.hd-180-1026.ch-210-1284.lg-270-1223.sh-290-1247" : userData.Figure)");
+                                                    swfobj.addVariable("gender", "@userData.Gender");
 
-                                                    swfobj.addVariable("showClubSelections", "1");
+                                                    swfobj.addVariable("showClubSelections", "@(userData.HasHabboClub ? 1 : 0)");
 
 
-                                                    swfobj.addVariable("userHasClub", "1");
+                                                    swfobj.addVariable("userHasClub", "@(userData.HasHabboClub ? 1 : 0)");
                                                     swfobj.write("flashcontent");
 
                                                             </script>
@@ -110,20 +112,19 @@
                                                     </div>
                                                 </div>
                                             }
-                                        }
-
-
-                                        <div class="content-white-content">
-                                            <div class="editfigure">
-                                                <div id="flashcontent">
-                                                    <center>
-                                                        <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
-                                                        <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
-                                                    </center>
-                                                </div>
-                                            </div>
-                                            <script type="text/javascript" language="JavaScript">
-	                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration.swf")", "habboreg", "406", "327", "8");
+                                            else
+                                            {
+                                                <div class="content-white-content">
+                                                    <div class="editfigure">
+                                                        <div id="flashcontent">
+                                                            <center>
+                                                                <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
+                                                                <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
+                                                            </center>
+                                                        </div>
+                                                    </div>
+                                                    <script type="text/javascript" language="JavaScript">
+	                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
 	                                                    swfobj.addVariable("post_url", "/profile/updatefigure?");
 	                                                    swfobj.addVariable("figuredata_url", "@figureDataUrl");
 	                                                    swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
@@ -132,9 +133,16 @@
                                                         swfobj.addParam("wmode", "opaque");
 	                                                    swfobj.addVariable("figure", "@userData.Figure");
 	                                                    swfobj.addVariable("gender", "@userData.Gender");
+                                                        swfobj.addParam("base", "@Url.Content("~/flash/")");
+                                                        swfobj.addVariable("draworder_url", "@Url.Content("~/xml/v21/draworder.xml")");
 	                                                    swfobj.write("flashcontent");
-                                            </script>
-                                        </div>
+                                                    </script>
+                                                </div>
+                                            }
+                                        }
+
+
+
                                         <div class="clear"></div>
                                     </div>
                                 </div>
@@ -155,3 +163,12 @@
 
     </tbody>
 </table>
+
+
+@section Scripts {'
+    <script src="~/js/myhabbo/visual.js" type="text/javascript"></script>
+    <script src="~/js/settings.js" type="text/javascript"></script>
+    <script>
+        HabboView.run();
+    </script>
+}

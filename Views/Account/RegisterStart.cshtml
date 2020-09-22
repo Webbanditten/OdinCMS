@@ -64,8 +64,9 @@
                                 </div>
 
                                 <script type="text/javascript" language="JavaScript">
-	                                var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration.swf")", "habboreg", "406", "327", "8");
+	                                var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
                                     swfobj.addVariable("post_url", "/register/step/2?");
+                                    swfobj.addParam("base", "@Url.Content("~/flash/")");
 	                                swfobj.addVariable("figuredata_url", "@Url.Content("~/xml/figure_data_xml.xml")");
 	                                swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
 	                                swfobj.addVariable("post_figure", "figureData");

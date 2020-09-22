@@ -1,6 +1,6 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{
-    if (Model.Definition.Type == "widgets")
+    if (Model.Definition.Type == "widgets" && Model.WidgetData != null)
     {
         <partial name="~/Areas/MyHabbo/Views/Items/Widget.cshtml" model=Model />
     }

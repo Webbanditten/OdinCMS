@@ -20,29 +20,74 @@ namespace KeplerCMS.Services.Implementations
         private readonly IRoomService _roomService;
         private readonly ITraxService _traxService;
         private readonly IFriendService _friendService;
+        private readonly ITagService _tagService;
 
-        public HomeService(DataContext context, IUserService userService, IRoomService roomService, ITraxService traxService, IFriendService friendService)
+        public HomeService(DataContext context, IUserService userService, IRoomService roomService, ITraxService traxService, IFriendService friendService, ITagService tagService)
         {
             _userService = userService;
             _context = context;
             _roomService = roomService;
             _traxService = traxService;
             _friendService = friendService;
+            _tagService = tagService;
         }
-        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing)
+
+
+        public async Task<HomeViewModel> GetHomeByGroupName(string groupUrl, bool enableEditing, int? currentUserId)
+        {
+            groupUrl = groupUrl.ToLower();
+            var group = await _context.Homes.Where(s => s.GroupUrl != null && s.GroupUrl == groupUrl).FirstOrDefaultAsync();
+            if(group != null)
+            {
+                return await GetHomeByGroupId(group.Id, enableEditing, currentUserId);
+            }
+            return null;
+        }
+
+        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId)
+        {
+            var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
+            if(home == null) return null;
+            GroupMembers membership = null;
+            bool canEdit = false;
+            if(currentUserId != null) { 
+                membership = await GetMembership(groupId, currentUserId.GetValueOrDefault());
+                canEdit = await CanEditHome(groupId, currentUserId);
+            }
+
+            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing, Membership = membership, CanEdit = canEdit };
+
+            var widgetData = await GetWidgetData(home.Id, currentUserId);
+
+            homeViewModel.Items = await (from item in _context.HomesItems
+                                         join def in _context.HomesItemData
+                                         on item.ItemId equals def.Id
+                                         where item.HomeId == home.Id
+                                         select new ItemViewModel
+                                         {
+                                             Item = item,
+                                             EnableEditing = enableEditing,
+                                             Definition = def,
+                                             WidgetData = widgetData
+                                         }).ToListAsync();
+            return homeViewModel;
+        }
+
+
+        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing, int? currentUserId)
         {
             // Get home for type user
-            var homeUser = await _userService.GetUserById(userId.ToString());
+            var homeUser = await _userService.GetUserById(userId);
 
             Homes home = (homeUser != null) ? await InitHome(homeUser.Id) : null;
             var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser, IsEditing = enableEditing };
 
-            var widgetData = await GetWidgetData(homeUser.Id);
+            var widgetData = await GetWidgetData(home.Id, currentUserId);
 
             homeViewModel.Items = await (from item in _context.HomesItems
                                               join def in _context.HomesItemData
                                               on item.ItemId equals def.Id
-                                              where item.OwnerId == userId
+                                              where item.HomeId == home.Id
                                               select new ItemViewModel
                                               {
                                                   Item = item,
@@ -113,12 +158,16 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<ItemViewModel> PlaceItem(int inventoryId, int z, int userId, string data = null)
+        public async Task<ItemViewModel> PlaceItem(int homeId, int inventoryId, int z, int userId, string data = null)
         {
-            var item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId).FirstOrDefaultAsync();
-            var homeForUser = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
+            var item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.HomeId == homeId).FirstOrDefaultAsync();
+            if(item == null)
+            {
+                item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId && s.HomeId == 0).FirstOrDefaultAsync();
+            }
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             HomesItems newItem = null;
-            if(item != null && homeForUser != null)
+            if(item != null && home != null)
             {
                 var def = await GetItemDetail(item.ItemId);
                 if(def.Type == "widgets")
@@ -139,19 +188,23 @@ namespace KeplerCMS.Services.Implementations
                 }
 
 
-                newItem = new HomesItems { HomeId = homeForUser.Id, OwnerId = userId, ItemId = item.ItemId, X = 0, Z = z, Y = 0, Skin = "w_skin_defaultskin" };
+                newItem = new HomesItems { HomeId = home.Id, OwnerId = userId, ItemId = item.ItemId, X = 0, Z = z, Y = 0, Skin = "w_skin_defaultskin" };
                 _context.HomesItems.Add(newItem);
                 await _context.SaveChangesAsync();
             }
 
-            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeForUser.UserId)  };
+            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeId, home.UserId)  };
         }
 
-        public async Task<HomesInventory> RemoveItem(int itemId, int userId)
+        public async Task<HomesInventory> RemoveItem(int homeId, int itemId, int userId)
         {
-            var currentItem = await _context.HomesItems.Where(s => s.Id == itemId && s.OwnerId == userId).FirstOrDefaultAsync();
+            var currentItem = await _context.HomesItems.Where(s => s.Id == itemId && s.HomeId == homeId).FirstOrDefaultAsync();
+            var itemDef = await GetItemDetail(currentItem.ItemId);
             var inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId).FirstOrDefaultAsync();
-            HomesInventory newInventoryItem = null;
+            if(itemDef.Type == "widgets") {
+                inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId && s.HomeId == homeId).FirstOrDefaultAsync();
+            }
+            HomesInventory newInventoryItem = inventoryItem;
             if(currentItem != null)
             {
                 if (inventoryItem != null)
@@ -161,7 +214,7 @@ namespace KeplerCMS.Services.Implementations
                 }
                 else
                 {
-                    newInventoryItem = new HomesInventory { Amount = 1, ItemId = currentItem.ItemId, UserId = userId };
+                    newInventoryItem = new HomesInventory { Amount = 1, ItemId = currentItem.ItemId, HomeId = homeId, UserId = userId };
                     _context.HomesInventory.Add(newInventoryItem);
                 }
             }
@@ -171,10 +224,10 @@ namespace KeplerCMS.Services.Implementations
         }
 
 
-        public async Task<bool> Save(int userId, SaveModel data)
+        public async Task<bool> Save(int homeId, int userId, SaveModel data)
         {
-            var user = await _userService.GetUserById(userId.ToString());
-            var home = await _context.Homes.Where(s => s.UserId == user.Id).FirstOrDefaultAsync();
+            var user = await _userService.GetUserById(userId);
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             if (user == null || home == null) return false;
 
             var itemsChanged = new List<HomesItems>();
@@ -187,7 +240,7 @@ namespace KeplerCMS.Services.Implementations
                 var bgItemId = bgData[0];
                 var dbItem = await GetInventoryItem(int.Parse(bgItemId), user.Id);
                 // If I plan to make groups work the following line needs to be fixed
-                if(dbItem != null && home != null)
+                if(dbItem != null)
                 {
                     home.Background = dbItem.Definition.CssClass;
                     _context.Homes.Update(home);
@@ -195,17 +248,14 @@ namespace KeplerCMS.Services.Implementations
             }
             foreach (var item in itemsChanged)
             {
-                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id && s.OwnerId == userId).FirstOrDefaultAsync();
+                // Lets see if the user is actually the owner of the items
+                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id).FirstOrDefaultAsync();
                 if(dbItem != null)
                 {
-                    // Lets check if the home actually exists
-                    if (home != null && home.UserId == user.Id)
-                    {
-                        dbItem.X = item.X;
-                        dbItem.Y = item.Y;
-                        dbItem.Z = item.Z;
-                        _context.HomesItems.Update(dbItem);
-                    }
+                    dbItem.X = item.X;
+                    dbItem.Y = item.Y;
+                    dbItem.Z = item.Z;
+                    _context.HomesItems.Update(dbItem);
                 }
 
             }
@@ -248,18 +298,37 @@ namespace KeplerCMS.Services.Implementations
             return true;
         }
 
-        public async Task<List<InventoryItem>> GetInventory(string type, int userId)
+        public async Task<List<InventoryItem>> GetInventory(int homeId, string type, int userId)
         {
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
+            List<InventoryItem> data = new List<InventoryItem>();
+            if (home != null)
+            {
+                if(home.Type == "group" && type == "widgets")
+                {
+                    data = await (from item in _context.HomesInventory
+                                  join def in _context.HomesItemData
+                                  on item.ItemId equals def.Id
+                                  where def.Type == type && item.HomeId == homeId
+                                  select new InventoryItem
+                                  {
+                                      Details = item,
+                                      Definition = def
+                                  }).ToListAsync();
+                } else
+                {
+                    data = await (from item in _context.HomesInventory
+                                                      join def in _context.HomesItemData
+                                                      on item.ItemId equals def.Id
+                                                      where def.Type == type && item.UserId == userId
+                                                      select new InventoryItem
+                                                      {
+                                                          Details = item,
+                                                          Definition = def
+                                                      }).ToListAsync();
+                }
+            }
 
-            List<InventoryItem> data = await (from item in _context.HomesInventory
-                                            join def in _context.HomesItemData
-                                            on item.ItemId equals def.Id
-                                            where def.Type == type && item.UserId == userId
-                                            select new InventoryItem
-                                              {
-                                                Details = item,
-                                                Definition = def
-                                            }).ToListAsync();
 
             return data;
         }
@@ -277,11 +346,11 @@ namespace KeplerCMS.Services.Implementations
                    }).FirstOrDefaultAsync();
         }
 
-        public async Task<ItemViewModel> EditItem(int itemId, int skinId, int userId)
+        public async Task<ItemViewModel> EditItem(int homeId, int itemId, int skinId, int userId)
         {
             var item = await GetItem(itemId);
-            var homeUser = await _userService.GetUserById(userId.ToString());
-            if (item != null && item.Item.OwnerId == homeUser.Id)
+            var homeUser = await _userService.GetUserById(userId);
+            if (item != null && await CanEditHome(homeId, homeUser.Id))
             {
                 if(item.Definition.Type == "notes")
                 {
@@ -295,14 +364,14 @@ namespace KeplerCMS.Services.Implementations
             }
 
             // Get widget data
-            item.WidgetData =  await GetWidgetData(homeUser.Id);
+            item.WidgetData =  await GetWidgetData(homeId, homeUser.Id);
             return item;
         }
 
-        public async Task<ItemViewModel> SelectSong(int itemId, int songId, int userId)
+        public async Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId)
         {
             var item = await _context.HomesItems.Where(s => s.Id == itemId && s.OwnerId == userId).FirstOrDefaultAsync();
-            var homeUser = await _userService.GetUserById(userId.ToString());
+            var homeUser = await _userService.GetUserById(userId);
             var song = await _traxService.GetSingleSongById(songId);
             if (item != null && song != null)
             {
@@ -318,7 +387,7 @@ namespace KeplerCMS.Services.Implementations
 
             // Get widget data
             var dbItem = await GetItem(itemId, true);
-            dbItem.WidgetData = await GetWidgetData(homeUser.Id);
+            dbItem.WidgetData = await GetWidgetData(homeId, homeUser.Id);
             return dbItem;
         }
 
@@ -338,21 +407,96 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public async Task<ItemWidgetDataModel> GetWidgetData(int userId)
+        public async Task<ItemWidgetDataModel> GetWidgetData(int homeId, int? userId)
         {
+            var home = await GetHomeDetailsById(homeId);
+            var canEdit = await CanEditHome(homeId, userId);
+
+            if(home.Type == "group") {
+                return new ItemWidgetDataModel
+                {
+                    Home = home,
+                    User = await _userService.GetUserById(home.UserId),
+                    Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
+                    SongList = await _traxService.GetSongsByOwner(home.UserId),
+                    Guestbook = await GetGuestbook(homeId),
+                    GroupMembers = await GetGroupMembers(home),
+                    GroupRoom = await GetGroupRoom(home),
+                    CanEdit = canEdit
+                };
+            }
             return new ItemWidgetDataModel
             {
-                User = await _userService.GetUserById(userId.ToString()),
-                Rooms = await _roomService.GetRoomsByOwner(userId),
-                SongList = await _traxService.GetSongsByOwner(userId),
-                Ratings = await GetRatings(userId),
+                Home = home,
+                User = await _userService.GetUserById(home.UserId),
+                Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
+                Rooms = await _roomService.GetRoomsByOwner(home.UserId),
+                SongList = await _traxService.GetSongsByOwner(home.UserId),
+                Ratings = await GetRatings(home.UserId),
                 Badges = await _context.UsersBadges.Where(s => s.UserId == userId).ToListAsync(),
-                Guestbook = await GetGuestbookForUser(userId),
-                Friends = await _friendService.GetFriendsWithUserData(userId)
+                Guestbook = await GetGuestbook(homeId),
+                Friends = await _friendService.GetFriendsWithUserData(home.UserId),
+                Groups = await GetGroupsForUser(home.UserId),
+                CanEdit = canEdit
             };
         }
 
-        public async Task<ItemViewModel> Rate(int rating, int itemId, int userId)
+        public async Task<Rooms> GetGroupRoom(Homes home)
+        {
+            return await _context.Rooms.FirstOrDefaultAsync(s=>s.Id == home.GroupRoom);
+        }
+
+        public async Task<List<GroupViewModel>> GetGroupMembers(Homes home)
+        {
+            var members = new List<GroupViewModel>();
+            var owner = await _userService.GetUserById(home.UserId);
+            members.Add(new GroupViewModel { Home = home, GroupMember = new GroupMembers { Owner= true, User = owner }});
+
+            members.AddRange(await (from member in _context.GroupMembers
+                                              join user in _context.Users
+                                              on member.UserId equals user.Id
+                                              where member.GroupId == home.Id
+                                              orderby member.Rights
+                                              select new GroupViewModel
+                                              {
+                                                  GroupMember = new GroupMembers { 
+                                                      GroupId = member.GroupId,
+                                                      Id = member.Id,
+                                                      Pending = member.Pending,
+                                                      User = user,
+                                                      Rights = member.Rights,
+                                                      UserId = member.UserId                                                      
+                                                  },
+                                                  Home = home
+                                              }).ToListAsync());
+            
+            return members;
+        }
+
+        public async Task<List<GroupMembers>> GetGroupMembers(int groupId)
+        {
+            var members = new List<GroupMembers>();
+
+            members.AddRange(await (from member in _context.GroupMembers
+                                              join user in _context.Users
+                                              on member.UserId equals user.Id
+                                              where member.GroupId == groupId
+                                              orderby member.Rights
+                                              select new GroupMembers { 
+                                                      GroupId = member.GroupId,
+                                                      Id = member.Id,
+                                                      Pending = member.Pending,
+                                                      User = user,
+                                                      Rights = member.Rights,
+                                                      UserId = member.UserId                                                      
+                                                  }).ToListAsync());
+            
+            return members;
+        }
+
+        
+
+        public async Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId)
         {
             // Get item to find home id
             var item = await GetItem(itemId);
@@ -372,11 +516,11 @@ namespace KeplerCMS.Services.Implementations
             }
 
             // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(item.Item.OwnerId);
+            item.WidgetData = await GetWidgetData(homeId, item.Item.OwnerId);
             return item;
         }
 
-        public async Task<ItemViewModel> ResetRating(int itemId, int userId)
+        public async Task<ItemViewModel> ResetRating(int homeId, int itemId, int userId)
         {
             // Get item to find home id
             var item = await GetItem(itemId);
@@ -390,7 +534,7 @@ namespace KeplerCMS.Services.Implementations
                 }
             }
             // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(item.Item.OwnerId);
+            item.WidgetData = await GetWidgetData(homeId, item.Item.OwnerId);
             return item;
         }
 
@@ -405,7 +549,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<GuestbookEntry> AddGuestbookEntry(int homeId, string message, int userId)
         {
             var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            var user = await _userService.GetUserById(userId.ToString());
+            var user = await _userService.GetUserById(userId);
             if(home != null && user != null)
             {
                 var entry = new HomesGuestbook { UserId = userId, HomeId = homeId, Message = message, Timestamp = DateTime.Now };
@@ -434,24 +578,13 @@ namespace KeplerCMS.Services.Implementations
             var dbEntries = await _context.HomesGuestbook.Where(s => s.HomeId == homeId).ToListAsync();
             foreach(var entry in dbEntries)
             {
-                var user = await _userService.GetUserById(entry.UserId.ToString());
+                var user = await _userService.GetUserById(entry.UserId);
                 if(user != null)
                 {
                     entries.Add(new GuestbookEntry { Entry = entry, User = user });
                 }
             }
             return entries.OrderByDescending(s=>s.Entry.Timestamp).ToList();
-        }
-
-        public async Task<List<GuestbookEntry>> GetGuestbookForUser(int userId)
-        {
-            var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
-            if(home != null)
-            {
-                return await GetGuestbook(home.Id);
-            }
-            return new List<GuestbookEntry>();
-
         }
 
         public async Task<ItemViewModel> ConfigureGuestbook(int widgetId)
@@ -473,35 +606,32 @@ namespace KeplerCMS.Services.Implementations
         }
 
 
-        public async Task<ItemViewModel> PlaceNote(int skin, string text, int userId)
+        public async Task<ItemViewModel> PlaceNote(int homeId, int skin, string text, int userId)
         {
-            var inventory = (await GetInventory("notes", userId)).FirstOrDefault();
-            var homeForUser = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
+            var inventory = (await GetInventory(homeId, "notes", userId)).FirstOrDefault();
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
             HomesItems newItem = null;
-            if (inventory != null && inventory.Details.Amount > 0 && homeForUser != null)
+            if (inventory != null && inventory.Details.Amount > 0 && home != null)
             {
                 // Ok we ensured the user has bought notes and have some left
-                // Now lets check if they have a home
-                if (homeForUser != null) {
 
-                    // Lets remove or take an item for the user
-                    if (inventory.Details.Amount > 1)
-                    {
-                        inventory.Details.Amount--;
-                        _context.HomesInventory.Update(inventory.Details);
-                    }
-                    else
-                    {
-                        _context.HomesInventory.Remove(inventory.Details);
-                    }
-                    // Add the new item to view
-                    newItem = new HomesItems { HomeId = homeForUser.Id, OwnerId = userId, ItemId = inventory.Definition.Id, X = 0, Z = 0, Y = 0, Skin = SkinIdToString.ConvertNote(skin), Data = text };
-                    _context.HomesItems.Add(newItem);
-                    await _context.SaveChangesAsync();
+                // Lets remove or take an item for the user
+                if (inventory.Details.Amount > 1)
+                {
+                    inventory.Details.Amount--;
+                    _context.HomesInventory.Update(inventory.Details);
                 }
+                else
+                {
+                    _context.HomesInventory.Remove(inventory.Details);
+                }
+                // Add the new item to view
+                newItem = new HomesItems { HomeId = home.Id, OwnerId = userId, ItemId = inventory.Definition.Id, X = 0, Z = 0, Y = 0, Skin = SkinIdToString.ConvertNote(skin), Data = text };
+                _context.HomesItems.Add(newItem);
+                await _context.SaveChangesAsync();
                 
             }
-            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeForUser.UserId) };
+            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeId, userId) };
         }
 
         public async Task<Homes> InitHome(int userId)
@@ -509,7 +639,7 @@ namespace KeplerCMS.Services.Implementations
             var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
             if(home == null)
             {
-                var newHome = new Homes { UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
+                var newHome = new Homes { Created = DateTime.Now, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
                 _context.Homes.Add(newHome);
                 await _context.SaveChangesAsync();
                 // Default items
@@ -563,6 +693,223 @@ namespace KeplerCMS.Services.Implementations
         public async Task<HomesItemData> GetItemDataByClass(string className)
         {
             return await _context.HomesItemData.Where(s => s.CssClass == className).FirstOrDefaultAsync();
+        }
+
+        public async Task<Homes> InitGroup(string name, string description, int userId)
+        {
+            var newHome = new Homes { GroupBadge = "b0503Xs09114s05013s05015", Created = DateTime.Now, GroupName = name, GroupDescription = description, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "group" };
+            _context.Homes.Add(newHome);
+            await _context.SaveChangesAsync();
+            // Default items
+
+            // Default Widgets
+            var defaultWidgets = await _context.HomesItemData.Where(s => 
+            s.CssClass == "w_guestbookwidget" ||
+            s.CssClass == "w_memberwidget" ||
+            s.CssClass == "w_traxplayerwidget" ||
+            s.CssClass == "w_groupinfowidget").ToListAsync();
+
+            foreach(var widget in defaultWidgets)
+            {
+                if(widget.CssClass == "w_groupinfowidget")
+                {
+                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 445, Y = 28, Z = 546 });
+                } else if (widget.CssClass == "w_memberwidget")
+                {
+                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 428, Y = 291, Z = 558 });
+                } else
+                {
+                    _context.HomesInventory.Add(new HomesInventory { HomeId = newHome.Id, Amount = 1, ItemId = widget.Id, UserId = userId });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return newHome;
+        }
+
+        public async Task<bool> CanEditHome(int homeId, int? userId)
+        {
+            if(userId == null) return false;
+
+            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
+            if(home != null)
+            {
+                if (home.UserId == userId) {
+                    return true;
+                } else
+                {
+                    var groupMemberWithRights = await _context.GroupMembers.Where(s => s.GroupId == homeId && s.Rights == true && s.UserId == userId).FirstOrDefaultAsync();
+                    if(groupMemberWithRights != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public async Task<List<GroupViewModel>> GetGroupsForUser(int userId)
+        {
+            var groups = new List<GroupViewModel>();
+
+            // Own groups
+            
+
+            var ownGroups = await _context.Homes.Where(s => s.Type == "group" && s.UserId == userId).ToListAsync();
+            foreach(Homes home in ownGroups)
+            {
+                groups.Add(new GroupViewModel { Home = home, GroupMember = null});
+            }
+
+            // Member of
+            groups.AddRange(await (from g in _context.GroupMembers
+                                                    join home in _context.Homes
+                                                    on g.GroupId equals home.Id
+                                                    where g.UserId == userId
+                                                    select new GroupViewModel { Home = home, GroupMember = g}).ToListAsync());
+
+            return groups;
+        }
+
+        public async Task<Homes> UpdateGroupBadge(int homeId, string code, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            var user = _userService.GetUserById(userId);
+            if(home != null && user != null && await CanEditHome(homeId, userId))
+            {
+                home.GroupBadge = code;
+                _context.Update(home);
+                await _context.SaveChangesAsync();
+            }
+            return home;
+        }
+
+        public async Task<bool> IsGroupUrlValid(string url)
+        {
+            url = url.ToLower();
+            var existingUrl = await _context.Homes.FirstOrDefaultAsync(s=>s.GroupUrl == url);
+            return (existingUrl == null);
+        }
+
+        public async Task<Homes> UpdateGroup(int groupId, string name, string description, string url, int type, int? roomId)
+        {
+            var group = await GetHomeDetailsById(groupId);
+            if(group != null) {
+                group.GroupName = (string.IsNullOrEmpty(name)) ? group.GroupName : name;
+                group.GroupDescription = description;
+                group.GroupUrl = (string.IsNullOrEmpty(group.GroupUrl) && !string.IsNullOrEmpty(url) && await IsGroupUrlValid(url)) ?  url : group.GroupUrl;
+                group.GroupType = type;
+                group.GroupRoom = roomId;
+
+                _context.Homes.Update(group);
+                await _context.SaveChangesAsync();
+            }
+            return group;
+        }
+
+        public async Task<bool> DeleteGroup(int groupId) {
+            // loop users and remove the group id 
+            var users = await _context.Users.Where(user => user.Group == groupId).ToListAsync();
+            users.ForEach(a=>a.Group = 0);
+            
+            
+            // delete group members
+            var members = await _context.GroupMembers.Where(group => group.GroupId == groupId).ToListAsync();
+            _context.GroupMembers.RemoveRange(members);
+            await _context.SaveChangesAsync();
+
+            // return habbohome items to their owner
+            var items = await _context.HomesItems.Where(s=>s.HomeId == groupId).ToListAsync();
+            items.ForEach(async (item) => { await RemoveItem(item.HomeId, item.Id, item.OwnerId); });
+
+            // delete habbohome
+            var home = await _context.Homes.FirstOrDefaultAsync(s=>s.Id == groupId);
+            _context.Homes.Remove(home);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<GroupMembers> GetMembership(int groupId, int userId)
+        {
+            return await _context.GroupMembers.FirstOrDefaultAsync(s => s.GroupId == groupId && s.UserId == userId);
+        }
+
+        public async Task<List<GroupMembers>> AcceptMembers(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Pending = false;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+
+        public async Task<List<GroupMembers>> GiveGroupRights(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Rights = true;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+        public async Task<List<GroupMembers>> RemoveGroupRights(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                member.Rights = false;
+                members.Add(member);
+            }
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+        public async Task<List<GroupMembers>> RemoveMembers(int groupId, int[] targetIds)
+        {
+            var members = new List<GroupMembers>();
+            foreach(var i in targetIds) {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+                _context.GroupMembers.Remove(member);
+                members.Add(member);
+
+                var user = await _userService.GetUserById(member.UserId);
+                if(user != null && user.Group == member.GroupId) {
+                    await _userService.SetGroup(member.UserId, 0);
+                }
+            }
+
+            await  _context.SaveChangesAsync();
+            return members;
+        }
+
+        public async Task<List<Homes>> GetRecentGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.Created).ToListAsync();
+        }
+
+        public async Task<List<Homes>> GetHotelGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.GroupName).ToListAsync();
+        }
+
+        public async Task<List<Homes>> GetActiveGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderBy(s=>s.Created).ToListAsync();
+        }
+
+        public async Task<GroupMembers> AddPendingMember(int groupId, int userId) {
+            var membership = new GroupMembers { GroupId = groupId, Pending = true, UserId = userId};
+            _context.GroupMembers.Add(membership);
+            await _context.SaveChangesAsync();
+            return membership;
         }
     }
 

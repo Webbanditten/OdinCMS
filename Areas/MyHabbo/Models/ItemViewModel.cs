@@ -18,15 +18,17 @@ namespace KeplerCMS.Areas.MyHabbo.Models
     public class ItemWidgetDataModel
     {
         public Users User { get; set; }
+        public Homes Home { get; set; }
+        public ICollection<Tags> Tags { get; set; }
         public List<Rooms> Rooms { get; set; }
         public List<SoundMachineSongs> SongList { get; set; }
         public List<HomesRating> Ratings { get; set; }
         public List<UsersBadges> Badges { get; set; }
         public List<GuestbookEntry> Guestbook { get; set; }
         public List<FriendsViewModel> Friends { get; set; }
-        // Badges
-        //Guest book
-        // Rating
-
+        public List<GroupViewModel> Groups { get; set; }
+        public List<GroupViewModel> GroupMembers { get; set; }
+        public Rooms GroupRoom { get; set; }
+        public bool CanEdit { get; internal set; }
     }
 }

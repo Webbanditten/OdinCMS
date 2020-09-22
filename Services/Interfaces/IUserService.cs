@@ -1,4 +1,5 @@
 ﻿using KeplerCMS.Data.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Services.Interfaces
@@ -7,12 +8,14 @@ namespace KeplerCMS.Services.Interfaces
     {
         Task<Users> GetUserByUsername(string username);
 
-        Task<Users> GetUserById(string id);
+        Task<Users> GetUserById(int id);
 
         public void UpdateFigure(string userId, string figureData, string newGender);
         public Task<Users> GenerateSSO(int userId);
 
         public Task<Users> Create(Users user);
+
+        public Task<Users> SetGroup(int userId, int groupId);
 
     }
 }

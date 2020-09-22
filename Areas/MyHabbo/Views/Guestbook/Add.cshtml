@@ -26,7 +26,7 @@
 
             <a href="/home/@Model.User.Username">@Model.User.Username</a>
         </div>
-        <p>@Model.Entry.Message</p>
+        <p>@Html.Raw(KeplerCMS.Areas.MyHabbo.Helpers.BBCodeToString.Convert(Model.Entry.Message))</p>
     </div>
     <div class="guestbook-cleaner">&nbsp;</div>
     <div class="guestbook-entry-footer metadata">@Model.Entry.Timestamp.ToString("dd-MM-yyyy")</div>

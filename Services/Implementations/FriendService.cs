@@ -52,13 +52,13 @@ namespace KeplerCMS.Services.Implementations
                 Users friendDetails = null;
                 if(friend.ToId != userId)
                 {
-                    var getFriend = await _userService.GetUserById(friend.ToId.ToString());
+                    var getFriend = await _userService.GetUserById(friend.ToId);
                     if(getFriend != null)
                         friendDetails = getFriend;
                     
                 } else if(friend.FromId != userId)
                 {
-                    var getFriend = await _userService.GetUserById(friend.FromId.ToString());
+                    var getFriend = await _userService.GetUserById(friend.FromId);
                     if (getFriend != null)
                         friendDetails = getFriend;
                 }
@@ -72,7 +72,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<bool> IsFriends(int from, int to)
         {
-            var request = await _context.Friends.Where(s => s.FromId == from && s.ToId == to).FirstOrDefaultAsync();
+            var request = await _context.Friends.Where(s => (s.FromId == from && s.ToId == to) || (s.FromId == to && s.ToId == from)).FirstOrDefaultAsync();
             if (request != null)
             {
                 return true;

@@ -29,23 +29,22 @@ namespace KeplerCMS.Controllers
             var enableEditing = false;
             if(habboHomeUser != null)
             {
-                if (User.Identity.IsAuthenticated && User.Identity.Name != habboHomeUser.Id.ToString())
+                if (Request.Cookies["editid"] != null)
                 {
-                    Response.Cookies.Delete("editmode");
+                    enableEditing = true;
                 }
-                else
-                {
-                    if (Request.Cookies["editmode"] != null && Request.Cookies["editmode"] == "true")
-                    {
-                        enableEditing = true;
-                    }
-                }
-                var home = await _homeService.GetHome(habboHomeUser.Id, enableEditing);
+
+                var home = (User.Identity.IsAuthenticated) ? await _homeService.GetHome(habboHomeUser.Id, enableEditing, int.Parse(User.Identity.Name)) : await _homeService.GetHome(habboHomeUser.Id, enableEditing);
 
                 if (home != null)
                 {
-                    if(User.Identity.IsAuthenticated)
+                    if (User.Identity.IsAuthenticated)
                     {
+                        if (User.Identity.Name != habboHomeUser.Id.ToString() || (Request.Cookies["editid"] != null && home.Home.Id != int.Parse(Request.Cookies["editid"])))
+                        {
+                            Response.Cookies.Delete("editid");
+                            home.IsEditing = false;
+                        }
                         ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
                     }
                     return View(home);
@@ -55,11 +54,13 @@ namespace KeplerCMS.Controllers
             
         }
 
+
+
         [Route("home/{id}/id")]
         [LoggedInFilter(false)]
         public async Task<IActionResult> HomeById(int id)
         {
-            var habboHomeUser = await _userService.GetUserById(id.ToString());
+            var habboHomeUser = await _userService.GetUserById(id);
             if(habboHomeUser != null)
             {
                 return Redirect("~/home/" + habboHomeUser.Username);
@@ -72,7 +73,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter]
         public async Task<IActionResult> Edit(int homeId)
         {
-            var currentUser = await _userService.GetUserById(User.Identity.Name);
+            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(homeId);
             if(home.UserId == currentUser.Id)
             {
@@ -81,7 +82,7 @@ namespace KeplerCMS.Controllers
                 {
                     Expires = DateTime.Now.AddMinutes(30)
                 };
-                Response.Cookies.Append("editmode", "true", option);
+                Response.Cookies.Append("editid", homeId.ToString(), option);
 
                 return Redirect("/home/" + currentUser.Username);
             }
@@ -89,13 +90,14 @@ namespace KeplerCMS.Controllers
             return Redirect("/home");
         }
 
+
         [Route("home/cancel/{homeId}")]
         [LoggedInFilter]
         public async Task<IActionResult> CancelEditing(int homeId)
         {
             var home = await _homeService.GetHomeDetailsById(homeId);
-            var homeUser = await _userService.GetUserById(home.UserId.ToString());
-            Response.Cookies.Delete("editmode");
+            var homeUser = await _userService.GetUserById(home.UserId);
+            Response.Cookies.Delete("editid");
             return Redirect("/home/" + homeUser.Username);
         }
 

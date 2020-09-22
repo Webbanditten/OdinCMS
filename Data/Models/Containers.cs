@@ -25,5 +25,11 @@ namespace KeplerCMS.Data.Models
         public string Theme { get; set; }
         [Column("order")]
         public int Order { get; set; }
+
+        [NotMapped]
+        public List<Homes> TopGroups { get; set; }
+        
+        [NotMapped]
+        public List<Homes> MyGroups { get; set; }
     }
 }

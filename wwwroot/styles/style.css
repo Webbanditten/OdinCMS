@@ -21,9 +21,11 @@ input {
     font-size: 11px;
     font-family: Verdana, Arial, Helvetica, sans-serif;
 }
+
 input#redeem-code {
-    width:250px;
+    width: 250px;
 }
+
 hr {
     border: 0;
     color: black;
@@ -276,7 +278,7 @@ div.tabmenu-inner h3 {
     padding: 4px 6px;
     background-color: #F3F3F3;
     font-size: 10px;
-    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 div.tabmenu-inner-content {
@@ -1867,6 +1869,8 @@ ul.groups-toplist li {
     background-position: 2px 2px;
     background-repeat: no-repeat;
     margin: 0 5px 5px 0;
+    height: 39px;
+    background-position: right;
 }
 
 div.toplist-item {
@@ -1875,8 +1879,16 @@ div.toplist-item {
     overflow: hidden;
 }
 
-ul.groups-toplist li.even {
+ul.groups-toplist li {
     background-color: #d5d5d5;
+}
+
+ul.groups-toplist li:nth-child(4n) {
+    background-color: #fff;
+}
+
+ul.groups-toplist li:nth-child(4n-1) {
+    background-color: #fff;
 }
 
 ul.groups-toplist li.odd div.toplist-item {
@@ -2453,8 +2465,6 @@ div#traxplayer-export-box {
     width: 210px;
 }
 
-div.tag-list {}
-
 img.tag-add-link {
     position: relative;
     top: 1px;
@@ -2572,4 +2582,91 @@ a.colorlink.noarrow.newfightbutton {
 
 .getflash {
     width: 280px;
+}
+
+
+/* Common habblet list styles */
+
+.habblet-list-container {
+    padding-bottom: 10px;
+}
+
+.habblet-button-row {
+    padding: 8px 15px 0 15px;
+}
+
+ul.habblet-list {
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+
+ul.habblet-list li {
+    padding: 2px 0 1px 25px;
+    background-repeat: no-repeat;
+}
+
+ul.habblet-list li a,
+.habblet a {
+    text-decoration: none;
+}
+
+ul.habblet-list li a:hover,
+.habblet a:hover {
+    text-decoration: underline;
+}
+
+ul.habblet-list.two-cols li.right .item {
+    border-left: 1px solid #d9d9d9;
+}
+
+ul.habblet-list.two-cols li {
+    padding: 0;
+    float: left;
+    width: 50%;
+}
+
+ul.habblet-list.two-cols li div.item {
+    padding: 2px 0 1px 25px;
+}
+
+ul.habblet-list li span.index {
+    float: left;
+    padding-right: 8px;
+    color: #777;
+}
+
+ul.habblet-list li div.link {
+    overflow: hidden;
+}
+
+ul.habblet-list li div.link p {
+    color: #a2a2a2;
+}
+
+
+/* Common Habblet styles */
+
+.habblet-content-info {
+    border-bottom: 1px dashed #ccc;
+    padding: 5px 0 5px 15px;
+}
+
+.habblet-content-info #enter-hotel-link {
+    float: none;
+}
+
+.widehabblet {
+    width: 335px;
+}
+
+#group-memberlist ul.habblet-list {
+    list-style: none;
+}
+
+#group-memberlist ul.habblet-list li:nth-child(4n) {
+    background-color: #ececec;
+}
+
+#group-memberlist ul.habblet-list li:nth-child(4n-1) {
+    background-color: #ececec;
 }

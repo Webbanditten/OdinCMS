@@ -21,7 +21,7 @@ namespace KeplerCMS.Controllers
         [HttpPost("redeem")]
         public async Task<IActionResult> Redeem(string code)
         {
-            var user = await _userService.GetUserById(User.Identity.Name);
+            var user = await _userService.GetUserById(int.Parse(User.Identity.Name));
             ViewData["success"] = await _creditService.RedeemCode(code, user.Id);
             return View();
         }

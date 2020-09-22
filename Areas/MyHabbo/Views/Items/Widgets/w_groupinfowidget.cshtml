@@ -1,0 +1,89 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
+@{Layout = null;}
+
+<div class="widget-corner" id="widget-@Model.Item.Id-handle">
+    <div class="widget-headline">
+        <h3>
+            @{
+                if (Model.EnableEditing)
+                {
+                    <img src="~/c_images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-@Model.Item.Id-edit">
+                    <script language="JavaScript" type="text/javascript">
+                                        Event.observe("widget-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "widget", "widget-@Model.Item.Id-edit"); }, false);
+                    </script>
+                }
+            }
+
+
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("group_info", "habbohome")</span><span class="header-right">&nbsp;</span>
+        </h3>
+    </div>
+</div>
+<div class="widget-body">
+		<div class="widget-content">
+                
+        <div class="group-info-icon"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(Model.WidgetData.Home.GroupBadge).gif"></div>
+        <h4>@Model.WidgetData.Home.GroupName</h4>
+
+        <p>@DbRes.T("group_created", "habbohome"): <b>@Model.WidgetData.Home.Created.ToString("d MMM yyyy")</b></p>
+        <p>@Model.WidgetData.GroupMembers.Count() @DbRes.T("members", "habbohome")</p>
+        <p>
+            @{
+                if(Model.WidgetData.GroupRoom != null) {
+                    <a class="roomForward group-info-room" href="/client?forwardId=2&amp;roomId=@Model.WidgetData.GroupRoom.Id" target="client" data-type="private" data-roomid="@Model.WidgetData.GroupRoom.Id">@Model.WidgetData.GroupRoom.Name</a>
+                }
+            }
+            
+        </p>
+        <div class="group-info-description">@Model.WidgetData.Home.GroupDescription</div>
+
+
+            <div id="profile-tags-panel">
+                <div id="profile-tag-list">
+                <partial name="~/Areas/MyHabbo/Views/Tag/List.cshtml" model=Model.WidgetData.Tags />
+
+
+                
+                    <script type="text/javascript">
+                        document.observe("dom:loaded", function () {
+                            TagHelper.setTexts({
+                                buttonText: "@DbRes.T("ok", "habbohome")",
+                                tagLimitText: "@DbRes.T("tag_limit", "habbohome")"
+                            });
+                        });
+                    </script>
+                
+
+                </div>
+                
+                @{
+                    if (User.Identity.IsAuthenticated && User.Identity.Name == Model.WidgetData.User.Id.ToString())
+                    {
+                        <div id="profile-tags-status-field">
+                            <div style="display: block;">
+                                <div class="content-red">
+                                    <div class="content-red-body">
+                                        <span id="tag-limit-message"><img src="~/images/myhabbo/buttons/icon_error.gif">@DbRes.T("tag_limit", "habbohome")</span>
+                                        <span id="tag-invalid-message"><img src="~/images/myhabbo/buttons/icon_error.gif">@DbRes.T("tag_invalid", "habbohome")</span>
+                                    </div>
+                                </div>
+                                <div class="content-red-bottom">
+                                    <div class="content-red-bottom-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-add-tag">
+                            <input type="text" id="profile-add-tag-input" maxlength="30"><br clear="all">
+                            <a href="#" class="new-button" style="float:left;margin:5px 0 0 0;" id="profile-add-tag"><b>@DbRes.T("tag_add", "habbohome")</b><i></i></a>
+                        </div>
+                    }
+                }
+            <script type="text/javascript">
+                document.observe("dom:loaded", function() {
+                    new GroupInfoWidget('@(Model.WidgetData.Home.Id)', '1');
+                });
+            </script></div>
+        <div class="clear"></div></div>
+</div>

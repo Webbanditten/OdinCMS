@@ -21,7 +21,7 @@ namespace KeplerCMS.Controllers
         [ResponseCache(Duration = 0)]
         public async Task<int> Credits()
         {
-            var user = await _userService.GetUserById(User.Identity.Name);
+            var user = await _userService.GetUserById(int.Parse(User.Identity.Name));
             return user.Credits;
         }
     }

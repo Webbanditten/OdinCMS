@@ -44,8 +44,9 @@ namespace KeplerCMS.Areas.MyHabbo
 		public async Task<IActionResult> Inventory(string type)
 		{
 			var userId = int.Parse(User.Identity.Name);
+			var homeId = int.Parse(Request.Cookies["editid"]);
 			var categories = await _homeService.GetStoreCategories();
-			var InventoryItems = await _homeService.GetInventory(type, userId);
+			var InventoryItems = await _homeService.GetInventory(homeId, type, userId);
 			var cssClassForFirstItem = "";
 			var firstItemName = "";
 			if (InventoryItems.Count > 0)
@@ -149,12 +150,18 @@ namespace KeplerCMS.Areas.MyHabbo
 		public async Task<IActionResult> InventoryItems(string type)
 		{
 			var userId = int.Parse(User.Identity.Name);
-			var items = await _homeService.GetInventory(type, userId);
-			if(type == "widgets")
+			var homeId = int.Parse(Request.Cookies["editid"]);
+			if(await _homeService.CanEditHome(homeId, userId))
 			{
-				return View("InventoryItemsWidgets", items);
+				var items = await _homeService.GetInventory(homeId, type, userId);
+				if (type == "widgets")
+				{
+					return View("InventoryItemsWidgets", items);
+				}
+
+				return View(items);
 			}
-			return View(items);
+			return Content("ERROR");
 		}
 	}
 }

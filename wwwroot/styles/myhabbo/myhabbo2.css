@@ -30,9 +30,12 @@
 #playground {
     position: relative;
 }
-#playground, #playground-outer {
+
+#playground,
+#playground-outer {
     height: 1360px;
 }
+
 body#editmode #playground-outer {
     border: 1px dotted white;
 }
@@ -98,7 +101,7 @@ img.header-bar-group-status {
 /*** PROFILE BOX ***/
 
 .profile-info {
-    width: 90px;
+    width: 94px;
     /* margin-left: -3px; */
     float: left;
 }
@@ -1096,11 +1099,13 @@ ul.web-item-list li:hover {
     width: 240px;
     clear: both;
 }
+
 div.progressbar {
     width: 32px;
     margin-left: auto;
     margin-right: auto;
 }
+
 #webstore-items div.progressbar {
     margin-top: 136px;
 }
@@ -1617,6 +1622,7 @@ div#linktool-results {
     display: none;
     margin-top: 3px;
 }
+
 h2.title.dialog-handle.rounded-done {
     margin: 0;
     padding: 4px 10px;
@@ -1635,22 +1641,23 @@ h2.title.dialog-handle.rounded-done {
     text-align: center;
 }
 
-
 .topdialog p {
     margin-bottom: 1em;
 }
 
 .rounded-container {
-    height:25px;
+    height: 25px;
 }
 
 #confirm-dialogcontent {
-    margin-top:0px;
+    margin-top: 0px;
 }
+
 #badgelist-content ul {
     list-style: none;
     padding-left: 0px;
 }
+
 #badgelist-content ul li {
     width: 53px;
     height: 45px;
@@ -1662,21 +1669,24 @@ h2.title.dialog-handle.rounded-done {
 
 /* buttons */
 
-
-
-#join-group-button, #join-group-with-invite-button {
-    background-position: 0 -239px;
-    padding-left: 15px;
-    margin-left: 10px;
-}
-
+#join-group-button,
+#join-group-with-invite-button,
+#select-favorite-button,
+#deselect-favorite-button,
 #leave-group-button {
-    background-position: 0 -198px;
-    padding-left: 15px;
-    margin-left: 10px;
+    background-position: 0 1px;
 }
 
-#reporting-button, .create-report-button {
+#join-group-button span,
+#join-group-with-invite-button span,
+#select-favorite-button span,
+#deselect-favorite-button span,
+#leave-group-button span {
+    padding-left: 8px;
+}
+
+#reporting-button,
+.create-report-button {
     background-position: 0 -101px;
 }
 
@@ -1684,30 +1694,23 @@ h2.title.dialog-handle.rounded-done {
     background-position: 0 -155px;
 }
 
-#select-favorite-button {
-    background-position: 0 -331px;
-}
-
-#deselect-favorite-button {
-    background-position: 0 -376px;
-}
-
 .delete-button {
     background-position: 0 -402px;
     padding-left: 17px;
 }
 
-    .delete-button:hover {
-        background-position: 0 -432px;
-    }
+.delete-button:hover {
+    background-position: 0 -432px;
+}
 
-.create-report-button, .delete-button {
+.create-report-button,
+.delete-button {
     display: block;
     height: 16px;
 }
 
-
-a.toolbutton, a.urltoolbutton {
+a.toolbutton,
+a.urltoolbutton {
     float: left;
     display: block;
     height: 22px;
@@ -1722,129 +1725,220 @@ a.toolbutton, a.urltoolbutton {
     white-space: nowrap;
 }
 
-    a.toolbutton span, a.urltoolbutton span {
-        color: black !important;
-        float: left;
-        display: block;
-        height: 22px;
-        background-image: url(/images/myhabbo/buttons/tools_right.gif);
-        background-repeat: no-repeat;
-        background-position: top right;
-        padding: 6px 24px 0 20px;
-        cursor: pointer;
-    }
+a.toolbutton span,
+a.urltoolbutton span {
+    color: black !important;
+    float: left;
+    display: block;
+    height: 22px;
+    background-image: url(/images/myhabbo/buttons/tools_right.gif);
+    background-repeat: no-repeat;
+    background-position: top right;
+    padding: 6px 24px 0 20px;
+    cursor: pointer;
+}
 
-    a.toolbutton.disabled span, a.urltoolbutton.disabled span {
-        color: #888 !important;
-    }
+a.toolbutton.disabled span,
+a.urltoolbutton.disabled span {
+    color: #888 !important;
+}
 
-    a.toolbutton.edit {
-        background-image: url(/images/myhabbo/buttons/tools_edit.gif);
-        padding-left: 25px;
-    }
+a.toolbutton.edit {
+    background-image: url(/images/myhabbo/buttons/tools_edit.gif);
+    padding-left: 25px;
+}
 
-    a.toolbutton.reporting-start, a.urltoolbutton.reporting-start {
-        background-image: url(/images/myhabbo/buttons/tools_reporting_start.gif);
-        padding-left: 23px;
-    }
+a.toolbutton.reporting-start,
+a.urltoolbutton.reporting-start {
+    background-image: url(/images/myhabbo/buttons/tools_reporting_start.gif);
+    padding-left: 23px;
+}
 
-    a.toolbutton.reporting-stop {
-        background-image: url(/images/myhabbo/buttons/tools_reporting_end.gif);
-        padding-left: 23px;
-    }
+a.toolbutton.reporting-stop {
+    background-image: url(/images/myhabbo/buttons/tools_reporting_end.gif);
+    padding-left: 23px;
+}
 
-    a.toolbutton.tell {
-        background-image: url(/images/myhabbo/buttons/tools_tell.gif);
-        padding-left: 27px;
-    }
+a.toolbutton.favorite {
+    background-image: url(/images/myhabbo/buttons/tools_favorite.png);
+    padding-left: 22px;
+}
 
-    a.toolbutton.avatar-export {
-        background-image: url(/images/myhabbo/buttons/export_icon.gif);
-        padding-left: 28px;
-    }
+a.toolbutton.remove-favorite {
+    background-image: url(/images/myhabbo/buttons/tools_remove_favorite.png);
+    padding-left: 23px;
+}
 
+a.toolbutton.join {
+    background-image: url(/images/myhabbo/buttons/tools_join.png);
+    padding-left: 17px;
+}
 
-    a.toolbutton.notes {
-        background-image: url(/images/myhabbo/buttons/tools_notes.gif);
-        padding-left: 28px;
-    }
+a.toolbutton.leave {
+    background-image: url(/images/myhabbo/buttons/tools_leave.png);
+    padding-left: 17px;
+}
 
-    a.toolbutton.stickers, a.toolbutton.inventory {
-        background-image: url(/images/myhabbo/buttons/tools_stickers.gif);
-        padding-left: 27px;
-    }
+a.toolbutton.tell {
+    background-image: url(/images/myhabbo/buttons/tools_tell.gif);
+    padding-left: 27px;
+}
 
-    a.toolbutton.widgets {
-        background-image: url(/images/myhabbo/buttons/tools_widgets.gif);
-        padding-left: 35px;
-    }
+a.toolbutton.avatar-export {
+    background-image: url(/images/myhabbo/buttons/export_icon.gif);
+    padding-left: 28px;
+}
 
-    a.toolbutton.backgrounds {
-        background-image: url(/images/myhabbo/buttons/tools_backgrounds.gif);
-        padding-left: 30px;
-    }
+a.toolbutton.notes {
+    background-image: url(/images/myhabbo/buttons/tools_notes.gif);
+    padding-left: 28px;
+}
 
-    a.toolbutton.save {
-        background-image: url(/images/myhabbo/buttons/tools_save.gif);
-        padding-left: 23px;
-        float: right;
-    }
+a.toolbutton.stickers,
+a.toolbutton.inventory {
+    background-image: url(/images/myhabbo/buttons/tools_stickers.gif);
+    padding-left: 27px;
+}
 
-    a.toolbutton.cancel {
-        background-image: url(/images/myhabbo/buttons/tools_cancel.gif);
-        padding-left: 25px;
-        float: right;
-        margin-right: 0;
-    }
+a.toolbutton.widgets {
+    background-image: url(/images/myhabbo/buttons/tools_widgets.gif);
+    padding-left: 35px;
+}
 
-    a.toolbutton.group-settings {
-        background-image: url(/images/groups/settings_icon.gif);
-        padding-left: 35px;
-    }
+a.toolbutton.backgrounds {
+    background-image: url(/images/myhabbo/buttons/tools_backgrounds.gif);
+    padding-left: 30px;
+}
 
+a.toolbutton.save {
+    background-image: url(/images/myhabbo/buttons/tools_save.gif);
+    padding-left: 23px;
+    float: right;
+}
 
-    a.toolbutton.group-badge span {
-        margin-top: -2px;
-        padding-left: 10px;
-    }
+a.toolbutton.cancel {
+    background-image: url(/images/myhabbo/buttons/tools_cancel.gif);
+    padding-left: 25px;
+    float: right;
+    margin-right: 0;
+}
 
-    a.toolbutton.group-badge {
-        background-image: url(/images/groups/edit_badge_button.gif);
-        padding-left: 23px;
-        margin-top: 2px;
-    }
+a.toolbutton.group-settings {
+    background-image: url(/images/groups/settings_icon.gif);
+    padding-left: 35px;
+}
 
-    a.toolbutton.save {
-        background-image: url(/images/myhabbo/buttons/tools_save.gif);
-        padding-left: 23px;
-        float: right;
-    }
+a.toolbutton.group-badge span {
+    margin-top: -2px;
+    padding-left: 10px;
+}
 
-    a.toolbutton.join-group {
-        background-image: url(/images/myhabbo/buttons/tools_groups_join.gif);
-        padding-left: 32px;
-    }
+a.toolbutton.group-badge {
+    background-image: url(/images/groups/edit_badge_button.gif);
+    padding-left: 23px;
+    margin-top: 2px;
+}
 
-    a.toolbutton.leave-group {
-        background-image: url(/images/myhabbo/buttons/tools_groups_leave.gif);
-        padding-left: 32px;
-    }
+a.toolbutton.save {
+    background-image: url(/images/myhabbo/buttons/tools_save.gif);
+    padding-left: 23px;
+    float: right;
+}
 
-    a.toolbutton.memberlist {
-        background-image: url(/images/myhabbo/buttons/tools_memberlist.gif);
-        padding-left: 26px;
-    }
+a.toolbutton.join-group {
+    background-image: url(/images/myhabbo/buttons/tools_groups_join.gif);
+    padding-left: 32px;
+}
 
-    a.toolbutton.webstore {
-        background-image: url(/images/myhabbo/buttons/tools_webstore.gif);
-        padding-left: 26px;
-    }
+a.toolbutton.leave-group {
+    background-image: url(/images/myhabbo/buttons/tools_groups_leave.gif);
+    padding-left: 32px;
+}
 
-    a.toolbutton.edit span, a.toolbutton.reporting-start span, a.toolbutton.reporting-stop span,
-    a.toolbutton.notes span, a.toolbutton.stickers span, a.toolbutton.widgets span,
-    a.toolbutton.backgrounds span, a.toolbutton.save span, a.toolbutton.cancel span,
-    a.toolbutton.tell span, a.toolbutton.group-settings span, a.toolbutton.join-group span,
-    a.toolbutton.leave-group span, a.toolbutton.memberlist span, a.toolbutton.inventory span,
-    a.toolbutton.webstore span, a.toolbutton.avatar-export span {
-        padding-left: 9px;
-    }
+a.toolbutton.memberlist {
+    background-image: url(/images/myhabbo/buttons/tools_memberlist.gif);
+    padding-left: 26px;
+}
+
+a.toolbutton.webstore {
+    background-image: url(/images/myhabbo/buttons/tools_webstore.gif);
+    padding-left: 26px;
+}
+
+a.toolbutton.edit span,
+a.toolbutton.reporting-start span,
+a.toolbutton.reporting-stop span,
+a.toolbutton.notes span,
+a.toolbutton.stickers span,
+a.toolbutton.widgets span,
+a.toolbutton.backgrounds span,
+a.toolbutton.save span,
+a.toolbutton.cancel span,
+a.toolbutton.tell span,
+a.toolbutton.group-settings span,
+a.toolbutton.join-group span,
+a.toolbutton.leave-group span,
+a.toolbutton.memberlist span,
+a.toolbutton.inventory span,
+a.toolbutton.webstore span,
+a.toolbutton.avatar-export span {
+    padding-left: 9px;
+}
+
+a.group-info-room {
+    background: url(/images/info_icons.png) no-repeat 100% -800px;
+    padding-right: 21px;
+    padding-bottom: 3px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a.group-info-room:hover {
+    text-decoration: underline;
+}
+
+#group_purchase_form form {
+    margin: 0px;
+}
+
+#group-description-area,
+#group-purchase-header,
+#group-name-area,
+#group-url-area {
+    margin-bottom: 8px;
+}
+
+#group-description-area {
+    margin-top: 4px;
+}
+
+#group_name_text,
+#group_url_text {
+    font-weight: bold;
+}
+
+#description_chars_left {
+    font-weight: normal;
+    float: right;
+    position: relative;
+}
+
+#description_text {
+    float: left;
+    font-weight: bold;
+    padding-top: 3px;
+}
+
+#group_name,
+#group_url {
+    width: 98%;
+}
+
+#group_description {
+    width: 98%;
+    height: 150px;
+}
+
+#group_description-counter {
+    background-color: #FC0;
+}

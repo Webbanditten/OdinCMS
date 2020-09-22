@@ -48,6 +48,21 @@ namespace KeplerCMS.Data.Models
         public string Type { get; set; }
         [Column("background")]
         public string Background { get; set; }
+        [Column("group_badge")]
+        public string GroupBadge { get; set; }
+        [Column("group_name")]
+        public string GroupName { get; set; }
+        [Column("group_description")]
+        public string GroupDescription { get; set; }
+        [Column("group_type")]
+        public int GroupType { get; set; }
+        [Column("group_url")]
+        public string GroupUrl { get; set; }
+        [Column("group_room")]
+        public int? GroupRoom { get; set; }
+
+        [Column("created")]
+        public DateTime Created { get; set; }
 
         [NotMapped]
         public bool AllowDisplay
@@ -154,6 +169,8 @@ namespace KeplerCMS.Data.Models
         public int Amount { get; set; }
         [Column("item_id")]
         public int ItemId { get; set; }
+        [Column("home_id")]
+        public int HomeId { get; set; }
 
 
     }

@@ -19,7 +19,8 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Rate(int ratingId, int givenRate)
         {
             var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.Rate(givenRate, ratingId, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            var item = await _homeService.Rate(homeId, givenRate, ratingId, userId);
             return View(item);
         }
 
@@ -28,7 +29,8 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> RemoveRating(int ratingId)
         {
             var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.ResetRating(ratingId, userId);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            var item = await _homeService.ResetRating(homeId, ratingId, userId);
             return View("~/Areas/MyHabbo/Views/Rating/Rate.cshtml", item);
         }
     }

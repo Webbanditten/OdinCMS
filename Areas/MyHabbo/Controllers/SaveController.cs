@@ -21,15 +21,18 @@ namespace KeplerCMS.Areas.MyHabbo
         [LoggedInFilter(false)]
         public async Task<IActionResult> Index(SaveModel input)
         {
-            var result = await _homeService.Save(int.Parse(User.Identity.Name), input);
-            if(result)
+            var userId = int.Parse(User.Identity.Name);
+            var homeId = int.Parse(Request.Cookies["editid"]);
+            if (await _homeService.CanEditHome(homeId, userId))
             {
-                Response.Cookies.Delete("editmode");
-                return Content("<script>window.location.reload()</script>");
-            } else
-            {
-                return Content("ERROR");
+                var result = await _homeService.Save(homeId, userId, input);
+                if(result)
+                {
+                    Response.Cookies.Delete("editid");
+                    return Content("<script>window.location.reload()</script>");
+                }
             }
+            return Content("ERROR");
         }
     }
 

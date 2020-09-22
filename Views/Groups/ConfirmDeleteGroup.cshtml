@@ -1,0 +1,16 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Data.Models.Homes 
+@{ 
+    Layout = null;
+}
+<p>
+@DbRes.T("group_delete_message", "habbohome") @Model.GroupName?
+</p>
+
+<p>
+<a href="#" class="new-button" id="group-action-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+<a href="#" class="new-button" id="group-action-ok"><b>@DbRes.T("confirm", "habbohome")</b><i></i></a>
+</p>
+
+<div class="clear"></div>

@@ -1,0 +1,21 @@
+﻿@model KeplerCMS.Data.Models.Homes 
+@{ 
+    Layout = null;
+}
+<div id="badge-editor-flash">
+    <p>Adobe Flash player is required.</p>
+    <p><a href="https://www.adobe.com/go/getflashplayer">Click here to install Adobe Flash player</a>.</p>
+</div>
+<script type="text/javascript" language="JavaScript">
+    var swfobj = new SWFObject("@Url.Content("~/flash/BadgeEditor.swf")", "badgeEditor", "280", "366", "8");
+    swfobj.addParam("base", "@Url.Content("~/flash/")");
+    swfobj.addParam("bgcolor", "#FFFFFF");
+    swfobj.addVariable("post_url", "/groups/actions/update_group_badge?");
+    swfobj.addVariable("__app_key", "");
+    swfobj.addVariable("groupId", "@Model.Id");
+    swfobj.addVariable("badge_data", "@Model.GroupBadge");
+    swfobj.addVariable("localization_url", "@Url.Content("~/xml/badge_editor_da.xml")");
+    swfobj.addVariable("xml_url", "@Url.Content("~/xml/badge_data.xml")");
+    swfobj.addParam("allowScriptAccess", "always");
+    swfobj.write("badge-editor-flash");
+</script>

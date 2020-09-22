@@ -1,0 +1,10 @@
+﻿@model KeplerCMS.Data.Models.Homes
+@{
+    Layout = null;
+}<div id="group_purchase_form-body">
+    <p>@DbRes.T("purchased", "groups")</p>
+    <div id="group-purchase-button">
+        <a href="/groups/@Model.Id/id" class="colorlink orange" style="margin-left: 0px;"><span>@DbRes.T("goto", "groups")</span></a>
+    </div>
+    <div class="clear"></div>
+</div>

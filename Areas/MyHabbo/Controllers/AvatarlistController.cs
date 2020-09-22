@@ -22,7 +22,7 @@ namespace KeplerCMS.Areas.MyHabbo
         [HttpPost]
         public async Task<IActionResult> AvatarInfo(int anAccountId)
         {
-            var user = await _userService.GetUserById(anAccountId.ToString());
+            var user = await _userService.GetUserById(anAccountId);
             if (user != null)
             {
                 return View(user);
@@ -34,7 +34,15 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> FriendSearchPaging(int pageNumber, string searchString, int widgetId)
         {
             var item = await _homeService.GetItem(widgetId);
-            item.WidgetData = await _homeService.GetWidgetData(item.Item.OwnerId);
+            item.WidgetData = await _homeService.GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
+            return View(new AvatarlistViewModel { Widget = item, PageNumber = pageNumber, Search = searchString });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MemberSearchPaging(int pageNumber, string searchString, int widgetId)
+        {
+            var item = await _homeService.GetItem(widgetId);
+            item.WidgetData = await _homeService.GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
             return View(new AvatarlistViewModel { Widget = item, PageNumber = pageNumber, Search = searchString });
         }
     }

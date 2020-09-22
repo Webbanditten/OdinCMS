@@ -1,0 +1,16 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    Layout = null;
+}
+<p>
+    @DbRes.T("group_deselect_message", "habbohome")
+</p>
+
+
+<p>
+    <a href="#" class="new-button" id="group-action-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
+    <a href="#" class="new-button" id="group-action-ok"><b>@DbRes.T("ok", "habbohome")</b><i></i></a>
+</p>
+
+<div class="clear"></div>

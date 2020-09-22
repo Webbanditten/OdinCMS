@@ -53,7 +53,7 @@
     </script>
 
 </head>
-<body id="@((Context.Request.Cookies["editmode"] != null && Context.Request.Cookies["editmode"] == "true") ? "editmode" : "")">
+<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")">
     <div id="overlay"></div>
     <h1 id="main-header">Habbo</h1>
     <div id="wrapper">

@@ -1,0 +1,130 @@
+﻿@model KeplerCMS.Areas.MyHabbo.Models.AvatarlistViewModel;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{ 
+    var filteredMembers = Model.Widget.WidgetData.GroupMembers.Where(s=>s.GroupMember.Pending == false);
+    if(Model.Search != "" && Model.Search != null)
+    {
+        filteredMembers = filteredMembers.Where(s => s.GroupMember.User.Username.ToLower().Contains(Model.Search.ToLower())).ToList();
+    }
+    var prPage = 32;
+    var maxPages = Math.Ceiling(Decimal.Divide(filteredMembers.Count(), prPage));
+    var pagedMembers = filteredMembers.Skip((Model.PageNumber - 1) * prPage).Take(prPage).ToList();
+}
+<div id="avatarlist-content">
+
+
+    <div class="avatar-widget-list-container">
+        <ul id="avatar-list-list" class="avatar-widget-list">
+            @{
+                foreach (var members in pagedMembers)
+                {
+                    <li id="avatar-list-@Model.Widget.Item.Id-@members.GroupMember.User.Id" title="@members.GroupMember.User.Username">
+                        <div class="avatar-list-open"><a href="#" id="avatar-list-open-link-@Model.Widget.Item.Id-@members.GroupMember.User.Id" class="avatar-list-open-link"></a></div>
+                        <div class="avatar-list-avatar"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(members.GroupMember.User.Figure)&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt=""></div>
+                        <h4><a href="/home/@members.GroupMember.User.Username">@members.GroupMember.User.Username</a></h4>
+                        <p class="avatar-list-birthday">@members.GroupMember.User.CreateAt.ToString("dd-MM-yyyy")</p>
+                        <p>
+                            @{
+                                if(members.GroupMember.Owner) {
+							        <img src="~/images/groups/owner_icon.gif" alt="@DbRes.T("owner", "habbohome")" title="@DbRes.T("owner", "habbohome")" class="avatar-list-groupstatus">
+                                }
+                                if(members.GroupMember.Rights) {
+							        <img src="~/images/groups/administrator_icon.gif" alt="@DbRes.T("administrator", "habbohome")" title="@DbRes.T("administrator", "habbohome")" class="avatar-list-groupstatus">
+                                }
+                                if(members.GroupMember.User.Group == members.Home.Id) {
+							        <img src="~/images/groups/favourite_group_icon.gif" alt="" class="avatar-list-groupstatus">
+                                }
+                            }
+						</p>
+                    </li>
+                }
+            }
+
+        </ul>
+
+        <div id="avatar-list-info" class="avatar-list-info">
+
+            <div class="avatar-list-info-close-container"><a href="#" class="avatar-list-info-close"></a></div>
+            <div class="avatar-list-info-container"></div>
+        </div>
+
+    </div>
+
+    @{
+        if (Model.Widget.WidgetData.GroupMembers.Count() == 0)
+        {
+
+            <div class="avatar-widget-list-container">
+                <ul id="avatar-list-list" class="avatar-widget-list">
+
+
+                    @DbRes.T("nofriends", "habbohome")
+
+                </ul>
+
+
+
+                <div id="avatar-list-info" class="avatar-list-info">
+
+                    <div class="avatar-list-info-close-container"><a href="#" class="avatar-list-info-close"></a></div>
+                    <div class="avatar-list-info-container"></div>
+                </div>
+
+            </div>
+        }
+    }
+
+<div id="avatar-list-paging" style="">
+
+    @pagedMembers.Count() - @Model.PageNumber / @maxPages<br>
+
+    @{
+        if (Model.PageNumber != 1)
+        {
+            @:<a href="#" class="avatar-list-paging-link" id="avatarlist-search-first">@DbRes.T("badgefirst", "habbohome")</a> |
+        }
+        else
+        {
+            @:@DbRes.T("badgefirst", "habbohome") |
+        }
+        if (Model.PageNumber > 1)
+        {
+            @:<a href="#" class="avatar-list-paging-link" id="avatarlist-search-previous">&lt;&lt;</a> |
+        }
+        else
+        {
+            @:&lt; &lt; |
+        }
+
+
+        if (Model.PageNumber < maxPages)
+        {
+            @:<a href="#" class="avatar-list-paging-link" id="avatarlist-search-next">&gt;&gt;</a> |
+        }
+        else
+        {
+            @:&gt;&gt;
+        }
+
+        if (Model.PageNumber != maxPages)
+        {
+            @:<a href="#" class="avatar-list-paging-link" id="avatarlist-search-last">@DbRes.T("badgelast", "habbohome")</a>
+        }
+        else
+        {
+            @:@DbRes.T("badgelast", "habbohome")
+        }
+    }
+
+
+    <input type="hidden" id="pageNumber" value="@Model.PageNumber">
+    <input type="hidden" id="totalPages" value="@maxPages">
+</div>
+
+    <script type="text/javascript">
+            document.observe("dom:loaded", function() {
+	            window.widget@(Model.Widget.Item.Id) = new MemberWidget('@(Model.Widget.Item.HomeId)', '@(Model.Widget.Item.Id)');
+            });
+    </script>
+</div>
