@@ -37,7 +37,11 @@ namespace KeplerCMS.Controllers
         [Route("grouppurchase/group_create_form")]
         public IActionResult GroupCreateForm(string name, string description)
         {
-            return View("Form");
+            if(User.Identity.IsAuthenticated) {
+                return View("Form");
+            } else {
+                return Content(DbRes.T("login", "groups"));
+            }
         }
 
         [LoggedInFilter(false)]
