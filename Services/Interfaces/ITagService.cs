@@ -14,6 +14,9 @@ namespace KeplerCMS.Services.Interfaces
 
         public void RemoveTag(Tags tag);
 
+        public Task<List<Tags>> Search(string tag);
+        public Task<int> Battle(string tag1, string tag2);
+
 
     }
 }
