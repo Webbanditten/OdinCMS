@@ -889,6 +889,28 @@ namespace KeplerCMS.Services.Implementations
             await  _context.SaveChangesAsync();
             return members;
         }
+
+        public async Task<List<Homes>> GetRecentGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.Created).ToListAsync();
+        }
+
+        public async Task<List<Homes>> GetHotelGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.GroupName).ToListAsync();
+        }
+
+        public async Task<List<Homes>> GetActiveGroups()
+        {
+            return await _context.Homes.Where(s=>s.Type == "group").OrderBy(s=>s.Created).ToListAsync();
+        }
+
+        public async Task<GroupMembers> AddPendingMember(int groupId, int userId) {
+            var membership = new GroupMembers { GroupId = groupId, Pending = true, UserId = userId};
+            _context.GroupMembers.Add(membership);
+            await _context.SaveChangesAsync();
+            return membership;
+        }
     }
 
 }

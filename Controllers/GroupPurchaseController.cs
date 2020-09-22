@@ -35,7 +35,7 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         [HttpPost]
         [Route("grouppurchase/group_create_form")]
-        public async Task<IActionResult> GroupCreateForm(string name, string description)
+        public IActionResult GroupCreateForm(string name, string description)
         {
             return View("Form");
         }

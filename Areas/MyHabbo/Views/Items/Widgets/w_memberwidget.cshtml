@@ -18,7 +18,7 @@
                 }
             }
 
-            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("groupmembers", "habbohome") (<span id="avatar-list-size">@Model.WidgetData.GroupMembers.Count()</span>)</span><span class="header-right">&nbsp;</span>
+            <span class="header-left">&nbsp;</span><span class="header-middle">@DbRes.T("groupmembers", "habbohome") (<span id="avatar-list-size">@Model.WidgetData.GroupMembers.Where(s=>s.GroupMember.Pending == false).Count()</span>)</span><span class="header-right">&nbsp;</span>
         </h3>
     </div>
 </div>

@@ -68,7 +68,7 @@ namespace KeplerCMS.Areas.Habbowood
             }
             return RedirectToAction("Watch", "Home", new { id = movieId });
         }
-        public async Task<IActionResult> Ping()
+        public IActionResult Ping()
         {
             return Content("pong");
         }

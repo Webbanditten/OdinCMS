@@ -20,13 +20,13 @@ namespace KeplerCMS.Areas.MyHabbo
         }
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Editor(NoteEditorViewModel model)
+        public IActionResult Editor(NoteEditorViewModel model)
         {
             return View(model);
         }
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Preview(NoteEditorViewModel model)
+        public IActionResult Preview(NoteEditorViewModel model)
         {
             return View(model);
         }

@@ -25,6 +25,55 @@ namespace KeplerCMS.Controllers
             _roomService = roomService;
         }
 
+
+        [Route("groups/directory/recent")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> DirectoryRecent()
+        {
+            var recent = await _homeService.GetRecentGroups();
+            
+            var directory = new GroupDirectory { Recent = recent};
+            
+            return View(directory);
+        }
+        [Route("groups/directory/hotel")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> DirectoryHotel()
+        {
+            var hotel = await _homeService.GetHotelGroups();
+            
+            var directory = new GroupDirectory { Hotel = hotel };
+
+            return View(directory);
+        }
+        [Route("groups/directory/active")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> DirectoryActive()
+        {
+            var active = await _homeService.GetActiveGroups();
+            
+            var directory = new GroupDirectory { Active = active };
+
+            return View(directory);
+        }
+
+        [Route("groups/directory")]
+        [LoggedInFilter(false)]
+        public async Task<IActionResult> Directory()
+        {
+            var recent = await _homeService.GetRecentGroups();
+            var active = await _homeService.GetActiveGroups();
+            var hotel = await _homeService.GetHotelGroups();
+            
+            var directory = new GroupDirectory { Active = active, Recent = recent, Hotel = hotel };
+
+            if(User.Identity.IsAuthenticated) { 
+                directory.MyGroups = await _homeService.GetGroupsForUser(int.Parse(User.Identity.Name)); 
+            }
+
+            return View(directory);
+        }
+
         [Route("myhabbo/groups/batch/confirm_accept")]
         [LoggedInFilter]
         [HttpPost]
@@ -274,7 +323,7 @@ namespace KeplerCMS.Controllers
         [Route("groups/actions/confirm_leave")]
         [LoggedInFilter]
         [HttpPost]
-        public async Task<IActionResult> ConfirmLeave(int groupId)
+        public IActionResult ConfirmLeave(int groupId)
         {
             var currentUserId = int.Parse(User.Identity.Name);
             if (_homeService.GetMembership(groupId, currentUserId) != null)
@@ -289,7 +338,10 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> Leave(int groupId)
         {
-            return Content("Nope");
+            var currentUserId = int.Parse(User.Identity.Name);
+            var membership = await _homeService.GetMembership(groupId, currentUserId);
+            await _homeService.RemoveMembers(groupId, new int[] { membership.Id });
+            return View();
         }
 
         [Route("groups/actions/join")]
@@ -297,7 +349,14 @@ namespace KeplerCMS.Controllers
         [HttpPost]
         public async Task<IActionResult> Join(int groupId)
         {
-            return Content("Nope");
+             var currentUserId = int.Parse(User.Identity.Name);
+            var group = await _homeService.GetHomeDetailsById(groupId);
+            var membership = await _homeService.AddPendingMember(groupId, currentUserId);
+            if(group.GroupType == 1) {
+                return View("JoinRequest");
+            }
+            await _homeService.AcceptMembers(groupId, new int[] { membership.Id });
+            return View("Join");
         }
 
         
@@ -305,7 +364,7 @@ namespace KeplerCMS.Controllers
         [Route("groups/actions/confirm_deselect_favorite")]
         [LoggedInFilter]
         [HttpPost]
-        public async Task<IActionResult> ConfirmDeselectFavorite(int groupId)
+        public IActionResult ConfirmDeselectFavorite(int groupId)
         {
             var currentUserId = int.Parse(User.Identity.Name);
             if (_homeService.GetMembership(groupId, currentUserId) != null) {

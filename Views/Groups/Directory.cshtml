@@ -1,0 +1,184 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Models.GroupDirectory
+@{
+    ViewData["Title"] = DbRes.T("groups_directory", "groups");
+}
+
+<div id="page-headline">
+	<div id="page-headline-breadcrums">
+	</div>
+	<div id="page-headline-text">@DbRes.T("groups_directory", "groups")</div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="content-2col">
+	<tbody><tr>
+		<td style="width: 8px;"></td>
+		<td valign="top" style="width: 202px;" class="habboPage-col">
+<div id="top-3rd-level"></div>
+	<div id="content-3rd-level">
+			
+		<ul id="third-level-navi">
+				
+						<li class="active">
+							@DbRes.T("groups_directory", "groups")
+						</li>
+				
+				
+						<li class="inactive">
+							<a href="/groups/directory/active">@DbRes.T("groups_directory_active", "groups")</a> 
+						</li>
+				
+				
+						<li class="inactive">
+							<a href="/groups/directory/hotel">@DbRes.T("groups_directory_hotel", "groups")</a> 
+						</li>
+				
+				
+						<li class="inactive">
+							<a href="/groups/directory/recent">@DbRes.T("groups_directory_recent", "groups")</a> 
+						</li>
+				
+		</ul>
+			<div class="clear"></div>
+	</div>
+<div id="bottom-3rd-level"></div>
+<div class="v2box red light">
+	<div class="headline"><h3>@DbRes.T("groups_directory_join_header", "groups")</h3></div>
+	<div class="border"><div></div></div>
+	<div class="body">
+        @Html.Raw(DbRes.T("groups_directory_join", "groups"))
+        <div class="clear"></div>
+	</div>
+	<div class="bottom"><div></div></div>
+</div>
+		</td>		
+		<td valign="top" style="width: 539px;" class="habboPage-col rightmost">
+
+@{
+    if(User.Identity.IsAuthenticated) {
+        <div class="v2box blue light">
+        <div class="headline"><h3>@DbRes.T("groups_directory_mygroups", "groups")</h3></div>
+        <div class="border"><div></div></div>
+        <div class="body">
+            
+            <ul class="groups-toplist toplist">
+                @{
+                    var myGroups = Model.MyGroups;
+                    for(int i = 0; i < myGroups.Count(); i++) {
+                        <li style="background-image: url(@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(myGroups[i].Home.GroupBadge).gif)">	
+                            <div class="group-index">@(i+1).</div>
+                            <div class="group-link">
+                                <a href="/groups/@myGroups[i].Home.Id/id">
+                                    @myGroups[i].Home.GroupName
+                                </a>
+                            </div>
+                            <p>@DbRes.T("group_created", "habbohome"): <strong>@myGroups[i].Home.Created.ToString("yyyy-MM-dd")</strong></p>
+                        </li>
+                    }
+                }
+            </ul>
+            <div class="clear"></div>
+        </div>
+        <div class="bottom"><div></div></div>
+    </div>
+    }
+}
+
+
+<div class="v2box blue light">
+	<div class="headline"><h3>@DbRes.T("groups_directory_active", "groups")</h3></div>
+	<div class="border"><div></div></div>
+	<div class="body">
+		
+        <ul class="groups-toplist toplist">
+            @{
+                var activeGroups = Model.Active.Take(10).ToList();
+                for(int i = 0; i < activeGroups.Count(); i++) {
+                    <li style="background-image: url(@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(activeGroups[i].GroupBadge).gif)">	
+                        <div class="group-index">@(i+1).</div>
+                        <div class="group-link">
+                            <a href="/groups/@activeGroups[i].Id/id">
+                                @activeGroups[i].GroupName
+                            </a>
+                        </div>
+                        <p>@DbRes.T("group_created", "habbohome"): <strong>@activeGroups[i].Created.ToString("yyyy-MM-dd")</strong></p>
+                    </li>
+                }
+            }
+        </ul>
+        <br>
+        <br>
+        <br>
+        <a target="_self" href="/groups/directory/active">@DbRes.T("groups_directory_showall", "groups")</a><br>
+		<div class="clear"></div>
+	</div>
+	<div class="bottom"><div></div></div>
+</div>
+
+<div class="v2box blue light">
+	<div class="headline"><h3>@DbRes.T("groups_directory_active", "groups")</h3></div>
+	<div class="border"><div></div></div>
+	<div class="body">
+		
+        <ul class="groups-toplist toplist">
+            @{
+                var hotelGroups = Model.Hotel.Take(10).ToList();
+                for(int i = 0; i < hotelGroups.Count(); i++) {
+                    <li style="background-image: url(@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(hotelGroups[i].GroupBadge).gif)">	
+                        <div class="group-index">@(i+1).</div>
+                        <div class="group-link">
+                            <a href="/groups/@hotelGroups[i].Id/id">
+                                @hotelGroups[i].GroupName
+                            </a>
+                        </div>
+                        <p>@DbRes.T("group_created", "habbohome"): <strong>@hotelGroups[i].Created.ToString("yyyy-MM-dd")</strong></p>
+                    </li>
+                }
+            }
+        </ul>
+        <br>
+        <br>
+        <br>
+        <a target="_self" href="/groups/directory/hotel">@DbRes.T("groups_directory_showall", "groups")</a><br>
+		<div class="clear"></div>
+	</div>
+	<div class="bottom"><div></div></div>
+</div>
+
+<div class="v2box blue light">
+	<div class="headline"><h3>@DbRes.T("groups_directory_recent", "groups")</h3></div>
+	<div class="border"><div></div></div>
+	<div class="body">
+		
+        <ul class="groups-toplist toplist">
+            @{
+                var recentGroups = Model.Recent.Take(10).ToList();
+                for(int i = 0; i < recentGroups.Count(); i++) {
+                    <li style="background-image: url(@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(recentGroups[i].GroupBadge).gif)">	
+                        <div class="group-index">@(i+1).</div>
+                        <div class="group-link">
+                            <a href="/groups/@recentGroups[i].Id/id">
+                                @recentGroups[i].GroupName
+                            </a>
+                        </div>
+                        <p>@DbRes.T("group_created", "habbohome"): <strong>@recentGroups[i].Created.ToString("yyyy-MM-dd")</strong></p>
+                    </li>
+                }
+            }
+        </ul>
+        <br>
+        <br>
+        <br>
+        <a target="_self" href="/groups/directory/recent">@DbRes.T("groups_directory_showall", "groups")</a><br>
+		<div class="clear"></div>
+	</div>
+	<div class="bottom"><div></div></div>
+</div>
+		</td>
+		
+        
+        
+        <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+	</tr>
+</tbody></table>

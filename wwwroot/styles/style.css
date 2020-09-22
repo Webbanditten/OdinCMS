@@ -278,7 +278,7 @@ div.tabmenu-inner h3 {
     padding: 4px 6px;
     background-color: #F3F3F3;
     font-size: 10px;
-    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 div.tabmenu-inner-content {
@@ -1869,6 +1869,8 @@ ul.groups-toplist li {
     background-position: 2px 2px;
     background-repeat: no-repeat;
     margin: 0 5px 5px 0;
+    height: 39px;
+    background-position: right;
 }
 
 div.toplist-item {
@@ -1877,8 +1879,16 @@ div.toplist-item {
     overflow: hidden;
 }
 
-ul.groups-toplist li.even {
+ul.groups-toplist li {
     background-color: #d5d5d5;
+}
+
+ul.groups-toplist li:nth-child(4n) {
+    background-color: #fff;
+}
+
+ul.groups-toplist li:nth-child(4n-1) {
+    background-color: #fff;
 }
 
 ul.groups-toplist li.odd div.toplist-item {
@@ -2454,8 +2464,6 @@ textarea#trax-embed-source-export {
 div#traxplayer-export-box {
     width: 210px;
 }
-
-div.tag-list {}
 
 img.tag-add-link {
     position: relative;

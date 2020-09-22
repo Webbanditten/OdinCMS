@@ -26,7 +26,7 @@ namespace KeplerCMS.Areas.Housekeeping
 
         [HousekeepingFilter(Fuse.fuse_administrator_access)]
         [HttpPost]
-        public async Task<IActionResult> Index(MessengerCampaign model)
+        public IActionResult Index(MessengerCampaign model)
         {
             if (ModelState.IsValid)
             {

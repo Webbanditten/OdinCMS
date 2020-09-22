@@ -61,5 +61,9 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<GroupMembers>> GiveGroupRights(int groupId, int[] targetIds);
         Task<List<GroupMembers>> RemoveGroupRights(int groupId, int[] targetIds);
         Task<List<GroupMembers>> RemoveMembers(int groupId, int[] targetIds);
+        Task<GroupMembers> AddPendingMember(int groupId, int userId);
+        Task<List<Homes>> GetRecentGroups();
+        Task<List<Homes>> GetHotelGroups();
+        Task<List<Homes>> GetActiveGroups();
     }
 }

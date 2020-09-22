@@ -103,25 +103,25 @@ namespace KeplerCMS.Controllers
         }
         [HttpPost]
         [Route("register/start")]
-        public async Task<IActionResult> RegisterStart(RegistrationViewModel model)
+        public IActionResult RegisterStart(RegistrationViewModel model)
         {
             return View(model);
         }
         [HttpPost]
         [Route("register/step/2")]
-        public async Task<IActionResult> RegisterInformation(RegistrationViewModel model)
+        public IActionResult RegisterInformation(RegistrationViewModel model)
         {
             return View(model);
         }
         [HttpPost]
         [Route("register/step/3")]
-        public async Task<IActionResult> Email(RegistrationViewModel model)
+        public IActionResult Email(RegistrationViewModel model)
         {
             return View(model);
         }
         [HttpPost]
         [Route("register/step/4")]
-        public async Task<IActionResult> TermsOfService(RegistrationViewModel model)
+        public IActionResult TermsOfService(RegistrationViewModel model)
         {
             return View(model);
         }
