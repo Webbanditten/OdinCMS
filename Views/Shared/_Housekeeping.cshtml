@@ -31,6 +31,9 @@
         case "/housekeeping/admin":
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
+        case "/housekeeping/catalog":
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
         case "/housekeeping/messengercampaign":
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
@@ -93,6 +96,8 @@
                             <div class="container-content">
                                 <ul>
                                     <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
+                                    <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
+                                    <li><a href="@Url.Action("Index", "Catalog")">Catalog</a></li>
                                 </ul>
                             </div>
                         </div>

@@ -4,6 +4,7 @@ using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -17,12 +18,14 @@ namespace KeplerCMS.Controllers
         private readonly ISettingsService _settingService;
         private readonly IUserService _userService;
         private readonly ICommandQueueService _commandQueueService;
+        private readonly IPhotoService _photoService;
 
-        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService)
+        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService, IPhotoService photoService)
         {
             _settingService = settingsService;
             _userService = userService;
             _commandQueueService = commandQueueService;
+            _photoService = photoService;
         }
 
         [HttpGet("api/hotel/online")]
@@ -72,6 +75,13 @@ namespace KeplerCMS.Controllers
         {
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
             return Content("ok");
+        }
+
+        [Route("api/photo")]
+        public async Task<IActionResult> Photo(int id) {
+            var photo = await _photoService.Get(id);
+
+            return File(photo.PhotoData, "image/png");
         }
     }
 }

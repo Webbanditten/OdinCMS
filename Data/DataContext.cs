@@ -25,6 +25,8 @@ namespace KeplerCMS.Data
         public DbSet<News> News { get; set; }
         public DbSet<Promo> Promos { get; set; }
         public DbSet<Vouchers> Vouchers { get; set; }
+        public DbSet<ItemsPhotos> ItemsPhotos { get; set; }
+        public DbSet<ItemsDefinitions> ItemsDefinitions { get; set; }
         public DbSet<VoucherHistory> VoucherHistory { get; set; }
         public DbSet<Settings> Settings { get; set; }
 
