@@ -15,10 +15,11 @@ namespace KeplerCMS.Services.Implementations
     public class TagService : ITagService
     {
         private readonly DataContext _context;
-
-        public TagService(DataContext context)
+        private readonly IUserService _userService;
+        public TagService(DataContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
         public async Task<List<Tags>> TagsForUser(int userId, bool editMode = false)
         {
@@ -54,7 +55,57 @@ namespace KeplerCMS.Services.Implementations
 
             _context.SaveChanges();
         }
+        public async Task<List<TagCloud>> TagCloud() {
+            return await (
+            from tag in _context.Tags.Take(10)
+            group tag by tag.Tag into tagGroup
+            select new TagCloud
+            {
+                Tag = tagGroup.Key,
+                Amount = tagGroup.Count(),
+            }).ToListAsync();
+        }
+        public async Task<List<TagSearchResult>> Search(string tag)
+        {
+            if(tag == null) return null;
+            var filteredTags = await _context.Tags.Where(s=>s.Tag.Contains(tag.ToLower())).ToListAsync();
 
+            var result = new List<TagSearchResult>();
+
+            foreach(var dbTag in filteredTags) {
+                var tagData = new TagSearchResult { Tag = dbTag.Tag};
+                if(dbTag.GroupId != 0) {
+                    tagData.Group = await _context.Homes.Where(s=>s.Id == dbTag.GroupId).FirstOrDefaultAsync();
+                    tagData.Tags = await this.TagsForGroup(dbTag.GroupId);
+                }
+
+                if(dbTag.UserId != 0) {
+                    tagData.User = await _userService.GetUserById(dbTag.UserId);
+                    tagData.Tags = await this.TagsForUser(dbTag.UserId);
+                }
+
+                result.Add(tagData);
+            }
+
+            return result;
+        }
+
+        public async Task<TagFightViewModel> Battle(string tag1, string tag2)
+        {
+            var result = new TagFightViewModel { 
+                Winner = 0, 
+                Tag1 = tag1,
+                Tag2 = tag2,
+                Tag1Count = (await _context.Tags.Where(s=>s.Tag == tag1.ToLower()).ToListAsync()).Count(), 
+                Tag2Count = (await _context.Tags.Where(s=>s.Tag == tag2.ToLower()).ToListAsync()).Count()  
+            }; 
+            if(result.Tag1Count > result.Tag2Count) {
+                result.Winner = 2;
+            } else if(result.Tag2Count > result.Tag1Count) {
+                result.Winner = 1;
+            }
+            return result;
+        }
     }
 
 }

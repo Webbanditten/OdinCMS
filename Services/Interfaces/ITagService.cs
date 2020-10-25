@@ -1,4 +1,5 @@
 ﻿using KeplerCMS.Data.Models;
+using KeplerCMS.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,6 +15,8 @@ namespace KeplerCMS.Services.Interfaces
 
         public void RemoveTag(Tags tag);
 
-
+        public Task<List<TagSearchResult>> Search(string tag);
+        public Task<TagFightViewModel> Battle(string tag1, string tag2);
+        public Task<List<TagCloud>> TagCloud();
     }
 }

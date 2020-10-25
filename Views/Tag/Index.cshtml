@@ -1,0 +1,148 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model TagSearchViewModel
+@{
+    ViewData["Title"] = DbRes.T("tags", "tags");
+}
+@section ScriptsTop {
+    <script src="~/js/myhabbo/visual.js" type="text/javascript"></script>
+    <script src="~/js/myhabbo/fullcontent.js" type="text/javascript"></script>
+
+}
+<div id="page-headline">
+    <div id="page-headline-breadcrums">
+    </div>
+    <div id="page-headline-text">@DbRes.T("tags", "tags")</div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="content-2col">
+    <tbody>
+        <tr>
+            <td style="width: 8px;"></td>
+            <td valign="top" style="width: 202px;" class="habboPage-col">
+                <div class="v2box red light">
+                    <div class="headline">
+                        <h3>@DbRes.T("popular", "tags")</h3>
+                    </div>
+                    <div class="border">
+                        <div></div>
+                    </div>
+                    <div class="body">
+                        <div class="tag-list">
+                        <ul class="tag-list">
+                            @foreach (var item in Model.Cloud.OrderByDescending(i=>i.Amount))
+                            {
+                                <li class="tag-search-rowholder"><span class="tag-search-rowholder">
+                                    <a href="~/tag/search?tag=@item.Tag" style="font-size:20px">@item.Tag</a> <img border="0" class="tag-none-link" src="~/images/myhabbo/buttons/tag_button_dim.gif" style="image-rendering: pixelated;"></span>
+                                </li>
+                            }
+                        </ul>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="bottom">
+                        <div></div>
+                    </div>
+                </div>
+
+                <div class="v2box red light">
+                    <div class="headline">
+                        <h3>@DbRes.T("fight", "tags")</h3>
+                    </div>
+                    <div class="border">
+                        <div></div>
+                    </div>
+                    <div class="body">
+                        <div id="tag-fight-habblet-container">
+                        <div class="fight-process" id="fight-process">@DbRes.T("fighting", "tags")</div>
+                        <div id="fightForm" class="fight-form">
+                            <div class="tag-field-container">@DbRes.T("firstag", "tags")<br /><input maxlength="30" type="text" class="tag-input" name="tag1" id="tag1"/></div>
+
+                            <div class="tag-field-container">@DbRes.T("secondtag", "tags")<br /><input maxlength="30" type="text" class="tag-input" name="tag2" id="tag2"/></div>
+                        </div>
+                        <div id="fightResults" class="fight-results">
+                            <div class="fight-image">
+                                <img src="/images/tagfight/tagfight_start.gif" alt="" name="fightanimation" id="fightanimation" />
+                                <a id="tag-fight-button" href="#" onclick="TagFight.init(); return false;" class="colorlink orange last"><span>Fight</span></a>
+                            </div>
+                        </div>
+                        <div class="tagfight-preload">
+                            <img src="~/images/tagfight/tagfight_end_0.gif" width="1" height="1"/>
+
+                            <img src="~/images/tagfight/tagfight_end_1.gif" width="1" height="1"/>
+                            <img src="~/images/tagfight/tagfight_end_2.gif" width="1" height="1"/>
+                            <img src="~/images/tagfight/tagfight_loop.gif" width="1" height="1"/>
+                            <img src="~/images/tagfight/tagfight_start.gif" width="1" height="1"/>
+                        </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="bottom">
+                        <div></div>
+                    </div>
+                </div>
+            </td>
+            <td valign="top" style="width: 539px;" class="habboPage-col rightmost">
+
+                <div class="v2box blue light">
+                    <div class="headline">
+                        <h3>@DbRes.T("searchfor", "tags")</h3>
+                    </div>
+                    <div class="border">
+                        <div></div>
+                    </div>
+                    <div class="body">
+                        <div id="tag-search-habblet-container">
+                            <form name="tag_search_form" action="~/tag/search" class="search-box">
+                                <input type="text" name="tag" id="search_query" value="" class="search-box-query"
+                                style="float: left">
+                                <a onclick="$(this).up('form').submit(); return false;" class="colorlink orange last"><span>@DbRes.T("search", "tags")</span></a>
+                            </form>
+                            <div class="clearfix"></div>
+                            @{
+                                
+                                if(Model.SearchResult == null || Model.SearchResult.Count() == 0) {
+                                    @: @DbRes.T("nottags", "tags")
+                                } else {
+
+                                <table id="tagsearch" border="0" width="100%">
+                                    <tbody>
+                                    @foreach (var item in Model.SearchResult)
+                                    {
+                                        <tr>
+                                            @{
+                                                if(item.User != null ){
+                                                    
+                                                    <td valign="top" width="40"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(item.User.Figure)&size=s" alt="" align="bottom" border="0" hspace="10" vspace="5"></td>
+                                                    <td valign="top"><strong><a href="/home/@item.User.Username">@item.User.Username</strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
+                                        
+                                                } else if(item.Group != null) {
+                                                    <td valign="top" width="40"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(item.Group.GroupBadge).gif" alt="" align="bottom" border="0" hspace="10" vspace="5"></td>
+                                                    <td valign="top"><strong><a href="/groups/@(item.Group.Id)/id">@item.Group.GroupName</strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
+                                        
+                                                }
+                                            }
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+                                
+                                }
+                            }
+
+                            
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="bottom">
+                        <div></div>
+                    </div>
+                </div>
+            </td>
+
+
+
+            <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+        </tr>
+    </tbody>
+</table>

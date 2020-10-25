@@ -2670,3 +2670,194 @@ ul.habblet-list li div.link p {
 #group-memberlist ul.habblet-list li:nth-child(4n-1) {
     background-color: #ececec;
 }
+
+
+/* TAG Search Page Habblet */
+
+#tag-search-habblet-container .result-title {
+    font-weight: bold;
+    font-size: 11px;
+}
+
+#tag-search-habblet-container .result-description {
+    font-style: italic;
+    font-size: 11px;
+}
+
+#tag-search-habblet-container ul.tag-list a:link,
+ul.tag-list a:visited {
+    color: #000000;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+#tag-search-habblet-container ul.tag-list a:hover {
+    text-decoration: underline;
+}
+
+#tag-search-habblet-container form.search-box {
+    margin-top: 10px;
+    padding-left: 45px;
+}
+
+#tag-search-habblet-container input.search-box-query {
+    width: 70%;
+}
+
+#tag-search-habblet-container input.search-box-sidebar-query {
+    width: 95%;
+}
+
+#tag-search-habblet-container p.search-result-count {
+    padding-left: 45px;
+}
+
+#tag-search-habblet-container #tag-search-add,
+#tag-search-habblet-container #tag-search-add-result {
+    padding-left: 45px;
+}
+
+#tag-search-habblet-container #tag-search-add-result {
+    display: none;
+}
+
+#tag-search-habblet-container p.search-result-divider {
+    margin: 5px;
+}
+
+#tag-search-habblet-container table.search-result {
+    border-spacing: 0;
+    border-collapse: collapse;
+    width: 100%;
+    clear: both;
+}
+
+#tag-search-habblet-container table.search-result tr.odd {
+    background-color: #e6e6e6;
+}
+
+#tag-search-habblet-container table.search-result tr.even {
+    background-color: white;
+}
+
+#tag-search-habblet-container table.search-result tr td.image {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#tag-search-habblet-container table.search-result tr td.text {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#tag-search-habblet-container p.search-result-navigation {
+    text-align: center;
+}
+
+#tag-related-habblet-container,
+#tag-match-habblet-container,
+#tag-fight-habblet-container {
+    padding: 7px;
+}
+
+#tag-match-form #tag-match-friend {
+    width: 98%;
+}
+
+#tag-match-form #tag-match-send {
+    float: right;
+    margin-top: 15px;
+}
+
+#tag-match-result {
+    margin-bottom: 7px;
+}
+
+.tag-field-container {
+    display: block;
+    width: 100%;
+}
+
+#tag-fight-habblet-container #tag-fight-button,
+#tag-fight-habblet-container #tag-fight-button-new {
+    float: right;
+    margin-top: 5px;
+}
+
+#tag-fight-habblet-container #fight-process {
+    display: none;
+}
+
+#tag-fight-habblet-container .fight-image {
+    text-align: center;
+    margin: 10px 5px 10px 5px;
+}
+
+#tag-fight-habblet-container .tag-field-container {
+    margin-bottom: 5px;
+}
+
+
+/* Tag listing */
+
+#tag-related-habblet-container .tag-list,
+#front-tags .tag-list {
+    text-align: center;
+}
+
+.tag-list li {
+    list-style: none;
+}
+
+.tag-list li a,
+.my-tag-list li a {
+    color: #000;
+}
+
+.tag-list li span {
+    background-position: -40px 0;
+}
+
+a.tag-remove-link:hover {
+    background-position: -10px 0;
+    text-decoration: none;
+}
+
+a.tag-add-link {
+    background-position: -20px 0;
+}
+
+a.tag-add-link:hover {
+    background-position: -30px 0;
+    text-decoration: none;
+}
+
+
+/*
+
+*/
+
+.add-tag-form,
+.tag-search-form {
+    margin-top: 1em;
+}
+
+.add-tag-form em.tag-question {
+    float: left;
+    color: #888 !important;
+    font-style: normal;
+    margin-top: 3px;
+}
+
+#add-tag-input {
+    width: 100px;
+    margin: 3px 10px 0 5px;
+}
+
+#tagsearch tr:nth-child(even) td {
+    background: #e6e6e6
+}
+
+#tagsearch tr:nth-child(odd) td {
+    background: #fff
+}
