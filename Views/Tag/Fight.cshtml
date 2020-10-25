@@ -1,0 +1,21 @@
+@model TagFightViewModel
+@{
+    Layout = null;
+}
+<div id="fightResultCount" class="fight-result-count">
+	@{
+        if(Model.Winner == 0) {
+            @:@DbRes.T("tie", "tags")!<br />
+        } else {
+            @:@DbRes.T("tagwin", "tags")!<br />
+        }
+        @:@Model.Tag1 (@Model.Tag1Count) @DbRes.T("hits", "tags") <br />
+        @:@Model.Tag2 (@Model.Tag2Count) @DbRes.T("hits", "tags")
+        
+    }
+</div>
+<div class="fight-image">
+		<img src="/images/tagfight/tagfight_end_@(Model.Winner).gif" alt="" name="fightanimation" id="fightanimation" />
+	<a id="tag-fight-button-new" href="#" class="colorlink orange last" onclick="TagFight.newFight(); return false;"><span>@DbRes.T("newfight", "tags")</span></a>
+	<a id="tag-fight-button" href="#" style="display:none" class="colorlink orange last" onclick="TagFight.init(); return false;"><span>@DbRes.T("fight", "tags")</span></a>
+</div>
