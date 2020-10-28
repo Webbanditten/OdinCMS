@@ -12,10 +12,8 @@
 <!DOCTYPE html>
 
 <html xmlns="XHTML namespace">
-
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <title>Habbo ~ Client</title>
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
 
@@ -50,7 +48,6 @@
     <link href="~/styles/ie6.css" type="text/css" rel="stylesheet" />
     <![endif]-->
 </head>
-
 <body id="client">
     <div id="client-topbar" style="display:none">
         <div class="logo"><img src="~/images/popup/popup_topbar_habbologo.gif" alt="" align="middle" /></div>
@@ -62,115 +59,42 @@
         <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
     </div>
     <div>
+        <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
+            <param name='src' value='@Configuration.GetSection("keplercms")["dcr"]'>
+            <param name='swRemote' value='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' '>
+            <param name='swStretchStyle' value='none'>
+            <param name='swText' value=''>
 
-        <OBJECT id="habbo"
-        codeBase="http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0"
-        classid=clsid:166B1BCA-3F9C-11CF-8075-444553540000 width=720 height=540>
-            <PARAM NAME="BGCOLOR" VALUE="#000000">
-            <PARAM NAME="swURL" VALUE="">
-            <PARAM NAME="swText" VALUE="">
-            <PARAM NAME="swForeColor" VALUE="">
-            <PARAM NAME="swBackColor" VALUE="">
-            <PARAM NAME="swFrame" VALUE="">
-            <PARAM NAME="swColor" VALUE="">
-            <PARAM NAME="swName" VALUE="">
-            <PARAM NAME="swPassword" VALUE="">
-            <PARAM NAME="swBanner" VALUE="">
-            <PARAM NAME="swSound" VALUE="">
-            <PARAM NAME="swVolume" VALUE="">
-            <PARAM NAME="swPreloadTime" VALUE="">
-            <PARAM NAME="swAudio" VALUE="">
-            <PARAM NAME="swList" VALUE="">
-            <PARAM NAME="sw1" VALUE="site.url=site.url=@url;url.prefix=@url">
-            <PARAM NAME="sw2" VALUE="connection.info.host=habbo.webbanditten.dk;connection.info.port=12321">
-            <PARAM NAME="sw3" VALUE="client.reload.url=https://dcr.webbanditten.dk/client.php">
-            <PARAM NAME="sw4" VALUE="connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322">
-            <PARAM NAME="sw5"
-            VALUE="external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php">
-            <param name='sw6' value='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'>
-            @{
-                if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
+            <param name='bgColor' value='#000000'>
+            @{ 
+                if((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
                 {
                     <param name='sw7' value='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'>
-                } else {
-                    <PARAM NAME="sw7" VALUE="">
                 }
             }
-            <PARAM NAME="sw7" VALUE="">
-            <PARAM NAME="sw8" VALUE="">
-            <PARAM NAME="sw9" VALUE="">
-            <PARAM NAME="SRC" VALUE="@Configuration.GetSection("keplercms")["dcr"]">
-            <PARAM NAME="AutoStart" VALUE="TRUE">
-            <PARAM NAME="Sound" VALUE="TRUE">
-            <PARAM NAME="swRemote" VALUE="swSaveEnabled=">
-            <PARAM NAME="logo" VALUE="TRUE">
-            <PARAM NAME="progress" VALUE="TRUE">
-            <PARAM NAME="PowerMenuEnabled" VALUE="TRUE">
-            <PARAM NAME="swModifyReport" VALUE="FALSE">
-            <PARAM NAME="swClickThroughUrl" VALUE="">
-            <PARAM NAME="swStretchStyle" VALUE="false">
-            <PARAM NAME="swStretchHAlign" VALUE="left">
-            <PARAM NAME="swStretchVAlign" VALUE="top">
-            <PARAM NAME="swInstallType" VALUE="">
-            <PARAM NAME="swObjectName" VALUE="">
-            <PARAM NAME="swPingServer" VALUE="">
-            <PARAM NAME="swPingerPort" VALUE="">
-            <PARAM NAME="swServerName" VALUE="">
-            <PARAM NAME="PlayerVersion" VALUE="10">
-            <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540'
-            swRemote='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false'
-            swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true'' swStretchStyle=' none' swText=''
-            type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
-            sw2='connection.info.host=habbo.webbanditten.dk;connection.info.port=12321'
-            sw4='connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322'
-            sw3='client.reload.url=https://dcr.webbanditten.dk/retrocms/'
-            sw1='site.url=@url;url.prefix=@url'
-            sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
-            @{
-                if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
-                {
-                    @:sw7='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'
-                }
-            }
-            sw5='external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php'></embed>
-        </OBJECT>
-        <!--
-        <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
-        <param name='src' value='@Configuration.GetSection("keplercms")["dcr"]'>
-        <param name='swRemote' value='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' '>
-        <param name='swStretchStyle' value='none'>
-        <param name='swText' value=''>
-
-        <param name='bgColor' value='#000000'>
-        @{
-            if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
-            {
-                <param name='sw7' value='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'>
-            }
-        }
-        <param name='sw6' value='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'>
-        <param name='sw2' value='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
-        <param name='sw4' value='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
-        <param name='sw3' value='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'>
-        <param name='sw1' value='site.url=@url;url.prefix=@url'>
-        <param name='sw5' value='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'>
-        <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540' swRemote="swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true'" swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
-        sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
-        sw2='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'
-        sw4='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
-        sw3='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'
-        sw1='site.url=@url;url.prefix=@url'
-        sw5='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'
-        @{
-            if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
-            {
-                @:sw7='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'
-            }
-        }
-                           
-        />
-        </object>-->
+            <param name='sw6' value='use.sso.ticket=0;sso.ticket=@ViewData["sso"]'>
+            <param name='sw2' value='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
+            <param name='sw4' value='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
+            <param name='sw3' value='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'>
+            <param name='sw1' value='site.url=@url;url.prefix=@url'>
+            <param name='sw5' value='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'>
+            <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540' swRemote='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' ' swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
+                   sw6='use.sso.ticket=0;sso.ticket=@ViewData["sso"]'
+                   sw2='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'
+                   sw4='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
+                   sw3='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'
+                   sw1='site.url=@url;url.prefix=@url'
+                   sw5='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'
+                   @{ 
+                       if((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
+                       {
+                           @:sw7='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'
+                       }
+                   }
+                   
+                   />
+        </object>
     </div>
 </body>
-
 </html>
+

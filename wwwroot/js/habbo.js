@@ -138,7 +138,7 @@ function resizeWin() {
         var pageSize = getPageSize();
         if (document.all) {
             if (typeof document.body.style.maxHeight == "undefined") {
-                pageSize[0] = 750;
+                pageSize[0] = 720;
                 pageSize[1] += 20;
             } // IE 6
             else {
