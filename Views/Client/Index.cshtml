@@ -87,7 +87,15 @@
             <PARAM NAME="sw4" VALUE="connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322">
             <PARAM NAME="sw5"
             VALUE="external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php">
-            <PARAM NAME="sw6" VALUE="">
+            <param name='sw6' value='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'>
+            @{
+                if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
+                {
+                    <param name='sw7' value='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'>
+                } else {
+                    <PARAM NAME="sw7" VALUE="">
+                }
+            }
             <PARAM NAME="sw7" VALUE="">
             <PARAM NAME="sw8" VALUE="">
             <PARAM NAME="sw9" VALUE="">
@@ -117,6 +125,13 @@
             sw4='connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322'
             sw3='client.reload.url=https://dcr.webbanditten.dk/retrocms/'
             sw1='site.url=@url;url.prefix=@url'
+            sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
+            @{
+                if ((int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0)
+                {
+                    @:sw7='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'
+                }
+            }
             sw5='external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php'></embed>
         </OBJECT>
         <!--
