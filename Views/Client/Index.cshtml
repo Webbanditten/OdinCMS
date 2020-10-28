@@ -34,7 +34,7 @@
         window.onload = resizeWin;
         window.onerror = function () { return true; };
         window.onunload = clearOpener;
-        ensureOpenerIsLoggedIn();
+        //ensureOpenerIsLoggedIn();
         addClientUnloadHook();
         Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
     </script>
