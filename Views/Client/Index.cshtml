@@ -9,9 +9,9 @@
     var scheme = Context.Request.Scheme;
     var url = $"https://{baseUrl}";
 }
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+
+<html xmlns="XHTML namespace">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=7" />
@@ -25,18 +25,18 @@
         document.habboLoggedIn = true;
     </script>
 
-    <!--<script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
-    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>-->
+    <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
     <script type='text/javascript'>var j = jQuery.noConflict();</script>
 
     <script language='JavaScript' type='text/javascript' src='~/js/site.js'></script>
     <script language="JavaScript" type="text/javascript">
-        //window.onload = resizeWin;
+        window.onload = resizeWin;
         window.onerror = function () { return true; };
-        //window.onunload = clearOpener;
-        //ensureOpenerIsLoggedIn();
-        //addClientUnloadHook();
+        window.onunload = clearOpener;
+        ensureOpenerIsLoggedIn();
+        addClientUnloadHook();
         Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
     </script>
 
@@ -50,7 +50,7 @@
     <![endif]-->
 </head>
 <body id="client">
-    <div id="client-topbar">
+    <div id="client-topbar" style="display:none">
         <div class="logo"><img src="~/images/popup/popup_topbar_habbologo.gif" alt="" align="middle" /></div>
         <div class="habbocount">
             <div id="habboCountUpdateTarget">
@@ -60,6 +60,16 @@
         <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
     </div>
     <div>
+        
+<DIV align=center><OBJECT id=habbo codeBase="http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0" classid=clsid:166B1BCA-3F9C-11CF-8075-444553540000 width=720 height=540><PARAM NAME="BGCOLOR" VALUE="#000000"><PARAM NAME="swURL" VALUE=""><PARAM NAME="swText" VALUE=""><PARAM NAME="swForeColor" VALUE=""><PARAM NAME="swBackColor" VALUE=""><PARAM NAME="swFrame" VALUE=""><PARAM NAME="swColor" VALUE=""><PARAM NAME="swName" VALUE=""><PARAM NAME="swPassword" VALUE=""><PARAM NAME="swBanner" VALUE=""><PARAM NAME="swSound" VALUE=""><PARAM NAME="swVolume" VALUE=""><PARAM NAME="swPreloadTime" VALUE=""><PARAM NAME="swAudio" VALUE=""><PARAM NAME="swList" VALUE=""><PARAM NAME="sw1" VALUE="site.url=http://www.habbo.ch;url.prefix=http://www.habbo.dk"><PARAM NAME="sw2" VALUE="connection.info.host=habbo.webbanditten.dk;connection.info.port=12321"><PARAM NAME="sw3" VALUE="client.reload.url=https://dcr.webbanditten.dk/client.php"><PARAM NAME="sw4" VALUE="connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322"><PARAM NAME="sw5" VALUE="external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php"><PARAM NAME="sw6" VALUE=""><PARAM NAME="sw7" VALUE=""><PARAM NAME="sw8" VALUE=""><PARAM NAME="sw9" VALUE=""><PARAM NAME="SRC" VALUE="https://dcr.webbanditten.dk/retrocms/habbo.dcr"><PARAM NAME="AutoStart" VALUE="TRUE"><PARAM NAME="Sound" VALUE="TRUE"><PARAM NAME="swRemote" VALUE="swSaveEnabled="><PARAM NAME="logo" VALUE="TRUE"><PARAM NAME="progress" VALUE="TRUE"><PARAM NAME="PowerMenuEnabled" VALUE="TRUE"><PARAM NAME="swModifyReport" VALUE="FALSE"><PARAM NAME="swClickThroughUrl" VALUE=""><PARAM NAME="swStretchStyle" VALUE="false"><PARAM NAME="swStretchHAlign" VALUE="left"><PARAM NAME="swStretchVAlign" VALUE="top"><PARAM NAME="swInstallType" VALUE=""><PARAM NAME="swObjectName" VALUE=""><PARAM NAME="swPingServer" VALUE=""><PARAM NAME="swPingerPort" VALUE=""><PARAM NAME="swServerName" VALUE=""><PARAM NAME="PlayerVersion" VALUE="10">
+<embed src='https://dcr.webbanditten.dk/retrocms/habbo.dcr' bgColor='#000000' width='720' height='540' swRemote='swSaveEnabled='true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true'' swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
+sw2='connection.info.host=habbo.webbanditten.dk;connection.info.port=12321'
+sw4='connection.mus.host=habbo.webbanditten.dk;connection.mus.port=12322'
+sw3='client.reload.url=https://dcr.webbanditten.dk/retrocms/'
+sw1='site.url=http://www.habbo.dk;url.prefix=http://www.habbo.dk'
+sw5='external.variables.txt=https://dcr.webbanditten.dk//retrocms/external_variables.txt;external.texts.txt=https://dcr.webbanditten.dk/shared/external_texts.php'></embed>
+</OBJECT></DIV>
+        <!--
         <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
             <param name='src' value='@Configuration.GetSection("keplercms")["dcr"]'>
             <param name='swRemote' value='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' '>
@@ -94,7 +104,7 @@
                    }
                    
                    />
-        </object>
+        </object>-->
     </div>
 </body>
 </html>
