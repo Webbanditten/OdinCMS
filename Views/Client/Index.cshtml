@@ -9,11 +9,12 @@
     var scheme = Context.Request.Scheme;
     var url = $"https://{baseUrl}";
 }
-<!DOCTYPE html>
-
-<html xmlns="XHTML namespace">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
     <title>Habbo ~ Client</title>
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
 
@@ -24,18 +25,18 @@
         document.habboLoggedIn = true;
     </script>
 
-    <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
-    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
+    <!--<script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>-->
     <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
     <script type='text/javascript'>var j = jQuery.noConflict();</script>
 
     <script language='JavaScript' type='text/javascript' src='~/js/site.js'></script>
     <script language="JavaScript" type="text/javascript">
-        window.onload = resizeWin;
+        //window.onload = resizeWin;
         window.onerror = function () { return true; };
-        window.onunload = clearOpener;
-        ensureOpenerIsLoggedIn();
-        addClientUnloadHook();
+        //window.onunload = clearOpener;
+        //ensureOpenerIsLoggedIn();
+        //addClientUnloadHook();
         Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
     </script>
 
@@ -49,7 +50,7 @@
     <![endif]-->
 </head>
 <body id="client">
-    <div id="client-topbar" style="display:none">
+    <div id="client-topbar">
         <div class="logo"><img src="~/images/popup/popup_topbar_habbologo.gif" alt="" align="middle" /></div>
         <div class="habbocount">
             <div id="habboCountUpdateTarget">
