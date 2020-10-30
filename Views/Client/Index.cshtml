@@ -34,7 +34,7 @@
         window.onload = resizeWin;
         window.onerror = function () { return true; };
         window.onunload = clearOpener;
-        ensureOpenerIsLoggedIn();
+        //ensureOpenerIsLoggedIn();
         addClientUnloadHook();
         Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
     </script>
@@ -72,14 +72,13 @@
                     <param name='sw7' value='forward.type=@ViewData["forwardId"];forward.id=@ViewData["roomId"]'>
                 }
             }
-            <param name='sw6' value='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'>
             <param name='sw2' value='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'>
             <param name='sw4' value='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'>
             <param name='sw3' value='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'>
             <param name='sw1' value='site.url=@url;url.prefix=@url'>
             <param name='sw5' value='external.variables.txt=@Configuration.GetSection("keplercms")["vars"];external.texts.txt=@Configuration.GetSection("keplercms")["texts"]'>
             <embed src='@Configuration.GetSection("keplercms")["dcr"]' bgColor='#000000' width='720' height='540' swRemote='swSaveEnabled=' true' swVolume='true' swRestart='false' swPausePlay='false' swFastForward='false' swTitle='Habbo Hotel' swContextMenu='true' ' swStretchStyle='none' swText='' type='application/x-director' pluginspage='http://www.macromedia.com/shockwave/download/'
-                   sw6='use.sso.ticket=1;sso.ticket=ST-347895-d73d697cdde0265b3bce--fe2'
+                   
                    sw2='connection.info.host=@Configuration.GetSection("keplercms")["host"];connection.info.port=@Configuration.GetSection("keplercms")["port"]'
                    sw4='connection.mus.host=@Configuration.GetSection("keplercms")["host"];connection.mus.port=@Configuration.GetSection("keplercms")["musport"]'
                    sw3='client.reload.url=@url/client;client.allow.cross.domain=1;client.notify.cross.domain=0'
