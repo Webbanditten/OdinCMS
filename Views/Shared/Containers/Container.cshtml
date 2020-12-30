@@ -134,14 +134,21 @@
     }
     async Task MaskBox()
     {
-        <div class="v2box @GenerateClassBasedOnTheme(Model.Theme)">
-            <div class="headline"><h3>@Model.Title</h3></div>
-            <div class="border"><div></div></div>
+        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
+            <div class="headline">
+                <div class="headline-inner">
+                    <div class="headline-inner-inner">
+                        <h3>@Model.Title</h3>
+                    </div>
+                </div>
+            </div>
             <div class="body">
                 @{ await RenderBody(Model.Text); }
                 <div class="clear"></div>
             </div>
-            <div class="bottom"><div></div></div>
+            <div class="bottom">
+                <div></div>
+            </div>
         </div>
     }
 
