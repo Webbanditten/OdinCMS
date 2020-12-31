@@ -45,6 +45,9 @@ namespace KeplerCMS.Data.Models
         public int Credits { get; set; }
         [Column("battleball_points")]
         public int BattleballPoints { get; set; }
+        
+        [Column("snowstorm_points")]
+        public int SnowStormPoints { get; set; }
 
         [Column("group_id")]
         public int Group { get; set; }

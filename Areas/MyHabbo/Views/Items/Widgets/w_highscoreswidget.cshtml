@@ -33,6 +33,14 @@
                             <td>@DbRes.T("totalscore", "habbohome")</td>
                             <td>@Model.WidgetData.User.BattleballPoints</td>
                         </tr>
+                    } if(Model.WidgetData.User.SnowStormPoints > 0) {
+                        <tr colspan="2">
+                            <th><a href="/games/snowstorm/">Snow Storm</a></th>
+                        </tr>
+                        <tr>
+                            <td>@DbRes.T("totalscore", "habbohome")</td>
+                            <td>@Model.WidgetData.User.SnowStormPoints</td>
+                        </tr>
                     }
                     else
                     {

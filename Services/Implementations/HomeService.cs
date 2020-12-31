@@ -433,7 +433,7 @@ namespace KeplerCMS.Services.Implementations
                 Rooms = await _roomService.GetRoomsByOwner(home.UserId),
                 SongList = await _traxService.GetSongsByOwner(home.UserId),
                 Ratings = await GetRatings(home.UserId),
-                Badges = await _context.UsersBadges.Where(s => s.UserId == userId).ToListAsync(),
+                Badges = await _context.UsersBadges.Where(s => s.UserId == home.UserId).ToListAsync(),
                 Guestbook = await GetGuestbook(homeId),
                 Friends = await _friendService.GetFriendsWithUserData(home.UserId),
                 Groups = await GetGroupsForUser(home.UserId),
