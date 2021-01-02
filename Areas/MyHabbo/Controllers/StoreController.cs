@@ -93,7 +93,7 @@ namespace KeplerCMS.Areas.MyHabbo
 		[LoggedInFilter]
 		[Route("myhabbo/store/purchase_backgrounds")]
 		[Route("myhabbo/store/purchase_stickers")]
-		[Route("myhabbo/store/purchase_stickie_notes")]
+		[Route("myhabbo/store/purchase_notes")]
 		public async Task<IActionResult> PurchaseItem(int selectedId)
 		{
 			var userId = int.Parse(User.Identity.Name);
