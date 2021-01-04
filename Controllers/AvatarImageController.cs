@@ -146,12 +146,12 @@ namespace KeplerCMS.Controllers
                 
                 string key = figure+isSmall+bodyDirection+headDirection+figuredataReader+action+gesture+headOnly+frame+carryDrink;
                 byte[] file;
-                if (!_cache.TryGetValue<byte[]>(key, out file))
+                /*if (!_cache.TryGetValue<byte[]>(key, out file))
                 {
-                    file = fig.Run();
+                    
                     _cache.Set<byte[]>(key, file);
-                }
-                
+                }*/
+                file = fig.Run();
                 return File(file, "image/png");
             }
 
