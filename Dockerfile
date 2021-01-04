@@ -18,7 +18,7 @@
 
 # Stage 1
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.10-focal AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-focal AS build
 WORKDIR /build
 EXPOSE 80
 EXPOSE 443
@@ -27,7 +27,7 @@ RUN dotnet restore -v diag
 RUN dotnet publish -c Release -o /app
 
 # Stage 2
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.10-focal AS final
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-focal AS final
 RUN apt-get update \
     && apt-get install -y --allow-unauthenticated \
         #libc6-dev \
