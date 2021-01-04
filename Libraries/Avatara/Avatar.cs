@@ -45,6 +45,17 @@ namespace KeplerCMS.Avatara
             RenderEntireFigure = !headOnly;
             IsOldFigure = Figure.Length == 25 && Regex.IsMatch(Figure, @"^\d+$");
 
+/*
+        public Dictionary<int, List<FigureColor>> FigurePalettes;
+        public Dictionary<string, FigureSetType> FigureSetTypes;
+        public Dictionary<string, FigureSet> FigureSets;
+        public List<FigureDataPiece> FigurePieces;
+*/
+Console.WriteLine("FigurePalettes: " + figuredataReader.FigurePalettes.Count);
+Console.WriteLine("FigureSetTypes: " + figuredataReader.FigureSetTypes.Count);
+Console.WriteLine("FigureSets: " + figuredataReader.FigureSets.Count);
+Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
+
             if (isSmall)
             {
                 CANVAS_WIDTH = CANVAS_WIDTH / 2;
@@ -249,6 +260,10 @@ namespace KeplerCMS.Avatara
 
         private void DrawAsset(List<AvatarAsset> buildQueue, Image<Rgba32> bodyCanvas, Image<Rgba32> faceCanvas, Image<Rgba32> drinkCanvas, AvatarAsset asset)
         {
+
+            foreach(var item in buildQueue) {
+                Console.WriteLine(item.FileName);
+            }
             var graphicsOptions = new GraphicsOptions();
             graphicsOptions.ColorBlendingMode = PixelColorBlendingMode.Normal;
 
