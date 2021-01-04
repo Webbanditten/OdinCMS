@@ -49,7 +49,8 @@ namespace KeplerCMS.Avatara.Util
                     }
 
                     XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(file);
+                    if(!file.Contains(".json"))
+                        xmlDoc.Load(file);
 
                     return xmlDoc;
                 }
