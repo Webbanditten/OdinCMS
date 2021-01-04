@@ -260,10 +260,15 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
 
         private void DrawAsset(List<AvatarAsset> buildQueue, Image<Rgba32> bodyCanvas, Image<Rgba32> faceCanvas, Image<Rgba32> drinkCanvas, AvatarAsset asset)
         {
+            Console.WriteLine("---- ASSET ----- ");
+            Console.WriteLine("Asset" + asset.FileName);
+            Console.WriteLine("X" + asset.X);
+            Console.WriteLine("Y" + asset.Y);
+            Console.WriteLine("ImageX" + asset.ImageX);
+            Console.WriteLine("ImageX" + asset.ImageX);
+            Console.WriteLine("Part" + asset.Part.Id + " - " + asset.Part.Type);
+            Console.WriteLine("Render order" + asset.RenderOrder);
 
-            foreach(var item in buildQueue) {
-                Console.WriteLine(item.FileName);
-            }
             var graphicsOptions = new GraphicsOptions();
             graphicsOptions.ColorBlendingMode = PixelColorBlendingMode.Normal;
 
