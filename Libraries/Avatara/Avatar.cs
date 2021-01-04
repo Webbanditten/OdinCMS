@@ -265,7 +265,7 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
             Console.WriteLine("X" + asset.X);
             Console.WriteLine("Y" + asset.Y);
             Console.WriteLine("ImageX" + asset.ImageX);
-            Console.WriteLine("ImageX" + asset.ImageX);
+            Console.WriteLine("ImageY" + asset.ImageY);
             Console.WriteLine("Part" + asset.Part.Id + " - " + asset.Part.Type);
             Console.WriteLine("Render order" + asset.RenderOrder);
 
