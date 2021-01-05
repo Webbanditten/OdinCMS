@@ -67,7 +67,6 @@ namespace KeplerCMS.Avatara.Util
                 {
                     if (Path.GetFileNameWithoutExtension(file).EndsWith(fileNameContains))
                     {
-                        Console.WriteLine("Solved file: " + file);
                         return file;
                     }
                 }
@@ -75,13 +74,11 @@ namespace KeplerCMS.Avatara.Util
                 {
                     if (Path.GetFileNameWithoutExtension(file).Contains(fileNameContains))
                     {
-                        Console.WriteLine("Solved file: " + file);
                         return file;
                     }
                 }
             }
 
-            Console.WriteLine("Failed to solve file (outputdir=" + outputDirectory + ") (FilenameContains=" + fileNameContains + ")");
             return null;
         }
 

@@ -45,17 +45,6 @@ namespace KeplerCMS.Avatara
             RenderEntireFigure = !headOnly;
             IsOldFigure = Figure.Length == 25 && Regex.IsMatch(Figure, @"^\d+$");
 
-/*
-        public Dictionary<int, List<FigureColor>> FigurePalettes;
-        public Dictionary<string, FigureSetType> FigureSetTypes;
-        public Dictionary<string, FigureSet> FigureSets;
-        public List<FigureDataPiece> FigurePieces;
-*/
-Console.WriteLine("FigurePalettes: " + figuredataReader.FigurePalettes.Count);
-Console.WriteLine("FigureSetTypes: " + figuredataReader.FigureSetTypes.Count);
-Console.WriteLine("FigureSets: " + figuredataReader.FigureSets.Count);
-Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
-
             if (isSmall)
             {
                 CANVAS_WIDTH = CANVAS_WIDTH / 2;
@@ -260,15 +249,6 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
 
         private void DrawAsset(List<AvatarAsset> buildQueue, Image<Rgba32> bodyCanvas, Image<Rgba32> faceCanvas, Image<Rgba32> drinkCanvas, AvatarAsset asset)
         {
-            Console.WriteLine("---- ASSET ----- ");
-            Console.WriteLine("Asset" + asset.FileName);
-            Console.WriteLine("X" + asset.X);
-            Console.WriteLine("Y" + asset.Y);
-            Console.WriteLine("ImageX" + asset.ImageX);
-            Console.WriteLine("ImageY" + asset.ImageY);
-            Console.WriteLine("Part" + asset.Part.Id + " - " + asset.Part.Type);
-            Console.WriteLine("Render order" + asset.RenderOrder);
-
             var graphicsOptions = new GraphicsOptions();
             graphicsOptions.ColorBlendingMode = PixelColorBlendingMode.Normal;
 
@@ -550,12 +530,11 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
         {
             if (part.Id == "24")
                 part.Type = "hrb";
-                
+
             var key = part.Type + (IsSmall ? "_sh" : "_h");
             var document = FigureExtractor.GetParts().ContainsKey(key) ? FigureExtractor.Parts[key] : null;
 
             if (document == null) {
-                Console.WriteLine("ERR LOADING FIGURE: " + part.Id + " " + part.Type + " " + part.HexColor + " - Orderid: " + part.OrderId);
                 return null;
             }
 
@@ -592,7 +571,6 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
 
             // Hide left arm on side view
             if (direction == 1 && part.Type == "ls") {
-                Console.WriteLine("direction 1 hiden ls");
                 return null;
             }
 
@@ -634,9 +612,6 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                     asset = LocateAsset((this.IsSmall ? "sh" : "h") + "_" + "std" + "_" + part.Type + "_" + 1 + "_" + direction + "_" + Frame, document, parts, part, set);
             }
 
-            if(asset == null)
-                Console.WriteLine("ERR: Asset not found: " + (this.IsSmall ? "sh" : "h") + "_" + gesture + "_" + part.Type + "_" + part.Id + "_" + direction + "_" + Frame);
-
             return asset;
         }
 
@@ -655,7 +630,6 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
         private AvatarAsset LocateAsset(string assetName, FigureDocument document, string[] parts, FigurePart part, FigureSet set)
         {
             var list = document.XmlFile.SelectNodes("//manifest/library/assets/asset");
-            Console.WriteLine("Reading from xml list: " + document.FileName);
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -665,7 +639,6 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                 if (name != assetName)
                     continue;
                 
-                Console.WriteLine("name == assetName: " + name);
                 var offsetList = asset.ChildNodes;
 
                 for (int j = 0; j < offsetList.Count; j++)
@@ -676,11 +649,9 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                         offsetData.Attributes.GetNamedItem("value") == null)
                         continue;
 
-                    Console.WriteLine("key and value exist on: " + name);
                     if (offsetData.Attributes.GetNamedItem("key").InnerText != "offset")
                         continue;
 
-                    Console.WriteLine("offset attribute found on : " + name);
                     var offsets = offsetData.Attributes.GetNamedItem("value").InnerText.Split(',');
 
                     return new AvatarAsset(this.IsSmall, Action, name, FileUtil.SolveFile(document.FileName + "/", name), int.Parse(offsets[0]), int.Parse(offsets[1]), part, set, CANVAS_HEIGHT, CANVAS_WIDTH, parts);
