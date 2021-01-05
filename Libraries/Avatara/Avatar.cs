@@ -662,6 +662,8 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
 
                 if (name != assetName) {
                     Console.WriteLine("Asset name is eq to name");
+                    Console.WriteLine("Asset name: " + assetName);
+                    Console.WriteLine("Name Param" + name);
                     continue;
                 }
 

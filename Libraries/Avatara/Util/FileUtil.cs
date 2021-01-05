@@ -79,6 +79,7 @@ namespace KeplerCMS.Avatara.Util
                 }
             }
 
+            Console.WriteLine("Failed to solve file (outputdir=" + outputDirectory + ") (FilenameContains=" + fileNameContains + ")");
             return null;
         }
 
