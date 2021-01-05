@@ -660,8 +660,10 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                 var asset = list.Item(i);
                 var name = asset.Attributes.GetNamedItem("name").InnerText;
 
-                if (name != assetName)
+                if (name != assetName) {
+                    Console.WriteLine("Asset name is eq to name");
                     continue;
+                }
 
                 var offsetList = asset.ChildNodes;
 
