@@ -548,7 +548,9 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
 
         private AvatarAsset LoadFigureAsset(string[] parts, FigurePart part, FigureSet set)
         {
-
+            if (part.Id == "24")
+                part.Type = "hrb";
+                
             var key = part.Type + (IsSmall ? "_sh" : "_h");
             var document = FigureExtractor.GetParts().ContainsKey(key) ? FigureExtractor.Parts[key] : null;
 
