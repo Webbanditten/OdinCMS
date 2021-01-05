@@ -632,9 +632,8 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                     asset = LocateAsset((this.IsSmall ? "sh" : "h") + "_" + "std" + "_" + part.Type + "_" + 1 + "_" + direction + "_" + Frame, document, parts, part, set);
             }
 
-            if(asset == null) {
-                Console.WriteLine("Asset not found: " + (this.IsSmall ? "sh" : "h") + "_" + gesture + "_" + part.Type + "_" + part.Id + "_" + direction + "_" + Frame);
-            }
+            if(asset == null)
+                Console.WriteLine("ERR: Asset not found: " + (this.IsSmall ? "sh" : "h") + "_" + gesture + "_" + part.Type + "_" + part.Id + "_" + direction + "_" + Frame);
 
             return asset;
         }
@@ -654,20 +653,17 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
         private AvatarAsset LocateAsset(string assetName, FigureDocument document, string[] parts, FigurePart part, FigureSet set)
         {
             var list = document.XmlFile.SelectNodes("//manifest/library/assets/asset");
+            Console.WriteLine("Reading from xml list: " + document.FileName);
 
             for (int i = 0; i < list.Count; i++)
             {
                 var asset = list.Item(i);
                 var name = asset.Attributes.GetNamedItem("name").InnerText;
 
-                if (name != assetName) {
+                if (name != assetName)
                     continue;
-                } else {
-                    Console.WriteLine("Asset name is eq to name");
-                    Console.WriteLine("Asset name: " + assetName);
-                    Console.WriteLine("Name Param" + name);
-                }
-
+                
+                Console.WriteLine("name == assetName: " + name);
                 var offsetList = asset.ChildNodes;
 
                 for (int j = 0; j < offsetList.Count; j++)
@@ -678,9 +674,11 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
                         offsetData.Attributes.GetNamedItem("value") == null)
                         continue;
 
+                    Console.WriteLine("key and value exist on: " + name);
                     if (offsetData.Attributes.GetNamedItem("key").InnerText != "offset")
                         continue;
 
+                    Console.WriteLine("offset attribute found on : " + name);
                     var offsets = offsetData.Attributes.GetNamedItem("value").InnerText.Split(',');
 
                     return new AvatarAsset(this.IsSmall, Action, name, FileUtil.SolveFile(document.FileName + "/", name), int.Parse(offsets[0]), int.Parse(offsets[1]), part, set, CANVAS_HEIGHT, CANVAS_WIDTH, parts);
