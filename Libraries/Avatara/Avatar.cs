@@ -552,8 +552,10 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
             var key = part.Type + (IsSmall ? "_sh" : "_h");
             var document = FigureExtractor.GetParts().ContainsKey(key) ? FigureExtractor.Parts[key] : null;
 
-            if (document == null)
+            if (document == null) {
+                Console.WriteLine("ERR LOADING FIGURE: " + part.Id + " " + part.Type + " " + part.HexColor + " - Orderid: " + part.OrderId);
                 return null;
+            }
 
             int direction;
             string gesture;
@@ -587,8 +589,10 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
             }
 
             // Hide left arm on side view
-            if (direction == 1 && part.Type == "ls")
+            if (direction == 1 && part.Type == "ls") {
+                Console.WriteLine("direction 1 hiden ls");
                 return null;
+            }
 
             if (Action == "lay")
             {
@@ -626,6 +630,10 @@ Console.WriteLine("FigurePieces: " + figuredataReader.FigurePieces.Count);
             {
                 if (asset == null)
                     asset = LocateAsset((this.IsSmall ? "sh" : "h") + "_" + "std" + "_" + part.Type + "_" + 1 + "_" + direction + "_" + Frame, document, parts, part, set);
+            }
+
+            if(asset == null) {
+                Console.WriteLine("Asset not found: " + (this.IsSmall ? "sh" : "h") + "_" + gesture + "_" + part.Type + "_" + part.Id + "_" + direction + "_" + Frame);
             }
 
             return asset;
