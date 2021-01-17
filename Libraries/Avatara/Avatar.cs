@@ -35,17 +35,19 @@ namespace KeplerCMS.Avatara
         public int CANVAS_WIDTH = 64;
         public bool RenderEntireFigure;
         public bool IsOldFigure;
+        public string Size;
 
-        public Avatar(string figure, bool isSmall, int bodyDirection, int headDirection, FiguredataReader figuredataReader, string action = "std", string gesture = "sml", bool headOnly = false, int frame = 1, int carryDrink = -1) { 
+        public Avatar(string figure, string size, int bodyDirection, int headDirection, FiguredataReader figuredataReader, string action = "std", string gesture = "sml", bool headOnly = false, int frame = 1, int carryDrink = -1) { 
             Figure = figure;
-            IsSmall = isSmall;
+            Size = size.ToLower();
+            IsSmall = Size != "b" && Size != "l";
             BodyDirection = bodyDirection;
             HeadDirection = headDirection;
             FiguredataReader = figuredataReader;
             RenderEntireFigure = !headOnly;
             IsOldFigure = Figure.Length == 25 && Regex.IsMatch(Figure, @"^\d+$");
 
-            if (isSmall)
+            if (IsSmall)
             {
                 CANVAS_WIDTH = CANVAS_WIDTH / 2;
                 CANVAS_HEIGHT = CANVAS_HEIGHT / 2;
@@ -324,6 +326,21 @@ namespace KeplerCMS.Avatara
 
         private byte[] RenderImage(Bitmap croppedBitmap)
         {
+            if (Size == "l")
+            {
+                using (var image = croppedBitmap.ToImageSharpImage<Rgba32>())
+                {
+                    var resizeOptions = new ResizeOptions();
+                    resizeOptions.Size = new SixLabors.ImageSharp.Size(
+                       image.Width * 2, image.Height * 2
+                    );
+
+                    resizeOptions.Sampler = KnownResamplers.NearestNeighbor;
+                    image.Mutate(x => x.Resize(resizeOptions));
+
+                    return image.ToBitmap().ToByteArray();
+                }
+            }
             return croppedBitmap.ToByteArray();
         }
 

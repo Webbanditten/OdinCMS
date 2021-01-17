@@ -43,7 +43,6 @@ namespace KeplerCMS.Controllers
         {
             
 
-            bool isSmall = false;
             int bodyDirection = 2;
             int headDirection = 2;
             string figure = null;
@@ -52,6 +51,7 @@ namespace KeplerCMS.Controllers
             bool headOnly = false;
             int frame = 1;
             int carryDrink = -1;
+            string size = "b";
 
             if (Request.Query.ContainsKey("figure"))
             {
@@ -80,11 +80,7 @@ namespace KeplerCMS.Controllers
             if (Request.Query.ContainsKey("size"))
             {
                 Request.Query.TryGetValue("size", out var value);
-
-                if (value == "s")
-                {
-                    isSmall = true;
-                }
+                size = value.ToString();
             }
 
             if (Request.Query.ContainsKey("head"))
@@ -142,9 +138,9 @@ namespace KeplerCMS.Controllers
 
             if (figure != null && figure.Length > 0)
             {
-                var fig = new Avatar(figure, isSmall, bodyDirection, headDirection, figuredataReader, action: action, gesture: gesture, headOnly: headOnly, frame: frame, carryDrink: carryDrink);
+                var fig = new Avatar(figure, size, bodyDirection, headDirection, figuredataReader, action: action, gesture: gesture, headOnly: headOnly, frame: frame, carryDrink: carryDrink);
                 
-                string key = figure+isSmall+bodyDirection+headDirection+figuredataReader+action+gesture+headOnly+frame+carryDrink;
+                string key = figure+size+bodyDirection+headDirection+figuredataReader+action+gesture+headOnly+frame+carryDrink;
                 byte[] file;
                 if (!_cache.TryGetValue<byte[]>(key, out file))
                 {
