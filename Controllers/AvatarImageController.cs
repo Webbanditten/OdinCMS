@@ -68,7 +68,11 @@ namespace KeplerCMS.Controllers
             if (Request.Query.ContainsKey("gesture"))
             {
                 Request.Query.TryGetValue("gesture", out var value);
+                
                 gesture = value.ToString();
+
+                if(gesture.Length == 0)
+                    gesture = "std";
             }
 
             if (Request.Query.ContainsKey("figure"))
