@@ -45,8 +45,9 @@ namespace KeplerCMS.Avatara
             HeadDirection = headDirection;
             FiguredataReader = figuredataReader;
             RenderEntireFigure = !headOnly;
-            IsOldFigure = Figure.Length == 25 && Regex.IsMatch(Figure, @"^\d+$");
-
+            IsOldFigure = new Regex(@"^\d+").IsMatch(figure);
+            
+            
             if (IsSmall)
             {
                 CANVAS_WIDTH = CANVAS_WIDTH / 2;
@@ -352,7 +353,7 @@ namespace KeplerCMS.Avatara
             {
                 var figureSpriteAndColor = new List<string>();
 
-                for (var i = 0; i < 5; i++)
+                for (var i = 0; i < (int)(Figure.Length / 5); i++)
                 {
                     var part = Figure.Substring(i * 5, 5);
                     figureSpriteAndColor.Add(part);
