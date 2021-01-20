@@ -546,7 +546,10 @@ namespace KeplerCMS.Avatara
 
         private AvatarAsset LoadFigureAsset(string[] parts, FigurePart part, FigureSet set)
         {
-            if (part.Id == "24")
+            if (part.Id == "24" && part.Type == "hr")
+                part.Type = "hrb";
+            
+            if (part.Id == "2" && part.Type == "hr")
                 part.Type = "hrb";
 
             var key = part.Type + (IsSmall ? "_sh" : "_h");
