@@ -37,8 +37,29 @@
         ensureOpenerIsLoggedIn();
         addClientUnloadHook();
         Event.observe(document, "keypress", function (e) { if (e.keyCode == Event.KEY_BACKSPACE) { Event.stop(e); } });
-    </script>
+        j(document).ready(function() {
 
+            if(determineSWVersion() == "undefined") {
+                j("#habbo").hide();
+                j("#noshockwave").show();
+            }
+        })
+    </script>
+    <style>
+        #noshockwave {
+            border-radius:4px;
+            background:#fff;
+            padding:16px;
+            font-size:16px;
+            margin:48px;
+            color:#000;
+
+        }
+
+        #noshockwave li {
+            text-align:left;
+        }
+    </style>
 
 
     <!--[if IE]>
@@ -57,6 +78,9 @@
             </div>
         </div>
         <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
+    </div>
+    <div id="noshockwave">
+        @Html.Raw(DbRes.T("noshockwave", "shared"))
     </div>
     <div>
         <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
