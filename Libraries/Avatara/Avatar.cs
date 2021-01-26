@@ -462,7 +462,10 @@ namespace KeplerCMS.Avatara
             }
 
             // Find maxiumum head render order (used for drinks)
-            int headRenderOrder = tempQueue.Where(x => IsHead(x.Part.Type)).Max(x => x.RenderOrder);
+            int headRenderOrder = 0;
+            if(tempQueue.Where(x => IsHead(x.Part.Type)).Count() > 0) {
+                headRenderOrder = tempQueue.Where(x => IsHead(x.Part.Type)).Max(x => x.RenderOrder);
+            }
 
             // Render drink next
             if (CarryDrink > 0)
