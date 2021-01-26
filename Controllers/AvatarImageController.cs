@@ -52,6 +52,7 @@ namespace KeplerCMS.Controllers
             int frame = 1;
             int carryDrink = -1;
             string size = "b";
+            bool ignoreCache = false;
 
             if (Request.Query.ContainsKey("figure"))
             {
@@ -140,13 +141,19 @@ namespace KeplerCMS.Controllers
                 }
             }
 
+           if (Request.Query.ContainsKey("ignorecache"))
+            {
+                Request.Query.TryGetValue("ignorecache", out var value);
+                ignoreCache = value.ToString() == "1" || value.ToString() == "true";
+            }
+
             if (figure != null && figure.Length > 0)
             {
                 var fig = new Avatar(figure, size, bodyDirection, headDirection, figuredataReader, action: action, gesture: gesture, headOnly: headOnly, frame: frame, carryDrink: carryDrink);
                 
                 string key = figure+size+bodyDirection+headDirection+figuredataReader+action+gesture+headOnly+frame+carryDrink;
                 byte[] file;
-                if (!_cache.TryGetValue<byte[]>(key, out file))
+                if (!_cache.TryGetValue<byte[]>(key, out file) || ignoreCache)
                 {
                     file = fig.Run();
                     _cache.Set<byte[]>(key, file);
