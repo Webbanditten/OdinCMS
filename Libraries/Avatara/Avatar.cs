@@ -160,6 +160,9 @@ namespace KeplerCMS.Avatara
                 case "811":
                     extra = "ha-1013-" + 0;
                     break;
+                case "130":
+                    extra = "ha-1010-" + 0;
+                    break;
 
             }
             if(extra.Length > 0)
@@ -549,11 +552,27 @@ namespace KeplerCMS.Avatara
 
         private AvatarAsset LoadFigureAsset(string[] parts, FigurePart part, FigureSet set)
         {
-            if (part.Id == "24" && part.Type == "hr")
+            if ((
+                part.Id == "24" || 
+                part.Id == "2" || 
+                part.Id == "501" || 
+                part.Id == "4" || 
+                part.Id == "5" || 
+                part.Id == "8" || 
+                part.Id == "9" || 
+                part.Id == "16" || 
+                //
+                part.Id == "10" || 
+                part.Id == "23" || 
+                part.Id == "1" || 
+                part.Id == "13" ||
+                part.Id == "504" ||
+                part.Id == "201" ||
+                part.Id == "203"
+                
+                ) && part.Type == "hr")
                 part.Type = "hrb";
             
-            if (part.Id == "2" && part.Type == "hr")
-                part.Type = "hrb";
 
             var key = part.Type + (IsSmall ? "_sh" : "_h");
             var document = FigureExtractor.GetParts().ContainsKey(key) ? FigureExtractor.Parts[key] : null;
