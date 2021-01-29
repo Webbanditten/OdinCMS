@@ -576,7 +576,14 @@ namespace KeplerCMS.Avatara
                 part.Id == "17" ||
                 part.Id == "18" ||
                 part.Id == "20" ||
-                part.Id == "19"
+                part.Id == "19" ||
+                part.Id == "202" ||
+                part.Id == "200" ||
+                part.Id == "508" ||
+                part.Id == "507" ||
+                part.Id == "19" ||
+                part.Id == "503" ||
+                part.Id == "506"
                 
                 ) && part.Type == "hr")
                 part.Type = "hrb";
