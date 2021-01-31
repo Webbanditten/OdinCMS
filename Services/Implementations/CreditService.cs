@@ -110,7 +110,7 @@ namespace KeplerCMS.Services.Implementations
             var catalogItem = await _context.CatalogueItems.Where(s => s.Id == catalogId).FirstOrDefaultAsync();
             if(catalogItem != null)
             {
-                var catalogPage = _context.CataloguePages.Where(s => s.Id == catalogItem.PageId).FirstOrDefault();
+                var catalogPage = _context.CataloguePages.Where(s => s.Id == int.Parse(catalogItem.PageId)).FirstOrDefault();
                 if(catalogPage != null)
                 {
                     if(await Purchase(catalogItem.Price, userId))
