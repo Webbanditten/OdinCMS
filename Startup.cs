@@ -100,6 +100,7 @@ namespace KeplerCMS
             services.AddScoped<IHabbowoodService, HabbowoodService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<ICatalogueService, CatalogueService>();
 
             services.AddMemoryCache();
         }

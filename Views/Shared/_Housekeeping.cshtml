@@ -31,7 +31,7 @@
         case "/housekeeping/admin":
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
-        case "/housekeeping/catalog":
+        case "/housekeeping/catalogue":
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
         case "/housekeeping/messengercampaign":
@@ -61,10 +61,9 @@
             <ul class="menu">
                 <li @(activeMenuItem.Equals(HousekeepingMenu.Statistics) ? "class=active" : "")><a href="">Statistics</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
-                <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
+                <li @(activeMenuItem.Equals(HousekeepingMenu.WebsiteAdmin) ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")><a href="">Hobba tools</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="">Localization</a></li>
             </ul>
         </div>
         <div class="content">
@@ -97,7 +96,7 @@
                                 <ul>
                                     <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
                                     <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
-                                    <li><a href="@Url.Action("Index", "Catalog")">Catalog</a></li>
+                                    <li><a href="@Url.Action("Index", "Catalogue")">Catalogue</a></li>
                                 </ul>
                             </div>
                         </div>

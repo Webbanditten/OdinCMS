@@ -46,6 +46,7 @@ namespace KeplerCMS.Data
         public DbSet<FriendRequests> FriendRequests { get; set; }
         public DbSet<CatalogueItems> CatalogueItems { get; set; }
         public DbSet<CataloguePages> CataloguePages { get; set; }
+        public DbSet<CataloguePackages> CataloguePackages { get; set; }
         public DbSet<Tags> Tags { get; set; }
         public DbSet<Items> Items { get; set; }
         public DbSet<Movies> Movies { get; set; }
