@@ -21,6 +21,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<ItemsPhotos> Get(int id)
         {
+            // No idea
             return await _context.ItemsPhotos.Where(s => s.Id == id).FirstOrDefaultAsync();
         }
 
