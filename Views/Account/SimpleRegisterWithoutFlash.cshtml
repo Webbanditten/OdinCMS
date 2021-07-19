@@ -1,0 +1,51 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Models.RegistrationViewModel
+<center style="display:none">
+    <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash
+            player</a>. More instructions for installation can be found here: <a
+            href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
+    <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png"
+                alt="Get Adobe Flash player" /></a></p>
+
+</center>
+<form style="text-align:center" method="POST" action="/register/step/2">
+     <label for="post_gender" class="registration-text">@DbRes.T("gender", "register")</label><br>
+    <br />
+<select id="gender" name="gender">
+    <option value="M" selected>@DbRes.T("boy", "register")</option>
+    <option value="F">@DbRes.T("girl", "register")</option>
+</select>
+<br />
+<img id="avatar" src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=1000118001270012900121001&size=l&direction=3&head_direction=3&gesture=sml" />
+
+<br />
+
+ <input type="submit" value="@DbRes.T("continue", "register")" id="continuebtn" class="process-button">
+
+<input type="hidden" value="" name="FigureData" />
+<input type="hidden" value="@Model.Year" name="year" />
+<input type="hidden" value="@Model.Day" name="day" />
+<input type="hidden" value="@Model.Month" name="month" />
+</form>
+<script>
+    var male = "1000118001270012900121001";
+    var female = "5150160001720017400167501";
+    j(document).ready(function () {
+        j("input[name='FigureData']").val(male)
+        j("body").on("change", "#gender", function (e) {
+            var value = j("#gender option:selected").val();
+            switch(value) {
+                case "F": 
+                    j("#avatar").attr("src",'@Configuration.GetSection("keplercms")["figureUrl"]?figure='+female+'&size=l&direction=3&head_direction=3&gesture=sml');
+                     j("input[name='FigureData']").val(female)
+                    break;
+                case "M":
+                    j("#avatar").attr("src",'@Configuration.GetSection("keplercms")["figureUrl"]?figure='+male+'&size=l&direction=3&head_direction=3&gesture=sml');
+                     j("input[name='FigureData']").val(male)
+                    break;
+            }
+            
+        })
+    });
+</script>
