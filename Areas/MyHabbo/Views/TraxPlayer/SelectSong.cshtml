@@ -1,7 +1,9 @@
 ﻿@model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
-@{Layout = null;}
+@{
+    Layout = null;
+}
 
 
 @{
@@ -11,6 +13,31 @@
     }
     else
     {
-        <embed type="application/x-shockwave-flash" src="~/flash/trax/traxplayer.swf" name="traxplayer" quality="high" base="/flash/trax/" allowscriptaccess="always" menu="false" wmode="transparent" flashvars="songUrl=/trax/song/@(Model.Item.Data)&amp;sampleUrl=@(Configuration.GetSection("keplercms")["traxUrl"])/" height="66" width="210">
+        <div class="trax-player" id="trax-player">
+            <div class="display">
+                <div class="loading"></div>
+                <div class="display-inner">
+                    <div class="title"></div>
+                    <div class="author"></div>
+                    <div class="time"><span class="length"></span></div>
+                </div>
+
+            </div>
+            <div class="control">
+                <button class="play-btn" onClick={_traxPlayer.Play()}>Play</button>
+            </div>
+            <div class="volumecontainer">
+                <div class="volume-indicator">
+                    <div class="volume-indicator-filled">
+                        <div class="volume-indicator-filled-bg"></div>
+                    </div>
+                </div>
+                <input type="range" min="0" max="100" value="50" class="volume">
+            </div>
+            <div class="music-activity"></div>
+        </div>
+        <script>
+             var _traxPlayer = new TraxPlayer("/trax/song/@(Model.Item.Data)", "@(Configuration.GetSection("keplercms")["traxUrl"])/");
+        </script>
     }
 }
