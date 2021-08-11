@@ -35,15 +35,25 @@ namespace KeplerCMS.Services.Implementations
             if (track == 1)
             {
                 trackNum = track + ":";
+            } else if(track == 4) {
+                try
+                {
+                    return data.Split(new string[] { trackNum }, StringSplitOptions.None)[1].Trim(':');
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
             }
             try
             {
-                return data.Split(new string[] { trackNum }, StringSplitOptions.None)[1].Trim(':');
+                return data.Split(new string[] { trackNum }, StringSplitOptions.None)[1].Split(":")[0].Trim(':');
             }
             catch (Exception)
             {
                 return "";
             }
+            
         }
     }
 
