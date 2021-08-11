@@ -151,9 +151,10 @@ namespace KeplerCMS.Controllers
             {
                 var fig = new Avatar(figure, size, bodyDirection, headDirection, figuredataReader, action: action, gesture: gesture, headOnly: headOnly, frame: frame, carryDrink: carryDrink);
                 
-                string key = figure+size+bodyDirection+headDirection+figuredataReader+action+gesture+headOnly+frame+carryDrink;
-                byte[] file;
-                if (!_cache.TryGetValue<byte[]>(key, out file) || ignoreCache)
+                string key = figure+size+bodyDirection+headDirection+action+gesture+headOnly+frame+carryDrink;
+                byte[] file = null;
+                _cache.TryGetValue<byte[]>(key, out file);
+                if (file == null  || !(file.Length > 0) || ignoreCache)
                 {
                     file = fig.Run();
                     _cache.Set<byte[]>(key, file);

@@ -40,7 +40,12 @@ namespace KeplerCMS.Avatara
                     if (Parts.ContainsKey(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h")))
                         continue;
 
-                    Parts.Add(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h"), new FigureDocument(fileName, xmlFile));
+                    try {
+                        Parts.Add(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h"), new FigureDocument(fileName, xmlFile));
+                    } catch(Exception) {
+                        // Something
+                    }
+                    
                 }
             }
 

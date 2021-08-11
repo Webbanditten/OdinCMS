@@ -117,8 +117,10 @@ namespace KeplerCMS.Avatara.Figure
                         figureSet.HiddenLayers.Add(hiddenLayer.Attributes.GetNamedItem("parttype").InnerText);
                     }
                 }
-
-                this.FigureSets.Add(id, figureSet);
+                if(!this.FigureSets.ContainsKey(id)) {
+                    this.FigureSets.Add(id, figureSet);
+                }
+                
             }
         }
 
@@ -160,8 +162,12 @@ namespace KeplerCMS.Avatara.Figure
                 String set = setType.Attributes.GetNamedItem("type").InnerText;
                 int paletteId = int.Parse(setType.Attributes.GetNamedItem("paletteid").InnerText);
                 bool isMandatory = setType.Attributes.GetNamedItem("mandatory").InnerText == "1";
-
-                this.FigureSetTypes.Add(set, new FigureSetType(set, paletteId, isMandatory));
+                try {
+                    this.FigureSetTypes.Add(set, new FigureSetType(set, paletteId, isMandatory));
+                } catch(Exception e) {
+                    // Dont really know what to do with this...
+                }
+                
             }
 
         }
