@@ -29,7 +29,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<ItemWidgetDataModel> GetWidgetData(int homeId, int? userId);
         Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId);
 
-        Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId);
+        Task<ItemViewModel> Rate(int rating, int itemId, int userId);
         Task<List<HomesRating>> GetRatings(int homeId);
 
         Task<GuestbookEntry> AddGuestbookEntry(int homeid, string message, int userId);

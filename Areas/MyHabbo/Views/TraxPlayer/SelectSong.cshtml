@@ -37,7 +37,13 @@
             <div class="music-activity"></div>
         </div>
         <script>
-             var _traxPlayer = new TraxPlayer("/trax/song/@(Model.Item.Data)", "@(Configuration.GetSection("keplercms")["traxUrl"])/");
+            var _traxPlayer = new TraxPlayer("/trax/song/@(Model.Item.Data)", "@(Configuration.GetSection("keplercms")["traxUrl"])/");
+            (async () => {
+                await _traxPlayer.Preload();
+            })()
+            .catch(error => {
+                console.log(error);
+            });
         </script>
     }
 }

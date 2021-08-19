@@ -19,8 +19,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Rate(int ratingId, int givenRate)
         {
             var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            var item = await _homeService.Rate(homeId, givenRate, ratingId, userId);
+            var item = await _homeService.Rate(givenRate, ratingId, userId);
             return View(item);
         }
 

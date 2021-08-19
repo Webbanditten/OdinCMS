@@ -496,7 +496,7 @@ namespace KeplerCMS.Services.Implementations
 
         
 
-        public async Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId)
+        public async Task<ItemViewModel> Rate(int rating, int itemId, int userId)
         {
             // Get item to find home id
             var item = await GetItem(itemId);
@@ -516,7 +516,7 @@ namespace KeplerCMS.Services.Implementations
             }
 
             // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(homeId, item.Item.OwnerId);
+            item.WidgetData = await GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
             return item;
         }
 
