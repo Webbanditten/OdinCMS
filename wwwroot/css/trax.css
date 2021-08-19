@@ -126,13 +126,13 @@
     width: 25px;
     font-size: 0px;
     border: 0px;
+    margin-top: 6px;
     cursor: pointer;
     height: 25px;
 }
 
 #trax-player .control {
     float: left;
-    top: 4px;
     position: relative;
 }
 

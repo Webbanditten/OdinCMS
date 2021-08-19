@@ -238,47 +238,6 @@ class TraxPlayer {
         } catch (err) {
             console.log("Failed during preload", err);
         }
-
-        /*this.FetchSong().then(function(tracks) {
-            console.log("Song loaded, loading samples");
-            console.log("TRACKS");
-            console.log(tracks);
-            var uniqueSamples = _self.GetUniqueSamples(tracks).map(function(sample) {
-                return _self.GetDuration(sample);
-            });
-
-            Promise.all(uniqueSamples).then(function(richSamples) {
-                for (var i = 0; i < richSamples.length; i++) {
-                    _self.samples[richSamples[i].sample.piece] = richSamples[i];
-                }
-                console.log("All samples loaded")
-
-                for (var i = 0; i < tracks.length; i++) {
-
-
-                    // BUILD Actual Tracks
-                    var actualTrack = [];
-                    for (var t = 0; t < tracks[i].length; t++) {
-                        var repeat = tracks[i][t].blocks / _self.samples[tracks[i][t].piece].sampleLength;
-                        for (var x = 0; x < repeat; x++) {
-                            actualTrack.push(tracks[i][t].piece);
-                            for (var l = 0; l < _self.samples[tracks[i][t].piece].sampleLength - 1; l++) {
-                                actualTrack.push("0");
-                            }
-
-                        }
-                    }
-                    _self.tracks[i].playlist = actualTrack;
-                }
-                _self.CalculatePlaytime();
-                _self.OnReady();
-
-            });
-
-        }).catch(function(err) {
-            console.log("Failed during preload");
-        });*/
-
     }
 
     CalculatePlaytime() {
@@ -336,7 +295,9 @@ class TraxPlayer {
     Time() {
         this.timeInSeconds = this.timeInSeconds + 1;
         if (this.timeInSeconds > this.traxLengthInSeconds) {
+            this.playing = false;
             this.ResetPlayer();
+            this.Play();
         } else {
             this.SetPlayTime();
         }
