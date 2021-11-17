@@ -351,3 +351,4 @@ MigrationBackup/
 
 # Development files
 appsettings.Development.json
+start.bat
