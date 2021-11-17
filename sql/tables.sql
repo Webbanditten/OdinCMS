@@ -4121,6 +4121,47 @@ CREATE TABLE IF NOT EXISTS `rank_fuserights` (
   `fuseright` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+INSERT INTO `rank_fuserights` (`min_rank`, `fuseright`) VALUES
+(1, 'default');
+INSERT INTO `rank_fuserights` (`min_rank`, `fuseright`) VALUES
+(1, 'fuse_login');
+INSERT INTO `rank_fuserights` (`min_rank`, `fuseright`) VALUES
+(1, 'fuse_buy_credits');
+INSERT INTO `rank_fuserights` (`min_rank`, `fuseright`) VALUES
+(1, 'fuse_trade'),
+(1, 'fuse_room_queue_default'),
+(2, 'fuse_enter_full_rooms'),
+(3, 'fuse_enter_locked_rooms'),
+(3, 'fuse_kick'),
+(3, 'fuse_mute'),
+(4, 'fuse_ban'),
+(4, 'fuse_room_mute'),
+(4, 'fuse_room_kick'),
+(4, 'fuse_receive_calls_for_help'),
+(4, 'fuse_remove_stickies'),
+(5, 'fuse_mod'),
+(5, 'fuse_superban'),
+(5, 'fuse_pick_up_any_furni'),
+(5, 'fuse_ignore_room_owner'),
+(5, 'fuse_any_room_controller'),
+(2, 'fuse_room_alert'),
+(5, 'fuse_moderator_access'),
+(6, 'fuse_administrator_access'),
+(6, 'fuse_see_flat_ids'),
+(5, 'fuse_credits'),
+(6, 'fuse_debug_window'),
+(6, 'fuse_performance_panel'),
+(6, 'fuse_catalog_editor'),
+(6, 'fuse_use_special_room_layouts'),
+(6, 'housekeeping_localization'),
+(6, 'housekeeping_campaign'),
+(6, 'housekeeping_menu'),
+(3, 'housekeeping'),
+(6, 'housekeeping_website'),
+(6, 'housekeeping_pages'),
+(6, 'housekeeping_upload'),
+(6, 'housekeeping_news');
+
 -- --------------------------------------------------------
 
 --
