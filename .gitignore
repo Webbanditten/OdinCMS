@@ -350,6 +350,6 @@ MigrationBackup/
 .ionide/
 
 # Development files
-Properties/launchSettings.json
+./Properties/launchSettings.json
 appsettings.Development.json
 start.bat
