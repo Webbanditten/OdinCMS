@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:49944",
+      "applicationUrl": "http://82.165.248.171:49944",
       "sslPort": 44309
     }
   },
@@ -23,7 +23,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation"
       },
-      "applicationUrl": "http://localhost:5000"
+      "applicationUrl": "http://82.165.248.171:5000"
     },
     "Docker": {
       "commandName": "Docker",
