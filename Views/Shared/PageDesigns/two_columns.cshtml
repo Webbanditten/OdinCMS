@@ -1,0 +1,51 @@
+﻿@model KeplerCMS.Models.Page
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tbody>
+        @if (!Model.Details.DisplayHeader)
+        {
+            <tr>
+                <td colspan="6" style="height: 4px;"></td>
+            </tr>
+        }
+        <tr>
+            <td rowspan="2" style="width: 8px;">&nbsp;</td>
+            <td valign="top" style="width: 740px;">
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tbody>
+                        @{
+                            if (Model.Details.News)
+                            {
+                                <partial name="~/Views/Shared/Containers/news.cshtml" model=Model optional="true" />
+                            }
+                            else
+                            {
+
+                                <tr><td colspan="3" style="padding-bottom: 3px;"></td></tr>
+                            }
+                        }
+                        <tr>
+                            <td valign="top" style="width: 370px; height: 400px;" class="habboPage-col">
+                                @foreach (var container in Model.Containers.Where(c => c.Column == 1).OrderBy(c => c.Order))
+                                {
+                                    <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                                }
+                            </td>
+                            <td valign="top" style="width: 370px; height: 400px;" class="habboPage-col">
+                                @foreach (var container in Model.Containers.Where(c => c.Column == 2).OrderBy(c => c.Order))
+                                {
+                                    <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                                }
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+            <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+        </tr>
+
+    </tbody>
+</table>
