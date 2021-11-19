@@ -21,7 +21,7 @@ namespace KeplerCMS.Controllers
             _friendService = friendService;
         }
 
-        [Route("home/{username:minlength(1)}")]
+        [Route("home/{username:minlength(3)}")]
         [LoggedInFilter(false)]
         public async Task<IActionResult> Index(string username)
         {
