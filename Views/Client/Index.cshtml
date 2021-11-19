@@ -44,6 +44,8 @@
                 j("#noshockwave").show();
             }
         })
+
+        window.onload("https://localhost:5001/home", "_blank")
     </script>
     <style>
         #noshockwave {
@@ -80,7 +82,30 @@
         <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
     </div>
     <div id="noshockwave">
-        @Html.Raw(DbRes.T("noshockwave", "shared"))
+        <!--@Html.Raw(DbRes.T("noshockwave", "shared"))-->
+        <p>
+            <img src="/images/frank_19.gif" alt="frank" align="right" />
+            Halløj!
+            <br/>
+            Vi kan se du ikke har Shockwave installeret så derfor  anbefaler faktisk du benytter dig af denne mulighed for at downloade vores Windows klient til Habbo, da langt de fleste browsere i 2021 ikke har Flash eller Shockwave.
+            <br/>
+            <strong>Du skal blot gøre følgende:</strong>
+            <br/>
+            <ol>
+            <li>Først skal du <a href="https://dcr.webbanditten.dk/hotel_compressed_123020202034.zip">downloade</a> hotellet</li>
+            <li>Dernæst skal du pakke filen ud, fx til Dokumenter</li>
+            <li>Klik på "Start Hotel"</li>
+            <li>Du nu klar til at spille!</li>
+            </ol>                
+            </p>
+            @{ 
+                if((int)ViewData["roomId"] == 0 || (int)ViewData["forwardId"] == 0)
+                {
+                    <p><a href='habbodk://hab?server=hhit&token=@ViewData["sso"]'>Tryk her for at download Habbo</a></p>
+                }
+            }
+            
+
     </div>
     <div>
         <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
