@@ -47,6 +47,24 @@ input.process-button:disabled {
     border-color: #666;
 }
 
+input.process-button:active {
+    background-color: #ffce00;
+    border: 2px solid black;
+    color: #000000;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+input.process-button-activated {
+    background-color: #ffce00;
+    border: 2px solid black;
+    color: #000000;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
 #main-header {
     display: none;
 }
