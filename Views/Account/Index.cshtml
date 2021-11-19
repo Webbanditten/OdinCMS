@@ -22,16 +22,7 @@
                     <br><br><br><br>
                 </p>
             </div>
-            <div id="registration-errors">
-                <div class="content-red">
-                    <div class="content-red-body" id="registration-errors-content">
-                        <div class="clear"></div>
-                    </div>
-                </div>
-                <div class="content-red-bottom">
-                    <div class="content-red-bottom-body"></div>
-                </div>
-            </div>
+            
 
             <div class="content-white-outer" id="registration-start">
                 <div class="content-white">
@@ -40,9 +31,23 @@
                             <form method="post" action="/register/start" id="registration-form">
                                 <p>
                                     <label for="day" class="registration-text">@DbRes.T("orange_box_birthday_header", "register")</label>
-                                    <br /><br />@DbRes.T("orange_box_birthday_text", "register")
+                                    @{
+                                        if(DbRes.T("orange_box_birthday_text", "register") != " "){
+                                            <br/><br/>@DbRes.T("orange_box_birthday_text", "register")
+                                        }
+                                    }
                                 </p>
-                                <div id="required-birthday">
+                                <div id="registration-errors">
+                                    <div class="content-red">
+                                        <div class="content-red-body" id="registration-errors-content">
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="content-red-bottom">
+                                        <div class="content-red-bottom-body"></div>
+                                    </div>
+                                </div>
+                                <div id="required-birthday" style="width:187px;height:19px;margin:auto;">
                                     <select name="day" id="day" class="dateselector">
                                         <option value="">--</option>
                                         <option value="1">1</option>
@@ -94,6 +99,20 @@
                                     </select>
                                     <select name="year" id="year" class="dateselector">
                                         <option value="">--</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2017">2017</option>
+                                        <option value="2016">2016</option>
+                                        <option value="2015">2015</option>
+                                        <option value="2014">2014</option>
+                                        <option value="2013">2013</option>
+                                        <option value="2012">2012</option>
+                                        <option value="2011">2011</option>
+                                        <option value="2010">2010</option>
+                                        <option value="2009">2009</option>
+                                        <option value="2008">2008</option>
                                         <option value="2007">2007</option>
                                         <option value="2006">2006</option>
                                         <option value="2005">2005</option>
@@ -277,6 +296,8 @@
                 </div>
             }
 
+            
+
 
             <div id="login-errors">
                 <div class="content-red">
@@ -295,14 +316,14 @@
                                 @Html.AntiForgeryToken()
                                 <p>
                                     <label for="login-username" class="registration-text">@DbRes.T("blue_box_username", "register")</label>
-                                    <input type="text" class="required-username" name="username" id="login-username" value="">
+                                    <input type="text" class="required-username" name="username" id="login-username" value="" style="width:38%">
                                 </p>
                                 <script type="text/javascript" language="JavaScript">
                                     $("login-username").focus();
                                 </script>
                                 <p>
                                     <label for="login-password" class="registration-text">@DbRes.T("blue_box_password", "register")</label>
-                                    <input type="password" class="required-password" name="password" id="login-password" value="">
+                                    <input type="password" class="required-password" name="password" id="login-password" value="" style="width:38%">
                                 </p>
                                 <p class="last">
                                     <input type="submit" value="@DbRes.T("blue_box_login", "register")" class="process-button">
@@ -318,7 +339,7 @@
             </div>
             <div class="processbox-inner">
                 <p>
-                    <br><span style="font-weight: bold;">@DbRes.T("blue_box_forgot_header", "register")</span><br><br>@DbRes.T("blue_box_forgot_text", "register")<br /><a href="/account/forgot" target="_blank">@DbRes.T("blue_box_forgot_link", "register")</a>.<br><br>
+                    <br><span style="font-weight: bold;">@DbRes.T("blue_box_forgot_header", "register")</span><br><br>@DbRes.T("blue_box_forgot_text", "register") <a href="/account/forgot" target="_blank">@DbRes.T("blue_box_forgot_link", "register")</a>.<br><br>
                 </p>
                 <h4>@DbRes.T("blue_box_security_header", "register")</h4>
                 <p>
@@ -338,7 +359,16 @@
 <!-- Validator Input Data Script before POST -->
 <script type="text/javascript">
     Event.observe($("registration-form"), "submit", function (e) {
-        if ($("day").selectedIndex == 0 || $("month").selectedIndex == 0 || $("year").selectedIndex == 0) {
+        var day1 = new Date(($("day").selectedIndex) + "/" + ($("month").selectedIndex) + "/" + (2022 - $("year").selectedIndex));
+        var day2 = new Date();
+        var difference= Math.abs(day2-day1);
+        var days = difference/(1000 * 3600 * 24)
+        if (days < 4800) {
+            validatorBeforeSubmit("registration-errors");
+            validatorAddError(false, false, "@DbRes.T("error_birthday_underyear", "register")", "registration-errors");
+            $("required-birthday").className = "validation-failed";
+            Event.stop(e);
+        } else if ($("day").selectedIndex == 0 || $("month").selectedIndex == 0 || $("year").selectedIndex == 0 || $("year").selectedIndex == 0) {
             validatorBeforeSubmit("registration-errors");
             validatorAddError(false, false, "@DbRes.T("error_birthday", "register")", "registration-errors");
             $("required-birthday").className = "validation-failed";
@@ -347,7 +377,7 @@
             $("registration-submit").disabled = 'true';
         }
     }, false);
-
+    
     Event.observe($("login-form"), "submit", function (e) {
         if ($F("login-username") == "" || $F("login-password") == "") {
             validatorBeforeSubmit("login-errors");
