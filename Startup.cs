@@ -101,7 +101,8 @@ namespace KeplerCMS
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
 
-            services.AddMemoryCache();
+            //removed to reload CSS
+            //services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
