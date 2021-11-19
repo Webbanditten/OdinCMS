@@ -1,0 +1,327 @@
+﻿
+@using KeplerCMS.Models.Enums
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using KeplerCMS.Data.Models
+
+@{
+    var userData = (Users)ViewData["user"];
+    var menu = (List<Menu>)ViewData["menu"];
+    var SSOTicket = (Users)ViewData["sso"];
+    var subMenu = new List<Menu>();
+    var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
+    var baseUrl = Context.Request.Host;
+    var scheme = Context.Request.Scheme;
+}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Habbo ~ @ViewData["Title"]</title>
+    <link href="~/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
+    @RenderSection("Styles", required: false)
+
+    <script type='text/javascript'>
+        var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
+        var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
+        var habboImagerUrl = '/habbo-imaging/';
+        document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
+        window.name = 'habboMain';
+    </script>
+
+    <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/builder.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/swfobject.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/ads.js'></script>
+    <script type='text/javascript' language='JavaScript' src='~/js/validation.js'></script>
+    @RenderSection("ScriptsTop", required: false)
+
+    <script type='text/javascript'>var j = jQuery.noConflict();</script>
+
+
+
+
+
+
+    <script language='JavaScript' type='text/javascript'>
+        window.onload = function () {
+            advertisementLoad();
+        }
+    </script>
+
+</head>
+<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")">
+    <div id="overlay"></div>
+    <h1 id="main-header">Habbo</h1>
+    <div id="wrapper">
+        <!-- ADVERTISEMENT INCLUDE -->
+        <script type='text/javascript'>
+            Ads_Top('@Url.Content("~/c_images/album728/ads_habbowood.png")');
+            Links_Top = ['/habbowood'];
+        </script>
+        <div align="center">
+            <div class="ad-scale ad-leader">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="ad-header-tl"></td>
+                            <td class="ad-header-t"></td>
+                            <td class="ad-header-tr"></td>
+                        </tr>
+                        <tr>
+                            <td class="ad-header-ml"></td>
+                            <td class="ad-header-m">
+
+                                <h5><span class="lang-Advertissement_Title">@DbRes.T("ad", "shared")</span></h5>
+                            </td>
+                            <td class="ad-header-mr"></td>
+                        </tr>
+                        <tr>
+                            <td class="ad-content-ml"></td>
+                            <td class="ad-content-m" align="center" valign="top">
+                                <a href="#" target="_self" id="TopLink"><img style="width: 728px; height: 90px;" alt="" src="#" id="TopImage"></a>
+                            </td>
+                            <td class="ad-content-mr"></td>
+                        </tr>
+                        <tr>
+                            <td class="ad-content-bl"></td>
+                            <td class="ad-content-b"></td>
+                            <td class="ad-content-br"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div id="top_wrap">
+            <div id="top">
+                <div id="topdim"></div>
+                <div id="top-elements">
+                    <table id="topbar">
+                        <tr>
+                            <!-- TOPBAR INCLUDE ( User Status ) -->
+                            <td id="topbar-count"><span class="online-count"></span> @DbRes.T("online_on_habbo", "shared")</td>
+                            <td id="topbar-menu" align="center">
+                                <ul>
+                                    <li id="myhabbo" class="selected" onmouseover="switchTab('myhabbo')">
+                                        <div><a href="/tab/myhabbo" class="topbar-menu-link" onclick="return false;">@DbRes.T("myhabbo", "topbar")</a></div>
+                                    </li>
+                                    <li id="mycredits" onmouseover="if (switchTab('mycredits') && document.habboLoggedIn) updateCredits()" onmouseout="fadeTab('myhabbo')">
+                                        <div><a href="/tab/credits" class="topbar-menu-link" onclick="return false;">@DbRes.T("mycoins", "topbar")</a></div>
+                                    </li>
+                                    <li id="habboclub" onmouseover="if (switchTab('habboclub') && document.habboLoggedIn) updateHabboClub()" onmouseout="fadeTab('myhabbo')">
+                                        <div><a href="/tab/habboclub" class="topbar-menu-link" onclick="return false;">@DbRes.T("habboclub", "topbar")</a></div>
+                                    </li>
+                                </ul>
+                            </td>
+                            <!-- TOPBAR INCLUDE ( User Status ) -->
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <td id="topbar-status" class="loggedin">@DbRes.T("loggedinas", "topbar") <strong>@userData.Username</strong></td>
+                            }
+                            else
+                            {
+                                <td id="topbar-status" class="notloggedin">@DbRes.T("notloggedin", "topbar")</td>
+                            }
+                        </tr>
+                    </table>
+                    <div id="habbologo"><a href="/"></a></div>
+                    <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
+                    <script>
+                        function openClientHabbo(ticket){
+                            getURL = "habbodk://hab?server=hhit&token=" + ticket + ".V004";
+                            window.open(getURL,"_self")
+                        }
+                    </script>
+
+                    <div id="enter-hotel">
+                        <a id="enter-hotel-link" target="client" onclick="openClientHabbo(@SSOTicket); return false;"></a>
+                    </div>
+
+                    <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">
+                        <div id="tabmenu-content">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <div id="myhabbo-content" class="tabmenu-inner selected">
+
+                                    <!-- TOPMENU INCLUDE (MYHABBO) -->
+
+                                    <div class="habbo-avatar">
+                                        <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@userData.Figure&action=wav&direction=3&head_direction=3&gesture=sml" alt="" class="tabmenu-image myimage" style="margin-right: 5px; margin-right: 0px;">
+                                    </div>
+                                    <h3 style="">@DbRes.T("welcome", "topbar") @userData.Username</h3>
+                                    <div class="tabmenu-inner-content">
+                                        <p>
+                                            <a href="/client" class="arrow" target="client" onclick="openOrFocusHabbo(this); return false;">@DbRes.T("gotohotel", "topbar")</a>
+                                        </p>
+                                        <p>
+                                            <a href="/home/@userData.Username" class="arrow">@DbRes.T("myhabbohome", "topbar")</a>
+                                        </p>
+                                        <p>
+                                            <a href="@Url.Action("index", "profile")" class="arrow">@DbRes.T("editprofile", "topbar")</a>
+                                        </p>
+                                        <a href="/account/logout" class="colorlink orange last"><span>@DbRes.T("signoff", "topbar")</span></a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div id="myhabbo-content" class="tabmenu-inner selected">
+
+                                    <!-- TOPMENU INCLUDE (MYHABBO) -->
+
+                                    <img src="~/images/top_bar/myhabbo_frank.gif" alt="" width="60" height="85" class="tabmenu-image" />
+                                    <h3>@DbRes.T("welcome_notsignedin", "topbar")</h3>
+                                    <div class="tabmenu-inner-content">
+                                        <p>
+                                            <a href="/account" class="colorlink orange" style="margin-left: 0px; margin-right: 2px;"><span>@DbRes.T("createprofile", "topbar")</span></a>
+                                        </p>
+                                        <p>
+                                            <a href="/account" class="colorlink orange last" style="margin-left: 0px; margin-right: 2px;"><span>@DbRes.T("login", "topbar")</span></a>
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+
+                            <div id="mycredits-content" class="tabmenu-inner">
+                                <div id="credits-status">
+                                    <!-- TOPMENU INCLUDE (MYCREDITS) -->
+
+                                    <h3><a href="/account">@DbRes.T("credits_pleaselogin", "topbar")</a> @DbRes.T("credits_toseetransactions", "topbar")</h3>
+                                    <div class="tabmenu-inner-content">
+                                        <p>
+                                            <img src="~/images/top_bar/mycredits_coins.gif" alt="" width="47" height="21" class="tabmenu-image coins" />
+                                            <a href="/credits" class="arrow">@DbRes.T("buy_credit", "topbar")</a>
+                                        </p>
+                                        <p>
+                                            <a href="/credits" class="arrow">@DbRes.T("redeem", "topbar")</a>
+                                        </p>
+                                    </div>
+                                    <script>CreditsUpdated = false;</script>
+                                </div>
+                            </div>
+                            <div id="habboclub-content" class="tabmenu-inner">
+                                <div id="habboclub-status">
+                                    <!-- TOPMENU INCLUDE (HABBOCLUB) -->
+
+                                    <h3><a href="/account">@DbRes.T("club_pleaselogin", "topbar")</a> @DbRes.T("club_toseestatus", "topbar")</h3>
+                                    <div class="tabmenu-inner-content">
+                                        <p>
+                                            <span class="lang-topbar-habboclub-inner-about">@DbRes.T("club_benefits", "topbar")</span>
+
+                                        </p>
+                                        <p>
+                                            <a href="/club" class="arrow">@DbRes.T("club_news", "topbar")</a>
+                                        </p>
+                                    </div>
+                                    <script>habboClubUpdated = false;</script>
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                        <div id="tabmenu-bottom"></div>
+                    </div>
+                    <script type="text/javascript">
+                        $("tabmenu").style.left = (Position.cumulativeOffset($("myhabbo"))[0] - Position.cumulativeOffset($("top"))[0]) + "px";
+                    </script>
+                </div>
+                <div id="mainmenu">
+                    <ul>
+                        <li id="leftspacer">&nbsp;</li>
+                        @{
+                            if (menu != null)
+                            {
+                                var headerMenu = menu.Where(m => m.Parent == 0).OrderBy(m => m.Order);
+                                if(headerMenu.Count() > 0) {
+                                    var last = headerMenu.Last();
+                                    foreach (Menu item in headerMenu)
+                                    {
+                                        string lastClass = (item == last) ? "last" : "";
+                                        bool isActive = (Path.Count() > 0 && pathList[0].Contains(item.Href.Substring(1)));
+                                        string active = isActive ? "active" : "";
+                                        bool needsAuthentication = item.State == Enum.GetName(typeof(MenuState), MenuState.authenticated);
+                                        string disabledClass = (needsAuthentication && !User.Identity.IsAuthenticated) ? "disabled" : "";
+                                        string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href=" + item.Href : "";
+                                        if (isActive)
+                                            subMenu = menu.Where(m => m.Parent == item.Id).ToList();
+                                        <li id="@active" class="@disabledClass @lastClass">
+                                            <span class="left"></span>
+                                            <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
+                                            <span class="right"></span>
+                                        </li>
+                                    }
+                                }
+                               
+                            }
+                        }
+                    </ul>
+                </div>
+                <div id="submenu">
+                    <div class="subnav">
+                        @{
+                            if (subMenu.Count > 0)
+                            {
+                                var subMenuItems = subMenu.OrderBy(m => m.Order);
+                                var last = subMenuItems.Last();
+                                foreach (var item in subMenuItems)
+                                {
+
+
+                                    bool isActive = false;
+                                    int index = item.Href.IndexOf(pathList[0]);
+                                    string cleanPath = (index < 0)
+                                        ? item.Href
+                                        : item.Href.Remove(index, pathList[0].Length);
+                                    if (pathList.Count() > 1 && cleanPath.Replace("/", "") == pathList[1])
+                                    {
+                                        isActive = true;
+                                    }
+                                    else if (pathList.Count() == 1 && Context.Request.Path.ToString().Contains(item.Href))
+                                    {
+                                        isActive = true;
+                                    }
+                                    if (isActive)
+                                    {
+                                        @item.Text
+                                    }
+                                    else
+                                    {
+                                        @:<a href="@item.Href">@item.Text</a>
+                                    }
+                                    if (last != item)
+                                    {
+                                        @:|
+                                    }
+
+                                }
+                            }
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="main-content">
+            @RenderBody()
+
+            <br style="clear: both;">
+        </div>
+        <div id="outer">
+            <div id="outer-content">
+                <partial name="~/Views/Shared/_Footer.cshtml" />
+            </div>
+        </div>
+        <div id="outer-bottom"><div id="outer-bottom-content"></div></div>
+    </div>
+    <script src="~/api/JavaScriptLocalizationResources?ResourceSet=shared&VarName=resources&localeId=auto&ResourceMode=ResDb"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
