@@ -99,9 +99,14 @@
             </ol>                
             </p>
             @{ 
-                if((int)ViewData["roomId"] == 0 || (int)ViewData["forwardId"] == 0)
+                //
+                if((int)ViewData["roomId"] != 0 || (int)ViewData["forwardId"] != 0)
                 {
-                    <p><a href='habbodk://hab?server=hhit&token=@ViewData["sso"]'>Tryk her for at download Habbo</a></p>
+                    <p><a href='habboit://hab?server=hhit&token=@ViewData["sso"]&V004&room=@ViewData["roomId"]'>Tryk her for at download Habbo</a></p>
+                }
+                else
+                {
+                    <p><a href='habboit://hab?server=hhit&token=@ViewData["sso"]&V004'>Tryk her for at download Habbo</a></p>
                 }
             }
             
