@@ -29,23 +29,23 @@
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         const container = document.getElementById("badge-editor-flash");
+        container.innerHTML = '';
         container.appendChild(player);
         player.load({
             url: '@Url.Content("~/flash/BadgeEditor.swf")',
-            parameters: 'base=&@Url.Content("~/flash/")'+
+            parameters: 'base=&@Url.Content("~/flash/")&'+
                         'bgcolor=#FFFFFF&'+
                         'post_url=/groups/actions/update_group_badge?&'+
                         '__app_key=&'+
                         'groupId=@Model.Id&'+
                         'badge_data=@Model.GroupBadge&'+
                         'localization_url=@Url.Content("~/xml/badge_editor_da.xml")&'+
-                        'xml_url=@Url.Content("~/xml/badge_data.xml")&'+
-                        'allowScriptAccess=always',
-            allowScriptAccess: false,
+                        'xml_url=@Url.Content("~/xml/badge_data.xml")&',
+            allowScriptAccess: true,
         });
         player.style.width = "280px";
         player.style.height = "366px";
         player.style.frameRate = "8";
     });
 </script>
-<script src="path/to/ruffle/ruffle.js"></script>
+<script src='@Url.Content("~/flash/ruffle/ruffle.js")'></script>

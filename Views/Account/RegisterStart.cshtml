@@ -100,6 +100,7 @@
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         const container = document.getElementById("flashcontent");
+        container.innerHTML = '';
         container.appendChild(player);
         player.load({
             url: '@Url.Content("~/flash/HabboRegistration2.swf")',
@@ -120,7 +121,7 @@
         player.style.frameRate = "8";
     });
 </script>
-<script src="path/to/ruffle/ruffle.js"></script>
+<script src='@Url.Content("~/flash/ruffle/ruffle.js")'></script>
 
 
 
