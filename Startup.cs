@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
 using Westwind.Globalization.AspnetCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace KeplerCMS
 {
@@ -141,6 +142,11 @@ namespace KeplerCMS
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             // who are you?  
             app.UseAuthentication();
