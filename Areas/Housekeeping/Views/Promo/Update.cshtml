@@ -5,42 +5,44 @@
         <h4 class="text-uppercase">Update promo</h4>
     </div>
     <div class="card-body">
+        <center>
         <form asp-action="Update">
             <input asp-for="PageId" type="hidden" class="form-control" />
             <div class="form-group">
                 <label asp-for="Teaser" class="label-control"></label>
-                <input asp-for="Teaser" class="form-control" />
+                <input asp-for="Teaser" class="form-control" style="width:600px"/>
                 <span asp-validation-for="Teaser" class="text-danger"></span>
-            </div>
+            </div><br/>
             <div class="form-group">
                 <label asp-for="Img" class="label-control"></label>
-                <input asp-for="Img" class="form-control" />
+                <input asp-for="Img" class="form-control" style="width:600px" />
                 <span asp-validation-for="Img" class="text-danger"></span>
-            </div>
+            </div><br/>
             <div class="form-group">
                 <label asp-for="Link1Text" class="label-control"></label>
-                <input asp-for="Link1Text" class="form-control" />
+                <input asp-for="Link1Text" class="form-control" style="width:600px"/>
                 <span asp-validation-for="Link1Text" class="text-danger"></span>
-            </div>
+            </div><br/>
             <div class="form-group">
                 <label asp-for="Link1Href" class="label-control"></label>
-                <input asp-for="Link1Href" class="form-control" />
+                <input asp-for="Link1Href" class="form-control" style="width:600px" />
                 <span asp-validation-for="Link1Href" class="text-danger"></span>
-            </div>
+            </div><br/>
             <div class="form-group">
                 <label asp-for="Link2Text" class="label-control"></label>
-                <input asp-for="Link2Text" class="form-control" />
+                <input asp-for="Link2Text" class="form-control" style="width:600px" />
                 <span asp-validation-for="Link2Text" class="text-danger"></span>
-            </div>
+            </div><br/>
             <div class="form-group">
                 <label asp-for="Link2Href" class="label-control"></label>
-                <input asp-for="Link2Href" class="form-control" />
+                <input asp-for="Link2Href" class="form-control" style="width:600px" />
                 <span asp-validation-for="Link2Href" class="text-danger"></span>
-            </div>
+            </div><br/>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                <button type="submit" class="btn btn-sm btn-primary" style="width:300px;height:50px">Submit</button>
             </div>
         </form>
+        </center>
     </div>
 </div>  

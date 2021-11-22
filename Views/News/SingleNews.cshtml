@@ -30,7 +30,7 @@
                                                         foreach (var news in Model.LatestNews)
                                                         {
                                                             <li>
-                                                                <span class="articledate">@news.PublishDate.ToString("dd-MM-yy")</span>
+                                                                <span class="articledate">@news.PublishDate.ToString("dd/MM/yy")</span>
                                                                 <a href="/news/@news.Slug">@news.Title</a>
                                                             </li>
                                                         }
@@ -49,7 +49,7 @@
                             </td>
                             <td valign="top" style="width: 539px;" class="habboPage-col rightmost">
                                 <div class="portlet-scale gold">
-                                    <div class="portlet-scale-header"><h3>@Model.News.Title</h3></div>
+                                    <div class="portlet-scale-header"><h3>@Model.News.Title <span class="articledate">[@Model.News.PublishDate.ToString("dd/MM/yy")]</span></h3></div>
                                     <div class="portlet-scale-body">
                                         <div class="portlet-scale-content">
                                             <div class="article-full">
