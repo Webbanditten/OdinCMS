@@ -143,6 +143,7 @@
                 if (userValidator == false) {
                     new Ajax.Request("/api/hotel/habboname_exists", {
                         method: "post", parameters: "habboName=" + encodeURIComponent(form.username.value), onComplete: function (req, text) {
+                          console.log(req)
                             if (req.responseText == 'True') {
                                 j("#usernameStatus").show();
                             } else {

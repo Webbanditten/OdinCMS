@@ -21,9 +21,11 @@ namespace KeplerCMS.Controllers
     {
         private static FiguredataReader figuredataReader;
         private IMemoryCache _cache;
+        private IUserService _userService;
 
-        public AvatarImageController(IMemoryCache cache)
+        public AvatarImageController(IMemoryCache cache, IUserService userService)
         {
+            this._userService = userService;
             this._cache = cache;
             if (figuredataReader == null)
             {
@@ -58,6 +60,20 @@ namespace KeplerCMS.Controllers
             {
                 Request.Query.TryGetValue("figure", out var value);
                 figure = value.ToString();
+            } else if(Request.Query.ContainsKey("habbo")) {
+                Request.Query.TryGetValue("habbo", out var value);
+                try {
+                    var userObj = await _userService.GetUserByUsername(value);
+                    if(userObj != null)
+                    {
+                        figure = userObj.Figure;
+                    } else {
+                        return NotFound();
+                    }
+                } catch {
+                    return NotFound();
+                }
+                
             }
 
             if (Request.Query.ContainsKey("action"))
