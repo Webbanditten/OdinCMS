@@ -69,7 +69,7 @@
                         <div id="promobody">
                             <p id="promoimage"><a href="@Model.Promos[0].Link1Href" id="promo-link"><img src="@Model.Promos[0].Img" alt=""></a></p>
                             <div class="promotext">
-                                <p id="promotext-content">@Model.Promos[0].Teaser</p>
+                                <p id="promotext-content">@Html.Raw(@Model.Promos[0].Teaser)</p>
                             </div>
                             <div id="promolinks">
                                 <ul id="promolinks-list">
@@ -101,7 +101,7 @@
                     if (Model.News != null)
                     {
 
-                        foreach (var news in Model.News.Take(3))
+                        foreach (var news in Model.News.OrderByDescending(s=>s.PublishDate).Take(3))
                         {
                             <div class="newsitem oldnewsitem">
                                 <h3>
@@ -116,7 +116,7 @@
                         if (Model.News.Count() > 3)
                         {
                             <div class="hr">&nbsp;</div>
-                            foreach (var news in Model.News.Skip(3).Take(2))
+                            foreach (var news in Model.News.OrderByDescending(s=>s.PublishDate).Skip(3).Take(2))
                             {
                                 <div class="newsitem oldnewsitem">
                                     <h3>
