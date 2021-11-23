@@ -6,7 +6,11 @@ namespace KeplerCMS.Services.Interfaces
 {
     public interface ISettingsService
     {
-        Task<Settings> GetValue(string setting);
+        Task<bool> Exists(string setting);
+        Task<IEnumerable<Settings>> GetAll();
+        
+        Task<Settings> Update(Settings setting);
+        Task<Settings> Get(string setting);
 
     }
 }

@@ -34,7 +34,7 @@ namespace KeplerCMS.Controllers
         [HttpGet("api/hotel/online")]
         public async Task<string> Online()
         {
-            return (await _settingService.GetValue("players.online")).Value;
+            return (await _settingService.Get("players.online")).Value;
         }
 
         [HttpPost("api/hotel/habboname_exists")]

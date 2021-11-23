@@ -1,0 +1,26 @@
+﻿@model KeplerCMS.Data.Models.Settings
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Update Setting</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update">
+
+            <div class="form-group">
+                <label asp-for="Setting" class="label-control"></label>
+                <input readonly asp-for="Setting" class="form-control" />
+                <span asp-validation-for="Setting" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Value" class="label-control"></label>
+                <input asp-for="Value" class="form-control" />
+                <span asp-validation-for="Value" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>

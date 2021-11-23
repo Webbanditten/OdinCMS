@@ -19,9 +19,32 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
-        public async Task<Settings> GetValue(string setting)
+        public async Task<bool> Exists(string setting)
+        {
+            var dbSetting = await this.Get(setting);
+            return (dbSetting != null); 
+        }
+
+        public async Task<IEnumerable<Settings>> GetAll()
+        {
+            return await _context.Settings.ToListAsync();
+        }
+
+        public async Task<Settings> Get(string setting)
         {
             return await _context.Settings.Where(s => s.Setting.ToLower() == setting.ToLower()).FirstOrDefaultAsync();
+        }
+
+        public async Task<Settings> Update(Settings setting)
+        {
+            var dbSetting = await this.Get(setting.Setting);
+            if(dbSetting != null) {
+                dbSetting.Value = setting.Value;
+                _context.Settings.Update(dbSetting);
+                await _context.SaveChangesAsync();
+            }
+
+            return dbSetting;
         }
     }
 

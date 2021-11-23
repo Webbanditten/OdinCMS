@@ -665,3 +665,21 @@ table.blueTable tfoot .links a{
     color:#fff;
 }
 
+.form-group:not(:first-child) {
+    margin-top:6px;
+
+}
+.form-group label {
+    margin-bottom:6px;
+    display:block;
+    font-weight: bold;
+}
+.form-group input[type='text']:read-only,textarea:read-only {
+    background:#ccc;
+}
+.form-group input[type='text'],textarea {
+    width:100%;
+    padding:12px;
+    border:1px solid #000;
+    border-radius:5px;
+}
