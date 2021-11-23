@@ -1,19 +1,15 @@
-﻿
+﻿@using KeplerCMS.Data.Models
 @using KeplerCMS.Models.Enums
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
-@using KeplerCMS.Data.Models
-
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
-    var SSOTicket = (Users)ViewData["sso"];
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
     var scheme = Context.Request.Scheme;
 }
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -134,15 +130,8 @@
                     </table>
                     <div id="habbologo"><a href="/"></a></div>
                     <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
-                    <script>
-                        function openClientHabbo(ticket){
-                            getURL = "habbodk://hab?server=hhit&token=" + ticket + ".V004";
-                            window.open(getURL,"_self")
-                        }
-                    </script>
-
                     <div id="enter-hotel">
-                        <a id="enter-hotel-link" target="client" onclick="openClientHabbo(@SSOTicket); return false;"></a>
+                        <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
                     </div>
 
                     <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">

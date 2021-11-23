@@ -377,7 +377,7 @@
             $("registration-submit").disabled = 'true';
         }
     }, false);
-    
+
     Event.observe($("login-form"), "submit", function (e) {
         if ($F("login-username") == "" || $F("login-password") == "") {
             validatorBeforeSubmit("login-errors");
