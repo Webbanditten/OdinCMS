@@ -47,7 +47,7 @@
                 @DbRes.T("profile_birthday", "habbohome")
             </div>
             <div class="birthday date">
-                @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
+                @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy").Replace('-', Configuration.GetSection("keplercms").GetSection("customizations")["dateSeparator"][0])
             </div>
             <div>
             @{ 

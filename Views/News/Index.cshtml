@@ -1,4 +1,6 @@
 ﻿@model List<KeplerCMS.Data.Models.News>
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = DbRes.T("archive", "news");
 }
@@ -43,7 +45,7 @@
                                                     foreach (var news in Model)
                                                     {
                                                         <li>
-                                                            <span class="articledate">[@news.PublishDate.ToString("dd-MM-yy")]</span>
+                                                            <span class="articledate">[@news.PublishDate.ToString("dd-MM-yy").Replace('-', Configuration.GetSection("keplercms").GetSection("customizations")["dateSeparator"][0])]</span>
                                                             <a href="/news/@news.Slug">@news.Title</a>
                                                         </li>
                                                     }
