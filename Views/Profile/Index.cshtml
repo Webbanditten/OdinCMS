@@ -31,16 +31,14 @@
                             </div>
                         </div>
                     </div>
-
-                    <div style="padding-bottom:3px"><center>
-                        <input onclick="activateLook()" type="submit" value="@DbRes.T("change_look", "habbohome")" id="look" class="process-button-activated" style="height:23px">
-                        <input onclick="activateMission()" type="submit" value="@DbRes.T("change_mission", "habbohome")" id="mission" class="process-button" style="height:23px">
-                        <input onclick="activateEmail()" type="submit" value="@DbRes.T("change_email", "habbohome")" id="email" class="process-button" style="height:23px">
-                        <input onclick="activatePassword()" type="submit" value="@DbRes.T("change_password", "habbohome")" id="password" class="process-button" style="height:23px">
-                    </center></div>
-
                     <div class="content-top">
                         <div class="content">
+                            <div id="profile-nav" style="padding-bottom:3px; text-align:center">
+                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_look", "habbohome")" id="look" class="process-button process-button-activated" style="height:23px">
+                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_mission", "habbohome")" id="mission" class="process-button" style="height:23px">
+                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_email", "habbohome")" id="email" class="process-button" style="height:23px">
+                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_password", "habbohome")" id="password" class="process-button" style="height:23px">
+                            </div>
                             <div id="registration-errors" style="display:none">
                                 <div class="content-red" style="display:block">
                                     <div class="content-red-body" id="registration-errors-content">
@@ -223,64 +221,23 @@
         player.style.frameRate = "8";
     });
 </script>
-<script src='@Url.Content("~/flash/ruffle/ruffle.js")'></script>
+<script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
 
 <script type="text/javascript">
-    function activateLook(){
-        document.getElementById("look").classList.remove('process-button');
-        document.getElementById("look").classList.add('process-button-activated');
-        document.getElementById("mission").classList.remove('process-button-activated');
-        document.getElementById("mission").classList.add('process-button');
-        document.getElementById("email").classList.remove('process-button-activated');
-        document.getElementById("email").classList.add('process-button');
-        document.getElementById("password").classList.remove('process-button-activated');
-        document.getElementById("password").classList.add('process-button');
-        show(document.getElementById('habbo-look'));
+    function resetTabs() {
+        var children = Array.from(document.getElementById("profile-nav").children);
+        for(i=0; i < children.length; i++) {
+            children[i].classList.remove('process-button-activated');
+        }
+        hide(document.getElementById('habbo-look'));
         hide(document.getElementById('habbo-mission'));
         hide(document.getElementById('habbo-email'));
         hide(document.getElementById('habbo-password'));
     }
-    function activateMission(){
-        document.getElementById("look").classList.remove('process-button-activated');
-        document.getElementById("look").classList.add('process-button');
-        document.getElementById("mission").classList.remove('process-button');
-        document.getElementById("mission").classList.add('process-button-activated');
-        document.getElementById("email").classList.remove('process-button-activated');
-        document.getElementById("email").classList.add('process-button');
-        document.getElementById("password").classList.remove('process-button-activated');
-        document.getElementById("password").classList.add('process-button');
-        hide(document.getElementById('habbo-look'));
-        show(document.getElementById('habbo-mission'));
-        hide(document.getElementById('habbo-email'));
-        hide(document.getElementById('habbo-password'));
-    }
-    function activateEmail(){
-        document.getElementById("look").classList.remove('process-button-activated');
-        document.getElementById("look").classList.add('process-button');
-        document.getElementById("mission").classList.remove('process-button-activated');
-        document.getElementById("mission").classList.add('process-button');
-        document.getElementById("email").classList.remove('process-button');
-        document.getElementById("email").classList.add('process-button-activated');
-        document.getElementById("password").classList.remove('process-button-activated');
-        document.getElementById("password").classList.add('process-button');
-        hide(document.getElementById('habbo-look'));
-        hide(document.getElementById('habbo-mission'));
-        show(document.getElementById('habbo-email'));
-        hide(document.getElementById('habbo-password'));
-    }
-    function activatePassword(){
-        document.getElementById("look").classList.remove('process-button-activated');
-        document.getElementById("look").classList.add('process-button');
-        document.getElementById("mission").classList.remove('process-button-activated');
-        document.getElementById("mission").classList.add('process-button');
-        document.getElementById("email").classList.remove('process-button-activated');
-        document.getElementById("email").classList.add('process-button');
-        document.getElementById("password").classList.remove('process-button');
-        document.getElementById("password").classList.add('process-button-activated');
-        hide(document.getElementById('habbo-look'));
-        hide(document.getElementById('habbo-mission'));
-        hide(document.getElementById('habbo-email'));
-        show(document.getElementById('habbo-password'));
+    function profileNav(button) {
+        resetTabs();
+        button.classList.add('process-button-activated');
+        show(document.getElementById('habbo-' + button.getAttribute("id")));
     }
     function hide (elements) {
         elements = elements.length ? elements : [elements];

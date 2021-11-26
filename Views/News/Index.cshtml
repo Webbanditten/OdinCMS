@@ -45,7 +45,7 @@
                                                     foreach (var news in Model)
                                                     {
                                                         <li>
-                                                            <span class="articledate">[@news.PublishDate.ToString("dd-MM-yy").Replace('-', Configuration.GetSection("keplercms").GetSection("customizations")["dateSeparator"][0])]</span>
+                                                            <span class="articledate">[@news.PublishDate.ToString(Configuration.GetSection("keplercms")["dateFormat"])]</span>
                                                             <a href="/news/@news.Slug">@news.Title</a>
                                                         </li>
                                                     }

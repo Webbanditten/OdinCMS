@@ -23,7 +23,7 @@
             </a>
 
         </p>
-        <p>@DbRes.T("profile_birthday", "habbohome"): <b>@Model.CreateAt.ToString("dd-MM-yyy").Replace('-', Configuration.GetSection("keplercms").GetSection("customizations")["dateSeparator"][0])</b></p>
+        <p>@DbRes.T("profile_birthday", "habbohome"): <b>@Model.CreateAt.ToString(Configuration.GetSection("keplercms")["dateFormat"])</b></p>
         <p><a href="/home/@Model.Username" class="arrow">@DbRes.T("show_home", "habbohome")</a></p>
     </div>
 </div>

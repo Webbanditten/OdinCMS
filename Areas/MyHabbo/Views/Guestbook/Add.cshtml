@@ -29,5 +29,5 @@
         <p>@Html.Raw(KeplerCMS.Areas.MyHabbo.Helpers.BBCodeToString.Convert(Model.Entry.Message))</p>
     </div>
     <div class="guestbook-cleaner">&nbsp;</div>
-    <div class="guestbook-entry-footer metadata">@Model.Entry.Timestamp.ToString("dd-MM-yyyy").Replace('-', Configuration.GetSection("keplercms").GetSection("customizations")["dateSeparator"][0])</div>
+    <div class="guestbook-entry-footer metadata">@Model.Entry.Timestamp.ToString(Configuration.GetSection("keplercms")["dateFormat"])</div>
 </li>
