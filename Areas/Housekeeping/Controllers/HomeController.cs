@@ -1,20 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using KeplerCMS.Services.Interfaces;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Areas.Housekeeping
 {
     [Area("Housekeeping")]
     public class HomeController : Controller
     {
-        public HomeController()
+        ISettingsService _settingsService;
+        public HomeController(ISettingsService settingsService)
         {
+            this._settingsService = settingsService;
         }
 
         [HousekeepingFilter(Fuse.housekeeping)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            return View(await _settingsService.GetMissingDefaultSettings());
         }
     }
 }
