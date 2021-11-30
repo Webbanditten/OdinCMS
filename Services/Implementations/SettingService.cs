@@ -53,6 +53,16 @@ namespace KeplerCMS.Services.Implementations
             return new List<DefaultSetting> { 
                 new DefaultSetting { Setting = "cms.use_ruffle", Value = "0", FriendlyName = "Use Ruffle to serve flash?" },
                 new DefaultSetting { Setting = "cms.background", Value = "0", FriendlyName = "Background" },
+                new DefaultSetting { Setting = "cms.figureUrl", Value = "/habbo-imaging/avatarimage", FriendlyName = "Path for Habbo avatars" },
+                new DefaultSetting { Setting = "cms.badgeUrl", Value = "", FriendlyName = "Path for badge images" },
+                new DefaultSetting { Setting = "cms.traxUrl", Value = "dcr.localhost/trax/mp3", FriendlyName = "Where to load mp3's for traxes from" },
+                new DefaultSetting { Setting = "cms.groupBadgeUrl", Value = "", FriendlyName = "URL for generating group badges" },
+                new DefaultSetting { Setting = "cms.port", Value = "12321", FriendlyName = "Port for server" },
+                new DefaultSetting { Setting = "cms.musport", Value = "12322", FriendlyName = "Mus Port" },
+                new DefaultSetting { Setting = "cms.host", Value = "0", FriendlyName = "Host" },
+                new DefaultSetting { Setting = "cms.texts", Value = "0", FriendlyName = "Texts for hotel" },
+                new DefaultSetting { Setting = "cms.vars", Value = "0", FriendlyName = "Variables for hotel" },
+                new DefaultSetting { Setting = "cms.dcr", Value = "0", FriendlyName = "DCR file for hotel" },
                 new DefaultSetting { Setting = "cms.hotel_banner", Value = "0", FriendlyName = "Hotel banner" }
             };
         }
