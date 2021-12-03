@@ -1,5 +1,21 @@
-﻿
+﻿@model System.Collections.Generic.IEnumerable<DefaultSetting>
+
 <h1>Welcome to Housekeeping</h1>
+    @{
+        if(Model.Count() > 0) {
+
+            <h2>The following settings are missing from the "settings" table. Would you like to install them with their default values?</h2>
+            <ul style="display:block; position:relative; border:2px solid red;">
+                @{
+                    foreach(var item in Model) {
+                        <li>@item.Setting (@item.FriendlyName)</li>
+                    }
+                }
+            </ul>
+            <a href="@Url.Action("InstallMissing", "Settings")">Yes install missing settings.</a>
+            
+        }
+    }
 <p>
     This CMS is created by Webbanditten
 </p>

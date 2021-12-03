@@ -20,11 +20,13 @@ namespace KeplerCMS
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
+        public IHostEnvironment CurrentEnvironment { get; }
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -101,7 +103,10 @@ namespace KeplerCMS
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
 
-            services.AddMemoryCache();
+            if (!CurrentEnvironment.IsDevelopment())
+            {
+                services.AddMemoryCache();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

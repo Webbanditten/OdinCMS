@@ -47,7 +47,7 @@
                 @DbRes.T("profile_birthday", "habbohome")
             </div>
             <div class="birthday date">
-                @Model.WidgetData.User.CreateAt.ToString("dd-MM-yyyy")
+                @Model.WidgetData.User.CreateAt.ToString(Configuration.GetSection("keplercms")["dateFormat"])
             </div>
             <div>
             @{ 

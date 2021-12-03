@@ -1,4 +1,5 @@
 ﻿using KeplerCMS.Data.Models;
+using KeplerCMS.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,6 +12,9 @@ namespace KeplerCMS.Services.Interfaces
         
         Task<Settings> Update(Settings setting);
         Task<Settings> Get(string setting);
+        IEnumerable<DefaultSetting> GetDefaultSettings();
+        Task<IEnumerable<DefaultSetting>> GetMissingDefaultSettings();
+        Task<IEnumerable<Settings>> InstallDefaultSettings();
 
     }
 }

@@ -9,20 +9,23 @@
     HousekeepingMenu activeMenuItem;
 
     switch (path)
-    {
-        case "/housekeeping/website":
+    { 
+        case var activeMenu when path == "/housekeeping":
+            activeMenuItem = HousekeepingMenu.Home;
+            break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/website"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/menu":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/menu"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/pages":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/pages"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/news":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/news"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/promotions":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
         case "/housekeeping/upload":
@@ -62,10 +65,10 @@
         <div class="top">
             <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
             <ul class="menu">
+                <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.Statistics) ? "class=active" : "")><a href="">Statistics</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
                 <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")><a href="">Hobba tools</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
                 <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="">Localization</a></li>
             </ul>
