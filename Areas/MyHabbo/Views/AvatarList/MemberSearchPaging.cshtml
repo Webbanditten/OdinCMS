@@ -23,7 +23,7 @@
                         <div class="avatar-list-open"><a href="#" id="avatar-list-open-link-@Model.Widget.Item.Id-@members.GroupMember.User.Id" class="avatar-list-open-link"></a></div>
                         <div class="avatar-list-avatar"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(members.GroupMember.User.Figure)&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt=""></div>
                         <h4><a href="/home/@members.GroupMember.User.Username">@members.GroupMember.User.Username</a></h4>
-                        <p class="avatar-list-birthday">@members.GroupMember.User.CreateAt.ToString("dd-MM-yyyy")</p>
+                        <p class="avatar-list-birthday">@members.GroupMember.User.CreateAt.ToString(Configuration.GetSection("keplercms")["dateFormat"])</p>
                         <p>
                             @{
                                 if(members.GroupMember.Owner) {

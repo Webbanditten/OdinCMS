@@ -17,6 +17,13 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             _settingsService = settingsService;
         }
+        
+        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        public async Task<IActionResult> InstallMissing()
+        {
+            await _settingsService.InstallDefaultSettings();
+            return RedirectToAction("Index", "Settings", new { message = "Default settings installed." });
+        }
 
         [HousekeepingFilter(Fuse.fuse_administrator_access)]
         public async Task<IActionResult> Index()
