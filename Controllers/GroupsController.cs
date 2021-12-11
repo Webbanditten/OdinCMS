@@ -18,11 +18,14 @@ namespace KeplerCMS.Controllers
         private readonly IUserService _userService;
         private readonly IHomeService _homeService;
         private readonly IRoomService _roomService;
-        public GroupsController(IUserService userService, IHomeService homeService, IRoomService roomService)
+        private readonly ISettingsService _settingsService;
+
+        public GroupsController(IUserService userService, IHomeService homeService, IRoomService roomService, ISettingsService settingsService)
         {
             _userService = userService;
             _homeService = homeService;
             _roomService = roomService;
+            _settingsService = settingsService;
         }
 
 
@@ -235,7 +238,7 @@ namespace KeplerCMS.Controllers
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
-                return View(home);
+                return View(new GroupBadgeViewModel { Homes = home, Settings = await _settingsService.GetAll() });
             }
             return Content("Nope");
         }

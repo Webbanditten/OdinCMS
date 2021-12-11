@@ -19,9 +19,11 @@ namespace KeplerCMS.Controllers
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ISettingsService _settingsService;
 
-        public AccountController(IUserService userService)
+        public AccountController(IUserService userService, ISettingsService settingsService)
         {
+            _settingsService = settingsService;
             _userService = userService;
         }
 
@@ -103,8 +105,9 @@ namespace KeplerCMS.Controllers
         }
         [HttpPost]
         [Route("register/start")]
-        public IActionResult RegisterStart(RegistrationViewModel model)
+        public async Task<IActionResult> RegisterStart(RegistrationViewModel model)
         {
+            ViewData["settings"] = await this._settingsService.GetAll();
             return View(model);
         }
         [HttpPost]

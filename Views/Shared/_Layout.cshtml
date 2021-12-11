@@ -5,6 +5,7 @@
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
+    var settings = (List<Settings>)ViewData["settings"];
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
@@ -312,5 +313,15 @@
     <script src="~/api/JavaScriptLocalizationResources?ResourceSet=shared&VarName=resources&localeId=auto&ResourceMode=ResDb"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+    @{
+        var shouldUseRuffle = false;
+        var ruffleSetting = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.use_ruffle") : null; 
+        if(ruffleSetting != null && ruffleSetting.Value == "1") {
+            shouldUseRuffle = true;
+        }
+    }
+    @if(shouldUseRuffle) {
+        <script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
+    }
 </body>
 </html>
