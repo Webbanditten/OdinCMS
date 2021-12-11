@@ -17,7 +17,7 @@ namespace KeplerCMS.Data.Models
         public string PageId { get; set; }
         [Column("price")]
         public int Price { get; set; }
-        [Column("order")]
+        [Column("order_id")]
         public int Order { get; set; }
         [Column("amount")]
         public int Amount { get; set; }
