@@ -6,7 +6,7 @@ using KeplerCMS.Models;
 
 namespace KeplerCMS.Controllers
 {
-
+    [MaintenanceFilter]
     [MenuFilter]
     public class NewsController : Controller
     {

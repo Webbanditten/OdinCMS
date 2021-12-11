@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
+    [MaintenanceFilter]
     [MenuFilter]
     public class ProfileController : Controller
     {
