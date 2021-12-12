@@ -165,7 +165,7 @@ namespace KeplerCMS.Avatara.Figure
                 try {
                     this.FigureSetTypes.Add(set, new FigureSetType(set, paletteId, isMandatory));
                 } catch(Exception e) {
-                    // Dont really know what to do with this...
+                    System.Console.WriteLine("ERROR #01", e);
                 }
                 
             }

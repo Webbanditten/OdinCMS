@@ -63,7 +63,8 @@ namespace KeplerCMS.Services.Implementations
                 new DefaultSetting { Setting = "cms.texts", Value = "0", FriendlyName = "Texts for hotel" },
                 new DefaultSetting { Setting = "cms.vars", Value = "0", FriendlyName = "Variables for hotel" },
                 new DefaultSetting { Setting = "cms.dcr", Value = "0", FriendlyName = "DCR file for hotel" },
-                new DefaultSetting { Setting = "cms.hotel_banner", Value = "0", FriendlyName = "Hotel banner" }
+                new DefaultSetting { Setting = "cms.hotel_banner", Value = "0", FriendlyName = "Hotel banner" },
+                new DefaultSetting { Setting = "cms.maintenance", Value = "0", FriendlyName = "Enable maintenance" }
             };
         }
 

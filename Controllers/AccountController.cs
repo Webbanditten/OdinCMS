@@ -1,21 +1,17 @@
 ﻿using Isopoh.Cryptography.Argon2;
-using KeplerCMS.Data;
+using KeplerCMS.Filters;
 using KeplerCMS.Models;
-using KeplerCMS.Services;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
+    [MaintenanceFilter]
     public class AccountController : Controller
     {
         private readonly IUserService _userService;

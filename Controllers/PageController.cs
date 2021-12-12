@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
-
+    [MaintenanceFilter]
     [MenuFilter]
     public class PageController : Controller
     {
