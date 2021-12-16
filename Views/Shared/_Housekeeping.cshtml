@@ -1,5 +1,7 @@
-﻿@using KeplerCMS.Data.Models
+﻿@using KeplerCMS.Areas.Housekeeping.Helpers
+@using KeplerCMS.Data.Models
 @using KeplerCMS.Areas.Housekeeping.Models.Enums
+@using Newtonsoft.Json
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
@@ -27,6 +29,9 @@
             break;
         case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
+            break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
+            activeMenuItem = HousekeepingMenu.Localization;
             break;
         case "/housekeeping/upload":
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
@@ -65,12 +70,18 @@
         <div class="top">
             <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
             <ul class="menu">
-                <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.Statistics) ? "class=active" : "")><a href="">Statistics</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
-                <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="">Localization</a></li>
+                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping_website)) {
+                    <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.fuse_administrator_access)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping_localization)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="@Url.Action("Index", "Localization")">Localization</a></li>
+                }
             </ul>
         </div>
         <div class="content">
