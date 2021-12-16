@@ -1,0 +1,121 @@
+﻿@model List<Westwind.Globalization.ResourceItem>;
+@{
+   
+    Layout = "_Housekeeping";
+    var headers = Model.OrderBy(q => q.ResourceSet).Select(x=>x.ResourceSet).Distinct();;
+}
+
+<h1>Localization</h1>
+@foreach (var header in headers)
+{
+    <h2>@header</h2>
+    <div class="divTable">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell">Resource ID</div>
+                <div class="divTableCell">Resource Set</div>
+                <div class="divTableCell">Locale</div>
+            </div>
+            @foreach (var resourceItem in Model.Where(q=>q.ResourceSet == header))
+            {
+                <div class="divTableRow" onclick="openValue(this, '@resourceItem.ResourceId', '@resourceItem.ResourceSet', '@resourceItem.LocaleId')">
+                    <div class="divTableCell">@resourceItem.ResourceId</div>
+                    <div class="divTableCell">@resourceItem.ResourceSet</div>
+                    <div class="divTableCell">@resourceItem.LocaleId</div>
+                    <div class="divTableValue" style="display:none"><textarea>@resourceItem.Value</textarea></div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+<script>
+     function openValue(me, resId, resSet, locale) {
+        var children = me.childNodes;
+        var resValue;
+        for(i = 0; i < children.length; i++) {
+            if(children[i].className === "divTableValue") {
+               resValue = children[i].children[0];
+            }
+        }
+
+        const value =  Swal.fire({
+            input: 'textarea',
+            inputValue: resValue.value,
+            showCancelButton: true,
+            customClass: 'swal-wide'
+        }).then(function (result) {
+            if(result.value) {
+                resValue.innerHTML = result.value;
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Save")",
+                    data: JSON.stringify({
+                        ResourceId: resId,
+                        ResourceSet: resSet,
+                        Value: resValue.value,
+                        LocaleId: locale
+                    }),
+                    success: function () {
+                        Swal.fire({
+                            title: 'Saved!',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end',
+                            timer: 1500
+                        });
+                    },
+                    contentType: "application/json; charset=utf-8"
+                });
+            }
+            
+        });
+    }
+</script>
+
+
+<style>
+    .swal-wide{
+        width:50% !important;
+        height:50% !important;
+    }
+    .swal-wide .swal2-content {
+        height:100%;
+    }
+    .swal-wide textarea {
+        height:100%;
+    }
+    .divTable{
+        display: table;
+        width: 100%;
+    }
+
+    .divTable .divTableRow:first-child {
+        background-color: #0066cc;
+        font-weight: bold;
+        color:#fff;
+    }
+    .divTableRow {
+        display: table-row;
+    }
+    .divTableInner {
+        display: table-row-group;
+    }
+    .divTableCell, .divTableHead {
+        border: 1px solid #999999;
+        display: table-cell;
+        padding: 3px 10px;
+        width: 33%;
+        cursor:pointer;
+    }
+    .divTableHeading {
+        background-color: #EEE;
+        display: table-header-group;
+        font-weight: bold;
+    }
+    .divTableBody {
+        display: table-row-group;
+    }
+</style>
