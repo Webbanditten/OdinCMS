@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
+    [MenuFilter]
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
         private readonly ISettingsService _settingsService;
 
-        [MenuFilter]
         public AccountController(IUserService userService, ISettingsService settingsService)
         {
             _settingsService = settingsService;
