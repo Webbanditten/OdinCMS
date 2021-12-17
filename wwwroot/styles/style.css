@@ -1,6 +1,5 @@
 body {
     background-color: #083940;
-    background-image: url(../images/bg_patterns/bday_background.png);
     margin: 0;
     padding: 0;
     font-size: 11px;
@@ -121,7 +120,6 @@ input.process-button-activated {
 /* --- top element of the pages --- */
 
 #top {
-    background-image: url(../c_images/hotelviews/web_view_bg_dk.gif);
     background-repeat: no-repeat;
     background-position: 0 37px;
     height: 216px;

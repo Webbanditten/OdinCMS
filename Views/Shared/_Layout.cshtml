@@ -54,7 +54,14 @@
     </script>
 
 </head>
-<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")">
+@{
+    var background = "/images/bg_patterns/bday_background.png";
+    var cmsBackground = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.background") : null; 
+    if(cmsBackground != null && cmsBackground.Value != "0" && !string.IsNullOrEmpty(cmsBackground.Value)) {
+        background = cmsBackground.Value;
+    }
+}
+<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")" style="background-image: url(@background)">
     <div id="overlay"></div>
     <h1 id="main-header">Habbo</h1>
     <div id="wrapper">
@@ -98,7 +105,14 @@
 
         </div>
         <div id="top_wrap">
-            <div id="top">
+            @{
+                var banner = "/c_images/hotelviews/web_view_bg_dk.gif";
+                var cmsBanner = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.background") : null; 
+                if(cmsBanner != null && cmsBanner.Value != "0" && !string.IsNullOrEmpty(cmsBanner.Value)) {
+                    banner = cmsBackground.Value;
+                }
+            }
+            <div id="top" style="background-image: url(@banner)">
                 <div id="topdim"></div>
                 <div id="top-elements">
                     <table id="topbar">
