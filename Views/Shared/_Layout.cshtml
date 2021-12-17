@@ -107,7 +107,7 @@
         <div id="top_wrap">
             @{
                 var banner = "/c_images/hotelviews/web_view_bg_dk.gif";
-                var cmsBanner = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.background") : null; 
+                var cmsBanner = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.hotel_banner") : null; 
                 if(cmsBanner != null && cmsBanner.Value != "0" && !string.IsNullOrEmpty(cmsBanner.Value)) {
                     banner = cmsBackground.Value;
                 }
