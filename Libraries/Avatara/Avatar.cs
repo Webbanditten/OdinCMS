@@ -375,8 +375,10 @@ namespace KeplerCMS.Avatara
                             Dictionary<string, string> hatsFigureData = new Dictionary<string, string>();
                             foreach (string hatData in hats.Split("."))
                             {
-                                string[] hatParts = hatData.Split("-");
-                                hatsFigureData.Add(hatParts[0], string.Join("-", hatParts));
+                                if(!String.IsNullOrEmpty(hatData)) {
+                                    string[] hatParts = hatData.Split("-");
+                                    hatsFigureData.Add(hatParts[0], string.Join("-", hatParts));
+                                }
 
                             }
 
