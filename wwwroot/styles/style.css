@@ -124,7 +124,7 @@ input.process-button-activated {
     background-image: url(../c_images/hotelviews/web_view_bg_dk.gif);
     background-repeat: no-repeat;
     background-position: 0 37px;
-    height: 216px;
+    height: auto;
     width: 928px;
     position: relative;
 }
@@ -598,20 +598,23 @@ img.tabmenu-image.coins {
 
 #submenu {
     background: transparent url(../images/navi/navi_bar_slice_btm.gif) no-repeat;
-    width: 928px;
-    height: 22px;
-    padding: 0 0 0 6px;
+    width: 922px;
+    height: auto;
+    min-height: 22px;
+    padding: 0 0 1px 6px;
     margin: 0;
     position: relative;
+    background-position-y: bottom;
 }
 
 #submenu .subnav {
+    background: transparent url(../images/navi/navi_bar_slice_mid.gif) repeat-y;
     color: #930;
-    padding: 2px 0 2px 3px !important;
+    padding: 3px 0 0 13px !important;
     padding/**/
     : 2px 0 0 3px;
-    margin: 0;
-    height: 16px;
+    margin: 0 0 8px -6px;
+    height: auto;
     text-align: left;
     text-transform: none;
     font-size: 10px;
@@ -622,6 +625,11 @@ img.tabmenu-image.coins {
     text-decoration: none;
     font-size: 10px;
     text-decoration: underline;
+    white-space: nowrap;
+}
+
+#submenu .subnav span {
+    white-space: nowrap;
 }
 
 #main-content {
