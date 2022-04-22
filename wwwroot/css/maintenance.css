@@ -1,85 +1,92 @@
 * {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
+  image-rendering: optimizeSpeed; /*                     */
+  image-rendering: -moz-crisp-edges; /* Firefox             */
+  image-rendering: -o-crisp-edges; /* Opera               */
+  image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+  image-rendering: pixelated; /* Chrome as of 2019   */
+  image-rendering: optimize-contrast; /* CSS3 Proposed       */
+  -ms-interpolation-mode: nearest-neighbor; /* IE8+                */
 }
 
 .maintenance-body {
-    background: url("../images/maintenance/bg.png");
-    font-size: 11px;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
+  background: url("../images/maintenance/bg.png");
+  font-size: 11px;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 .maintenance-container {
-    width: 680px;
-    margin: 5vh auto 0 auto;
+  width: 680px;
+  margin: 5vh auto 0 auto;
 }
 
 .maintenance-header {
-    width: 680px;
-    height: 101px;
-    background: url("../images/maintenance/header.png");
-    text-align: center;
+  width: 680px;
+  height: 101px;
+  background: url("../images/maintenance/header.png");
+  text-align: center;
 }
 
 .maintenance-header img {
-    margin-top: 33px;
+  margin-top: 33px;
 }
 
 .maintenance-content {
-    background: url("../images/maintenance/container.png") repeat-y;
-    display: flex;
-    justify-content: center;
-    padding: 44px 0 109px 0;
+  background: url("../images/maintenance/container.png") repeat-y;
+  display: flex;
+  justify-content: center;
+  padding: 44px 0 109px 0;
 }
 
 .maintenance-footer {
-    width: 680px;
-    height: 28px;
-    background: url("../images/maintenance/footer.png") repeat-y;
-    text-align: center;
-    padding-top: 5px;
+  width: 680px;
+  height: 28px;
+  background: url("../images/maintenance/footer.png") repeat-y;
+  text-align: center;
+  padding-top: 5px;
 }
 
 .maintenance-left-bubble-top {
-    width: 286px;
-    height: 6px;
-    background: url("../images/maintenance/left-bubble-top.png");
+  width: 286px;
+  height: 6px;
+  background: url("../images/maintenance/left-bubble-top.png");
 }
 
 .maintenance-left-bubble-middle {
-    width: 264px;
-    padding: 5px 11px 10px 11px;
-    background: url("../images/maintenance/left-bubble-middle.png");
+  width: 264px;
+  padding: 5px 11px 10px 11px;
+  background: url("../images/maintenance/left-bubble-middle.png");
 }
 
 .maintenance-left-bubble-middle img {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .maintenance-left-bubble-bottom {
-    width: 286px;
-    height: 118px;
-    background: url("../images/maintenance/left-bubble-bottom.png");
+  width: 286px;
+  height: 118px;
+  background: url("../images/maintenance/left-bubble-bottom.png");
 }
 
 .maintenance-right-bubble-top {
-    width: 286px;
-    height: 6px;
-    background: url("../images/maintenance/right-bubble-top.png");
+  width: 286px;
+  height: 6px;
+  background: url("../images/maintenance/right-bubble-top.png");
 }
 
 .maintenance-right-bubble-middle {
-    width: 264px;
-    padding: 5px 11px 10px 11px;
-    background: url("../images/maintenance/right-bubble-middle.png");
+  width: 264px;
+  padding: 5px 11px 10px 11px;
+  background: url("../images/maintenance/right-bubble-middle.png");
 }
 
 .maintenance-right-bubble-bottom {
-    width: 286px;
-    height: 149px;
-    background: url("../images/maintenance/right-bubble-bottom.png");
+  width: 286px;
+  height: 149px;
+  background: url("../images/maintenance/right-bubble-bottom.png");
 }
 
 .bubble:first-child {
-    margin-right: 10px;
+  margin-right: 10px;
 }
