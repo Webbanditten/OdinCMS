@@ -44,7 +44,7 @@ namespace KeplerCMS.Controllers
             var photo = await _photoService.Get(photoId);
             if (photo != null)
             {
-                HttpWebRequest req = WebRequest.Create(new Uri("http://127.0.0.1:9000?style=" + style)) as HttpWebRequest;
+                HttpWebRequest req = WebRequest.Create(new Uri(_configuration.GetSection("keplercms:photoService").Value + "?style=" + style)) as HttpWebRequest;
                 req.KeepAlive = false;
                 req.Method = "POST";
                 req.ContentType = "stream/octet-stream";
