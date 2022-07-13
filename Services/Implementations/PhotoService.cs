@@ -24,6 +24,11 @@ namespace KeplerCMS.Services.Implementations
             return await _context.ItemsPhotos.Where(s => s.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<ItemsPhotos[]> GetMany(int skip)
+        {
+            return await _context.ItemsPhotos.Skip(skip).Take(100).ToArrayAsync();
+        }
+
     }
 
 }
