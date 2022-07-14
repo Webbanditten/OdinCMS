@@ -104,4 +104,10 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Flazzy">
+      <HintPath>.\Libraries\Flazzy\Flazzy.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
