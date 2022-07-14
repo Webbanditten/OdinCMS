@@ -196,6 +196,7 @@ namespace KeplerCMS.Controllers
 
                 if (System.IO.File.Exists("furni_export/" + sprite + "/export/" + hashedUniqueName + ".png"))
                 {
+                    Response.Headers.Add("Cache-Control", "public, max-age=31536000");
                     return File(System.IO.File.ReadAllBytes("furni_export/" + sprite + "/export/" + hashedUniqueName + ".png"), "image/png");
                 }
             }
