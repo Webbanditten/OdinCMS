@@ -79,12 +79,5 @@ namespace KeplerCMS.Controllers
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
             return Content("ok");
         }
-
-        [Route("api/photo")]
-        public async Task<IActionResult> Photo(int id) {
-            var photo = await _photoService.Get(id);
-
-            return File(photo.PhotoData, "image/png");
-        }
     }
 }

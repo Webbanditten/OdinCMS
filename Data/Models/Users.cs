@@ -28,6 +28,9 @@ namespace KeplerCMS.Data.Models
         [Column("sex")]
         public string Gender { get; set; }
 
+        [Column("email")]
+        public string Email { get; set; }
+
         [Column("rank")]
         public int Rank { get; set; }
         [Column("badge")]

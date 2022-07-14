@@ -7,5 +7,6 @@ namespace KeplerCMS.Services.Interfaces
     public interface IPhotoService
     {
         Task<ItemsPhotos> Get(int id);
+        Task<ItemsPhotos[]> GetMany(int skip);
     }
 }
