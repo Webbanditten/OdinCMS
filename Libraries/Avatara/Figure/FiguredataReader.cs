@@ -67,7 +67,7 @@ namespace KeplerCMS.Avatara.Figure
 
         public void LoadFigureSets()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//sets/settype/set");
 
             for (int i = 0; i < list.Count; i++)
@@ -126,7 +126,7 @@ namespace KeplerCMS.Avatara.Figure
 
         public void LoadFigurePalettes()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//colors/palette");
 
             for (int i = 0; i < list.Count; i++)
@@ -153,7 +153,7 @@ namespace KeplerCMS.Avatara.Figure
 
         public void loadFigureSetTypes()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//settype");
 
             for (int i = 0; i < list.Count; i++)

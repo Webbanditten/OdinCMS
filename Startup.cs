@@ -160,20 +160,6 @@ namespace KeplerCMS
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "slug",
-                    pattern: "{slug}",
-                    defaults: new { controller = "Page", action = "Index" },
-                    constraints: new { slug = ".+" }
-                );
-
-                endpoints.MapControllerRoute(
-                    name: "slugWithSub",
-                    pattern: "{slug}/{subSlug}",
-                    defaults: new { controller = "Page", action = "Index" },
-                    constraints: new { slug = ".+" }
-                );
-
-                endpoints.MapControllerRoute(
                     name: "newsWithSlug",
                     pattern: "news/{slug}",
                     defaults: new { controller = "News", action = "Index" },
@@ -187,7 +173,7 @@ namespace KeplerCMS
                 );
 
                 endpoints.MapControllerRoute(
-                name: "MyArea",
+                name: "CustomAreaHandler",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(
@@ -195,6 +181,23 @@ namespace KeplerCMS
                 pattern: "{controller=Page}/{action=Index}/{slug?}");
 
                 endpoints.MapControllerRoute(name: "api", pattern: "api/{controller=MeApiController}");
+
+
+                endpoints.MapControllerRoute(
+                    name: "slug",
+                    pattern: "{slug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "slugWithSub",
+                    pattern: "{slug}/{subSlug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                
             });
 
         }

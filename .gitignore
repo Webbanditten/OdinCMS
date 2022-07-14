@@ -351,3 +351,5 @@ MigrationBackup/
 
 # Development files
 appsettings.Development.json
+swfs
+furni_export
