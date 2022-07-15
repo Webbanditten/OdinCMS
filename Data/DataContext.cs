@@ -51,6 +51,11 @@ namespace KeplerCMS.Data
         public DbSet<Movies> Movies { get; set; }
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<Answer> PollsAnswers { get; set; }
+        public DbSet<Question> PollsQuestions { get; set; }
+        public DbSet<QuestionOption> PollsQuestionsOptions { get; set; }
+        public DbSet<Trigger> PollsTriggers { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }
