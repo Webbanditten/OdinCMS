@@ -27,12 +27,10 @@ namespace KeplerCMS.Controllers
         private readonly IUserService _userService;
         private readonly ISettingsService _settingsService;
         private readonly IConfiguration _configuration;
-        private readonly IRazorViewToStringRenderer _renderer;
         private readonly IFluentEmail _fluentEmail;
 
-        public AccountController(IConfiguration configuration,IRazorViewToStringRenderer renderer, IUserService userService, ISettingsService settingsService, IFluentEmail fluentEmail)
+        public AccountController(IConfiguration configuration, IUserService userService, ISettingsService settingsService, IFluentEmail fluentEmail)
         {
-            _renderer = renderer;
             _configuration = configuration;
             _settingsService = settingsService;
             _userService = userService;
@@ -181,7 +179,12 @@ namespace KeplerCMS.Controllers
             return View(newUser);
         }
         [HttpGet]
-        public async Task<IActionResult> ForgotPassword(string returnUrl)
+        public async Task<IActionResult> Forgot()
+        {
+            return View();
+        }
+        [HttpGet]
+        public async Task<IActionResult> ForgotPassword()
         {
 
             var model = new ForgotPasswordModel {
