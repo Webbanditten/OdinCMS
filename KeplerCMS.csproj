@@ -91,6 +91,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentEmail.Mailgun" Version="3.0.2" />
+    <PackageReference Include="FluentEmail.Razor" Version="3.0.2" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.11" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.1" />

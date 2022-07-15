@@ -1,13 +1,22 @@
 ﻿using Isopoh.Cryptography.Argon2;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using KeplerCMS.Helpers;
+using KeplerCMS.Models.Emails;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Text;
+using System.Net.Mime;
+using FluentEmail.Core;
+using System.IO;
 
 namespace KeplerCMS.Controllers
 {
@@ -17,11 +26,17 @@ namespace KeplerCMS.Controllers
     {
         private readonly IUserService _userService;
         private readonly ISettingsService _settingsService;
+        private readonly IConfiguration _configuration;
+        private readonly IRazorViewToStringRenderer _renderer;
+        private readonly IFluentEmail _fluentEmail;
 
-        public AccountController(IUserService userService, ISettingsService settingsService)
+        public AccountController(IConfiguration configuration,IRazorViewToStringRenderer renderer, IUserService userService, ISettingsService settingsService, IFluentEmail fluentEmail)
         {
+            _renderer = renderer;
+            _configuration = configuration;
             _settingsService = settingsService;
             _userService = userService;
+            _fluentEmail = fluentEmail;
         }
 
         [HttpGet]
@@ -34,7 +49,7 @@ namespace KeplerCMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string username, string password, string returnUrl)
         {
-            if(username != null && password != null)
+            if (username != null && password != null)
             {
                 var user = await _userService.GetUserByUsername(username);
                 if (user != null && Argon2.Verify(user.Password, password))
@@ -76,7 +91,7 @@ namespace KeplerCMS.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
-                    if(returnUrl != null && returnUrl != "")
+                    if (returnUrl != null && returnUrl != "")
                     {
                         return Redirect(returnUrl);
                     }
@@ -88,14 +103,15 @@ namespace KeplerCMS.Controllers
                     ViewData["wrong_users_or_password"] = true;
                     return View("index", returnUrl);
                 }
-            } else
+            }
+            else
             {
                 ViewData["please_enter_username"] = true;
                 return View("index", returnUrl);
             }
         }
 
-        public async Task <IActionResult> Logout()
+        public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("index", "home");
@@ -139,7 +155,7 @@ namespace KeplerCMS.Controllers
                 Email = model.Email
             });
             // Lets sign the user in if its created
-            if(newUser != null)
+            if (newUser != null)
             {
                 var user = await _userService.GetUserById(newUser.Id);
                 if (user != null && Argon2.Verify(user.Password, model.Password))
@@ -158,11 +174,30 @@ namespace KeplerCMS.Controllers
                         authProperties);
                 }
             }
-            if(newUser == null )
+            if (newUser == null)
             {
                 return Redirect("/");
             }
             return View(newUser);
+        }
+        [HttpGet]
+        public async Task<IActionResult> ForgotPassword(string returnUrl)
+        {
+
+            var model = new ForgotPasswordModel {
+                Title = "Reset Password",
+                Body = "bla bla {link} bla bla ",
+                ResetPassword = "her",
+                ResetPasswordUri = "www.google.com"
+            };
+            var response = await _fluentEmail.To("patrick-wohlk@hotmail.com")
+            .UsingTemplateFromFile($"{Directory.GetCurrentDirectory()}/Views/Emails/ForgotPassword.cshtml",model)
+            .PlaintextAlternativeUsingTemplateFromFile($"{Directory.GetCurrentDirectory()}/Views/Emails/ForgotPasswordText.cshtml",model)
+            .Subject("Habbo Hotel - Glemt kodeord")
+            .SetFrom("no-reply@habbo.webbanditten.dk", "Habbo Hotel")
+            .SendAsync();
+
+            return Content("OK");
         }
     }
 }

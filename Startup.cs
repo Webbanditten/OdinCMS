@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using KeplerCMS.Data;
+using KeplerCMS.Helpers;
 using KeplerCMS.Services;
 using KeplerCMS.Services.Implementations;
 using KeplerCMS.Services.Interfaces;
@@ -76,6 +77,10 @@ namespace KeplerCMS
                 options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
             ));
 
+            services.AddFluentEmail("fromemail@test.test")
+            .AddRazorRenderer()
+            .AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
+
             services.AddRouting(options => options.LowercaseUrls = true);
 
 
@@ -103,6 +108,7 @@ namespace KeplerCMS
             services.AddScoped<IHabbowoodService, HabbowoodService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
+            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
             if (!CurrentEnvironment.IsDevelopment())
             {
