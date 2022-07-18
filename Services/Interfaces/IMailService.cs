@@ -9,5 +9,6 @@ namespace KeplerCMS.Services.Interfaces
     {
         public Task<FluentEmail.Core.Models.SendResponse> SendEmail(string[] to, string subject, string body);
         public Task<FluentEmail.Core.Models.SendResponse> SendForgotPassword(string to, string link);
+        public Task<FluentEmail.Core.Models.SendResponse> SendListOfHabboNames(string to, string[] habboNames);
     }
 }

@@ -184,12 +184,41 @@ namespace KeplerCMS.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> ForgotPassword()
+        [Route("account/forgot/reset/{guid}")]
+        public async Task<IActionResult> ResetPassword(string guid)
         {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("account/forgot/habboname")]
+        public async Task<IActionResult> ForgotHabboName(string email)
+        {
+            ViewData["success_sent_habbonames"] = true;
+            var users = await _userService.GetUsersByEmail(email);
+            if(users.Length > 0) {
+                List<string> habboNames = new List<string>();
+                foreach (var user in users)
+                {
+                    habboNames.Add(user.Username);
+                }
+                await _mailService.SendListOfHabboNames(email, habboNames.ToArray());
+            }
+            return View("forgot");
+        }
 
-            await _mailService.SendForgotPassword("patrick-wohlk@hotmail.com", "http://localhost:4200/reset-password");
-
-            return Content("OK");
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("account/forgot/password")]
+        public async Task<IActionResult> ForgotHabboName(string username, string email)
+        {
+            ViewData["success_sent_forgot_password"] = true;
+            var user = await _userService.GetUserByUsername(username);
+            if(user != null && user.Email.ToLower() == email.ToLower()) {
+                var link = await _userService.GeneratePasswordResetLink(user.Id);
+                await _mailService.SendForgotPassword(email, link);
+            }
+            return View("forgot");
         }
     }
 }

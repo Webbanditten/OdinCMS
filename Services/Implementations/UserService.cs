@@ -5,6 +5,7 @@ using KeplerCMS.Helpers;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +18,14 @@ namespace KeplerCMS.Services.Implementations
         private readonly ICommandQueueService _commandQueueService;
         private readonly IFuseService _fuseService;
         private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserService(ICommandQueueService commandQueueService, IFuseService fuseService, DataContext context)
+        public UserService(IConfiguration configuration, ICommandQueueService commandQueueService, IFuseService fuseService, DataContext context)
         {
             _commandQueueService = commandQueueService;
             _fuseService = fuseService;
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<Users> GetUserByUsername(string username)
@@ -95,6 +98,41 @@ namespace KeplerCMS.Services.Implementations
                 await _context.SaveChangesAsync();
             }
             return user;
+        }
+
+        public Task<Users[]> GetUsersByEmail(string email)
+        {
+            return _context.Users.Where(user => user.Email.ToLower() == email.ToLower()).ToArrayAsync();
+        }
+
+        public async Task<string> GeneratePasswordResetLink(int userId)
+        {
+            var user = await GetUserById(userId);
+            if(user != null)
+            {
+                var guid = Guid.NewGuid().ToString();
+                var timestamp = DateTime.Now;
+                var resetPassword = new ResetPassword
+                {
+                    UserId = userId,
+                    Timestamp = timestamp,
+                    guid = guid
+                };
+                _context.ResetPasswords.Add(resetPassword);
+                await _context.SaveChangesAsync();
+                return string.IsNullOrEmpty(_configuration.GetSection("keplercms:publicUrl").Value) ? "http://localhost:5000/account/forgot/reset/"+guid : _configuration.GetSection("keplercms:publicUrl").Value+"/account/forgot/reset/"+guid;
+            }
+            return null;
+        }
+
+        public Task<bool> ValidatePasswordResetLink(string guid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ResetPassword(string guid, string password)
+        {
+            throw new NotImplementedException();
         }
     }
 
