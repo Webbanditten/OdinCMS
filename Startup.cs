@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
+using Mjml.AspNetCore;
 using Westwind.Globalization.AspnetCore;
 
 namespace KeplerCMS
@@ -78,7 +79,6 @@ namespace KeplerCMS
             ));
 
             services.AddFluentEmail("fromemail@test.test")
-            .AddRazorRenderer()
             .AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
 
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -108,6 +108,21 @@ namespace KeplerCMS
             services.AddScoped<IHabbowoodService, HabbowoodService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<IMailService, MailService>();
+
+            services.AddMjmlServices(o =>
+            {
+                if (CurrentEnvironment.IsDevelopment())
+                {
+                    o.DefaultKeepComments = true;
+                    o.DefaultBeautify = true;
+                }
+                else
+                {
+                    o.DefaultKeepComments = false;
+                    o.DefaultMinify = true;
+                }
+            });
 
             if (!CurrentEnvironment.IsDevelopment())
             {

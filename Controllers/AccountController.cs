@@ -27,14 +27,14 @@ namespace KeplerCMS.Controllers
         private readonly IUserService _userService;
         private readonly ISettingsService _settingsService;
         private readonly IConfiguration _configuration;
-        private readonly IFluentEmail _fluentEmail;
+        private readonly IMailService _mailService;
 
-        public AccountController(IConfiguration configuration, IUserService userService, ISettingsService settingsService, IFluentEmail fluentEmail)
+        public AccountController(IConfiguration configuration, IUserService userService, ISettingsService settingsService, IMailService mailService)
         {
             _configuration = configuration;
             _settingsService = settingsService;
             _userService = userService;
-            _fluentEmail = fluentEmail;
+            _mailService = mailService;
         }
 
         [HttpGet]
@@ -187,18 +187,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> ForgotPassword()
         {
 
-            var model = new ForgotPasswordModel {
-                Title = "Reset Password",
-                Body = "bla bla {link} bla bla ",
-                ResetPassword = "her",
-                ResetPasswordUri = "www.google.com"
-            };
-            var response = await _fluentEmail.To("patrick-wohlk@hotmail.com")
-            .UsingTemplateFromFile($"{Directory.GetCurrentDirectory()}/Views/Emails/ForgotPassword.cshtml",model)
-            .PlaintextAlternativeUsingTemplateFromFile($"{Directory.GetCurrentDirectory()}/Views/Emails/ForgotPasswordText.cshtml",model)
-            .Subject("Habbo Hotel - Glemt kodeord")
-            .SetFrom("no-reply@habbo.webbanditten.dk", "Habbo Hotel")
-            .SendAsync();
+            await _mailService.SendForgotPassword("patrick-wohlk@hotmail.com", "http://localhost:4200/reset-password");
 
             return Content("OK");
         }
