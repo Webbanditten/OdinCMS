@@ -16,6 +16,11 @@ namespace KeplerCMS.Services.Interfaces
         public Task<Users> Create(Users user);
 
         public Task<Users> SetGroup(int userId, int groupId);
+        public Task<Users[]> GetUsersByEmail(string email);
+
+        public Task<string> GeneratePasswordResetLink(int userId);
+        public Task<Users> ValidatePasswordResetLink(string guid);
+        public Task<bool> ResetPassword(string guid, string password);
 
     }
 }
