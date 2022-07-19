@@ -31,7 +31,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS final
 RUN apt-get update \
     && apt-get install -y --allow-unauthenticated \
         #libc6-dev \
-        libgdiplus \
+        libgdiplus 
         #libx11-dev \
 RUN apt-get update && apt-get install -y --allow-unauthenticated curl
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
