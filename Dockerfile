@@ -33,7 +33,10 @@ RUN apt-get update \
         #libc6-dev \
         libgdiplus \
         #libx11-dev \
-     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --allow-unauthenticated curl
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y --allow-unauthenticated nodejs
+RUN  rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "KeplerCMS.dll"]
