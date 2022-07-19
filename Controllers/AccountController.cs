@@ -2,7 +2,6 @@
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Helpers;
-using KeplerCMS.Models.Emails;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -187,7 +186,21 @@ namespace KeplerCMS.Controllers
         [Route("account/forgot/reset/{guid}")]
         public async Task<IActionResult> ResetPassword(string guid)
         {
-            return View();
+            var valid = false;
+            var user = await _userService.ValidatePasswordResetLink(guid);
+            if(user != null) {
+                valid = true;
+            }
+            return View(new ResetPasswordViewModel { Valid = valid, Code = guid });
+        }
+        [HttpPost]
+        [Route("account/forgot/reset")]
+        public async Task<IActionResult> ResetPassword(string code, string password)
+        {
+            var success = await _userService.ResetPassword(code, password);
+            if(success) return View("ResetPasswordSuccess");
+            
+            return View(new ResetPasswordViewModel { Valid = false });
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

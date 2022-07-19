@@ -125,14 +125,31 @@ namespace KeplerCMS.Services.Implementations
             return null;
         }
 
-        public Task<bool> ValidatePasswordResetLink(string guid)
+        public async Task<Users> ValidatePasswordResetLink(string guid)
         {
-            throw new NotImplementedException();
+            var resetPasswordEntry = await _context.ResetPasswords.Where(reset => reset.guid == guid).FirstOrDefaultAsync();
+            if(resetPasswordEntry != null && resetPasswordEntry.Timestamp.AddMinutes(10) >= DateTime.Now) {
+                return await GetUserById(resetPasswordEntry.UserId);
+            }
+            return null;
         }
 
-        public Task<bool> ResetPassword(string guid, string password)
+        public async Task<bool> ResetPassword(string guid, string password)
         {
-            throw new NotImplementedException();
+            var resetPasswordEntry = await _context.ResetPasswords.Where(reset => reset.guid == guid).FirstOrDefaultAsync();
+            if(resetPasswordEntry != null) {
+                var user = await ValidatePasswordResetLink(guid);
+                _context.ResetPasswords.Remove(resetPasswordEntry);
+                if(user != null) {
+                    user.Password = Argon2.Hash(password);
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return false;
         }
     }
 

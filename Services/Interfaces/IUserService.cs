@@ -19,7 +19,7 @@ namespace KeplerCMS.Services.Interfaces
         public Task<Users[]> GetUsersByEmail(string email);
 
         public Task<string> GeneratePasswordResetLink(int userId);
-        public Task<bool> ValidatePasswordResetLink(string guid);
+        public Task<Users> ValidatePasswordResetLink(string guid);
         public Task<bool> ResetPassword(string guid, string password);
 
     }

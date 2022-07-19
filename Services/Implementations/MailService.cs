@@ -1,15 +1,9 @@
 ﻿using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using KeplerCMS.Data;
-using KeplerCMS.Data.Models;
-using KeplerCMS.Models;
-using KeplerCMS.Models.Emails;
-using KeplerCMS.Models.Enums;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Mjml.AspNetCore;
-using Newtonsoft.Json;
-using System;
 using System.Threading.Tasks;
 using Westwind.Globalization;
 
