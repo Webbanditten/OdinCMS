@@ -194,6 +194,7 @@ namespace KeplerCMS.Controllers
             return View(new ResetPasswordViewModel { Valid = valid, Code = guid });
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Route("account/forgot/reset")]
         public async Task<IActionResult> ResetPassword(string code, string password)
         {
