@@ -1,3 +1,13 @@
+* {
+	image-rendering: optimizeSpeed; /*                     */
+	image-rendering: -moz-crisp-edges; /* Firefox             */
+	image-rendering: -o-crisp-edges; /* Opera               */
+	image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+	image-rendering: pixelated; /* Chrome as of 2019   */
+	image-rendering: optimize-contrast; /* CSS3 Proposed       */
+	-ms-interpolation-mode: nearest-neighbor; /* IE8+                */
+  }
+  
 h2 { 
 	margin: 0px; 
 	padding-bottom: 5px; 
@@ -77,4 +87,13 @@ ul
 	height: 150px;
 }
 
+.imessageinput
+{
+	width: 550px;
+}
 
+label {
+	margin-bottom:4px;
+	margin-top:8px;
+	display:block;
+}
