@@ -28,6 +28,9 @@ namespace KeplerCMS.Data.Models
         [Column("sex")]
         public string Gender { get; set; }
 
+        [Column("email")]
+        public string Email { get; set; }
+
         [Column("rank")]
         public int Rank { get; set; }
         [Column("badge")]
@@ -75,8 +78,9 @@ namespace KeplerCMS.Data.Models
                 var today = DateTime.UtcNow;
                 var expirationDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                 expirationDate = expirationDate.AddSeconds(ClubExpiration).ToLocalTime();
-
-                return (expirationDate - today).Days;
+                
+                var days = (expirationDate - today).Days;
+                return days > 0 ? days : 0;
             }
         }
 

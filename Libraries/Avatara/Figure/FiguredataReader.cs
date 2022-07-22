@@ -67,7 +67,7 @@ namespace KeplerCMS.Avatara.Figure
 
         public void LoadFigureSets()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//sets/settype/set");
 
             for (int i = 0; i < list.Count; i++)
@@ -117,14 +117,16 @@ namespace KeplerCMS.Avatara.Figure
                         figureSet.HiddenLayers.Add(hiddenLayer.Attributes.GetNamedItem("parttype").InnerText);
                     }
                 }
-
-                this.FigureSets.Add(id, figureSet);
+                if(!this.FigureSets.ContainsKey(id)) {
+                    this.FigureSets.Add(id, figureSet);
+                }
+                
             }
         }
 
         public void LoadFigurePalettes()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//colors/palette");
 
             for (int i = 0; i < list.Count; i++)
@@ -151,7 +153,7 @@ namespace KeplerCMS.Avatara.Figure
 
         public void loadFigureSetTypes()
         {
-            var xmlFile = FileUtil.SolveXmlFile("", "figuredata");
+            var xmlFile = FileUtil.SolveXmlFile("", "figuredata.xml");
             var list = xmlFile.SelectNodes("//settype");
 
             for (int i = 0; i < list.Count; i++)
@@ -160,8 +162,12 @@ namespace KeplerCMS.Avatara.Figure
                 String set = setType.Attributes.GetNamedItem("type").InnerText;
                 int paletteId = int.Parse(setType.Attributes.GetNamedItem("paletteid").InnerText);
                 bool isMandatory = setType.Attributes.GetNamedItem("mandatory").InnerText == "1";
-
-                this.FigureSetTypes.Add(set, new FigureSetType(set, paletteId, isMandatory));
+                try {
+                    this.FigureSetTypes.Add(set, new FigureSetType(set, paletteId, isMandatory));
+                } catch(Exception e) {
+                    System.Console.WriteLine("ERROR #01", e);
+                }
+                
             }
 
         }

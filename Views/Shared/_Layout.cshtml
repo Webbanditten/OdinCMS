@@ -5,6 +5,7 @@
 @{
     var userData = (Users)ViewData["user"];
     var menu = (List<Menu>)ViewData["menu"];
+    var settings = (List<Settings>)ViewData["settings"];
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
@@ -53,7 +54,14 @@
     </script>
 
 </head>
-<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")">
+@{
+    var background = "/images/bg_patterns/bday_background.png";
+    var cmsBackground = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.background") : null; 
+    if(cmsBackground != null && cmsBackground.Value != "0" && !string.IsNullOrEmpty(cmsBackground.Value)) {
+        background = cmsBackground.Value;
+    }
+}
+<body id="@((Context.Request.Cookies["editid"] != null) ? "editmode" : "")" style="background-image: url(@background)">
     <div id="overlay"></div>
     <h1 id="main-header">Habbo</h1>
     <div id="wrapper">
@@ -97,7 +105,14 @@
 
         </div>
         <div id="top_wrap">
-            <div id="top">
+            @{
+                var banner = "/c_images/hotelviews/web_view_bg_dk.gif";
+                var cmsBanner = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.hotel_banner") : null; 
+                if(cmsBanner != null && cmsBanner.Value != "0" && !string.IsNullOrEmpty(cmsBanner.Value)) {
+                    banner = cmsBanner.Value;
+                }
+            }
+            <div id="top" style="background-image: url(@banner)">
                 <div id="topdim"></div>
                 <div id="top-elements">
                     <table id="topbar">
@@ -228,23 +243,26 @@
                             if (menu != null)
                             {
                                 var headerMenu = menu.Where(m => m.Parent == 0).OrderBy(m => m.Order);
-                                var last = headerMenu.Last();
-                                foreach (Menu item in headerMenu)
-                                {
-                                    string lastClass = (item == last) ? "last" : "";
-                                    bool isActive = (Path.Count() > 0 && pathList[0].Contains(item.Href.Substring(1)));
-                                    string active = isActive ? "active" : "";
-                                    bool needsAuthentication = item.State == Enum.GetName(typeof(MenuState), MenuState.authenticated);
-                                    string disabledClass = (needsAuthentication && !User.Identity.IsAuthenticated) ? "disabled" : "";
-                                    string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href=" + item.Href : "";
-                                    if (isActive)
-                                        subMenu = menu.Where(m => m.Parent == item.Id).ToList();
-                                    <li id="@active" class="@disabledClass @lastClass">
-                                        <span class="left"></span>
-                                        <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
-                                        <span class="right"></span>
-                                    </li>
+                                if(headerMenu.Count() > 0) {
+                                    var last = headerMenu.Last();
+                                    foreach (Menu item in headerMenu)
+                                    {
+                                        string lastClass = (item == last) ? "last" : "";
+                                        bool isActive = (Path.Count() > 0 && pathList[0].Contains(item.Href.Substring(1)));
+                                        string active = isActive ? "active" : "";
+                                        bool needsAuthentication = item.State == Enum.GetName(typeof(MenuState), MenuState.authenticated);
+                                        string disabledClass = (needsAuthentication && !User.Identity.IsAuthenticated) ? "disabled" : "";
+                                        string href = (!needsAuthentication || needsAuthentication && User.Identity.IsAuthenticated) ? "href=" + item.Href : "";
+                                        if (isActive)
+                                            subMenu = menu.Where(m => m.Parent == item.Id).ToList();
+                                        <li id="@active" class="@disabledClass @lastClass">
+                                            <span class="left"></span>
+                                            <a @href><img src="@Url.Content("~/c_images/navi_icons/" + item.Icon + ".gif")" alt="" /> <span class="lang-navbar-home">@item.Text</span></a>
+                                            <span class="right"></span>
+                                        </li>
+                                    }
                                 }
+                               
                             }
                         }
                     </ul>
@@ -309,5 +327,15 @@
     <script src="~/api/JavaScriptLocalizationResources?ResourceSet=shared&VarName=resources&localeId=auto&ResourceMode=ResDb"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+    @{
+        var shouldUseRuffle = false;
+        var ruffleSetting = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.use_ruffle") : null; 
+        if(ruffleSetting != null && ruffleSetting.Value == "1") {
+            shouldUseRuffle = true;
+        }
+    }
+    @if(shouldUseRuffle) {
+        <script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
+    }
 </body>
 </html>

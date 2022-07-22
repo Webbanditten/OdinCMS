@@ -11,6 +11,9 @@ using System.Web;
 
 namespace KeplerCMS.Controllers
 {
+    interface HabboNameRequest {
+        public string habboName { get; set; }
+    }
     [ApiController]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class HotelApiController : Controller
@@ -31,14 +34,14 @@ namespace KeplerCMS.Controllers
         [HttpGet("api/hotel/online")]
         public async Task<string> Online()
         {
-            return (await _settingService.GetValue("players.online")).Value;
+            return (await _settingService.Get("players.online")).Value;
         }
 
         [HttpPost("api/hotel/habboname_exists")]
-        public async Task<IActionResult> HabboNameExists(string habboName)
+        public async Task<IActionResult> HabboNameExists([FromForm]string habboName)
         {
             var user = await _userService.GetUserByUsername(habboName);
-            return Content((user != null ? true : false).ToString());
+            return Content((user != null ? "True" : "False"));
         }
 
         [HttpGet("api/hotel/usersearch")]
@@ -75,13 +78,6 @@ namespace KeplerCMS.Controllers
         {
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
             return Content("ok");
-        }
-
-        [Route("api/photo")]
-        public async Task<IActionResult> Photo(int id) {
-            var photo = await _photoService.Get(id);
-
-            return File(photo.PhotoData, "image/png");
         }
     }
 }

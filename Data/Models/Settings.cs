@@ -11,8 +11,10 @@ namespace KeplerCMS.Data.Models
     public class Settings
     {
         [Key]
+        [Display(Name = "Setting")]
         [Column("setting")]
         public string Setting { get; set; }
+        [Display(Name = "Value")]
         [Column("value")]
         public string Value { get; set; }
 

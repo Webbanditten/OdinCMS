@@ -1,0 +1,116 @@
+﻿{
+	"manifest": {
+		"library": {
+			"assets": {
+				"asset": [
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,31"
+						},
+						"_name": "sh_std_fc_1_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-16,31"
+						},
+						"_name": "sh_std_fc_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-12,28"
+						},
+						"_name": "sh_std_fc_1_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-19,31"
+						},
+						"_name": "sh_eyb_fc_1_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-16,29"
+						},
+						"_name": "sh_eyb_fc_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-12,27"
+						},
+						"_name": "sh_eyb_fc_1_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-19,32"
+						},
+						"_name": "sh_spk_fc_1_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,31"
+						},
+						"_name": "sh_spk_fc_1_1_1",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-16,32"
+						},
+						"_name": "sh_spk_fc_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-16,31"
+						},
+						"_name": "sh_spk_fc_1_2_1",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-12,29"
+						},
+						"_name": "sh_spk_fc_1_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-12,28"
+						},
+						"_name": "sh_spk_fc_1_3_1",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "4,16"
+						},
+						"_name": "sh_lay_fc_1_2_0",
+						"_mimeType": "image/png"
+					}
+				]
+			},
+			"_name": "hh_human_50_face",
+			"_version": "0.1"
+		}
+	}
+}

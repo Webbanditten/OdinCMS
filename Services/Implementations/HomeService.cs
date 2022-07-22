@@ -456,7 +456,7 @@ namespace KeplerCMS.Services.Implementations
                                               join user in _context.Users
                                               on member.UserId equals user.Id
                                               where member.GroupId == home.Id
-                                              orderby member.Rights
+                                              orderby member.IRights
                                               select new GroupViewModel
                                               {
                                                   GroupMember = new GroupMembers { 
@@ -481,7 +481,7 @@ namespace KeplerCMS.Services.Implementations
                                               join user in _context.Users
                                               on member.UserId equals user.Id
                                               where member.GroupId == groupId
-                                              orderby member.Rights
+                                              orderby member.IRights
                                               select new GroupMembers { 
                                                       GroupId = member.GroupId,
                                                       Id = member.Id,
@@ -496,7 +496,7 @@ namespace KeplerCMS.Services.Implementations
 
         
 
-        public async Task<ItemViewModel> Rate(int homeId, int rating, int itemId, int userId)
+        public async Task<ItemViewModel> Rate(int rating, int itemId, int userId)
         {
             // Get item to find home id
             var item = await GetItem(itemId);
@@ -516,7 +516,7 @@ namespace KeplerCMS.Services.Implementations
             }
 
             // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(homeId, item.Item.OwnerId);
+            item.WidgetData = await GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
             return item;
         }
 
@@ -738,7 +738,7 @@ namespace KeplerCMS.Services.Implementations
                     return true;
                 } else
                 {
-                    var groupMemberWithRights = await _context.GroupMembers.Where(s => s.GroupId == homeId && s.Rights == true && s.UserId == userId).FirstOrDefaultAsync();
+                    var groupMemberWithRights = await _context.GroupMembers.Where(s => s.GroupId == homeId && s.IRights == 1 && s.UserId == userId).FirstOrDefaultAsync();
                     if(groupMemberWithRights != null)
                     {
                         return true;
@@ -853,7 +853,7 @@ namespace KeplerCMS.Services.Implementations
             var members = new List<GroupMembers>();
             foreach(var i in targetIds) {
                 var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
-                member.Rights = true;
+                member.IRights = 1;
                 members.Add(member);
             }
             await  _context.SaveChangesAsync();
@@ -865,7 +865,7 @@ namespace KeplerCMS.Services.Implementations
             var members = new List<GroupMembers>();
             foreach(var i in targetIds) {
                 var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
-                member.Rights = false;
+                member.IRights = 0;
                 members.Add(member);
             }
             await  _context.SaveChangesAsync();

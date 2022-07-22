@@ -1,0 +1,252 @@
+﻿{
+	"manifest": {
+		"library": {
+			"assets": {
+				"asset": [
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-19,32"
+						},
+						"_name": "sh_std_ea_1_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-14,31"
+						},
+						"_name": "sh_std_ea_1_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,32"
+						},
+						"_name": "sh_std_ea_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-9,30"
+						},
+						"_name": "sh_std_ea_1_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "8,18"
+						},
+						"_name": "sh_lay_ea_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-11,31"
+						},
+						"_name": "sh_std_ea_2_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-11,32"
+						},
+						"_name": "sh_std_ea_2_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-9,33"
+						},
+						"_name": "sh_std_ea_2_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,33"
+						},
+						"_name": "sh_std_ea_2_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "6,17"
+						},
+						"_name": "sh_lay_ea_2_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-18,32"
+						},
+						"_name": "sh_std_ea_3_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-14,31"
+						},
+						"_name": "sh_std_ea_3_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,31"
+						},
+						"_name": "sh_std_ea_3_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-9,29"
+						},
+						"_name": "sh_std_ea_3_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "7,18"
+						},
+						"_name": "sh_lay_ea_3_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-18,31"
+						},
+						"_name": "sh_std_ea_4_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-14,32"
+						},
+						"_name": "sh_std_ea_4_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,32"
+						},
+						"_name": "sh_std_ea_4_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,30"
+						},
+						"_name": "sh_std_ea_4_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "8,17"
+						},
+						"_name": "sh_lay_ea_4_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-18,31"
+						},
+						"_name": "sh_std_ea_5_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-14,32"
+						},
+						"_name": "sh_std_ea_5_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,32"
+						},
+						"_name": "sh_std_ea_5_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,30"
+						},
+						"_name": "sh_std_ea_5_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "8,17"
+						},
+						"_name": "sh_lay_ea_5_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-18,31"
+						},
+						"_name": "sh_std_ea_6_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-14,32"
+						},
+						"_name": "sh_std_ea_6_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-9,33"
+						},
+						"_name": "sh_std_ea_6_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-10,30"
+						},
+						"_name": "sh_std_ea_6_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "8,17"
+						},
+						"_name": "sh_lay_ea_6_2_0",
+						"_mimeType": "image/png"
+					}
+				]
+			},
+			"_name": "hh_human_50_acc_eye",
+			"_version": "0.1"
+		}
+	}
+}

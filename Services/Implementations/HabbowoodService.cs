@@ -46,13 +46,13 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<TopMovie>> GetTopMovies()
         {
-            var avg = _context.MovieVotes
+            var avg = await _context.MovieVotes
                   .GroupBy(g => g.MovieId, c => c.Rating)
                   .Select(g => new
                   {
                       MovieId = g.Key,
                       Average = g.Average()
-                  }).Take(10);
+                  }).Take(10).ToListAsync();
 
             List<TopMovie> movies = new List<TopMovie>();
             foreach(var a in avg)

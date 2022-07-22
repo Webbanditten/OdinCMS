@@ -1,0 +1,260 @@
+﻿{
+	"manifest": {
+		"library": {
+			"assets": {
+				"asset": [
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-37,65"
+						},
+						"_name": "h_std_ea_1_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-26,63"
+						},
+						"_name": "h_std_ea_1_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-22,64"
+						},
+						"_name": "h_std_ea_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,61"
+						},
+						"_name": "h_std_ea_1_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "16,38"
+						},
+						"_name": "h_lay_ea_1_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-36,62"
+						},
+						"_name": "h_std_ea_2_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-29,63"
+						},
+						"_name": "h_std_ea_2_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-25,66"
+						},
+						"_name": "h_std_ea_2_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-23,64"
+						},
+						"_name": "h_std_ea_2_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "13,36"
+						},
+						"_name": "h_lay_ea_2_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-37,62"
+						},
+						"_name": "h_std_ea_3_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-26,61"
+						},
+						"_name": "h_std_ea_3_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-22,63"
+						},
+						"_name": "h_std_ea_3_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,60"
+						},
+						"_name": "h_std_ea_3_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "11,35"
+						},
+						"_name": "h_lay_ea_3_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-36,64"
+						},
+						"_name": "h_std_ea_4_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-27,62"
+						},
+						"_name": "h_std_ea_4_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-23,64"
+						},
+						"_name": "h_std_ea_4_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-21,60"
+						},
+						"_name": "h_std_ea_4_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,59"
+						},
+						"_name": "h_std_ea_4_6_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "14,35"
+						},
+						"_name": "h_lay_ea_4_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-38,62"
+						},
+						"_name": "h_std_ea_5_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-27,62"
+						},
+						"_name": "h_std_ea_5_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-23,64"
+						},
+						"_name": "h_std_ea_5_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-21,60"
+						},
+						"_name": "h_std_ea_5_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "16,36"
+						},
+						"_name": "h_lay_ea_5_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-37,62"
+						},
+						"_name": "h_std_ea_6_0_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-28,62"
+						},
+						"_name": "h_std_ea_6_1_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-23,63"
+						},
+						"_name": "h_std_ea_6_2_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "-20,60"
+						},
+						"_name": "h_std_ea_6_3_0",
+						"_mimeType": "image/png"
+					},
+					{
+						"param": {
+							"_key": "offset",
+							"_value": "16,36"
+						},
+						"_name": "h_lay_ea_6_2_0",
+						"_mimeType": "image/png"
+					}
+				]
+			},
+			"_name": "hh_human_acc_eye",
+			"_version": "0.1"
+		}
+	}
+}

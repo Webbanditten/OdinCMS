@@ -61,6 +61,17 @@ namespace KeplerCMS.Services.Implementations
             return await _context.Uploads.Where(s => s.Category.ToLower() == category && s.Name.ToLower() == name.ToLower()).FirstOrDefaultAsync();
         }
 
+        public async Task<Upload> GetByCategoryAndNameNoBlob(string category, string name)
+        {
+            var file = await _context.Uploads.Where(s => s.Category.ToLower() == category && s.Name.ToLower() == name.ToLower()).Select(x => new Upload
+            {
+                Id = x.Id,
+                Category = x.Category,
+                ContentType = x.ContentType
+            }).FirstOrDefaultAsync();
+            return file;
+        }
+
         public async Task<bool> Remove(int id)
         {
             _context.Uploads.Remove(new Upload { Id = id });

@@ -31,7 +31,7 @@ namespace KeplerCMS.Avatara.Util
 
             foreach (var file in Directory.GetFiles(assetFolder + outputDirectory, "*"))
             {
-                if (Path.GetFileNameWithoutExtension(file).Contains(fileNameContains))
+                if (Path.GetFileName(file).Contains(fileNameContains))
                 {
                     var text = File.ReadAllText(file);
 

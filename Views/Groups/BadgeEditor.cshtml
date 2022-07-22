@@ -1,4 +1,4 @@
-﻿@model KeplerCMS.Data.Models.Homes 
+﻿@model KeplerCMS.Models.GroupBadgeViewModel
 @{ 
     Layout = null;
 }
@@ -12,10 +12,50 @@
     swfobj.addParam("bgcolor", "#FFFFFF");
     swfobj.addVariable("post_url", "/groups/actions/update_group_badge?");
     swfobj.addVariable("__app_key", "");
-    swfobj.addVariable("groupId", "@Model.Id");
-    swfobj.addVariable("badge_data", "@Model.GroupBadge");
+    swfobj.addVariable("groupId", "@Model.Homes.Id");
+    swfobj.addVariable("badge_data", "@Model.Homes.GroupBadge");
     swfobj.addVariable("localization_url", "@Url.Content("~/xml/badge_editor_da.xml")");
     swfobj.addVariable("xml_url", "@Url.Content("~/xml/badge_data.xml")");
     swfobj.addParam("allowScriptAccess", "always");
     swfobj.write("badge-editor-flash");
 </script>
+
+
+
+@{
+    var shouldUseRuffle = false;
+    var ruffleSetting = Model.Settings.FirstOrDefault(s=>s.Setting == "cms.use_ruffle"); 
+    if(ruffleSetting != null && ruffleSetting.Value == "1") {
+        shouldUseRuffle = true;
+    }
+}
+@if(shouldUseRuffle) {
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = {
+            "autoplay": "auto",
+        };
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("badge-editor-flash");
+            container.innerHTML = '';
+            container.appendChild(player);
+            player.load({
+                url: '@Url.Content("~/flash/BadgeEditor.swf")',
+                parameters: 'base=@Url.Content("~/flash/")&'+
+                            'bgcolor=#FFFFFF&'+
+                            'post_url=/groups/actions/update_group_badge?&'+
+                            '__app_key=&'+
+                            'groupId=@Model.Homes.Id&'+
+                            'badge_data=@Model.Homes.GroupBadge&'+
+                            'localization_url=@Url.Content("~/xml/badge_editor_da.xml")&'+
+                            'xml_url=@Url.Content("~/xml/badge_data.xml")&',
+                allowScriptAccess: true,
+            });
+            player.style.width = "280px";
+            player.style.height = "366px";
+            player.style.frameRate = "8";
+        });
+    </script> 
+}

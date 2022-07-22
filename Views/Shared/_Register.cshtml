@@ -1,5 +1,7 @@
-﻿@{
+﻿@using KeplerCMS.Data.Models
+@{
     var baseUrl = Context.Request.Host;
+    var settings = (List<Settings>)ViewData["settings"];
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -44,7 +46,14 @@
     </script>
 
 </head>
-<body>
+@{
+    var background = "/images/bg_patterns/bday_background.png";
+    var cmsBackground = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.background") : null; 
+    if(cmsBackground != null && cmsBackground.Value != "0" && !string.IsNullOrEmpty(cmsBackground.Value)) {
+        background = cmsBackground.Value;
+    }
+}
+<body style="background-image: url(@background)">
     <div id="overlay"></div>
     <div id="process-wrapper">
         <div id="process-header">

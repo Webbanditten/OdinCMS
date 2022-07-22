@@ -1,0 +1,123 @@
+﻿@{
+    Layout = "_Register";
+    ViewData["Title"] = DbRes.T("orange_box_header", "forgot");
+}
+
+<div class="processbox left">
+    <div class="headline">
+        <div class="headline-content">
+            <div class="headline-wrapper">
+                <h2>@DbRes.T("orange_box_header", "forgot")</h2>
+            </div>
+        </div>
+    </div>
+    <div class="content-top">
+        <div class="content">
+            <div class="processbox-inner">
+                @DbRes.T("orange_box_content_header", "forgot")<h2>
+            </div>
+            @if(ViewData["success_sent_forgot_password"] != null && (bool)ViewData["success_sent_forgot_password"]) {
+                <div style="display: block;">
+                    <div class="content-ok">
+                        <div class="content-ok-body">
+                            @DbRes.T("success_sent_forgot_password", "forgot")
+                        </div>
+                    </div>
+                    <div class="content-ok-bottom"><div class="content-ok-bottom-body"></div></div>
+                </div>
+            }
+            <div class="content-white-outer">
+                <div class="content-white">
+                    <div class="content-white-body">
+                        <div class="content-white-content">
+                            <form action="/account/forgot/password" method="post">
+                                @Html.AntiForgeryToken()
+                                <p>
+                                    <label for="username" class="registration-text">@DbRes.T("orange_box_username", "forgot")</label><br/>
+                                    <input type="text" class="required-username" name="username" id="username" value="">
+                                </p>
+                                <p>
+                                    <label for="email" class="registration-text">@DbRes.T("orange_box_email", "forgot")</label><br/>
+                                    <input type="text" class="required-email" name="email" id="email" value="">
+                                </p>
+                                
+                                <p class="last">
+                                    <input type="submit" value="@DbRes.T("orange_box_forgot_password", "forgot")" class="process-button">
+                                </p>
+                            </form>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+                <div class="content-white-bottom">
+                    <div class="content-white-bottom-body"></div>
+                </div>
+            </div>
+
+            <div class="clear"></div>
+        </div>
+    </div>
+    <div class="content-bottom">
+        <div class="content-bottom-content"></div>
+    </div>
+</div>
+<div class="processbox right blue">
+    <div class="headline">
+        <div class="headline-content">
+            <div class="headline-wrapper">
+                <h2>@DbRes.T("blue_box_header", "forgot")</h2>
+            </div>
+        </div>
+    </div>
+    <div class="content-top">
+        <div class="content">
+            <div class="processbox-inner">
+                <p>
+                    @DbRes.T("blue_box_content", "forgot")<br><br>
+                </p>
+            </div>
+            @if(ViewData["success_sent_habbonames"] != null && (bool)ViewData["success_sent_habbonames"]) {
+                <div style="display: block;">
+                    <div class="content-ok">
+                        <div class="content-ok-body">
+                            @DbRes.T("success_sent_habbonames", "forgot")
+                        </div>
+                    </div>
+                    <div class="content-ok-bottom"><div class="content-ok-bottom-body"></div></div>
+                </div>
+            }
+              
+            <div class="content-white-outer">
+                <div class="content-white">
+                    <div class="content-white-body">
+                        <div class="content-white-content">
+                            <form action="/account/forgot/habboname" method="post">
+                                @Html.AntiForgeryToken()
+                                <p>
+                                    <label for="email" class="registration-text">@DbRes.T("blue_box_email", "forgot")</label><br/>
+                                    <input type="text" class="required-email" name="email" id="email" value="">
+                                </p>
+                                
+                                <p class="last">
+                                    <input type="submit" value="@DbRes.T("blue_box_forgot_habboname", "forgot")" class="process-button">
+                                </p>
+                            </form>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+                <div class="content-white-bottom">
+                    <div class="content-white-bottom-body"></div>
+                </div>
+            </div>
+           
+            <div class="clear"></div>
+        </div>
+    </div>
+    <div class="content-bottom">
+        <div class="content-bottom-content"></div>
+    </div>
+</div>
+
+
+

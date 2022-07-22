@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using KeplerCMS.Data;
+using KeplerCMS.Helpers;
 using KeplerCMS.Services;
 using KeplerCMS.Services.Implementations;
 using KeplerCMS.Services.Interfaces;
@@ -9,22 +10,26 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
+using Mjml.AspNetCore;
 using Westwind.Globalization.AspnetCore;
 
 namespace KeplerCMS
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
+        public IHostEnvironment CurrentEnvironment { get; }
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -73,6 +78,9 @@ namespace KeplerCMS
                 options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
             ));
 
+            services.AddFluentEmail("fromemail@test.test")
+            .AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
+
             services.AddRouting(options => options.LowercaseUrls = true);
 
 
@@ -101,8 +109,30 @@ namespace KeplerCMS
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
             services.AddScoped<ICatalogueService, CatalogueService>();
+            services.AddScoped<IMailService, MailService>();
 
-            services.AddMemoryCache();
+            services.AddMjmlServices(o =>
+            {
+                if (CurrentEnvironment.IsDevelopment())
+                {
+                    o.DefaultKeepComments = true;
+                    o.DefaultBeautify = true;
+                }
+                else
+                {
+                    o.DefaultKeepComments = false;
+                    o.DefaultMinify = true;
+                }
+            });
+
+            if (!CurrentEnvironment.IsDevelopment())
+            {
+                services.AddMemoryCache();
+            }
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -151,20 +181,6 @@ namespace KeplerCMS
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "slug",
-                    pattern: "{slug}",
-                    defaults: new { controller = "Page", action = "Index" },
-                    constraints: new { slug = ".+" }
-                );
-
-                endpoints.MapControllerRoute(
-                    name: "slugWithSub",
-                    pattern: "{slug}/{subSlug}",
-                    defaults: new { controller = "Page", action = "Index" },
-                    constraints: new { slug = ".+" }
-                );
-
-                endpoints.MapControllerRoute(
                     name: "newsWithSlug",
                     pattern: "news/{slug}",
                     defaults: new { controller = "News", action = "Index" },
@@ -178,7 +194,7 @@ namespace KeplerCMS
                 );
 
                 endpoints.MapControllerRoute(
-                name: "MyArea",
+                name: "CustomAreaHandler",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(
@@ -186,6 +202,23 @@ namespace KeplerCMS
                 pattern: "{controller=Page}/{action=Index}/{slug?}");
 
                 endpoints.MapControllerRoute(name: "api", pattern: "api/{controller=MeApiController}");
+
+
+                endpoints.MapControllerRoute(
+                    name: "slug",
+                    pattern: "{slug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "slugWithSub",
+                    pattern: "{slug}/{subSlug}",
+                    defaults: new { controller = "Page", action = "Index" },
+                    constraints: new { slug = ".+" }
+                );
+
+                
             });
 
         }

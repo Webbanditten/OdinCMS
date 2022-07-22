@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
@@ -12,17 +11,21 @@ using System.Linq;
 
 namespace KeplerCMS.Controllers
 {
+    [MaintenanceFilter]
     [MenuFilter]
     public class GroupsController : Controller
     {
         private readonly IUserService _userService;
         private readonly IHomeService _homeService;
         private readonly IRoomService _roomService;
-        public GroupsController(IUserService userService, IHomeService homeService, IRoomService roomService)
+        private readonly ISettingsService _settingsService;
+
+        public GroupsController(IUserService userService, IHomeService homeService, IRoomService roomService, ISettingsService settingsService)
         {
             _userService = userService;
             _homeService = homeService;
             _roomService = roomService;
+            _settingsService = settingsService;
         }
 
 
@@ -220,7 +223,7 @@ namespace KeplerCMS.Controllers
             if(await _homeService.CanEditHome(groupId, currentUserId))
             {
                 var members = await _homeService.GetGroupMembers(groupId);
-                var filtered_members = members.Where(s=>s.Pending == pending).ToList();
+                var filtered_members = members.Where(s=>s.IPending == 1).ToList();
                 Response.Headers.Add("x-json", "{\"pending\":\"" + DbRes.T("group_pending_members", "habbohome") + " (" + members.Count(s=>s.Pending == true) + ")\",\"members\":\"" + DbRes.T("group_members", "habbohome") + " (" + members.Count(s=>s.Pending == false) + ")\"}");
                 return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = filtered_members});
             }
@@ -235,7 +238,7 @@ namespace KeplerCMS.Controllers
             var home = await _homeService.GetHomeDetailsById(groupId);
             if(home != null && await _homeService.CanEditHome(home.Id, currentUser.Id))
             {
-                return View(home);
+                return View(new GroupBadgeViewModel { Homes = home, Settings = await _settingsService.GetAll() });
             }
             return Content("Nope");
         }

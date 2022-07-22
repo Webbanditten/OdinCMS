@@ -1,0 +1,39 @@
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@DbRes.T("title", "maintenance")</title>
+    <link rel="stylesheet" href="/css/maintenance.css"/>
+</head>
+<body class="maintenance-body">
+<div class="maintenance-container">
+    <div class="maintenance-header">
+        <img src="/images/maintenance/habbo-logo.png"/>
+    </div>
+    <div class="maintenance-content">
+        <div class="bubble">
+            <div class="maintenance-left-bubble-top"></div>
+            <div class="maintenance-left-bubble-middle">
+                <img src="images/maintenance/warning.png" align="left" />
+                <p><b>@DbRes.T("frank", "maintenance")</b></p>
+            </div>
+            <div class="maintenance-left-bubble-bottom"></div>
+        </div>
+        <div class="bubble">
+            <div class="maintenance-right-bubble-top"></div>
+            <div class="maintenance-right-bubble-middle">
+                @DbRes.T("technician", "maintenance")
+            </div>
+            <div class="maintenance-right-bubble-bottom"></div>
+        </div>
+    </div>
+    <div class="maintenance-footer"></div>
+</div>
+</body>
+</html>

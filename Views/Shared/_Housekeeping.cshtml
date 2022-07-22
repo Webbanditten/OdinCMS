@@ -1,7 +1,10 @@
-﻿@using KeplerCMS.Data.Models
+﻿@using KeplerCMS.Areas.Housekeeping.Helpers
+@using KeplerCMS.Data.Models
 @using KeplerCMS.Areas.Housekeeping.Models.Enums
+@using Newtonsoft.Json
 @{
     var userData = (Users)ViewData["user"];
+    var fuses = userData.Fuses.ToList();
     var menu = (List<Menu>)ViewData["menu"];
     var subMenu = new List<Menu>();
     var path = Context.Request.Path;
@@ -9,21 +12,27 @@
     HousekeepingMenu activeMenuItem;
 
     switch (path)
-    {
-        case "/housekeeping/website":
+    { 
+        case var activeMenu when path == "/housekeeping":
+            activeMenuItem = HousekeepingMenu.Home;
+            break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/website"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/menu":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/menu"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/pages":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/pages"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/news":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/news"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case "/housekeeping/promotions":
+        case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
+            break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
+            activeMenuItem = HousekeepingMenu.Localization;
             break;
         case "/housekeeping/upload":
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
@@ -35,6 +44,9 @@
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
         case "/housekeeping/messengercampaign":
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
+        case "/housekeeping/settings":
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
         default:
@@ -59,11 +71,18 @@
         <div class="top">
             <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
             <ul class="menu">
-                <li @(activeMenuItem.Equals(HousekeepingMenu.Statistics) ? "class=active" : "")><a href="">Statistics</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.SystemStatus) ? "class=active" : "")><a href="">System Status</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.WebsiteAdmin) ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")><a href="">Hobba tools</a></li>
-                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
+                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping_website)) {
+                    <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(fuses, Fuse.fuse_administrator_access)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
+                }
+                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping_localization)) {
+                    <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="@Url.Action("Index", "Localization")">Localization</a></li>
+                }
             </ul>
         </div>
         <div class="content">
@@ -94,6 +113,7 @@
                             </div>
                             <div class="container-content">
                                 <ul>
+                                    <li><a href="@Url.Action("Index", "Settings")">Settings</a></li>
                                     <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
                                     <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
                                     <li><a href="@Url.Action("Index", "Catalogue")">Catalogue</a></li>

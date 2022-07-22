@@ -22,7 +22,7 @@ namespace KeplerCMS.Avatara
             {
                 DirectoryInfo dirInfo = new DirectoryInfo(path);
                 string fileName = dirInfo.Name;
-                var xmlFile = FileUtil.SolveXmlFile(fileName + "/xml/", "manifest");
+                var xmlFile = FileUtil.SolveXmlFile(fileName + "/xml/", "manifest.xml");
                 var list = xmlFile.SelectNodes("//manifest/library/assets/asset");
 
                 for (int i = 0; i < list.Count; i++)
@@ -40,7 +40,12 @@ namespace KeplerCMS.Avatara
                     if (Parts.ContainsKey(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h")))
                         continue;
 
-                    Parts.Add(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h"), new FigureDocument(fileName, xmlFile));
+                    try {
+                        Parts.Add(name.Split("_")[2] + (fileName.Contains("_50_") ? "_sh" : "_h"), new FigureDocument(fileName, xmlFile));
+                    } catch(Exception) {
+                        // Something
+                    }
+                    
                 }
             }
 

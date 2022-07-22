@@ -1,25 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
 {
+    [MaintenanceFilter]
     [MenuFilter]
     public class ProfileController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ISettingsService _settingService;
 
-        public ProfileController(IUserService userService)
+        public ProfileController(IUserService userService, ISettingsService settingService)
         {
+            _settingService = settingService;
             _userService = userService;
         }
 
         [LoggedInFilter]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-            
+            return View(await _settingService.GetAll());   
         }
 
         [LoggedInFilter]

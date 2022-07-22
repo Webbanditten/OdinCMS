@@ -11,4 +11,10 @@ namespace KeplerCMS.Models
         public List<Rooms> Rooms { get; set; }
         public Homes Details { get; set; }
     }
+
+    public class GroupBadgeViewModel {
+        public Homes Homes { get; set; }
+        public IEnumerable<Settings> Settings { get; set; }
+    }
+
 }
