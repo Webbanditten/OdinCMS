@@ -50,5 +50,7 @@ namespace KeplerCMS.Data.Models
             set { IIsPackage = value ? 1 : 0; }
         }
 
+        [NotMapped]
+        public ItemsDefinitions ItemDefinition {get;set;}
     }
 }

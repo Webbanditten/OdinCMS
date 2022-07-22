@@ -25,7 +25,7 @@
                                 @Html.Raw((item.ClubOnly == 1) ? "<img src='/images/navi/new_03.gif' title='Club only' />" : "")
                                 @Html.Raw((item.MinRole != 1) ? "<img src='/images/navi/new_11.gif' title='Required role: " + item.MinRole + "' />" : "")
                                 @item.Name (@item.NameIndex) </div>
-                            <div class="options"><a href="@Url.Action("Products", "Catalogue", new { id = item.Id })"><img src="/images/navi/my_2.gif" alt="Products" title="Products" /></a>
+                            <div class="options"><a href="@Url.Action("Products", "Catalogue", new { pageId = item.Id })"><img src="/images/navi/my_2.gif" alt="Products" title="Products" /></a>
                             <a href="@Url.Action("Update", "Catalogue", new { id = item.Id })"><img src="/images/navi/my_5.gif" alt="Edit" title="Edit" /></a>
                             <a href="#" onclick="removeCataloguePage(@item.Id)"><img src="/images/navi/new_15.gif" alt="Remove" title="Remove" /></a></div>
                         </li>

@@ -28,7 +28,7 @@ namespace KeplerCMS.Data.Models
         [Column("top_height")]
         public int TopHeight { get; set; }
         [Column("max_status")]
-        public int MaxStatus { get; set; }
+        public string MaxStatus { get; set; }
         [Column("behaviour")]
         public string Behavior { get; set; }
         [Column("interactor")]
@@ -38,6 +38,6 @@ namespace KeplerCMS.Data.Models
         [Column("is_recyclable")]
         public int IsRecyclable { get; set; }
         [Column("drink_ids")]
-        public int DrinkIds { get; set; }
+        public string DrinkIds { get; set; }
     }
 }

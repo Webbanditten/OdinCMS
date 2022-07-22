@@ -36,5 +36,15 @@ namespace KeplerCMS.Areas.Housekeeping
             await _catalogueService.ReArrange(model);
             return Content("OK");
         }
+
+
+        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        public async Task<IActionResult> Products(int pageId)
+        {
+            var model = await _catalogueService.GetCataloguePageItems(pageId.ToString());
+            return View(model);
+        }
+
+
     }
 }

@@ -9,9 +9,9 @@ namespace KeplerCMS.Services.Interfaces
     {
         Task<List<CataloguePages>> GetCataloguePages();
         Task<CataloguePages> Get(int id);
-        //Task<CataloguePages> Add(MenuAddViewModel model);
         Task<bool> Remove(int id);
-        //Task<Menu> Update(MenuUpdateViewModel model);
         Task<bool> ReArrange(List<CatalogueReArrangeModel> model);
+
+        Task<List<CatalogueItems>> GetCataloguePageItems(string pageId);
     }
 }
