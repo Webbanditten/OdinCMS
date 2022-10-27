@@ -17,5 +17,9 @@ namespace KeplerCMS.Models
         public string MessageLink { get; set; }
         public int FriendRequestTo { get; set; }
         public bool OnlineOnly { get; set; }
+        public int RoomAccessType { get; set; }
+        public string RoomDescription { get; set; }
+        public string RoomName { get; set; }
+        public bool RoomShowOwnerName { get; set; }
     }
 }
