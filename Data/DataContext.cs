@@ -53,6 +53,8 @@ namespace KeplerCMS.Data
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
+        public DbSet<RankRights> RankRights { get; set; }
+        public DbSet<FusesNew> FusesNew { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }
