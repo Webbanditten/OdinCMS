@@ -19,6 +19,11 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        public async Task<IEnumerable<FusesNew>> GetFuses()
+        {
+            return await _context.FusesNew.ToListAsync();
+        }
+
         public async Task<IEnumerable<string>> GetFusesByRank(int rank)
         {
             return await _context.Fuses.Where(f => f.MinRank <= rank).Select(s=>s.Fuse.ToLower()).ToListAsync();

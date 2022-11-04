@@ -7,6 +7,6 @@ namespace KeplerCMS.Services.Interfaces
     public interface IFuseService
     {
         Task<IEnumerable<string>> GetFusesByRank(int rank);
-
+        Task<IEnumerable<FusesNew>> GetFuses();
     }
 }

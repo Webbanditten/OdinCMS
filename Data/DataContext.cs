@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using KeplerCMS.Data.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
 namespace KeplerCMS.Data
 {
     public class DataContext : DbContext
@@ -14,6 +16,11 @@ namespace KeplerCMS.Data
 
             modelBuilder.Entity<FriendRequests>()
                 .HasKey(c => new { c.FromId, c.ToId });
+
+            modelBuilder
+                .Entity<FusesNew>()
+                .Property(d => d.UserGroup)
+                .HasConversion(new EnumToStringConverter<FuseUserGroup>());
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
@@ -52,6 +59,8 @@ namespace KeplerCMS.Data
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
+        public DbSet<RankRights> RankRights { get; set; }
+        public DbSet<FusesNew> FusesNew { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

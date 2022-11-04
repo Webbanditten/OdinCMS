@@ -1,0 +1,19 @@
+﻿@model IEnumerable<KeplerCMS.Data.Models.FusesNew>;
+@{
+    Layout = "_Housekeeping";
+}
+
+<h1>TBD</h1>
+<table>
+    <thead>
+        <th></th>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UserGroup</td>
+            </tr>
+        }
+    </tbody>
+</table>
