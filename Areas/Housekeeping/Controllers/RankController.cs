@@ -3,6 +3,7 @@ using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
+using KeplerCMS.Areas.Housekeeping.Models.Views;
 
 namespace KeplerCMS.Areas.Housekeeping
 {
@@ -19,7 +20,12 @@ namespace KeplerCMS.Areas.Housekeeping
         [HousekeepingFilter(Fuse.fuse_administrator_access)]
         public async Task<IActionResult> Index()
         {
-            return View(await _fuseService.GetFuses());
+            return View(new RanksViewModel
+            {
+                Fuses = await _fuseService.GetFuses(),
+                Ranks = await _fuseService.GetRanks(),
+                RankRights = await _fuseService.GetRankRights()
+            });
         }
     }
 }

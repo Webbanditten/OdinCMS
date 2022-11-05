@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Data.Models
 {
-    [Table("rank_rights")]
-    public class RankRights
+
+    [Table("ranks")]
+    public class Rank
     {
-        [Column("rank_id")]
-        public string RankId { get; set; }
         [Key]
-        [Column("fuse")]
-        public string Fuse { get; set; }
+        [Column("id")]
+        public int Id { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
     }
 }

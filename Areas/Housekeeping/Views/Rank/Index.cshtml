@@ -1,18 +1,57 @@
-﻿@model IEnumerable<KeplerCMS.Data.Models.FusesNew>;
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.RanksViewModel;
 @{
     Layout = "_Housekeeping";
 }
 
 <h1>TBD</h1>
+<h2>Fuse rank relations</h2>
 <table>
     <thead>
-        <th></th>
+        <th>Rank Id</th>
+        <th>Rank Name</th>
+        <th>Fuse</th>
+        <th>Fuse Description</th>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.RankRights)
         {
             <tr>
+                <td>@item.RankId</td>
+                <td>@item.Rank.Name</td>
+                <td>@item.FuseName</td>
+                <td>@item.Fuse.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Fuses</h2>
+<table>
+    <thead>
+        <th>Fuse Name</th>
+        <th>Fuse Usergroup</th>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Fuses)
+        {
+            <tr>
+                <td>@item.Name</td>
                 <td>@item.UserGroup</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Ranks</h2>
+<table>
+    <thead>
+        <th>Rank</th>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Ranks)
+        {
+            <tr>
+                <td>@item.Name</td>
             </tr>
         }
     </tbody>

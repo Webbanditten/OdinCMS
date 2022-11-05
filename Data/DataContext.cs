@@ -18,7 +18,7 @@ namespace KeplerCMS.Data
                 .HasKey(c => new { c.FromId, c.ToId });
 
             modelBuilder
-                .Entity<FusesNew>()
+                .Entity<NewFuses>()
                 .Property(d => d.UserGroup)
                 .HasConversion(new EnumToStringConverter<FuseUserGroup>());
         }
@@ -59,8 +59,9 @@ namespace KeplerCMS.Data
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
-        public DbSet<RankRights> RankRights { get; set; }
-        public DbSet<FusesNew> FusesNew { get; set; }
+        public DbSet<RankRight> RankRights { get; set; }
+        public DbSet<NewFuses> NewFuses { get; set; }
+        public DbSet<Rank> Ranks { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

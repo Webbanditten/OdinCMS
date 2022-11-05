@@ -13,11 +13,11 @@ namespace KeplerCMS.Data.Models
         CUSTOM = 2,
     }
     [Table("fuses")]
-    public class FusesNew
+    public class NewFuses
     {
         [Key]
         [Column("fuse")]
-        public string Fuse { get; set; }
+        public string Name { get; set; }
         [Column("user_group")]
         public FuseUserGroup UserGroup { get; set; }
         [Column("description")]
