@@ -1,0 +1,58 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.RanksCreateViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Create rank</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div class="form-group">
+                <label asp-for="Name" class="label-control"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+
+                <table class="blueTable">
+                    <thead>
+                        <tr>
+                            <th>Selected</th>
+                            <th>Fuse</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (Model != null)
+                            {
+                                foreach (var item in Model.Fuses.OrderBy(s => s.Name))
+                                {
+                                    var disabled = item.UserGroup == KeplerCMS.Data.Models.FuseUserGroup.ANYONE;
+                                    var selected = item.Selected || disabled;
+
+                                    <tr>
+                                        <td><input type="checkbox" value="@item.Name" name="RankRights[]" checked="@selected" disabled="@disabled" /></td>
+                                        <td>@item.Name</td>
+                                        <td>@item.Description</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>No Fuses</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>

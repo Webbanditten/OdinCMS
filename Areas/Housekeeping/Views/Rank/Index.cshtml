@@ -3,56 +3,64 @@
     Layout = "_Housekeeping";
 }
 
-<h1>TBD</h1>
-<h2>Fuse rank relations</h2>
-<table>
+<h1>Ranks</h1>
+@if (ViewData["message"] != null)
+{
+    <div class="message">
+        @ViewData["message"]
+    </div>
+}
+<a href="@Url.Action("Create")">Add</a>
+
+<table class="blueTable">
     <thead>
-        <th>Rank Id</th>
-        <th>Rank Name</th>
-        <th>Fuse</th>
-        <th>Fuse Description</th>
+        <tr>
+            <th>Rank</th>
+            <th>Actions</th>
+        </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.RankRights)
-        {
-            <tr>
-                <td>@item.RankId</td>
-                <td>@item.Rank.Name</td>
-                <td>@item.FuseName</td>
-                <td>@item.Fuse.Description</td>
-            </tr>
+        @{
+            if (Model != null)
+            {
+                foreach (var item in Model.Ranks.OrderBy(s=>s.Name))
+                {
+                <tr>
+                    <td>@item.Name</td>
+                    <td><a href="@Url.Action("Update", "Rank", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeRank(@item.Id)">Remove</a></td>
+                </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td>No data</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            }
+
         }
     </tbody>
 </table>
 
-<h2>Fuses</h2>
-<table>
-    <thead>
-        <th>Fuse Name</th>
-        <th>Fuse Usergroup</th>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Fuses)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.UserGroup</td>
-            </tr>
+@section scripts {
+    <script>
+    function removeRank(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    window.location = "@Url.Action("Remove")/" + id;
+                }
+            })
         }
-    </tbody>
-</table>
+    </script>
+}
 
-<h2>Ranks</h2>
-<table>
-    <thead>
-        <th>Rank</th>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Ranks)
-        {
-            <tr>
-                <td>@item.Name</td>
-            </tr>
-        }
-    </tbody>
-</table>
