@@ -682,4 +682,5 @@ table.blueTable tfoot .links a{
     padding:12px;
     border:1px solid #000;
     border-radius:5px;
+    box-sizing: border-box;
 }

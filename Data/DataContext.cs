@@ -17,6 +17,9 @@ namespace KeplerCMS.Data
             modelBuilder.Entity<FriendRequests>()
                 .HasKey(c => new { c.FromId, c.ToId });
 
+            modelBuilder.Entity<RankRight>()
+                .HasKey(c => new { c.FuseName, c.RankId });
+
             modelBuilder
                 .Entity<NewFuses>()
                 .Property(d => d.UserGroup)

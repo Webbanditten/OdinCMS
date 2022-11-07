@@ -38,7 +38,7 @@ namespace KeplerCMS.Areas.Housekeeping
             if (ModelState.IsValid)
             {
                 await _newsService.Add(model);
-                return RedirectToAction("Index", "News", new { message = "News uploaded" });
+                return RedirectToAction("Index", "News", new { message = "News created" });
             }
             return View(model);
         }

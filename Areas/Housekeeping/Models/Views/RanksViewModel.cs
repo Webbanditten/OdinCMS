@@ -9,10 +9,21 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
     public class RanksViewModel
     {
         public IEnumerable<KeplerCMS.Data.Models.Rank> Ranks { get; set; }
+        public string Message { get; set; }
 
     }
 
     public class RanksCreateViewModel {
+        [Required]
+        [Display(Name = "Rank Name")]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        public string Name { get; set; }
+        public IEnumerable<RanksSelectedFusesModel> Fuses { get; set; }
+    }
+
+    public class RanksEditViewModel {
+        [Required]
+        public int RankId { get; set; }
         [Required]
         [Display(Name = "Rank Name")]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]

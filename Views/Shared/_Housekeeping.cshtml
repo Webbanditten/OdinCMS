@@ -30,6 +30,9 @@
         case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/rank"):
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
         case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
             activeMenuItem = HousekeepingMenu.Localization;
             break;
@@ -116,6 +119,7 @@
                                     <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
                                     <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
                                     <li><a href="@Url.Action("Index", "Catalog")">Catalog</a></li>
+                                    <li><a href="@Url.Action("Index", "Rank")">Rank Settings</a></li>
                                 </ul>
                             </div>
                         </div>
