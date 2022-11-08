@@ -2,10 +2,11 @@
 
 <div class="card">
     <div class="card-header">
-        <h4 class="text-uppercase">Create rank</h4>
+        <h1 class="text-uppercase">Update rank</h4>
     </div>
     <div class="card-body">
-        <form asp-action="Create">
+        <form asp-action="Update">
+            <input asp-for="RankId" hidden class="form-control" />
             <div class="form-group">
                 <label asp-for="Name" class="label-control"></label>
                 <input asp-for="Name" class="form-control" />

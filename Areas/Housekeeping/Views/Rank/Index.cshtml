@@ -4,10 +4,10 @@
 }
 
 <h1>Ranks</h1>
-@if (ViewData["message"] != null)
+@if (Model.Message != null)
 {
     <div class="message">
-        @ViewData["message"]
+        @Model.Message
     </div>
 }
 <a href="@Url.Action("Create")">Add</a>
@@ -21,7 +21,7 @@
     </thead>
     <tbody>
         @{
-            if (Model != null)
+            if (Model.Ranks.Count() > 0)
             {
                 foreach (var item in Model.Ranks.OrderBy(s=>s.Name))
                 {
@@ -35,7 +35,6 @@
             {
                 <tr>
                     <td>No data</td>
-                    <td></td>
                     <td></td>
                 </tr>
             }

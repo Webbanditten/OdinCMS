@@ -81,8 +81,6 @@ namespace KeplerCMS.Services.Implementations
             _context.Ranks.Remove(rank);
             await _context.SaveChangesAsync();
 
-            await this.DeleteRankRights(rankId);
-
             return true;
         }
 
