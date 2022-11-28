@@ -20,20 +20,6 @@
 }
 /*#endregion */
 
-body {
-  height: 200vh;
-}
-* {
-  margin: 0;
-  padding: 0;
-  image-rendering: optimizeSpeed; /*                     */
-  image-rendering: -moz-crisp-edges; /* Firefox             */
-  image-rendering: -o-crisp-edges; /* Opera               */
-  image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
-  image-rendering: pixelated; /* Chrome as of 2019   */
-  image-rendering: optimize-contrast; /* CSS3 Proposed       */
-  -ms-interpolation-mode: nearest-neighbor; /* IE8+                */
-}
 .christmas-calendar {
   background-image: url(./images/19.png);
   width: 700px;
