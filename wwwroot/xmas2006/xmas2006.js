@@ -90,14 +90,13 @@ function handleMouseMove(event) {
     }
   }
 }
-window.onload = function () {
+function initCalendar() {
   var calendar = document.getElementById("calendar");
   var calendarBounds = calendar.getBoundingClientRect();
   calendar.scrollLeft = calendarBounds.width / 2;
   calendar.scrollTop = calendarBounds.height / 2;
   // Get mouse position
   calendar.onmousemove = handleMouseMove;
-  window.onresize = repositionPresentModal;
 
   var days = document.getElementsByClassName("day");
   // Iterate days
@@ -114,6 +113,8 @@ window.onload = function () {
   repositionPresentModal();
 };
 
+window.addEventListener("load", initCalendar);
+window.addEventListener("onresize", repositionPresentModal);
 
 var lastKnownScrollPosition = 0;
 var ticking = false;
