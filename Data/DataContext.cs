@@ -65,6 +65,7 @@ namespace KeplerCMS.Data
         public DbSet<RankRight> RankRights { get; set; }
         public DbSet<NewFuses> NewFuses { get; set; }
         public DbSet<Rank> Ranks { get; set; }
+        public DbSet<Rewards> Rewards { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

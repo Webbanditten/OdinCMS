@@ -1,0 +1,61 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@inject KeplerCMS.Services.Interfaces.IRewardService RewardService
+
+
+@{
+    var rewards = await RewardService.GetRewardsBetweenDates(new DateTime(DateTime.Now.Year,11,30,00,00,00), new DateTime(DateTime.Now.Year,12,31,23,59,59));
+}
+
+<link rel="stylesheet" href="/xmas2006/xmas2006.css" />
+<script src="/xmas2006/xmas2006.js" type="text/javascript"></script>
+<div id="calendar" class="christmas-calendar-wrapper">
+    <div id="present_modal" class="present-modal">
+    <div class="title">Dagens gave <button onClick="hidePresentModal()"><img src="/xmas2006/images/close_btn.png"></button></div>
+    <div class="highlighted_items"></div>
+    <div class="description"></div>
+    </div>
+    <div id="calendar-inner" class="christmas-calendar">
+    <div class="days">
+        @{
+            foreach(var reward in rewards) {
+                if(reward.AvailableFrom <= DateTime.Now) {
+                    <div class="day">
+                        <div class="number"></div>
+                        <div class="present">
+                            <div class="present_content">
+                                <div class="images">
+                                    @{
+                                        foreach(var item in reward.ItemsDefinitions) {
+                                            <img src="/habbo-imaging/furni?sprite=@item.sprite" />
+                                        }
+                                    }
+                                </div>
+                                <div class="description">
+                                    @{
+                                        foreach(var item in reward.ItemsDefinitions) {
+                                            <span>@item.Name (@item.Description)</span><br />
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                } else {
+                    <div class="day">
+                        <div class="number"></div>
+                        <div class="lock"></div>
+                    </div>
+                }
+            }
+        }
+        
+    </div>
+
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    </div>
+</div>

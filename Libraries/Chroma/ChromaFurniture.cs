@@ -526,7 +526,7 @@ namespace KeplerCMS.Chroma
                 var drawingColor = System.Drawing.ColorTranslator.FromHtml("#" + hexString);
                 return Color.FromRgb(drawingColor.R, drawingColor.G, drawingColor.B);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 

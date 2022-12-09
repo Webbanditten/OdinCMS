@@ -11,7 +11,6 @@
 
     async Task RenderBody(string text)
     {
-
         if (text.Contains("{credits}"))
         {
             if (User.Identity.IsAuthenticated)
@@ -80,6 +79,9 @@
                     <div class="bottom"><div></div></div>
                 </div>
             }
+        } else if(text.Contains("{xmas2006}"))
+        {
+            <partial name="~/Views/Shared/Containers/Xmas2006_Calendar.cshtml" model=Model />
         }
         else
         {

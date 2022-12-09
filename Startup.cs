@@ -109,6 +109,7 @@ namespace KeplerCMS
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPhotoService, PhotoService>();
             services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IRewardService, RewardService>();
 
             services.AddMjmlServices(o =>
             {
