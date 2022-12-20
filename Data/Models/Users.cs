@@ -25,6 +25,8 @@ namespace KeplerCMS.Data.Models
         public double ClubGiftDue { get; set; }
         [Column("created_at")]
         public DateTime CreateAt { get; set; }
+        [Column("last_online")]
+        public long LastOnlineTimestamp { get; set; }
         [Column("sex")]
         public string Gender { get; set; }
 
@@ -69,6 +71,17 @@ namespace KeplerCMS.Data.Models
             get { return IBadgeActive == 1; }
             set { IBadgeActive = value ? 1 : 0; }
         }
+        
+        [NotMapped]
+        public DateTime LastOnline
+        {
+            get
+            {
+                var unixDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                unixDate = unixDate.AddSeconds(this.LastOnlineTimestamp).ToLocalTime();
+                return unixDate;
+            }
+        }
 
         [NotMapped]
         public int HabboClubInDays
@@ -85,6 +98,6 @@ namespace KeplerCMS.Data.Models
         }
 
         [NotMapped]
-        public IEnumerable<string> Fuses { get; set; }
+        public IEnumerable<RankRights> Fuses { get; set; }
     }
 }

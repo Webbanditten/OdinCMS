@@ -16,6 +16,6 @@ namespace KeplerCMS.Data.Models
         public int Id { get; set; }
         [Column("name")]
         public string Name { get; set; }
-        public virtual IEnumerable<RankRight> RankRights { get; set; }
+        public virtual IEnumerable<RankRights> RankRights { get; set; }
     }
 }

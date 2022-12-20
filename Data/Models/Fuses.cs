@@ -7,13 +7,20 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Data.Models
 {
-    [Table("rank_fuserights")]
+    public enum FuseUserGroup {
+        ANYONE = 0,
+        HABBO_CLUB = 1,
+        CUSTOM = 2,
+    }
+    [Table("fuses")]
     public class Fuses
     {
         [Key]
-        [Column("min_rank")]
-        public int MinRank { get; set; }
-        [Column("fuseright")]
-        public string Fuse { get; set; }
+        [Column("fuse")]
+        public string Name { get; set; }
+        [Column("user_group")]
+        public FuseUserGroup UserGroup { get; set; }
+        [Column("description")]
+        public string Description { get; set; }
     }
 }

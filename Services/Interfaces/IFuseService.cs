@@ -6,15 +6,15 @@ namespace KeplerCMS.Services.Interfaces
 {
     public interface IFuseService
     {
-        Task<IEnumerable<string>> GetFusesByRank(int rank);
-        Task<IEnumerable<NewFuses>> GetFuses();
+        Task<IEnumerable<Fuses>> GetFuses();
         Task<IEnumerable<Rank>> GetRanks();
         Task<Rank> GetRankById(int rankId);
-        Task<IEnumerable<RankRight>> GetRankRights();
-        Task<Rank> CreateRank(Rank rank, IEnumerable<RankRight> rankRights);
-        Task<Rank> UpdateRank(Rank rank, IEnumerable<RankRight> rankRights);
+        Task<IEnumerable<RankRights>> GetRankRights();
+        Task<Rank> CreateRank(Rank rank, IEnumerable<RankRights> rankRights);
+        Task<Rank> UpdateRank(Rank rank, IEnumerable<RankRights> rankRights);
         Task<bool> DeleteRankRights(int rankId);
         Task<bool> DeleteRank(int rankId);
-        Task<IEnumerable<RankRight>> GetRankRightsByRankId(int id);
+        Task<IEnumerable<RankRights>> GetFusesByRank(int rank, bool hasClub);
+        Task<IEnumerable<RankRights>> GetRankRightsByRankId(int id);
     }
 }

@@ -30,7 +30,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public IEnumerable<RanksSelectedFusesModel> Fuses { get; set; }
     }
 
-    public class RanksSelectedFusesModel : KeplerCMS.Data.Models.NewFuses {
+    public class RanksSelectedFusesModel : KeplerCMS.Data.Models.Fuses {
         public bool Selected { get; set; }
     }
 

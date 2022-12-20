@@ -17,11 +17,11 @@ namespace KeplerCMS.Data
             modelBuilder.Entity<FriendRequests>()
                 .HasKey(c => new { c.FromId, c.ToId });
 
-            modelBuilder.Entity<RankRight>()
+            modelBuilder.Entity<RankRights>()
                 .HasKey(c => new { c.FuseName, c.RankId });
 
             modelBuilder
-                .Entity<NewFuses>()
+                .Entity<Fuses>()
                 .Property(d => d.UserGroup)
                 .HasConversion(new EnumToStringConverter<FuseUserGroup>());
         }
@@ -30,7 +30,6 @@ namespace KeplerCMS.Data
         public DbSet<Menu> Menu { get; set; }
         public DbSet<Containers> Containers { get; set; }
         public DbSet<Pages> Pages { get; set; }
-        public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Upload> Uploads { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<Promo> Promos { get; set; }
@@ -62,8 +61,8 @@ namespace KeplerCMS.Data
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
-        public DbSet<RankRight> RankRights { get; set; }
-        public DbSet<NewFuses> NewFuses { get; set; }
+        public DbSet<RankRights> RankRights { get; set; }
+        public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<Rewards> Rewards { get; set; }
         public DataContext(DbContextOptions<DataContext> options)

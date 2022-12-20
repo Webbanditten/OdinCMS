@@ -2,7 +2,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h1 class="text-uppercase">Update rank</h4>
+        <h1 class="text-uppercase">Update rank</h1>
     </div>
     <div class="card-body">
         <form asp-action="Update">
@@ -29,7 +29,7 @@
                                 foreach (var item in Model.Fuses.OrderBy(s => s.Name))
                                 {
                                     var disabled = item.UserGroup == KeplerCMS.Data.Models.FuseUserGroup.ANYONE;
-                                    var selected = item.Selected || disabled;
+                                    var selected = item.Selected || disabled;
 
                                     <tr>
                                         <td><input type="checkbox" value="@item.Name" name="RankRights[]" checked="@selected" disabled="@disabled" /></td>

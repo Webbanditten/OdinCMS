@@ -684,3 +684,37 @@ table.blueTable tfoot .links a{
     border-radius:5px;
     box-sizing: border-box;
 }
+
+
+
+table.habboTable {
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #FFFFFF;
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+table.habboTable td, table.habboTable th {
+    border: 1px solid #FFFFFF;
+    padding: 2px 2px;
+}
+table.habboTable tbody td {
+    font-size: 13px;
+}
+table.habboTable tr:nth-child(even) {
+    background: #FFEEAA;
+}
+table.habboTable thead {
+    background: #FFCC00;
+    border-bottom: 5px solid #FFFFFF;
+}
+table.habboTable thead th {
+    font-size: 12px;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    border-left: 2px solid #FFFFFF;
+}
+table.habboTable thead th:first-child {
+    border-left: none;
+}

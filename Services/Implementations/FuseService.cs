@@ -1,12 +1,12 @@
-﻿using KeplerCMS.Data;
+﻿using System;
+using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
-using KeplerCMS.Helpers;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace KeplerCMS.Services.Implementations
 {
@@ -17,19 +17,19 @@ namespace KeplerCMS.Services.Implementations
         public FuseService(DataContext context)
         {
             _context = context;
-        }
+        } 
 
-        public async Task<IEnumerable<NewFuses>> GetFuses()
+        public async Task<IEnumerable<Fuses>> GetFuses()
         {
-            return await _context.NewFuses.ToListAsync();
+            return await _context.Fuses.ToListAsync();
         }
-
-        public async Task<IEnumerable<string>> GetFusesByRank(int rank)
+        public async Task<IEnumerable<RankRights>> GetFusesByRank(int rank, bool hasClub)
         {
-            return await _context.Fuses.Where(f => f.MinRank <= rank).Select(s=>s.Fuse.ToLower()).ToListAsync();
+            var habboClubQuery = (hasClub) ? " OR user_group = 'HABBO_CLUB'" : "";
+            return await _context.RankRights.FromSqlRaw("SELECT fuse, rank_id FROM rank_rights where rank_id = @id UNION SELECT fuse, @id as rank_id FROM fuses where user_group = 'ANYONE'" + habboClubQuery, new MySqlParameter ("@id", rank)).IgnoreAutoIncludes().ToListAsync();
         }
 
-        public async Task<IEnumerable<RankRight>> GetRankRights()
+        public async Task<IEnumerable<RankRights>> GetRankRights()
         {
             return await _context.RankRights.ToListAsync();
         }
@@ -39,7 +39,7 @@ namespace KeplerCMS.Services.Implementations
             return await _context.Ranks.ToListAsync();
         }
 
-        public async Task<Rank> CreateRank(Rank rank, IEnumerable<RankRight> rankRights)
+        public async Task<Rank> CreateRank(Rank rank, IEnumerable<RankRights> rankRights)
         {
             _context.Ranks.Add(rank);
             await _context.SaveChangesAsync();
@@ -52,17 +52,35 @@ namespace KeplerCMS.Services.Implementations
             return rank;
         }
 
-        public async Task<Rank> UpdateRank(Rank rank, IEnumerable<RankRight> rankRights)
+        public async Task<Rank> UpdateRank(Rank rank, IEnumerable<RankRights> rankRights)
         {
-            _context.Ranks.Update(rank);
+            var dbRank = await _context.Ranks.FirstOrDefaultAsync(s => s.Id == rank.Id);
+            
+            dbRank.Name = rank.Name;
+            _context.Ranks.Update(dbRank);
             await _context.SaveChangesAsync();
-            await this.DeleteRankRights(rank.Id);
-            foreach (var rankRight in rankRights)
+
+            var rankRightsToDelete = new List<RankRights>();
+            foreach (var rankRight in await _context.RankRights.Where(s =>
+                         s.RankId == rank.Id).ToListAsync())
             {
-                rankRight.RankId = rank.Id;
-                _context.RankRights.Add(rankRight);
+                if(!rankRights.Any(r => r.FuseName == rankRight.FuseName))
+                {
+                    rankRightsToDelete.Add(rankRight);
+                }
+            }
+            _context.RankRights.RemoveRange(rankRightsToDelete);
+            await _context.SaveChangesAsync();
+            
+            foreach (var rr in rankRights)
+            {
+                if (!dbRank.RankRights.Any(r => r.FuseName == rr.FuseName))
+                {
+                    _context.RankRights.Add(rr);
+                }
             }
             await _context.SaveChangesAsync();
+            
             return rank;
         }
         public async Task<bool> DeleteRankRights(int rankId)
@@ -88,10 +106,11 @@ namespace KeplerCMS.Services.Implementations
             return await _context.Ranks.FirstOrDefaultAsync(r => r.Id == rankId);
         }
 
-        public async Task<IEnumerable<RankRight>> GetRankRightsByRankId(int id)
+        public async Task<IEnumerable<RankRights>> GetRankRightsByRankId(int id)
         {
             return await _context.RankRights.Where(r => r.RankId == id).ToListAsync();
         }
+        
     }
 
 }

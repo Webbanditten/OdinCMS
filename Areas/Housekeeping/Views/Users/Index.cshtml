@@ -1,0 +1,100 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.UsersViewModel
+
+@{
+    ViewBag.Title = "Users";
+}
+
+<h1>Users</h1>
+<p>
+    Here you can search and filter users
+</p>
+<form asp-action="Index" method="get">
+    <label for="search">Search for username</label>
+    <input name="search" type="text" value="@Model.Search" />
+    <input type="submit" value="Submit" />
+</form>
+<hr/>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="" })">All</a> 
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="a" })">A</a> 
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="b" })">B</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="c" })">C</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="d" })">D</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="e" })">E</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="f" })">F</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="g" })">G</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="h" })">H</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="i" })">I</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="j" })">J</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="k" })">K</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="l" })">L</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="m" })">M</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="n" })">N</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="o" })">O</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="p" })">P</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="q" })">Q</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="r" })">R</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="s" })">S</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="t" })">T</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="u" })">U</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="v" })">V</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="w" })">W</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="x" })">X</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="y" })">Y</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="z" })">Z</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="æ" })">Æ</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="ø" })">Ø</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="å" })">Å</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="1" })">1</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="2" })">2</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="3" })">3</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="4" })">4</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="5" })">5</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="6" })">6</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="7" })">7</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="8" })">8</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="9" })">9</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="*" })">*</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="(" })">(</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter=")" })">)</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter=":" })">:</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="." })">.</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="!" })">!</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="=" })">=</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="_" })">_</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter="<" })"><</a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter=">" })">></a>
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage, letter=">" })">+</a>
+<br/>
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Last Login</th>
+        <th>Created</th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.LastOnline</td>
+                <td>@user.CreateAt</td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+@{
+    if (Model.CurrentPage != 1)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage-1, letter=@Model.Letter })">Previous Page</a>
+    }
+    
+    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage+1, letter=@Model.Letter })" style="float:right">Next Page</a>
+    }
+}
+

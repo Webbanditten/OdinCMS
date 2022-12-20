@@ -19,7 +19,7 @@ namespace KeplerCMS.Areas.Housekeeping
             _fuseService = fuseService;
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         public async Task<IActionResult> Index(string message)
         {
             return View(new RanksViewModel
@@ -29,7 +29,7 @@ namespace KeplerCMS.Areas.Housekeeping
             });
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         public async Task<IActionResult> Create()
         {
             var fuses = await _fuseService.GetFuses();
@@ -46,7 +46,7 @@ namespace KeplerCMS.Areas.Housekeeping
             return View(model);
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] RanksCreatePostModel data)
         {
@@ -64,12 +64,12 @@ namespace KeplerCMS.Areas.Housekeeping
 
             var rank = await _fuseService.CreateRank(
                 new Rank { Name = data.Name}, 
-                model.Fuses.Where(f => f.Selected).Select(f => new RankRight { FuseName = f.Name })
+                model.Fuses.Where(f => f.Selected).Select(f => new RankRights { FuseName = f.Name })
             );
             return RedirectToAction("Index", "Rank", new { message = "Rank created" });
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         public async Task<IActionResult> Update(int id)
         {
             var rank = await _fuseService.GetRankById(id);
@@ -92,27 +92,27 @@ namespace KeplerCMS.Areas.Housekeeping
             return View(model);
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         [HttpPost]
         public async Task<IActionResult> Update([FromForm] RanksUpdatePostModel data)
         {
             var fuses = await _fuseService.GetFuses();
             var selectedFuses = fuses.Select(f => new RanksSelectedFusesModel
-                {
-                    Name = f.Name,
-                    Description = f.Description,
-                    UserGroup = f.UserGroup,
-                    Selected = (f.UserGroup == Data.Models.FuseUserGroup.ANYONE || (data.RankRights != null && data.RankRights.Contains(f.Name) ? true : false)) ? true : false
-                });
+            {
+                Name = f.Name,
+                Description = f.Description,
+                UserGroup = f.UserGroup,
+                Selected = f.UserGroup == FuseUserGroup.ANYONE || (data.RankRights != null && data.RankRights.Any(r => r.ToLower() == f.Name.ToLower()))
+            });
 
-            var rank = await _fuseService.UpdateRank(
+            await _fuseService.UpdateRank(
                 new Rank { Id = data.RankId, Name = data.Name}, 
-                selectedFuses.Where(f => f.Selected).Select(f => new RankRight { FuseName = f.Name })
+                selectedFuses.Where(f => f.Selected).Select(f => new RankRights { FuseName = f.Name, RankId = data.RankId}).ToList()
             );
             return RedirectToAction("Index", "Rank", new { message = "Rank updated" });
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
         public async Task<IActionResult> Remove(int id)
         {
             await _fuseService.DeleteRank(id);
