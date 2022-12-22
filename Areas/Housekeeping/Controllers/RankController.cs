@@ -13,9 +13,11 @@ namespace KeplerCMS.Areas.Housekeeping
     public class RankController : Controller
     {
         private IFuseService _fuseService;
+        private IUserService _userService;
 
-        public RankController(IFuseService fuseService)
+        public RankController(IFuseService fuseService, IUserService userService)
         {
+            _userService = userService;
             _fuseService = fuseService;
         }
 
@@ -118,6 +120,26 @@ namespace KeplerCMS.Areas.Housekeeping
             await _fuseService.DeleteRank(id);
             return RedirectToAction("Index", "Rank", new { message = "Rank Removed" });
         }
-        
+
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
+        [HttpPost]
+        public async Task<IActionResult> Change(int userId, int rankId, string returnUrl)
+        {
+            var user = await _userService.GetUserById(userId);
+            if (user != null)
+            {
+                var rank = _fuseService.GetRankById(rankId);
+                if (rank != null)
+                {
+                    user.Rank = rankId;
+                    await _userService.Update(user);
+                }
+            }
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Index", "Rank", new { message = "Rank Changed" });
+        }
     }
 }

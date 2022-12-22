@@ -7,6 +7,7 @@ using KeplerCMS.Models;
 using KeplerCMS.Data.Models;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KeplerCMS.Areas.Housekeeping
 {
@@ -14,9 +15,13 @@ namespace KeplerCMS.Areas.Housekeeping
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+        private readonly IFriendService _friendsService;
+        private readonly IFuseService _fuseService;
+        public UsersController(IUserService userService, IFriendService friendsService, IFuseService fuseService)
         {
             _userService = userService;
+            _friendsService = friendsService;
+            _fuseService = fuseService;
         }
 
         [HousekeepingFilter(Fuse.fuse_kick)]
@@ -36,6 +41,26 @@ namespace KeplerCMS.Areas.Housekeeping
             };
             return View(model);
         }
-       
+
+        [HousekeepingFilter(Fuse.fuse_kick)]
+        public async Task<IActionResult> Manage(int id, string message)
+        {
+            var user = await _userService.GetUserById(id);
+            if (user == null) return NotFound();
+            var friends = await _friendsService.GetFriendsWithIdAndUsername(user.Id);
+            var rank = await _fuseService.GetRankById(user.Rank);
+            var ranks = await _fuseService.GetRanks();
+            var model = new ManageUserViewModel
+            {
+                User = user,
+                Friends = friends,
+                Rank = rank,
+                Ranks = ranks,
+                Message = message
+            };
+            return View(model);
+        }
     }
+
 }
+

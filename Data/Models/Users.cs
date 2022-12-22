@@ -17,6 +17,8 @@ namespace KeplerCMS.Data.Models
         public string Password { get; set; }
         [Column("figure")]
         public string Figure { get; set; }
+        [Column("birthday")]
+        public string Birthday { get; set; }
         [Column("club_subscribed")]
         public double ClubSubscribed { get; set; }
         [Column("club_expiration")]

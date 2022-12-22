@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using KeplerCMS.Data.Models;
+using KeplerCMS.Models;
 
 namespace KeplerCMS.Areas.Housekeeping.Models.Views
 {
@@ -22,5 +23,15 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
     {
         public IEnumerable<Users> Users { get; set; }
         public int TotalResults { get; set; }
+    }
+    
+    
+    public class ManageUserViewModel
+    {
+        public Users User { get; set; }
+        public List<Users> Friends { get; set; }
+        public Rank Rank { get; set; }
+        public IEnumerable<Rank> Ranks { get; set; }
+        public string Message { get; set; }
     }
 }

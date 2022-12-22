@@ -167,7 +167,7 @@ namespace KeplerCMS.Services.Implementations
                             new MySqlParameter("@search", "%" + username + "%"),
                             new MySqlParameter("@letter", letter + "%"));
                     var total = await allUsers.CountAsync();
-                    var users = await allUsers.Skip(skip).Take(take).ToListAsync();
+                    var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
                     return new UsersSearchModel { Users = users, TotalResults = total };
                 }
                 else
@@ -175,7 +175,7 @@ namespace KeplerCMS.Services.Implementations
                     var allUsers = _context.Users.Where(user => user.Username.ToLower().Contains(username.ToLower()))
                         .OrderBy(user => user.Username);
                     var total = await allUsers.CountAsync();
-                    var users = await allUsers.Skip(skip).Take(take).ToListAsync();
+                    var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
                     return new UsersSearchModel { Users = users, TotalResults = total };
                 }
             }
@@ -185,14 +185,14 @@ namespace KeplerCMS.Services.Implementations
                     "SELECT * FROM users where username like @letter ORDER BY username ASC",
                     new MySqlParameter("@letter", letter + "%"));
                 var total = await allUsers.CountAsync();
-                var users = await allUsers.Skip(skip).Take(take).ToListAsync();
+                var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
                 return new UsersSearchModel { Users = users, TotalResults = total };
             }
             else
             {
                 var allUsers = _context.Users.OrderBy(user => user.Username);
                 var total = await allUsers.CountAsync();
-                var users = await allUsers.Skip(skip).Take(take).ToListAsync();
+                var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
                 return new UsersSearchModel { Users = users, TotalResults = total };
             }
         }
@@ -221,6 +221,13 @@ namespace KeplerCMS.Services.Implementations
         public async Task<int> TotalSignedinUsers()
         {
             return await _context.Users.Where(user => user.LastOnlineTimestamp != 0).CountAsync();
+        }
+
+        public async Task<Users> Update(Users user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
     }
 

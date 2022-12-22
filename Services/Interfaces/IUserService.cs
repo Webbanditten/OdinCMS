@@ -29,5 +29,6 @@ namespace KeplerCMS.Services.Interfaces
         public Task<int> TotalUsers();
         public Task<int> TotalSignedinUsers();
 
+        public Task<Users> Update(Users user);
     }
 }
