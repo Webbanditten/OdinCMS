@@ -33,5 +33,6 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public Rank Rank { get; set; }
         public IEnumerable<Rank> Ranks { get; set; }
         public string Message { get; set; }
+        public IEnumerable<UsersBadges> Badges { get; set; }
     }
 }

@@ -31,5 +31,8 @@ namespace KeplerCMS.Services.Interfaces
 
         public Task<Users> Update(Users user);
         public Task<IEnumerable<Users>> GetUserByRank(int id);
+        public Task<IEnumerable<UsersBadges>> GetBadges(int userId);
+        public Task<UsersBadges> AddBadge(UsersBadges badge);
+        public Task<bool> RemoveBadge(UsersBadges badge);
     }
 }

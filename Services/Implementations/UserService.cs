@@ -234,6 +234,23 @@ namespace KeplerCMS.Services.Implementations
         {
             return await  _context.Users.Where(user => user.Rank == id).ToListAsync();
         }
+
+        public async Task<IEnumerable<UsersBadges>> GetBadges(int userId)
+        {
+            return await _context.UsersBadges.Where(s=>s.UserId == userId).ToListAsync();
+        }
+        public async Task<UsersBadges> AddBadge(UsersBadges badge)
+        {
+            _context.UsersBadges.Add(badge);
+            await _context.SaveChangesAsync();
+            return badge;
+        }
+        public async Task<bool> RemoveBadge(UsersBadges badge)
+        {
+            _context.UsersBadges.Remove(badge);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 
 }

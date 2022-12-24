@@ -52,42 +52,40 @@
                 </table>
             </div>
             <h2>Badges</h2>
-            <div>
-                <!-- List of badges -->
-                <table class="habboTable" id="badges">
-                    <thead>
-                        <tr>
-                            <th>Badge</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            foreach(var badge in Model.RankBadges) {
-                                <tr>
-                                    <td>
-                                        @badge.Badge
-                                    </td>
-                                    <td>
-                                        <button type="button" onClick="removeBadge('@badge.Rank', '@badge.Badge')">Remove</button>
-                                    </td>
-                                </tr>
-                            }
-                            if(!Model.RankBadges.Any()) {
-                                <tr>
-                                    <td colspan="2">No badges</td>
-                                </tr>
-                            }
+            <!-- List of badges -->
+            <table class="habboTable" id="badges">
+                <thead>
+                    <tr>
+                        <th>Badge</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        foreach(var badge in Model.RankBadges) {
+                            <tr>
+                                <td>
+                                    @badge.Badge
+                                </td>
+                                <td>
+                                    <button type="button" onClick="removeBadge('@badge.Rank', '@badge.Badge')">Remove</button>
+                                </td>
+                            </tr>
                         }
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
-                            <td><button type="button" onClick="addBadge('@Model.RankId')">Add badge</button></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+                        if(!Model.RankBadges.Any()) {
+                            <tr>
+                                <td colspan="2">No badges</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
+                        <td><button type="button" onClick="addBadge('@Model.RankId')">Add badge</button></td>
+                    </tr>
+                </tfoot>
+            </table>
             <div class="form-group">
                 <button type="submit" class="btn btn-sm btn-primary">Submit</button>
             </div>
@@ -104,11 +102,11 @@
                 return;
             }
 
-            fetch('/housekeeping/rank/addbadge', {
+            fetch('/housekeeping/ranks/addbadge', {
                 method: 'POST',
                 body: JSON.stringify({
                     rank: rank,
-                    badge: badge
+                    badge: badge.toUpperCase()
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -124,11 +122,11 @@
 
         function removeBadge(rank, badge) {
             
-            fetch('/housekeeping/rank/removebadge', {
+            fetch('/housekeeping/ranks/removebadge', {
                 method: 'POST',
                 body: JSON.stringify({
                     rank: rank,
-                    badge: badge
+                    badge: badge.toUpperCase()
                 }),
                 headers: {
                     'Content-Type': 'application/json'

@@ -50,15 +50,49 @@ namespace KeplerCMS.Areas.Housekeeping
             var friends = await _friendsService.GetFriendsWithIdAndUsername(user.Id);
             var rank = await _fuseService.GetRankById(user.Rank);
             var ranks = await _fuseService.GetRanks();
+            var badges = await _userService.GetBadges(user.Id);
             var model = new ManageUserViewModel
             {
                 User = user,
                 Friends = friends,
                 Rank = rank,
                 Ranks = ranks,
-                Message = message
+                Message = message,
+                Badges = badges
             };
             return View(model);
+        }
+
+        [HousekeepingFilter(Fuse.fuse_badges)]
+        [HttpPost]
+        public async Task<IActionResult> AddBadge([FromBody]UsersBadges badge)
+        {
+           var user = _userService.GetUserById(badge.UserId);
+            if (user != null)
+            {
+                var currentBadges = await _userService.GetBadges(badge.UserId);
+                if(currentBadges.Select(s=>s.Badge).Contains(badge.Badge)) {
+                    return Ok("Badge already exists");
+                } else {
+                    await _userService.AddBadge(badge);
+                }
+            } else {
+                return NotFound();
+            }
+            return Ok("Badges for user updated");
+        }
+        [HousekeepingFilter(Fuse.fuse_badges)]
+        [HttpPost]
+        public async Task<IActionResult> RemoveBadge([FromBody]UsersBadges badge)
+        {
+            var user = _userService.GetUserById(badge.UserId);
+            if (user != null)
+            {
+               await _userService.RemoveBadge(badge);
+            } else {
+                return NotFound();
+            }
+            return Ok("Badges for user updated");
         }
     }
 

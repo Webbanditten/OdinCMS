@@ -10,12 +10,12 @@ using KeplerCMS.Data.Models;
 namespace KeplerCMS.Areas.Housekeeping
 {
     [Area("Housekeeping")]
-    public class RankController : Controller
+    public class RanksController : Controller
     {
         private IFuseService _fuseService;
         private IUserService _userService;
 
-        public RankController(IFuseService fuseService, IUserService userService)
+        public RanksController(IFuseService fuseService, IUserService userService)
         {
             _userService = userService;
             _fuseService = fuseService;
@@ -68,7 +68,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 new Rank { Name = data.Name}, 
                 model.Fuses.Where(f => f.Selected).Select(f => new RankRights { FuseName = f.Name })
             );
-            return RedirectToAction("Index", "Rank", new { message = "Rank created" });
+            return RedirectToAction("Index", "Ranks", new { message = "Rank created" });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_ranks)]
@@ -112,14 +112,14 @@ namespace KeplerCMS.Areas.Housekeeping
                 new Rank { Id = data.RankId, Name = data.Name}, 
                 selectedFuses.Where(f => f.Selected).Select(f => new RankRights { FuseName = f.Name, RankId = data.RankId}).ToList()
             );
-            return RedirectToAction("Index", "Rank", new { message = "Rank updated" });
+            return RedirectToAction("Index", "Ranks", new { message = "Rank updated" });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_ranks)]
         public async Task<IActionResult> Remove(int id)
         {
             await _fuseService.DeleteRank(id);
-            return RedirectToAction("Index", "Rank", new { message = "Rank Removed" });
+            return RedirectToAction("Index", "Ranks", new { message = "Rank Removed" });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_ranks)]
@@ -140,7 +140,7 @@ namespace KeplerCMS.Areas.Housekeeping
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Rank", new { message = "Rank Changed" });
+            return RedirectToAction("Index", "Ranks", new { message = "Rank Changed" });
         }
         [HousekeepingFilter(Fuse.housekeeping_ranks)]
         [HttpPost]

@@ -30,7 +30,9 @@ namespace KeplerCMS.Models
         [Description("housekeeping_settings")]
         housekeeping_settings,
         [Description("fuse_kick")]
-        fuse_kick
+        fuse_kick,
+        [Description("fuse_badges")]
+        fuse_badges
         
     }
 }

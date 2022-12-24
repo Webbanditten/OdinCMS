@@ -31,7 +31,7 @@
         case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/rank"):
+        case var activeMenu when path.StartsWithSegments("/housekeeping/ranks"):
             activeMenuItem = HousekeepingMenu.AdminTools;
             break;
         case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
@@ -180,7 +180,7 @@
                                 @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_ranks }))
                                 {
                                     <li>
-                                        <a href="@Url.Action("Index", "Rank")">Rank Settings</a>
+                                        <a href="@Url.Action("Index", "Ranks")">Manage ranks</a>
                                     </li>
                                 }
                             </ul>
