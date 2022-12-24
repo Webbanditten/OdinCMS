@@ -30,5 +30,6 @@ namespace KeplerCMS.Services.Interfaces
         public Task<int> TotalSignedinUsers();
 
         public Task<Users> Update(Users user);
+        public Task<IEnumerable<Users>> GetUserByRank(int id);
     }
 }

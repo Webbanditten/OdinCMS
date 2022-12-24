@@ -17,5 +17,8 @@ namespace KeplerCMS.Data.Models
         [Column("name")]
         public string Name { get; set; }
         public virtual IEnumerable<RankRights> RankRights { get; set; }
+
+        [NotMapped]
+        public IEnumerable<Users> Users { get; set; }
     }
 }

@@ -110,6 +110,33 @@ namespace KeplerCMS.Services.Implementations
         {
             return await _context.RankRights.Where(r => r.RankId == id).ToListAsync();
         }
+
+        public async Task<IEnumerable<Rank>> GetRanksWithUsers()
+        {
+            var ranks = await GetRanks();
+            foreach (var rank in ranks)
+            {
+                rank.Users = await _context.Users.Where(user => user.Rank == rank.Id).ToListAsync();
+            }
+            return ranks;
+        }
+
+        public async Task<IEnumerable<RankBadges>> GetRankBadges(int rankId)
+        {
+            return await _context.RankBadges.Where(s=>s.Rank == rankId).ToListAsync();
+        }
+        public async Task<RankBadges> AddRankBadge(RankBadges rankBadge)
+        {
+            _context.RankBadges.Add(rankBadge);
+            await _context.SaveChangesAsync();
+            return rankBadge;
+        }
+        public async Task<bool> RemoveRankBadge(RankBadges rankBadge)
+        {
+            _context.RankBadges.Remove(rankBadge);
+            await _context.SaveChangesAsync();
+            return true;
+        }
         
     }
 

@@ -51,9 +51,99 @@
                     </tbody>
                 </table>
             </div>
+            <h2>Badges</h2>
+            <div>
+                <!-- List of badges -->
+                <table class="habboTable" id="badges">
+                    <thead>
+                        <tr>
+                            <th>Badge</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach(var badge in Model.RankBadges) {
+                                <tr>
+                                    <td>
+                                        @badge.Badge
+                                    </td>
+                                    <td>
+                                        <button type="button" onClick="removeBadge('@badge.Rank', '@badge.Badge')">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                            if(!Model.RankBadges.Any()) {
+                                <tr>
+                                    <td colspan="2">No badges</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
+                            <td><button type="button" onClick="addBadge('@Model.RankId')">Add badge</button></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-sm btn-primary">Submit</button>
             </div>
         </form>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        function addBadge(rank) {
+            
+            var badge = document.getElementsByName('badge')[0].value;
+            if (badge.length == 0 && badge.length > 3) {
+                return;
+            }
+
+            fetch('/housekeeping/rank/addbadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    rank: rank,
+                    badge: badge
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                table.querySelector('input').value = '';
+                table.querySelector('tbody').appendChild(document.createElement('tr')).innerHTML = '<td>' + badge + '</td><td><button type="button" onClick="removeBadge(\'' + rank + '\', \'' + badge + '\')">Remove</button></td>';
+                return response.json();
+
+            });
+        }
+
+        function removeBadge(rank, badge) {
+            
+            fetch('/housekeeping/rank/removebadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    rank: rank,
+                    badge: badge
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                var rows = table.querySelectorAll('tbody tr');
+                rows.forEach(function (row) {
+                    if (row.querySelector('td').innerText == badge) {
+                        row.remove();
+                    }
+                });
+                return response.json();
+
+            });
+        }
+    </script>
+}

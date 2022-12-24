@@ -229,6 +229,11 @@ namespace KeplerCMS.Services.Implementations
             await _context.SaveChangesAsync();
             return user;
         }
+
+        public async Task<IEnumerable<Users>> GetUserByRank(int id)
+        {
+            return await  _context.Users.Where(user => user.Rank == id).ToListAsync();
+        }
     }
 
 }

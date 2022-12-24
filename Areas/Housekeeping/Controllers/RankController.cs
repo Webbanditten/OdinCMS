@@ -81,6 +81,7 @@ namespace KeplerCMS.Areas.Housekeeping
             var fuses = await _fuseService.GetFuses();
             var model = new RanksEditViewModel
             {
+                RankBadges = await _fuseService.GetRankBadges(rank.Id),
                 RankId = rank.Id,
                 Name = rank.Name,
                 Fuses = fuses.Select(f => new RanksSelectedFusesModel
@@ -140,6 +141,37 @@ namespace KeplerCMS.Areas.Housekeeping
                 return Redirect(returnUrl);
             }
             return RedirectToAction("Index", "Rank", new { message = "Rank Changed" });
+        }
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
+        [HttpPost]
+        public async Task<IActionResult> AddBadge([FromBody]RankBadges badge)
+        {
+           var rank = _fuseService.GetRankById(badge.Rank);
+            if (rank != null)
+            {
+                var currentBadges = await _fuseService.GetRankBadges(badge.Rank);
+                if(currentBadges.Select(s=>s.Badge).Contains(badge.Badge)) {
+                    return Ok("Badge already exists");
+                } else {
+                    await _fuseService.AddRankBadge(badge);
+                }
+            } else {
+                return NotFound();
+            }
+            return Ok("Badges for rank updated");
+        }
+        [HousekeepingFilter(Fuse.housekeeping_ranks)]
+        [HttpPost]
+        public async Task<IActionResult> RemoveBadge([FromBody]RankBadges badge)
+        {
+            var rank = _fuseService.GetRankById(badge.Rank);
+            if (rank != null)
+            {
+               await _fuseService.RemoveRankBadge(badge);
+            } else {
+                return NotFound();
+            }
+            return Ok("Badges for rank updated");
         }
     }
 }

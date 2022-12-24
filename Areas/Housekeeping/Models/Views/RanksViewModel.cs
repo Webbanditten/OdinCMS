@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using KeplerCMS.Data.Models;
 
 namespace KeplerCMS.Areas.Housekeeping.Models.Views
 {
@@ -28,6 +29,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         [Required]
         public int RankId { get; set; }
         public IEnumerable<RanksSelectedFusesModel> Fuses { get; set; }
+        public IEnumerable<RankBadges> RankBadges { get; set; }
     }
 
     public class RanksSelectedFusesModel : KeplerCMS.Data.Models.Fuses {

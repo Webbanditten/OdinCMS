@@ -19,6 +19,9 @@ namespace KeplerCMS.Data
 
             modelBuilder.Entity<RankRights>()
                 .HasKey(c => new { c.FuseName, c.RankId });
+                
+            modelBuilder.Entity<RankBadges>()
+            .HasKey(c => new { c.Rank, c.Badge });
 
             modelBuilder
                 .Entity<Fuses>()
@@ -65,6 +68,7 @@ namespace KeplerCMS.Data
         public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<Rewards> Rewards { get; set; }
+        public DbSet<RankBadges> RankBadges { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

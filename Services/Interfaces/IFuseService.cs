@@ -16,5 +16,9 @@ namespace KeplerCMS.Services.Interfaces
         Task<bool> DeleteRank(int rankId);
         Task<IEnumerable<RankRights>> GetFusesByRank(int rank, bool hasClub);
         Task<IEnumerable<RankRights>> GetRankRightsByRankId(int id);
+        Task<IEnumerable<Rank>> GetRanksWithUsers();
+        Task<IEnumerable<RankBadges>> GetRankBadges(int rankId);
+        Task<RankBadges> AddRankBadge(RankBadges rankBadge);
+        Task<bool> RemoveRankBadge(RankBadges rankBadge);
     }
 }
