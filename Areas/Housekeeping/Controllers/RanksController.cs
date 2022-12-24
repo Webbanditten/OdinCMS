@@ -146,6 +146,9 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> AddBadge([FromBody]RankBadges badge)
         {
+            if(badge.Badge == null || string.IsNullOrEmpty(badge.Badge)) {
+                return BadRequest("Badge cannot be empty");
+            }
            var rank = _fuseService.GetRankById(badge.Rank);
             if (rank != null)
             {
@@ -164,6 +167,9 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> RemoveBadge([FromBody]RankBadges badge)
         {
+            if(badge.Badge == null || string.IsNullOrEmpty(badge.Badge)) {
+                return BadRequest("Badge cannot be empty");
+            }
             var rank = _fuseService.GetRankById(badge.Rank);
             if (rank != null)
             {

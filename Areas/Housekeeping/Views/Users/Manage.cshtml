@@ -1,6 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
 @using KeplerCMS.Data.Models
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Linq
 @using KeplerCMS.Helpers
 @model ManageUserViewModel
@@ -147,7 +146,8 @@
     <table class="habboTable" id="badges">
         <thead>
             <tr>
-                <th>Badge</th>
+                <th>Image</th>
+                <th>Badge name</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -156,9 +156,8 @@
                 foreach (var badge in Model.Badges)
                 {
                     <tr>
-                        <td>
-                            @badge.Badge
-                        </td>
+                        <td><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif" /></td>
+                        <td>@badge.Badge</td>
                         <td>
                             @{
                                 if (userFuses.Contains(Fuse.fuse_badges.Description())) {
@@ -180,6 +179,7 @@
             if (userFuses.Contains(Fuse.fuse_badges.Description())) {
                 <tfoot>
                     <tr>
+                        <td></td>
                         <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
                         <td><button type="button" onClick="addBadge('@Model.User.Id')">Add badge</button></td>
                     </tr>
@@ -225,7 +225,7 @@
             }).then(function (response) {
                 var table = document.getElementById('badges');
                 table.querySelector('input').value = '';
-                table.querySelector('tbody').appendChild(document.createElement('tr')).innerHTML = '<td>' + badge + '</td><td><button type="button" onClick="removeBadge(\'' + userId + '\', \'' + badge + '\')">Remove</button></td>';
+                table.querySelector('tbody').appendChild(document.createElement('tr')).innerHTML = '<td><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/'+badge+'.gif" /></td><td>' + badge + '</td><td><button type="button" onClick="removeBadge(\'' + userId + '\', \'' + badge + '\')">Remove</button></td>';
                 
 
             });
@@ -246,7 +246,7 @@
                 var table = document.getElementById('badges');
                 var rows = table.querySelectorAll('tbody tr');
                 rows.forEach(function (row) {
-                    if (row.querySelector('td').innerText == badge) {
+                    if (row.querySelector('td:nth-child(2)').innerText == badge) {
                         row.remove();
                     }
                 });

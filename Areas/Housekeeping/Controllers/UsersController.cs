@@ -67,7 +67,10 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> AddBadge([FromBody]UsersBadges badge)
         {
-           var user = _userService.GetUserById(badge.UserId);
+            if(badge.Badge == null || string.IsNullOrEmpty(badge.Badge)) {
+                return BadRequest("Badge cannot be empty");
+            }
+            var user = _userService.GetUserById(badge.UserId);
             if (user != null)
             {
                 var currentBadges = await _userService.GetBadges(badge.UserId);
@@ -85,6 +88,9 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> RemoveBadge([FromBody]UsersBadges badge)
         {
+            if(badge.Badge == null || string.IsNullOrEmpty(badge.Badge)) {
+                return BadRequest("Badge cannot be empty");
+            }
             var user = _userService.GetUserById(badge.UserId);
             if (user != null)
             {
