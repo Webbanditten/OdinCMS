@@ -1,5 +1,5 @@
--- Create tables with fuses 
-create table keplerdev.fuses
+-- Create tables with fuses
+create table fuses
 (
     fuse        varchar(255)                                             not null
         primary key,
@@ -56,7 +56,7 @@ insert into fuses (fuse, user_group, description) values ('housekeeping_website'
 alter table catalogue_pages
     add fuse varchar(255) default 'DEFAULT' not null;
 
-update catalogue_pages set fuse = 'fuse_catalogue_administrator';
+update catalogue_pages set fuse = 'fuse_catalogue_administrator' where min_role > 1;
 
 create table ranks
 (
@@ -84,7 +84,9 @@ alter table rooms_categories
 alter table rooms_categories
     add fuse_setflatcat varchar(255) default 'DEFAULT' not null;
 
+update rooms_categories set fuse_access = 'fuse_hidden_rooms' where minrole_access > 1;
+update rooms_categories set fuse_setflatcat = 'fuse_room_cat_special' where minrole_access > 1;
 
 
-UPDATE users set rank = 0;
+UPDATE users set `rank` = 0;
 

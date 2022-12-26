@@ -7,7 +7,7 @@
 @{
     ViewBag.Title = Model.User.Username;
     var userData = (Users)ViewData["user"];
-    var userFuses = userData.Fuses.Select(s => s.FuseName).ToList();
+    var userFuses = userData?.Fuses.Select(s => s.FuseName).ToList();
 }
 
 <a href="@Url.Action("Index", "Users")">Back</a>
@@ -102,9 +102,9 @@
                     </td>
                     <td>
                         @{
-                            if (userFuses.Contains(Fuse.housekeeping_ranks.Description()))
+                            if (userFuses != null && userFuses.Contains(Fuse.housekeeping_ranks.Description()))
                             {
-                                <form asp-action="Change" asp-controller="Rank">
+                                <form asp-action="Change" asp-controller="Ranks">
                                     <input type="hidden" name="userId" value="@Model.User.Id" />
                                     <input type="hidden" name="returnUrl"
                                     value="@Url.Action("Manage", "Users", new { id = @Model.User.Id, message="Rank updated" })" />
@@ -156,7 +156,8 @@
                 foreach (var badge in Model.Badges)
                 {
                     <tr>
-                        <td><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif" /></td>
+                        <td>
+                            <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif" alt=""/></td>
                         <td>@badge.Badge</td>
                         <td>
                             @{
@@ -176,7 +177,7 @@
             }
         </tbody>
         @{
-            if (userFuses.Contains(Fuse.fuse_badges.Description())) {
+            if (userFuses != null && userFuses.Contains(Fuse.fuse_badges.Description())) {
                 <tfoot>
                     <tr>
                         <td></td>

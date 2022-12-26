@@ -1,5 +1,11 @@
-﻿@model HousekeepingHomeViewModels
-
+﻿@using KeplerCMS.Helpers
+@using KeplerCMS.Data.Models
+@model HousekeepingHomeViewModels
+@{
+    ViewBag.Title = "Housekeeping";
+    var userData = (Users)ViewData["user"];
+    var userFuses = userData?.Fuses.Select(s => s.FuseName).ToList();
+}
 <h1>Welcome to Housekeeping</h1>
     @{
         if(Model.MissingSettings.Any()) {
@@ -36,7 +42,13 @@
                 {
                     <tr>
                         <td>
-                            <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                        @{
+                            if (userFuses != null && userFuses.Contains(Fuse.fuse_kick.Description())) {
+                                <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                            } else {
+                                @user.Username
+                            }
+                        }
                         </td>
                         <td>
                             @user.LastOnline
@@ -64,7 +76,13 @@
                 {
                     <tr>
                         <td>
-                            <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                            @{
+                                if (userFuses != null && userFuses.Contains(Fuse.fuse_kick.Description())) {
+                                    <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                                } else {
+                                    @user.Username
+                                }
+                            }
                         </td>
                         <td>
                             @user.CreateAt
