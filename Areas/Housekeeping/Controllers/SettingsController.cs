@@ -30,14 +30,6 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             return View(await _settingsService.GetAll());
         }
-
-
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         
         [HousekeepingFilter(Fuse.fuse_administrator_access)]
         public async Task<IActionResult> Update(string id)

@@ -7,11 +7,12 @@
     var menu = (List<Menu>)ViewData["menu"];
     var subMenu = new List<Menu>();
     var path = Context.Request.Path;
+    var userFuses = userData.Fuses.Select(s => s.FuseName).ToList();
 
     HousekeepingMenu activeMenuItem;
 
     switch (path)
-    { 
+    {
         case var activeMenu when path == "/housekeeping":
             activeMenuItem = HousekeepingMenu.Home;
             break;
@@ -30,14 +31,26 @@
         case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/ranks"):
+            activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
         case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
             activeMenuItem = HousekeepingMenu.Localization;
+            break;
+        case var activeMenu when path.StartsWithSegments("/housekeeping/users"):
+            activeMenuItem = HousekeepingMenu.HobbaTools;
+            break;        
+        case var activeMenu when path.StartsWithSegments("/housekeeping/hobba"):
+            activeMenuItem = HousekeepingMenu.HobbaTools;
             break;
         case "/housekeeping/upload":
             activeMenuItem = HousekeepingMenu.WebsiteAdmin;
             break;
         case "/housekeeping/admin":
             activeMenuItem = HousekeepingMenu.AdminTools;
+            break;
+        case "/housekeeping/hobba":
+            activeMenuItem = HousekeepingMenu.HobbaTools;
             break;
         case "/housekeeping/catalog":
             activeMenuItem = HousekeepingMenu.AdminTools;
@@ -58,7 +71,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Housekeeping</title>
+    <title>Housekeeping ~ @ViewBag.Title</title>
 
     <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css">
     <link rel="stylesheet" href="~/housekeeping/css/sweetalert2.min.css">
@@ -66,73 +79,144 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <div class="top">
-            <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
-            <ul class="menu">
-                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping_website)) {
-                    <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.fuse_administrator_access)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(userData.Fuses.ToList(), Fuse.housekeeping_localization)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="@Url.Action("Index", "Localization")">Localization</a></li>
-                }
-            </ul>
-        </div>
-        <div class="content">
-            <div class="sidebar">
-                @{if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
-                    {
-                        <div class="container">
-                            <div class="title">
-                                Website administration
-                            </div>
-                            <div class="container-content">
-                                <ul>
-                                    <li><a href="@Url.Action("Index", "Menu")">Menu</a></li>
-                                    <li><a href="@Url.Action("Index", "Pages")">Pages</a></li>
-                                    <li><a href="@Url.Action("Index", "Upload")">Upload</a></li>
-                                    <li><a href="@Url.Action("Index", "News")">News</a></li>
-                                </ul>
-                            </div>
+<div class="wrapper">
+    <div class="top">
+        <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
+        <ul class="menu">
+            @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping }))
+            {
+                <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")>
+                    <a href="@Url.Action("Index", "Home")">Home</a>
+                </li>
+            }
+            @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_website }))
+            {
+                <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")>
+                    <a href="@Url.Action("Index", "Website")">Website management</a>
+                </li>
+            }
+            @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_kick }))
+            {
+                <li @(activeMenuItem.Equals(HousekeepingMenu.HobbaTools) ? "class=active" : "")>
+                    <a href="@Url.Action("Index", "Hobba")">Hobba tools</a>
+                </li>
+            }
+            @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_administrator_access, Fuse.housekeeping_ranks }))
+            {
+                <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")>
+                    <a href="@Url.Action("Index", "Admin")">Admin tools</a>
+                </li>
+            }
+            @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_localization }))
+            {
+                <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")>
+                    <a href="@Url.Action("Index", "Localization")">Localization</a>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="content">
+        <div class="sidebar">
+            @{
+                if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
+                {
+                    <div class="container">
+                        <div class="title">
+                            Website administration
                         </div>
-                    }
+                        <div class="container-content">
+                            <ul>
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_menu }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "Menu")">Menu</a>
+                                    </li>
+                                }
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_pages }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "Pages")">Pages</a>
+                                    </li>
+                                }
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_upload }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "Upload")">Upload</a>
+                                    </li>
+                                }
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_news }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "News")">News</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
                 }
+            }
 
-                @{if (activeMenuItem == HousekeepingMenu.AdminTools)
-                    {
-                        <div class="container">
-                            <div class="title">
-                                Admin tools
-                            </div>
-                            <div class="container-content">
-                                <ul>
-                                    <li><a href="@Url.Action("Index", "Settings")">Settings</a></li>
-                                    <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
-                                    <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
-                                    <li><a href="@Url.Action("Index", "Catalog")">Catalog</a></li>
-                                </ul>
-                            </div>
+            @{
+                if (activeMenuItem == HousekeepingMenu.AdminTools)
+                {
+                    <div class="container">
+                        <div class="title">
+                            Admin tools
                         </div>
-                    }
+                        <div class="container-content">
+                            <ul>
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_settings }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "Settings")">Settings</a>
+                                    </li>
+                                }
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_campaign }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a>
+                                    </li>
+                                }
+                                @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_ranks }))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "Ranks")">Manage ranks</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
                 }
-            </div>
-            <div class="main-content">
-                @RenderBody()
-            </div>
+            }
+            
+            @{
+                if (activeMenuItem == HousekeepingMenu.HobbaTools)
+                {
+                    <div class="container">
+                        <div class="title">
+                            Hobba Tools
+                        </div>
+                        <div class="container-content">
+                            <ul>
+                                <li>
+                                    <a href="@Url.Action("Index", "Users")">Users</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="main-content">
+            @RenderBody()
         </div>
     </div>
+</div>
 
-    <script src="~/housekeeping/js/jquery.js" type="text/javascript"></script>
-    <script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
-    <script src="~/housekeeping/js/sweetalert2.min.js" type="text/javascript"></script>
-    @RenderSection("scripts", false)
+<script src="~/housekeeping/js/jquery.js" type="text/javascript"></script>
+<script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
+<script src="~/housekeeping/js/sweetalert2.min.js" type="text/javascript"></script>
+@RenderSection("scripts", false)
 </body>
 
 </html>
-

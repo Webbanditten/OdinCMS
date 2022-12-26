@@ -1,13 +1,19 @@
-﻿@model System.Collections.Generic.IEnumerable<DefaultSetting>
-
+﻿@using KeplerCMS.Helpers
+@using KeplerCMS.Data.Models
+@model HousekeepingHomeViewModels
+@{
+    ViewBag.Title = "Housekeeping";
+    var userData = (Users)ViewData["user"];
+    var userFuses = userData?.Fuses.Select(s => s.FuseName).ToList();
+}
 <h1>Welcome to Housekeeping</h1>
     @{
-        if(Model.Count() > 0) {
+        if(Model.MissingSettings.Any()) {
 
             <h2>The following settings are missing from the "settings" table. Would you like to install them with their default values?</h2>
             <ul style="display:block; position:relative; border:2px solid red;">
                 @{
-                    foreach(var item in Model) {
+                    foreach(var item in Model.MissingSettings) {
                         <li>@item.Setting (@item.FriendlyName)</li>
                     }
                 }
@@ -16,6 +22,88 @@
             
         }
     }
+
+<h2>Statistics</h2>
+<div style="display:flex">
+    <div style="flex: 1; margin-right: 10px;">
+        <strong>Latest Sign-ins</strong>
+        <table class="habboTable">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>
+                    Last Login
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @{
+                foreach (var user in Model.LatestSignins)
+                {
+                    <tr>
+                        <td>
+                        @{
+                            if (userFuses != null && userFuses.Contains(Fuse.fuse_kick.Description())) {
+                                <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                            } else {
+                                @user.Username
+                            }
+                        }
+                        </td>
+                        <td>
+                            @user.LastOnline
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <div style="flex: 1; margin-left: 10px;">
+        <strong>Latest Sign-ups</strong>
+        <table class="habboTable">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>
+                    Created At
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @{
+                foreach (var user in Model.LatestSignups)
+                {
+                    <tr>
+                        <td>
+                            @{
+                                if (userFuses != null && userFuses.Contains(Fuse.fuse_kick.Description())) {
+                                    <a href="@Url.Action("Manage", "Users", new { id = user.Id })">@user.Username</a>
+                                } else {
+                                    @user.Username
+                                }
+                            }
+                        </td>
+                        <td>
+                            @user.CreateAt
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+        <br/>
+        Monthly Signups:
+        <strong>@Model.MonthlySignups</strong>
+        <br/>
+        Signed-in users:
+        <strong>@Model.totalSignedinUsers</strong>
+        <br/>
+        Total Users:
+        <strong>@Model.totalUsers</strong>
+    </div>
+</div>
+
 <p>
     This CMS is created by Webbanditten
 </p>

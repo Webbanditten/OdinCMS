@@ -1,11 +1,13 @@
-﻿@model IEnumerable<KeplerCMS.Data.Models.News>;
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.RanksViewModel;
+@{
+    Layout = "_Housekeeping";
+}
 
-<h1>News</h1>
-
-@if (ViewData["message"] != null)
+<h1>Ranks</h1>
+@if (Model.Message != null)
 {
     <div class="message">
-        @ViewData["message"]
+        @Model.Message
     </div>
 }
 <a href="@Url.Action("Create")">Add</a>
@@ -13,21 +15,19 @@
 <table class="blueTable">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Publishing date</th>
+            <th>Rank</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @{
-            if (Model != null)
+            if (Model.Ranks.Count() > 0)
             {
-                foreach (var item in Model.OrderByDescending(s=>s.PublishDate))
+                foreach (var item in Model.Ranks.OrderBy(s=>s.Name))
                 {
                 <tr>
-                    <td>@item.Title</td>
-                    <td>@item.PublishDate.ToString("dd-MM-yyyy")</td>
-                    <td><a href="@Url.Action("Update", "News", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeUpload(@item.Id)">Remove</a></td>
+                    <td>@item.Name</td>
+                    <td><a href="@Url.Action("Update", "Ranks", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeRank(@item.Id)">Remove</a></td>
                 </tr>
                 }
             }
@@ -35,7 +35,6 @@
             {
                 <tr>
                     <td>No data</td>
-                    <td></td>
                     <td></td>
                 </tr>
             }
@@ -46,7 +45,7 @@
 
 @section scripts {
     <script>
-    function removeUpload(id) {
+    function removeRank(id) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -63,3 +62,4 @@
         }
     </script>
 }
+

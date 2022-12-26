@@ -8,6 +8,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using KeplerCMS.Helpers;
+using KeplerCMS.Services.Implementations;
 
 namespace KeplerCMS.Controllers
 {
@@ -40,8 +42,17 @@ namespace KeplerCMS.Controllers
         [HttpPost("api/hotel/habboname_exists")]
         public async Task<IActionResult> HabboNameExists([FromForm]string habboName)
         {
-            var user = await _userService.GetUserByUsername(habboName);
-            return Content((user != null ? "True" : "False"));
+            
+            var allowedChars = await _settingService.Get("allowed_username_chars", "1234567890qwertyuiopasdfghjklzxcvbnm-=?!@:.æøå,+<>_");
+            var regexPattern = RegexHelper.RegexSafeString(allowedChars.Value); 
+            var r = new Regex(regexPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            var m = r.Match(habboName);
+            if(m.Success)
+            {
+                var user = await _userService.GetUserByUsername(habboName);
+                return Content((user != null ? "1" : "0"));
+            }
+            return Content("2");
         }
 
         [HttpGet("api/hotel/usersearch")]
@@ -53,23 +64,6 @@ namespace KeplerCMS.Controllers
                 return Content($"{userObj.Gender};{userObj.Figure}");
             }
             return NotFound();
-        }
-
-        [HttpGet("avatarimage")]
-        public async Task<IActionResult> AvatarImage()
-        {
-            var nameValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
-            if(nameValues.Get("figure") != null)
-            {
-                var figure = nameValues.Get("figure");
-                bool canConvertToIntegers = new Regex(@"^\d+").IsMatch(figure);
-                if (canConvertToIntegers)
-                {
-                    figure = Helpers.FigureHelper.ConvertFigure(figure, nameValues.Get("direction") != null ? int.Parse(nameValues.Get("direction")) : 0);
-                }
-                nameValues.Set("figure", figure);
-            }
-            return Redirect("https://www.habbo.com/habbo-imaging/avatarimage?" + nameValues.ToString());
         }
 
         [LoggedInFilter]

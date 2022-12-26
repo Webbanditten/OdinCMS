@@ -4,8 +4,15 @@
 }
 * {
     font-size: 12px;
-    font-family: 'MS Sans Serif', Geneva, sans-serif
-}
+    font-family: 'MS Sans Serif', Geneva, sans-serif;
+    image-rendering: optimizeSpeed; /*                     */
+    image-rendering: -moz-crisp-edges; /* Firefox             */
+    image-rendering: -o-crisp-edges; /* Opera               */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+    image-rendering: pixelated; /* Chrome as of 2019   */
+    image-rendering: optimize-contrast; /* CSS3 Proposed       */
+    -ms-interpolation-mode: nearest-neighbor; /* IE8+                */
+  }
 
 .wrapper {
     width: 920px;
@@ -682,4 +689,36 @@ table.blueTable tfoot .links a{
     padding:12px;
     border:1px solid #000;
     border-radius:5px;
+    box-sizing: border-box;
+}
+
+
+
+table.habboTable {
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #FFFFFF;
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    margin-top:4px;
+    margin-bottom: 4px;
+}
+table.habboTable td, table.habboTable th {
+    border: 1px solid #FFFFFF;
+    padding: 2px 2px;
+}
+table.habboTable tr:nth-child(even) {
+    background: #FFEEAA;
+}
+table.habboTable thead {
+    background: #FFCC00;
+}
+table.habboTable thead th {
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    border-left: 2px solid #FFFFFF;
+}
+table.habboTable thead th:first-child {
+    border-left: none;
 }

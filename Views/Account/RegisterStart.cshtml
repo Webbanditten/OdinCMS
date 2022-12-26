@@ -63,7 +63,7 @@
                                     <partial name="./SimpleRegisterWithoutFlash.cshtml" model=Model></partial>
                                 </div>
 
-                                <script type="text/javascript" language="JavaScript">
+                                <script type="text/javascript">
 	                                var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
                                     swfobj.addVariable("post_url", "/register/step/2?");
                                     swfobj.addParam("base", "@Url.Content("~/flash/")");

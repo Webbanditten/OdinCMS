@@ -17,14 +17,14 @@ namespace KeplerCMS.Areas.Housekeeping
             _commandQueueService = commandQueueService;
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_campaign)]
         public IActionResult Index(string message = null)
         {
             ViewData["message"] = message;
             return View();
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(Fuse.housekeeping_campaign)]
         [HttpPost]
         public IActionResult Index(MessengerCampaign model)
         {

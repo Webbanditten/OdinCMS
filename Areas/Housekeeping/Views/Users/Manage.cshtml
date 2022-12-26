@@ -1,0 +1,258 @@
+﻿@using Microsoft.Extensions.Configuration
+@using KeplerCMS.Data.Models
+@using System.Linq
+@using KeplerCMS.Helpers
+@model ManageUserViewModel
+@inject IConfiguration Configuration
+@{
+    ViewBag.Title = Model.User.Username;
+    var userData = (Users)ViewData["user"];
+    var userFuses = userData?.Fuses.Select(s => s.FuseName).ToList();
+}
+
+<a href="@Url.Action("Index", "Users")">Back</a>
+<h1>@Model.User.Username</h1>
+@if (Model.Message != null)
+{
+    <div class="message">
+    @Model.Message
+</div>
+}
+<div style="display:flex">
+    <div style="flex: 0; ">
+        <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@Model.User.Figure&head_direction=3&amp;gesture=sml&amp;size=b"
+            alt="Avatar" />
+    </div>
+    <div style="flex: 1">
+        <table class="habboTable">
+            <thead>
+                <tr>
+                    <th style="width: 150px">Information</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Username</strong>
+                    </td>
+                    <td>
+                        @Model.User.Username
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Status</strong>
+                    </td>
+                    <td>
+                        @Model.User.Status
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Motto</strong>
+                    </td>
+                    <td>
+                        @Model.User.Motto
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Credits</strong>
+                    </td>
+                    <td>
+                        @Model.User.Credits
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Email</strong>
+                    </td>
+                    <td>
+                        @Model.User.Email
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Created</strong>
+                    </td>
+                    <td>
+                        @Model.User.CreateAt
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Last Login</strong>
+                    </td>
+                    <td>
+                        @Model.User.LastOnline
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>HabboClub</strong>
+                    </td>
+                    <td>
+                        @Model.User.HasHabboClub
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Rank</strong>
+                    </td>
+                    <td>
+                        @{
+                            if (userFuses != null && userFuses.Contains(Fuse.housekeeping_ranks.Description()))
+                            {
+                                <form asp-action="Change" asp-controller="Ranks">
+                                    <input type="hidden" name="userId" value="@Model.User.Id" />
+                                    <input type="hidden" name="returnUrl"
+                                    value="@Url.Action("Manage", "Users", new { id = @Model.User.Id, message="Rank updated" })" />
+                                    <select name="rankId">
+                                        <option value="0">No Rank</option>
+                                        @{
+                                            foreach (var rank in Model.Ranks)
+                                            {
+                                                var selected = Model.User.Rank != 0 && rank.Id == Model.User.Rank;
+                                                if (selected)
+                                                {
+                                                    <option value="@rank.Id" selected>@rank.Name</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@rank.Id">@rank.Name</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                    <input type="submit" value="Change rank" />
+                                </form>
+                            }
+                            else
+                            {
+                                <text>@Model.Rank?.Name </text>
+                            }
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<hr>
+<h2>Badges: </h2>
+<details>
+    <summary>Manage badges</summary>
+    <table class="habboTable" id="badges">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Badge name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var badge in Model.Badges)
+                {
+                    <tr>
+                        <td>
+                            <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif" alt=""/></td>
+                        <td>@badge.Badge</td>
+                        <td>
+                            @{
+                                if (userFuses.Contains(Fuse.fuse_badges.Description())) {
+                                    <button type="button" onClick="removeBadge('@badge.UserId', '@badge.Badge')">Remove</button>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+                if (!Model.Badges.Any())
+                {
+                    <tr>
+                        <td colspan="2">No badges</td>
+                    </tr>
+                }
+            }
+        </tbody>
+        @{
+            if (userFuses != null && userFuses.Contains(Fuse.fuse_badges.Description())) {
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
+                        <td><button type="button" onClick="addBadge('@Model.User.Id')">Add badge</button></td>
+                    </tr>
+                </tfoot>
+            }
+        }
+    </table>
+</details>
+<hr />
+
+<h2>Buddies: </h2>
+<p>
+    This habbo has @Model.Friends.Count() buddies
+    <br />
+
+    @{
+        foreach (var buddies in Model.Friends.OrderBy(s => s.Username))
+        {
+            <a href="@Url.Action("Manage", "Users", new { id = buddies.Id })">@buddies.Username</a><br />
+        }
+    }
+</p>
+
+
+@section scripts {
+    <script>
+        function addBadge(userId) {
+            
+            var badge = document.getElementsByName('badge')[0].value;
+            if (badge.length == 0 && badge.length > 3) {
+                return;
+            }
+
+            fetch('/housekeeping/users/addbadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    userId: userId,
+                    badge: badge.toUpperCase()
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                table.querySelector('input').value = '';
+                table.querySelector('tbody').appendChild(document.createElement('tr')).innerHTML = '<td><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/'+badge+'.gif" /></td><td>' + badge + '</td><td><button type="button" onClick="removeBadge(\'' + userId + '\', \'' + badge + '\')">Remove</button></td>';
+                
+
+            });
+        }
+
+        function removeBadge(userId, badge) {
+            
+            fetch('/housekeeping/users/removebadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    userId: userId,
+                    badge: badge.toUpperCase()
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                var rows = table.querySelectorAll('tbody tr');
+                rows.forEach(function (row) {
+                    if (row.querySelector('td:nth-child(2)').innerText == badge) {
+                        row.remove();
+                    }
+                });
+
+            });
+        }
+    </script>
+}
