@@ -192,7 +192,7 @@
             @{
                 if (activeMenuItem == HousekeepingMenu.HobbaTools)
                 {
-                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_settings }))
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.room_alert }))
                     {
                         <div class="container">
                             <div class="title">
