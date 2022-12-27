@@ -17,5 +17,6 @@ namespace KeplerCMS.Models
         public string MessageLink { get; set; }
         public int FriendRequestTo { get; set; }
         public bool OnlineOnly { get; set; }
+        public string[] Users { get; set; }
     }
 }

@@ -4,7 +4,6 @@
 }
 * {
     font-size: 12px;
-    font-family: 'MS Sans Serif', Geneva, sans-serif;
     image-rendering: optimizeSpeed; /*                     */
     image-rendering: -moz-crisp-edges; /* Firefox             */
     image-rendering: -o-crisp-edges; /* Opera               */
@@ -69,6 +68,8 @@
 }
 
 .content {
+    position: absolute;
+    margin-top:12px;
     display: flex;
 }
 
@@ -89,7 +90,7 @@
 .container .title {
     background: #0066cc;
     height: 20px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     padding-left: 4px;
     border-bottom: 1px solid #000;
@@ -109,6 +110,10 @@
 
 .container .container-content ul li {
     margin-top: 1px;
+}
+
+.container:not(:first-child) {
+    margin-top: 12px;
 }
 
 h1 {
@@ -721,4 +726,31 @@ table.habboTable thead th {
 }
 table.habboTable thead th:first-child {
     border-left: none;
+}
+
+
+
+form.basic {
+    
+}
+
+form.basic label {
+    display: inline-block;
+    width: 100px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size:12px;
+}
+
+form.basic input:not([type="submit"]) {
+    width:270px;
+}
+form.basic input[type="submit"] {
+    display: block;
+    margin-left:103px;
+}
+
+form.basic .success-message {
+    display:block;
+    margin-top:16px;
 }

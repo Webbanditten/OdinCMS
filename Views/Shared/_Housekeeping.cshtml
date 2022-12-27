@@ -192,14 +192,31 @@
             @{
                 if (activeMenuItem == HousekeepingMenu.HobbaTools)
                 {
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping_settings }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Hobba Tools
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    <li>
+                                        <a href="@Url.Action("Alert", "Hobba")">Remote alerting</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    
                     <div class="container">
                         <div class="title">
-                            Hobba Tools
+                            Scam Detection
                         </div>
                         <div class="container-content">
                             <ul>
                                 <li>
-                                    <a href="@Url.Action("Index", "Users")">Users</a>
+                                    <a href="@Url.Action("Index", "Users")">User search & information tool</a>
                                 </li>
                             </ul>
                         </div>

@@ -32,7 +32,9 @@ namespace KeplerCMS.Models
         [Description("fuse_kick")]
         fuse_kick,
         [Description("fuse_badges")]
-        fuse_badges
+        fuse_badges,
+        [Description("fuse_room_alert")]
+        room_alert
         
     }
 }
