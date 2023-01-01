@@ -53,5 +53,32 @@ namespace KeplerCMS.Areas.Housekeeping
             
             return View(model);
         }
+        
+        
+        [HousekeepingFilter(Fuse.fuse_ban)]
+        public IActionResult Ban()
+        {
+            return View(new BanViewModel { Username = "", Message = "", SuccessMessage = null, BanLength = 0, ExtraInfo = ""});
+        }
+        
+        [HousekeepingFilter(Fuse.fuse_ban)]
+        [HttpPost]
+        public async Task<IActionResult> Ban(BanViewModel model)
+        {
+            _commandQueueService.QueueCommand(KeplerCMS.Models.Enums.CommandQueueType.remote_ban, new CommandTemplate { Message = model.Message, Users = new [] { model.Username } });
+
+            if(ModelState.IsValid)
+            {
+                var dbUser = await _userService.GetUserByUsername(model.Username);
+                if (dbUser == null)
+                {
+                    ModelState.AddModelError("Username", "Username not found");
+                    return View(model);
+                }
+                model.SuccessMessage = "Gave alert to " + model.Username;
+            }
+            
+            return View(model);
+        }
     }
 }
