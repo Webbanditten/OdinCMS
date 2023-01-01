@@ -1,7 +1,9 @@
 ﻿@using Microsoft.Extensions.Configuration
 @using KeplerCMS.Data.Models
 @using System.Linq
+@using KeplerCMS.Areas.Housekeeping.Helpers
 @using KeplerCMS.Helpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model ManageUserViewModel
 @inject IConfiguration Configuration
 @{
@@ -94,6 +96,22 @@
                     </td>
                     <td>
                         @Model.User.HasHabboClub
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Online time</strong>
+                    </td>
+                    <td>
+                        @PrettyFormatTime.PrettyFormatTimeSpan(new TimeSpan(0, 0, Model.User.OnlineTimeInSeconds))
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Logged in</strong>
+                    </td>
+                    <td>
+                        @Model.User.TimesLoggedIn times
                     </td>
                 </tr>
                 <tr>
