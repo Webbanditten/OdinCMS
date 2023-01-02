@@ -22,7 +22,6 @@ using Microsoft.AspNetCore.Http;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class AccountController : Controller
     {
         private readonly IUserService _userService;

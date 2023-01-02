@@ -12,7 +12,6 @@ using System.Linq;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class GroupsController : Controller
     {
         private readonly IUserService _userService;
