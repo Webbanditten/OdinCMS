@@ -179,7 +179,14 @@ p {
 .large {
     font-size: 1.25em;
 }
-
+.hidden-item {
+    background: #545454;
+    color:#fff;
+}
+.hidden-item > .board-item-content {
+    background: #545454;
+    color:#fff;
+}
 /**
  * Nestable
  */

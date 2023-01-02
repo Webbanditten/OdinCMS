@@ -18,6 +18,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public bool News { get; set; }
         [Required]
         public string Design { get; set; }
+        public bool Hidden { get; set; }
     }
     public class PageUpdateViewModel
     {
@@ -32,6 +33,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public bool News { get; set; }
         [Required]
         public string Design { get; set; }
+
+        public bool Hidden { get; set; }
     }
     public class PageGrid
     {
