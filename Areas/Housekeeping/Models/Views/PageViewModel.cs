@@ -49,6 +49,17 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
     {
         public int Id { get; set; }
     }
+    
+    public class PromoReArrange
+    {
+        public int Id { get; set; }
+    }
+    
+    public class PromoReArrangePostModel
+    {
+        public int PageId { get; set; }
+        public List<PromoReArrange> Promos { get; set; }
+    }
 
 
 }
