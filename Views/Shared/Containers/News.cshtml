@@ -19,7 +19,9 @@
             <script type="text/javascript">
             var promoPages = [
                 @{
-                    foreach (var promo in Model.Promos)
+                    
+                    var promos = Model.Promos.Where(s => s.Hidden == false).OrderBy(s => s.Order).ToList();
+                    foreach (var promo in promos)
                     {
                         @:{
                         @:image: "<img src='@promo.Img' alt=''>",
@@ -48,9 +50,9 @@
                 <h2>@Model.Details.NewsHeader</h2>
                 <ul style="display: block;" id="promoheader-selectors">
                     @{
-                        if (Model.Promos != null && Model.Promos.Count() > 1)
+                        if (promos.Count() > 1)
                         {
-                            for (var i = 0; i < Model.Promos.Count(); i++)
+                            for (var i = 0; i < promos.Count(); i++)
                             {
                                 var selected = (i == 0) ? "class=selected" : "";
                                 <li><a href="#" onclick="showPromo(@i); return false;" @selected>@(i+1)</a></li>
@@ -64,24 +66,24 @@
 
             <div id="promocontent">
                 @{
-                    if (Model.Promos != null && Model.Promos.Count() > 0)
+                    if (promos.Any())
                     {
                         <div id="promobody">
-                            <p id="promoimage"><a href="@Model.Promos[0].Link1Href" id="promo-link"><img src="@Model.Promos[0].Img" alt=""></a></p>
+                            <p id="promoimage"><a href="@promos[0].Link1Href" id="promo-link"><img src="@promos[0].Img" alt=""></a></p>
                             <div class="promotext">
-                                <p id="promotext-content">@Html.Raw(@Model.Promos[0].Teaser)</p>
+                                <p id="promotext-content">@Html.Raw(@promos[0].Teaser)</p>
                             </div>
                             <div id="promolinks">
                                 <ul id="promolinks-list">
                                     @{
-                                        if (Model.Promos[0].Link1Text != null && Model.Promos[0].Link1Text != "")
+                                        if (string.IsNullOrEmpty(promos[0].Link1Text))
                                         {
-                                            <li>@{ GenerateLink(Model.Promos[0].Link1Text, Model.Promos[0].Link1Href); }</li>
+                                            <li>@{ GenerateLink(promos[0].Link1Text, promos[0].Link1Href); }</li>
                                         }
 
-                                        if (Model.Promos[0].Link2Text != null && Model.Promos[0].Link2Text != "")
+                                        if (!string.IsNullOrEmpty(promos[0].Link2Text))
                                         {
-                                            <li>@{ GenerateLink(Model.Promos[0].Link2Text, Model.Promos[0].Link2Href);}</li>
+                                            <li>@{ GenerateLink(promos[0].Link2Text, promos[0].Link2Href);}</li>
                                         }
                                     }
                                 </ul>

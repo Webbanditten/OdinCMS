@@ -13,6 +13,7 @@ namespace KeplerCMS.Areas.MyHabbo.Helpers
 
         public static string Convert(string input)
         {
+            if (input == null) return null;
             input = Regex.Replace(input, "<.*?>", String.Empty);
             input = input.Replace("[size=small]", "<span style=\"font-size: 9px;\">").Replace("[/size]", "</span>");
             input = input.Replace("[size=large]", "<span style=\"font-size: 14px;\">").Replace("[/size]", "</span>");

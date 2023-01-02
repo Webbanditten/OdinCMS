@@ -45,7 +45,7 @@
                     @{
                         foreach (var container in Model.Containers.Where(c => c.Column == i).OrderBy(c => c.Order))
                         {
-                            <div class="board-item" data-id="@container.Id">
+                            <div class="board-item @(container.Hidden ? "hidden-item" : "")" data-id="@container.Id">
                                 <div class="board-item-content">
                                     <span>@container.Title</span>
                                     <div class="actions">

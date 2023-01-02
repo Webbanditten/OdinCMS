@@ -2,10 +2,12 @@
 @using KeplerCMS.Models.Enums
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
+@inject KeplerCMS.Services.Interfaces.IMenuService MenuService
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
     var userData = (Users)ViewData["user"];
-    var menu = (List<Menu>)ViewData["menu"];
-    var settings = (List<Settings>)ViewData["settings"];
+    var menu = await MenuService.GetMenu();
+    var settings = await SettingsService.GetAll();
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;

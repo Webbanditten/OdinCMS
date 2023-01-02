@@ -3,21 +3,24 @@
 @model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{Layout = null;}
 @{
-    var showAddBtn = true;
+    var showAddBtn = false;
     var guestbookAccess = (Model.Item.Data == "private") ? "private" : "public";
     if(User.Identity.IsAuthenticated)
     {
         if (guestbookAccess == "private")
         {
             var userId = int.Parse(User.Identity.Name);
-            if (Model.Item.OwnerId != userId && Model.WidgetData.Friends.Where(s => s.FriendDetails.FromId == userId || s.FriendDetails.ToId == userId).Count() == 0)
+            if (Model.Item.OwnerId == userId)
             {
-                showAddBtn = false;
+                showAddBtn = true;
+            } else if (Model.WidgetData.Friends != null && Model.WidgetData.Friends.Any(s => s.FriendDetails.FromId == userId || s.FriendDetails.ToId == userId))
+            {
+                showAddBtn = true;
+            } else if (Model.WidgetData.GroupMembers.Any(g => g.GroupMember.UserId == userId))
+            {
+                showAddBtn = true;
             }
         }
-    } else
-    {
-        showAddBtn = false;
     }
 
 }

@@ -25,6 +25,17 @@ namespace KeplerCMS.Data.Models
         public string Link2Href { get; set; }
         [Column("teaser")]
         public string Teaser { get; set; }
+        [Column("hidden")]
+        public int IHidden { get; set; }
+        
+        [NotMapped]
+        public bool Hidden
+        {
+            get => IHidden == 1;
+            set => IHidden = value ? 1 : 0;
+        }
+        [Column("order")]
+        public int Order { get; set; }
 
 
     }

@@ -50,7 +50,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> Update(int id)
         {
             var details = await _pageService.GetPageById(id);
-            return View(new PageUpdateViewModel { Id = details.Id, Name = details.Name, Slug = details.Slug, Design = details.Design, DisplayHeader = details.DisplayHeader, News = details.News });
+            return View(new PageUpdateViewModel { Id = details.Id, Hidden = details.Hidden, Name = details.Name, Slug = details.Slug, Design = details.Design, DisplayHeader = details.DisplayHeader, News = details.News, NewsHeader = details.NewsHeader});
         }
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]
@@ -98,7 +98,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> UpdateContainer(int id)
         {
             var details = await _pageService.GetContainerById(id);
-            return View(new ContainerUpdateViewModel { Id = details.Id, Title = details.Title, Text = details.Text, Theme = details.Theme, Type = details.Type, PageId = details.PageId });
+            return View(new ContainerUpdateViewModel { Id = details.Id, Title = details.Title, Text = details.Text, Theme = details.Theme, Type = details.Type, PageId = details.PageId, Hidden = details.Hidden });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]
