@@ -12,7 +12,6 @@ using System.Linq;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class GroupsController : Controller
     {
         private readonly IUserService _userService;
@@ -467,13 +466,8 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         public async Task<IActionResult> GroupById(int id)
         {
-            var enableEditing = false;
-            if (Request.Cookies["editid"] != null)
-            {
-                enableEditing = true;
-            }
-
-
+            var enableEditing = false || Request.Cookies["editid"] != null;
+            
             var group = (User.Identity.IsAuthenticated) ? 
             await _homeService.GetHomeByGroupId(id, enableEditing, int.Parse(User.Identity.Name)) : 
             await _homeService.GetHomeByGroupId(id, enableEditing);

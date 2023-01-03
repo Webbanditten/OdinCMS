@@ -58,6 +58,10 @@ namespace KeplerCMS.Data.Models
 
         [Column("group_id")]
         public int Group { get; set; }
+        [Column("online_time_seconds")]
+        public int OnlineTimeInSeconds { get; set; }
+        [Column("times_logged_in")]
+        public int TimesLoggedIn { get; set; }
 
         public bool HasHabboClub
         {

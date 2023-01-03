@@ -10,6 +10,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
     {
         [Required]
         public string Title { get; set; }
+        [Required]
         public string Text { get; set; }
         [Required]
         public int PageId { get; set; }
@@ -19,6 +20,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public int Column { get; set; }
         [Required]
         public string Theme { get; set; }
+        public bool Hidden { get; set; }
     }
     public class ContainerUpdateViewModel
     {
@@ -28,10 +30,13 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public int Id { get; set; }
         [Required]
         public string Title { get; set; }
+        [Required]
         public string Text { get; set; }
         [Required]
         public string Type { get; set; }
         [Required]
         public string Theme { get; set; }
+
+        public bool Hidden { get; set; }
     }
 }
