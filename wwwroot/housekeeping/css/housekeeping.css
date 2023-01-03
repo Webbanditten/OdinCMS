@@ -752,7 +752,7 @@ form.basic label {
     font-size:12px;
 }
 
-form.basic input:not([type="submit"]) {
+form.basic input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]) {
     width:270px;
 }
 form.basic input[type="submit"] {
@@ -763,4 +763,21 @@ form.basic input[type="submit"] {
 form.basic .success-message {
     display:block;
     margin-top:16px;
+}
+
+form.basic label.checkbox {
+    display: inline-block;
+    width: auto;
+    margin-bottom: 8px;
+    font-weight: normal;
+    font-size:12px;
+}
+
+form.basic input[type="checkbox"] {
+    margin-left: 104px;
+}
+
+form.basic textarea {
+    width:270px;
+    height:100px;
 }

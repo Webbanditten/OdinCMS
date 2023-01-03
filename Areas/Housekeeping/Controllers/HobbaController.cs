@@ -65,7 +65,8 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> Ban(BanViewModel model)
         {
-            _commandQueueService.QueueCommand(KeplerCMS.Models.Enums.CommandQueueType.remote_ban, new CommandTemplate { Message = model.Message, Users = new [] { model.Username } });
+            var isBan = (model.Action == "Ban") ? true : false;
+            //_commandQueueService.QueueCommand(KeplerCMS.Models.Enums.CommandQueueType.remote_ban, new CommandTemplate { Message = model.Message, Users = new [] { model.Username } });
 
             if(ModelState.IsValid)
             {
