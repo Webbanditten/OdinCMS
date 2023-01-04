@@ -1,7 +1,8 @@
 ﻿@using KeplerCMS.Data.Models
+@inject KeplerCMS.Services.Interfaces.ISettingsService _SettingsService
 @{
     var baseUrl = Context.Request.Host;
-    var settings = (List<Settings>)ViewData["settings"];
+    var settings = await _SettingsService.GetAll();
 }
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
