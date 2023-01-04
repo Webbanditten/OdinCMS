@@ -1,8 +1,8 @@
 ﻿@model KeplerCMS.Models.RegistrationViewModel
-
+@inject KeplerCMS.Services.Interfaces.ISettingsService _SettingsService
 @{
     
-    var _settings = ViewData["settings"] as IEnumerable<KeplerCMS.Data.Models.Settings>;
+    var _settings = await _SettingsService.GetAll();
     Layout = "_Register";
     ViewData["Title"] = DbRes.T("orange_box_header", "register");
 }
