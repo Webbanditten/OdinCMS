@@ -1,7 +1,7 @@
 ﻿@model BanViewModel
 
 @{
-    ViewBag.Title = "Remote banning & kicking";
+    ViewBag.Title = "Remote banning and kicking";
     Layout = "_Housekeeping";
     var banLengths = new int[] { 2, 4, 12, 24, 2 * 24, 3 * 24, 7 * 24, 14 * 24, 21 * 24, 30 * 24, 60 * 24, 365 * 24, 730 * 24, 100000 };
     var banLengthItems = banLengths.Select(x => new SelectListItem { Text = x + " hours", Value = x.ToString() }).ToList();
