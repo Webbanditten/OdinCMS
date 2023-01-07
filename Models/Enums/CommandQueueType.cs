@@ -15,6 +15,7 @@ namespace KeplerCMS.Models.Enums
         roomForward,
         campaign,
         remote_alert,
-        remote_ban
+        remote_ban,
+        remote_kick
     }
 }

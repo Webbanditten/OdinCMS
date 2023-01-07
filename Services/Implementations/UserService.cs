@@ -251,6 +251,82 @@ namespace KeplerCMS.Services.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<UsersBanSearchModel> BanSearch(string username, int take, int skip, string letter)
+        {
+            if (username != null)
+            {
+                if(letter != null)
+                {
+                    var allUsers = await _context.UsersBans
+                        .FromSqlRaw(
+                            "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where (username like @letter AND username like @search) ORDER BY username ASC",
+                            new MySqlParameter("@search", "%" + username + "%"),
+                            new MySqlParameter("@letter", letter + "%")).ToListAsync();
+                    foreach (var user in allUsers)
+                    {
+                        user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                    }
+                    var total = allUsers.Count();
+                    var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                    return new UsersBanSearchModel { Bans = users, TotalResults = total };
+                }
+                else
+                {
+                    var allUsers = await _context.UsersBans
+                        .FromSqlRaw(
+                            "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where (username like @search) ORDER BY username ASC", new MySqlParameter("@search", "%" + username + "%")).ToListAsync();
+                    foreach (var user in allUsers)
+                    {
+                        user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                    }
+                    var total = allUsers.Count();
+                    var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                    return new UsersBanSearchModel { Bans = users, TotalResults = total };
+                }
+            }
+            if (letter != null)
+            {
+                var allUsers = await _context.UsersBans.FromSqlRaw(
+                    "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where username like @letter ORDER BY username ASC",
+                    new MySqlParameter("@letter", letter + "%")).ToListAsync();
+                foreach (var user in allUsers)
+                {
+                    user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                }
+                var total = allUsers.Count();
+                var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                return new UsersBanSearchModel { Bans = users, TotalResults = total };
+            }
+            else
+            {
+                var allUsers = await _context.UsersBans.FromSqlRaw(
+                    "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id ORDER BY users.username ASC").ToListAsync();
+                foreach (var user in allUsers)
+                {
+                    user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                }
+                var total = allUsers.Count();
+                var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                return new UsersBanSearchModel { Bans = users, TotalResults = total };
+            }
+        }
+        
+        // Remove ban
+        public async Task<bool> RemoveBan(UsersBans ban)
+        {
+            _context.UsersBans.Remove(ban);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        // Get specific ban
+        public async Task<UsersBans> GetBan(int id)
+        {
+            var ban = await _context.UsersBans.FirstOrDefaultAsync(ban => ban.Id == id);
+            ban.Username = (await this.GetUserById(ban.UserId)).Username;
+            return ban;
+        }
     }
 
 }

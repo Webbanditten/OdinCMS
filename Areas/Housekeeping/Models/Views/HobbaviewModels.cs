@@ -38,6 +38,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         [Display(Name = "Ban time")]
         public int BanLength { get; set; }
         [Display(Name = "Extra info")]
+        [Required]
         [MinLength(1, ErrorMessage = "Please enter extra info")]
         public string ExtraInfo { get; set; }
         [Display(Name="Also ban computer for more than one hour")]
@@ -45,6 +46,17 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         [Display(Name="Also ban IP for more than one hour")]
         public bool BanIP { get; set; }
         public string Action { get; set; }
+    }
+    
+    public class BansViewModel
+    {
+        public IEnumerable<UsersBans> Bans { get; set; }
+        public int CurrentPage { get; set; }
+        public string Filter { get; set; }
+        public int TotalPages { get; set; }
+        public string Search { get; set; }
+        public string Letter { get; set; }
+
     }
     
     

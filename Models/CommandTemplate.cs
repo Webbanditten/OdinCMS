@@ -21,7 +21,7 @@ namespace KeplerCMS.Models
         
         public int BanLength { get; set; }
         public string ExtraInfo { get; set; }
-        public string BanIp { get; set; }
-        public string BanMachine { get; set; }
+        public bool BanIp { get; set; }
+        public bool BanMachine { get; set; }
     }
 }

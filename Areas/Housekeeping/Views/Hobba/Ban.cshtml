@@ -14,26 +14,26 @@
 </p>
 <form asp-action="Ban" method="post" asp-controller="Hobba" class="basic">
     <label asp-for="Username"></label>
-    <input asp-for="Username" value="@Model.Username" />
+    <input asp-for="Username" />
     <span asp-validation-for="Username"></span>
     <br />
     <label asp-for="Message"></label>
-    <input asp-for="Message" value="@Model.Message"/>
+    <input asp-for="Message"/>
     <span asp-validation-for="Message"></span>
     <br />
     <label asp-for="BanLength"></label>
-    <select asp-for="BanLength" asp-items="banLengthItems" value="@Model.BanLength"></select>
+    <select asp-for="BanLength" asp-items="banLengthItems"></select>
     <span asp-validation-for="BanLength"></span>
     <br />
     <label asp-for="ExtraInfo"></label>
-    <textarea asp-for="ExtraInfo" value="@Model.ExtraInfo"></textarea>
+    <textarea asp-for="ExtraInfo"></textarea>
     <span asp-validation-for="ExtraInfo"></span>  
     <br />
-    <input asp-for="BanMachine" value="@Model.BanMachine"/>
+    <input asp-for="BanMachine"/>
     <label class="checkbox" asp-for="BanMachine"></label>
     <span asp-validation-for="BanMachine"></span>
     <br />
-    <input asp-for="BanIP" value="@Model.BanIP"/>
+    <input asp-for="BanIP"/>
     <label class="checkbox" asp-for="BanIP"></label>
     <span asp-validation-for="BanIP"></span>
     <br />

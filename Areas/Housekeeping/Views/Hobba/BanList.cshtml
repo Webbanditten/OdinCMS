@@ -1,0 +1,95 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.BansViewModel
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
+
+@{
+    ViewBag.Title = "List of current bannings";
+    
+}
+
+<h1>@ViewBag.Title</h1>
+<p>
+    To see if a Habbo is banned click on the first letter or character of their name, or click on the "All" link to see the complete list of banned Habbos
+</p>
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}
+<form asp-action="BanList" method="get">
+    <label for="search">Search for username</label>
+    <input name="search" type="text" value="@Model.Search" />
+    <input type="submit" value="Submit" />
+</form>
+<hr/>
+
+<a href="@Url.Action("BanList", "Hobba", new { search=@Model.Search, letter="" })">All</a> 
+@{
+    var dbCharacters = await SettingsService.Get("allowed_username_chars");
+    var characters = dbCharacters.Value.ToArray();
+    Array.Sort(characters);
+    foreach (var t in characters)
+    {
+        var character = t.ToString();
+        <a href="@Url.Action("BanList", "Hobba", new { search=@Model.Search, letter=character })" style="text-transform: uppercase">@character</a> 
+    }
+}
+<br/>
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Habbo name</th>
+        <th>Banned until</th>
+        <th>Message</th>
+        <th>Ban Type</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        foreach (var ban in Model.Bans)
+        {
+            <tr>
+                <td><a href="@Url.Action("Manage", "Users", new { id = ban.UserId})">@ban.Username</a></td>
+                <td>@ban.BannedUntil</td>
+                <td>@ban.Message</td>
+                <td>@ban.BanType</td>
+                <td><a href="#" onclick="unban(@ban.Id)">Unban</a></td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+@{
+    if (Model.CurrentPage != 1)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage-1, letter=@Model.Letter })">Previous Page</a>
+    }
+    
+    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage+1, letter=@Model.Letter })" style="float:right">Next Page</a>
+    }
+}
+
+
+
+
+
+@section scripts {
+    <script>
+    function unban(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will have to ban this Habbo again if you want to ban them!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    window.location = "@Url.Action("Unban")/" + id;
+                }
+            })
+        }
+</script>
+}
