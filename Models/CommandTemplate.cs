@@ -18,5 +18,10 @@ namespace KeplerCMS.Models
         public int FriendRequestTo { get; set; }
         public bool OnlineOnly { get; set; }
         public string[] Users { get; set; }
+        
+        public int BanLength { get; set; }
+        public string ExtraInfo { get; set; }
+        public bool BanIp { get; set; }
+        public bool BanMachine { get; set; }
     }
 }

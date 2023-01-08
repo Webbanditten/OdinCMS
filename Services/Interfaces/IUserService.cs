@@ -34,5 +34,8 @@ namespace KeplerCMS.Services.Interfaces
         public Task<IEnumerable<UsersBadges>> GetBadges(int userId);
         public Task<UsersBadges> AddBadge(UsersBadges badge);
         public Task<bool> RemoveBadge(UsersBadges badge);
+        public Task<UsersBanSearchModel> BanSearch(string search, int take, int skip, string letter);
+        public Task<bool> RemoveBan(UsersBans ban);
+        public Task<UsersBans> GetBan(int id);
     }
 }

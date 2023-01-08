@@ -25,6 +25,12 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public int TotalResults { get; set; }
     }
     
+    public class UsersBanSearchModel
+    {
+        public IEnumerable<UsersBans> Bans { get; set; }
+        public int TotalResults { get; set; }
+    }
+    
     
     public class ManageUserViewModel
     {

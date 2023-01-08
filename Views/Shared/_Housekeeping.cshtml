@@ -4,66 +4,33 @@
 @using Newtonsoft.Json
 @{
     var userData = (Users)ViewData["user"];
-    var menu = (List<Menu>)ViewData["menu"];
-    var subMenu = new List<Menu>();
     var path = Context.Request.Path;
     var userFuses = userData.Fuses.Select(s => s.FuseName).ToList();
 
-    HousekeepingMenu activeMenuItem;
-
-    switch (path)
+    var activeMenuItem = HousekeepingMenu.Home;
+    var menuMapping = new Dictionary<string, HousekeepingMenu>
     {
-        case var activeMenu when path == "/housekeeping":
-            activeMenuItem = HousekeepingMenu.Home;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/website"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/menu"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/pages"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/news"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/ranks"):
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
-            activeMenuItem = HousekeepingMenu.Localization;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/users"):
-            activeMenuItem = HousekeepingMenu.HobbaTools;
-            break;        
-        case var activeMenu when path.StartsWithSegments("/housekeeping/hobba"):
-            activeMenuItem = HousekeepingMenu.HobbaTools;
-            break;
-        case "/housekeeping/upload":
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case "/housekeeping/admin":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/hobba":
-            activeMenuItem = HousekeepingMenu.HobbaTools;
-            break;
-        case "/housekeeping/catalog":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/messengercampaign":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/settings":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        default:
-            activeMenuItem = HousekeepingMenu.Frontpage;
-            break;
+        { "/housekeeping", HousekeepingMenu.Home },
+        { "/housekeeping/website", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/menu", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/pages", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/news", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/promo", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/promotions", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/ranks", HousekeepingMenu.AdminTools },
+        { "/housekeeping/localization", HousekeepingMenu.Localization },
+        { "/housekeeping/users", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/hobba", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/upload", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/admin", HousekeepingMenu.AdminTools },
+        { "/housekeeping/catalog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
+        { "/housekeeping/settings", HousekeepingMenu.AdminTools }
+    };
+
+    foreach (var key in menuMapping.Keys.Where(key => path.ToString().Contains(key) || path == key))
+    {
+        activeMenuItem = menuMapping[key];
     }
 }
 <!doctype html>
@@ -192,7 +159,7 @@
             @{
                 if (activeMenuItem == HousekeepingMenu.HobbaTools)
                 {
-                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.room_alert }))
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.room_alert, Fuse.fuse_ban }))
                     {
                         <div class="container">
                             <div class="title">
@@ -200,9 +167,21 @@
                             </div>
                             <div class="container-content">
                                 <ul>
-                                    <li>
-                                        <a href="@Url.Action("Alert", "Hobba")">Remote alerting</a>
-                                    </li>
+                                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.room_alert }))
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Alert", "Hobba")">Remote alerting</a>
+                                        </li>
+                                    }
+                                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_ban }))
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Ban", "Hobba")">Remote banning and kicking</a>
+                                        </li>
+                                        <li>
+                                            <a href="@Url.Action("BanList", "Hobba")">List of current bans</a>
+                                        </li>
+                                    }
                                 </ul>
                             </div>
                         </div>
