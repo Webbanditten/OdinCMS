@@ -1,6 +1,7 @@
 ﻿@using KeplerCMS.Areas.Housekeeping.Helpers
 @using KeplerCMS.Data.Models
 @using KeplerCMS.Areas.Housekeeping.Models.Enums
+@using KeplerCMS.Areas.Housekeeping.Models.Views
 @using Newtonsoft.Json
 @{
     var userData = (Users)ViewData["user"];
@@ -50,6 +51,18 @@
     <div class="top">
         <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
         <ul class="menu">
+            @await Html.PartialAsync("HousekeepingMenuItem", new HousekeepingMenuItem
+                   {
+                       Title = "Home", 
+                       Url = Url.Action("Index", "Home"), 
+                       IsActive = activeMenuItem == HousekeepingMenu.Home, 
+                       UserFuses = userFuses, 
+                       Fuses = new List<Fuse>
+                       {
+                           Fuse.housekeeping 
+                  
+                       }
+                   })
             @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.housekeeping }))
             {
                 <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")>

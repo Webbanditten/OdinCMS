@@ -112,4 +112,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Housekeeping\Views\Shared" />
+  </ItemGroup>
+
 </Project>

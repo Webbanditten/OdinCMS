@@ -1,0 +1,9 @@
+﻿@using KeplerCMS.Areas.Housekeeping.Helpers
+@model HousekeepingMenuItem
+
+@if (HousekeepingAccess.HasAccess(Model.UserFuses, Model.Fuses))
+{
+    <li @(Model.IsActive ? "class=active" : "")>
+        <a href="@Model.Url">@Model.Title</a>
+    </li>
+}
