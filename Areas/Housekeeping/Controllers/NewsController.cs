@@ -12,10 +12,12 @@ namespace KeplerCMS.Areas.Housekeeping
     public class NewsController : Controller
     {
         private readonly INewsService _newsService;
+        private readonly IAuditLogService _auditService;
 
-        public NewsController(INewsService newsService)
+        public NewsController(INewsService newsService, IAuditLogService auditService)
         {
             _newsService = newsService;
+            _auditService = auditService;
         }
 
         [HousekeepingFilter(Fuse.housekeeping_news)]
@@ -38,6 +40,7 @@ namespace KeplerCMS.Areas.Housekeeping
             if (ModelState.IsValid)
             {
                 await _newsService.Add(model);
+                await _auditService.AddLog(AuditLogType.create_news, int.Parse(HttpContext.User.Identity.Name), 0);
                 return RedirectToAction("Index", "News", new { message = "News created" });
             }
             return View(model);
@@ -46,8 +49,8 @@ namespace KeplerCMS.Areas.Housekeeping
         [HousekeepingFilter(Fuse.housekeeping_news)]
         public async Task<IActionResult> Update(int id)
         {
-            var upload = await _newsService.Get(id);
-            return View(upload);
+            var news = await _newsService.Get(id);
+            return View(news);
         }
 
         [HousekeepingFilter(Fuse.housekeeping_news)]
@@ -56,7 +59,8 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             if (ModelState.IsValid)
             {
-                await _newsService.Update(model);
+                var news = await _newsService.Update(model);
+                await _auditService.AddLog(AuditLogType.edit_news, int.Parse(HttpContext.User.Identity.Name), null, null, 0, news.Id);
                 return RedirectToAction("Index", "News", new { message = "News edited" });
             }
             return View(model);
@@ -66,6 +70,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> Remove(int id)
         {
             await _newsService.Remove(id);
+            await _auditService.AddLog(AuditLogType.delete_news, int.Parse(HttpContext.User.Identity.Name), null, null, 0, id);
             return RedirectToAction("Index", "News", new { message = "News Removed" });
         }
     }
