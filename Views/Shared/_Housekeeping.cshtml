@@ -27,7 +27,8 @@
         { "/housekeeping/admin", HousekeepingMenu.AdminTools },
         { "/housekeeping/catalog", HousekeepingMenu.AdminTools },
         { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
-        { "/housekeeping/settings", HousekeepingMenu.AdminTools }
+        { "/housekeeping/settings", HousekeepingMenu.AdminTools },
+        { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
     };
 
     foreach (var key in menuMapping.Keys.Where(key => path.ToString().Contains(key) || path == key))
@@ -111,6 +112,7 @@
                                 @await menuHelper.Render("Settings", Url.Action("Index", "Settings"), new List<Fuse> { Fuse.housekeeping_settings })
                                 @await menuHelper.Render("Messenger Campaign", Url.Action("Index", "MessengerCampaign"), new List<Fuse> { Fuse.housekeeping_campaign })
                                 @await menuHelper.Render("Manage ranks", Url.Action("Index", "Ranks"), new List<Fuse> { Fuse.housekeeping_ranks })
+                                @await menuHelper.Render("Audit log", Url.Action("Index", "AuditLog"), new List<Fuse> { Fuse.fuse_administrator_access })
                             </ul>
                         </div>
                     </div>

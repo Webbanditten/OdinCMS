@@ -315,7 +315,8 @@ namespace KeplerCMS.Services.Implementations
         // Remove ban
         public async Task<bool> RemoveBan(UsersBans ban)
         {
-            _context.UsersBans.Remove(ban);
+            ban.BannedUntilTimestamp = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            _context.UsersBans.Update(ban);
             await _context.SaveChangesAsync();
             return true;
         }

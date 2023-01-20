@@ -17,11 +17,13 @@ namespace KeplerCMS.Areas.Housekeeping
         private readonly IUserService _userService;
         private readonly IFriendService _friendsService;
         private readonly IFuseService _fuseService;
-        public UsersController(IUserService userService, IFriendService friendsService, IFuseService fuseService)
+        private readonly IAuditLogService _auditService;
+        public UsersController(IUserService userService, IFriendService friendsService, IFuseService fuseService, IAuditLogService auditService)
         {
             _userService = userService;
             _friendsService = friendsService;
             _fuseService = fuseService;
+            _auditService = auditService;
         }
 
         [HousekeepingFilter(Fuse.fuse_kick)]
@@ -77,7 +79,8 @@ namespace KeplerCMS.Areas.Housekeeping
                 if(currentBadges.Select(s=>s.Badge).Contains(badge.Badge)) {
                     return Ok("Badge already exists");
                 } else {
-                    await _userService.AddBadge(badge);
+                    await _auditService.AddLog(AuditLogType.give_badge, int.Parse(HttpContext.User.Identity.Name), "Added " + badge.Badge, null, badge.UserId, 0);
+                    await _userService.AddBadge(badge); 
                 }
             } else {
                 return NotFound();
@@ -94,7 +97,8 @@ namespace KeplerCMS.Areas.Housekeeping
             var user = _userService.GetUserById(badge.UserId);
             if (user != null)
             {
-               await _userService.RemoveBadge(badge);
+                await _auditService.AddLog(AuditLogType.remove_badge, int.Parse(HttpContext.User.Identity.Name), "Removed " + badge.Badge, null, badge.UserId, 0);
+                await _userService.RemoveBadge(badge);
             } else {
                 return NotFound();
             }

@@ -11,30 +11,26 @@ namespace KeplerCMS.Areas.Housekeeping
     [Area("Housekeeping")]
     public class AuditLogController : Controller
     {
-        private readonly ICommandQueueService _commandQueueService;
-        private readonly IUserService _userService;
+        private readonly IAuditLogService _auditLogService;
 
-        public AuditLogController(ICommandQueueService commandQueueService, IUserService userService)
+        public AuditLogController(IAuditLogService auditLogService)
         {
-            _commandQueueService = commandQueueService;
-            _userService = userService;
+            _auditLogService = auditLogService;
         }
         
         [HousekeepingFilter(Fuse.fuse_administrator_access)]
-        public async Task<IActionResult> Index(string search = null, int currentPage = 1, string letter = null, string Message = null)
+        public async Task<IActionResult> Index(int currentPage = 1, string a = null, string Message = null)
         {
             ViewBag.Message = Message;
             const int pageSize = 25;
-            var take = pageSize;
-            var skip = (currentPage - 1) * pageSize;
-            var searchResult = await _userService.BanSearch(search, take, skip, letter);
-            var model = new BansViewModel
+            var searchResult = await _auditLogService.GetLogs(currentPage, 25, a, 0);
+            var model = new AuditLogViewModel
             {
-                Bans = searchResult.Bans,
-                Search = search,
-                Letter = letter,
+                AuditLogs = searchResult.AuditLogs,
+                Action = a,
                 CurrentPage = currentPage,
-                TotalPages = searchResult.TotalResults / pageSize
+                TotalPages = searchResult.TotalResults / pageSize,
+                Actions = await _auditLogService.GetActions()
             };
             return View(model);
         }

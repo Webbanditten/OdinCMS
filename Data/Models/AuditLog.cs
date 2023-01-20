@@ -28,5 +28,11 @@ namespace KeplerCMS.Data.Models
         [Column("data_id")]
         public int? DataId { get; set; }
         
+        [NotMapped]
+        public Users User { get; set; }
+        
+        [NotMapped]
+        public Users Target { get; set; }
+        
     }
 }

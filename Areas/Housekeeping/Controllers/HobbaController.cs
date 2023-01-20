@@ -13,11 +13,13 @@ namespace KeplerCMS.Areas.Housekeeping
     {
         private readonly ICommandQueueService _commandQueueService;
         private readonly IUserService _userService;
+        private readonly IAuditLogService _auditLogService;
 
-        public HobbaController(ICommandQueueService commandQueueService, IUserService userService)
+        public HobbaController(ICommandQueueService commandQueueService, IUserService userService, IAuditLogService auditLogService)
         {
             _commandQueueService = commandQueueService;
             _userService = userService;
+            _auditLogService = auditLogService;
         }
 
         [HousekeepingFilter(Fuse.fuse_kick)]
@@ -36,7 +38,7 @@ namespace KeplerCMS.Areas.Housekeeping
         [HttpPost]
         public async Task<IActionResult> Alert(AlertViewModel model)
         {
-            _commandQueueService.QueueCommand(CommandQueueType.remote_alert, new CommandTemplate { Message = model.Message, Users = new [] { model.Username } });
+            
 
             if(ModelState.IsValid)
             {
@@ -46,6 +48,9 @@ namespace KeplerCMS.Areas.Housekeeping
                     ModelState.AddModelError("Username", "Username not found");
                     return View(model);
                 }
+                
+                _commandQueueService.QueueCommand(CommandQueueType.remote_alert, new CommandTemplate { Message = model.Message, Users = new [] { model.Username } });
+                await _auditLogService.AddLog(AuditLogType.alert_user, int.Parse(HttpContext.User.Identity.Name),dbUser.Id);
                 model.SuccessMessage = "Gave alert to " + model.Username;
             }
             
@@ -93,6 +98,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 else
                 {
                     _commandQueueService.QueueCommand(CommandQueueType.remote_kick, commandTemplate);
+                    await _auditLogService.AddLog(AuditLogType.kick_user, int.Parse(HttpContext.User.Identity.Name),dbUser.Id);
                     model.SuccessMessage = "Kicked " + model.Username;
                 }
             }
@@ -127,6 +133,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 return RedirectToAction("BanList");
             }
             await _userService.RemoveBan(ban);
+            await _auditLogService.AddLog(AuditLogType.unban_user, int.Parse(HttpContext.User.Identity.Name),null,null,ban.UserId, ban.Id);
             return RedirectToAction("BanList", new { Message = "Unbanned " + ban.Username });
         }
     }
