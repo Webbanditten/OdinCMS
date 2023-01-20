@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated curl
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y --allow-unauthenticated nodejs
 RUN  rm -rf /var/lib/apt/lists/*
+ENV TZ="Europe/Copenhagen"
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "KeplerCMS.dll"]
