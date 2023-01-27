@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 AuditLogs = searchResult.AuditLogs,
                 Action = a,
                 CurrentPage = currentPage,
-                TotalPages = searchResult.TotalResults / pageSize,
+                TotalPages =  1 + (searchResult.TotalResults / pageSize),
                 Actions = await _auditLogService.GetActions()
             };
             return View(model);
