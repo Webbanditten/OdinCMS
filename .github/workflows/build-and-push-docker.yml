@@ -2,7 +2,8 @@ name: Build Images
 on:
   push:
     branches:
-      - main
+      - 'feature/*'
+      - 'fix/*'
 jobs:
   build-images:
     runs-on: ubuntu-latest
