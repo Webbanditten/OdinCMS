@@ -26,7 +26,7 @@ jobs:
           tags: ghcr.io/webbanditten/keplercms:prerelease-${{ github.sha }}
       - name: Create Image Tag Comment
         if: ${{ success() }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -34,13 +34,11 @@ jobs:
               console.log('Not a pull request event');
               return;
             }
-            const prNumber = context.payload.pull_request.number;
             const imageTag = 'prerelease-' + '${{ github.sha }}';
             const commentBody = `The pre-release image tag is: ${imageTag}`;
-            const octokit = require("@octokit/rest")();
-            octokit.issues.createComment({
+            github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: prNumber,
+              issue_number: context.issue.number,
               body: commentBody
             });
