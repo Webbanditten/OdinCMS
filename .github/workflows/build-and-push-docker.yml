@@ -35,7 +35,7 @@ jobs:
               return;
             }
             const imageTag = 'prerelease-' + '${{ github.sha }}';
-            const commentBody = `The pre-release image tag is: ${imageTag}`;
+            const commentBody = `The pre-release image can be pulled using: docker pull ghcr.io/webbanditten/keplercms:${imageTag}`;
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
