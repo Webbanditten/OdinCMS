@@ -22,10 +22,12 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: true
+          push: push
           tags: ghcr.io/webbanditten/keplercms:prerelease-${{ github.sha }}
       - name: Create Image Tag Comment
+        needs: build-pre-release-image
         uses: actions/github-script@v4
+        if: ${{ success() }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
