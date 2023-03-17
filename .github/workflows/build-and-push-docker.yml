@@ -28,11 +28,15 @@ jobs:
           push: true
           tags: ghcr.io/webbanditten/keplercms:prerelease-${{ github.sha }}
       - name: Create Image Tag Comment
-        uses: actions/github-script@v4
         if: ${{ success() }}
+        uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            if (context.eventName !== 'pull_request') {
+              console.log('Not a pull request event');
+              return;
+            }
             const prNumber = context.payload.pull_request.number;
             const imageTag = 'prerelease-' + '${{ github.sha }}';
             const commentBody = `The pre-release image tag is: ${imageTag}`;
