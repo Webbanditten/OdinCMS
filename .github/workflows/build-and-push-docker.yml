@@ -1,5 +1,9 @@
 name: Build Images
 on:
+  push:
+    branches:
+      - 'feature/*'
+      - 'fix/*'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
