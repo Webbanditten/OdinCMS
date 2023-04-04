@@ -19,5 +19,9 @@ namespace KeplerCMS.Data.Models
         public string Description { get; set; }
         [Column("accesstype")]
         public int AccessType { get; set; }
+        [Column("showname")]
+        public int ShowOwner { get; set; }
+        [Column("category")]
+        public int Category { get; set; }
     }
 }
