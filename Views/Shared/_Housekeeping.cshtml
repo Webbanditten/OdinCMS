@@ -151,6 +151,20 @@
                             </div>
                         </div>
                     }
+                    
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_private_rooms }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Private rooms
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Room admin", Url.Action("Index", "Rooms"), new List<Fuse> { Fuse.fuse_private_rooms })
+                                </ul>
+                            </div>
+                        </div>
+                    }
                 }
             }
         </div>
