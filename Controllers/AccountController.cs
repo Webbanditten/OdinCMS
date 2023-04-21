@@ -225,6 +225,7 @@ namespace KeplerCMS.Controllers
         [Route("account/forgot/habboname")]
         public async Task<IActionResult> ForgotHabboName(string email)
         {
+            if (string.IsNullOrEmpty(email)) return View("forgot");
             ViewData["success_sent_habbonames"] = true;
             var users = await _userService.GetUsersByEmail(email);
             if(users.Length > 0) {
@@ -235,6 +236,7 @@ namespace KeplerCMS.Controllers
                 }
                 await _mailService.SendListOfHabboNames(email, habboNames.ToArray());
             }
+
             return View("forgot");
         }
 
@@ -243,6 +245,7 @@ namespace KeplerCMS.Controllers
         [Route("account/forgot/password")]
         public async Task<IActionResult> ForgotHabboName(string username, string email)
         {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username)) return View("forgot");
             ViewData["success_sent_forgot_password"] = true;
             var user = await _userService.GetUserByUsername(username);
             if(user != null && user.Email.ToLower() == email.ToLower()) {

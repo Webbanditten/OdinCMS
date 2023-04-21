@@ -222,7 +222,7 @@ namespace KeplerCMS.Controllers
             if(await _homeService.CanEditHome(groupId, currentUserId))
             {
                 var members = await _homeService.GetGroupMembers(groupId);
-                var filtered_members = members.Where(s=>s.IPending == 1).ToList();
+                var filtered_members = members.Where(s=>s.IPending == (pending ? 1 : 0)).ToList();
                 Response.Headers.Add("x-json", "{\"pending\":\"" + DbRes.T("group_pending_members", "habbohome") + " (" + members.Count(s=>s.Pending == true) + ")\",\"members\":\"" + DbRes.T("group_members", "habbohome") + " (" + members.Count(s=>s.Pending == false) + ")\"}");
                 return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = filtered_members});
             }
