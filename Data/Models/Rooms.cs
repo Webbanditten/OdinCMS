@@ -12,6 +12,7 @@ namespace KeplerCMS.Data.Models
         [Column("id")]
         public int Id { get; set; }
         [Column("owner_id")]
+        [ForeignKey("Users")]
         public int OwnerId { get; set; }
         [Column("name")]
         public string Name { get; set; }
@@ -23,5 +24,6 @@ namespace KeplerCMS.Data.Models
         public int ShowOwner { get; set; }
         [Column("category")]
         public int Category { get; set; }
+        public Users Owner { get; set; }
     }
 }

@@ -27,6 +27,11 @@ namespace KeplerCMS.Data
                 .Entity<Fuses>()
                 .Property(d => d.UserGroup)
                 .HasConversion(new EnumToStringConverter<FuseUserGroup>());
+            
+            modelBuilder.Entity<Rooms>()
+                .HasOne(r => r.Owner)
+                .WithMany()
+                .HasForeignKey(r => r.OwnerId);
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
