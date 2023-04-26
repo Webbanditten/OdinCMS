@@ -1,25 +1,24 @@
 ﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.SearchRoomsViewModel
-@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 
 @{
-    ViewBag.Title = "Private rooms";
+    ViewBag.Title = "Room admin";
     
 }
 
-<h1>Private rooms</h1>
+<h1>@ViewBag.Title</h1>
 <p>
     Here you can search for rooms by name or owner
 </p>
 <form asp-action="Index" method="get">
     <label for="search"><strong>Search</strong></label>
-    <input name="search" type="text" value="@Model.Search" />
+    <input id="search" name="search" type="text" value="@Model.Search" />
     <input type="submit" value="Submit" />
 </form>
 <hr/>
 @if (Model.Rooms.Any())
 {
     
-    <h2>Rooms </h2>
+    <h2>Rooms with name starting with '@Model.Search' or owned by '@Model.Search'</h2>
     <br/>
     <table class="habboTable">
         <thead>
@@ -36,19 +35,38 @@
             foreach (var room in Model.Rooms)
             {
                 <tr>
-                    <form class="rooms-inline-form" data-room-id="@room.Id">
-                        <td>@room.@room.OwnerId @if(room.Owner != null) { <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}else{<text>PUBLIC ROOM</text>}</td>
-                        <td>
+                    <form class="rooms-inline-form">
+                        
+                        <td><input name="id" type="hidden" value="@room.Id" />
+                            @if (room.Owner != null)
+                            {
+                                <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}
+                            else
+                            {<text>PUBLIC ROOM</text>}
+                        </td>
+                        <td style="padding-right: 10px;">
 
-                            <label for="name">Name</label>
-                            <input type="text" name="name" value="@room.Name"/>¨'
+                            <label style="display:block" for="name">Name</label>
+                            <input style="width: 100%;" type="text" name="name" value="@room.Name"/>
                             <br/>
-                            <label for="description">Description</label>
-                            <input type="text" name="name" value="@room.Description"/>
+                            <label style="display:block" for="description">Description</label>
+                            <input style="width: 100%;" type="text" name="description" value="@room.Description"/>
 
                         </td>
-                        <td></td>
-                        <td></td>
+                        <td style="text-align: center">
+                            @{
+                                var doorModes = new List<SelectListItem>
+                                {
+                                    new SelectListItem { Value = "1", Text = "Open" },
+                                    new SelectListItem { Value = "2", Text = "Closed" },
+                                    new SelectListItem { Value = "3", Text = "Code" }
+                                };
+                            }
+                            
+                            <select asp-for="@room.AccessType" asp-items="doorModes"></select>
+                        </td>
+                        <td style="text-align: center"><input type="checkbox" name="show_owner" @((@room.ShowOwner == 1) ? "checked" : "") /></td>
+                        <td style="text-align: center"><input type="submit" value="Save" /></td>
                     </form>
                 </tr>
             }
@@ -66,4 +84,25 @@
     }
 
 
+}
+
+@section scripts {
+    <script>
+        $(".rooms-inline-form").submit(function (e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                type: "POST",
+                url: form.attr("action"),
+                data: form.serialize(),
+                success: function (data) {
+                    if (data.success) {
+                        alert("Room updated");
+                    } else {
+                        alert("Error");
+                    }
+                }
+            });
+        });
+    </script>
 }
