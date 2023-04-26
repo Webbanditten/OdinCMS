@@ -37,7 +37,7 @@
             {
                 <tr>
                     <form class="rooms-inline-form" data-room-id="@room.Id">
-                        <td>@if(room.Owner != null) { <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}else{<text>PUBLIC ROOM</text>}</td>
+                        <td>@room.@room.OwnerId @if(room.Owner != null) { <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}else{<text>PUBLIC ROOM</text>}</td>
                         <td>
 
                             <label for="name">Name</label>

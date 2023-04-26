@@ -30,8 +30,8 @@ namespace KeplerCMS.Data
             
             modelBuilder.Entity<Rooms>()
                 .HasOne(r => r.Owner)
-                .WithMany()
-                .HasForeignKey(r => r.OwnerId);
+                .WithOne()
+                .HasForeignKey<Rooms>(r => r.OwnerId);
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }

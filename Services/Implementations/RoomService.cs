@@ -38,12 +38,35 @@ namespace KeplerCMS.Services.Implementations
             var total = await allUsers.CountAsync();
             var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();*/
             // Search either the name or the Owner.username 
-            var allRooms = _context.Rooms
-                .FromSqlRaw(
-                    "SELECT * FROM rooms where (name like @search OR owner_id IN (SELECT id FROM users WHERE username like @search)) ORDER BY name ASC",
-                    new MySqlParameter("@search", "%" + search + "%"));
-            var total = await allRooms.CountAsync();
-            var rooms = await allRooms.OrderBy(u => u.Name).Skip(skip).Take(take).ToListAsync();
+            /*var roomsQuery = from room in _context.Rooms.Include(r => r.Owner)
+                where room.Name.Contains(search) || _context.Users.Any(u => u.Id == room.OwnerId && u.Username.Contains(search))
+                orderby room.Name ascending
+                select room;
+
+            var total = await roomsQuery.CountAsync();
+            var rooms = await roomsQuery.Skip(skip).Take(take).ToListAsync();
+
+            return new SearchRoomsModel
+            {
+                Rooms = rooms,
+                TotalResults = total
+            };*/
+            
+            var roomsQuery = from room in _context.Rooms
+                join owner in _context.Users on room.OwnerId equals owner.Id into owners
+                from owner in owners.DefaultIfEmpty()
+                where (room.Name.Contains(search) || (owner != null && owner.Username.Contains(search))) && room.Model.Contains("model_")
+                orderby room.Name ascending
+                select new { Room = room, Owner = owner };
+
+            var total = await roomsQuery.CountAsync();
+            var rooms = await roomsQuery.Skip(skip).Take(take).Select(joinResult => joinResult.Room).ToListAsync();
+
+            foreach (var room in rooms)
+            {
+                room.Owner = roomsQuery.Where(joinResult => joinResult.Room == room).Select(joinResult => joinResult.Owner).FirstOrDefault();
+            }
+
             return new SearchRoomsModel
             {
                 Rooms = rooms,
