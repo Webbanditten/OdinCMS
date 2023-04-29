@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using KeplerCMS.Areas.Housekeeping.Models.Views;
 using KeplerCMS.Models;
 using KeplerCMS.Data.Models;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace KeplerCMS.Areas.Housekeeping
@@ -34,9 +32,8 @@ namespace KeplerCMS.Areas.Housekeeping
                 });
             }
             const int pageSize = 25;
-            var take = pageSize;
             var skip = (currentPage - 1) * pageSize;
-            var searchResult = await _roomService.Search(search, take, skip);
+            var searchResult = await _roomService.Search(search, pageSize, skip);
             var model = new SearchRoomsViewModel
             {
                 Rooms = searchResult.Rooms,
@@ -45,6 +42,15 @@ namespace KeplerCMS.Areas.Housekeeping
                 TotalPages = searchResult.TotalResults / pageSize
             };
             return View(model);
+        }
+        [HttpPost]
+        [HousekeepingFilter(Fuse.fuse_private_rooms)]
+        public async Task<IActionResult> UpdateRoom([FromBody] RoomsUpdateModel model)
+        {
+            if (!ModelState.IsValid) return Content("error");
+            
+            var result = await _roomService.UpdateRoom(model);
+            return Content(result);
         }
 
         

@@ -73,6 +73,27 @@ namespace KeplerCMS.Services.Implementations
                 TotalResults = total
             };
         }
+
+        public async Task<string> UpdateRoom(RoomsUpdateModel model)
+        {
+            try
+            {
+                var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == model.Id);
+                if (room == null) return "error";
+                room.Name = model.Name;
+                room.Description = model.Description;
+                room.ShowOwner = model.ShowOwner;
+                room.AccessType = model.AccessType;
+            
+                await _context.SaveChangesAsync();
+                
+                return "success";
+            } catch (Exception e)
+            {
+                return "error";
+            }
+            
+        }
     }
 
 }

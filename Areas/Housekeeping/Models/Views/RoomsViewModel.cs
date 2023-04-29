@@ -22,4 +22,12 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
             public IEnumerable<Rooms> Rooms { get; set; }
             public int TotalResults { get; set; }
         }
+        
+        public class RoomsUpdateModel {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public int AccessType { get; set; }
+            public int ShowOwner { get; set; }
+        }
 }

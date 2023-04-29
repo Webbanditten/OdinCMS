@@ -35,9 +35,9 @@
             foreach (var room in Model.Rooms)
             {
                 <tr>
-                    <form class="rooms-inline-form">
+                    <form class="rooms-inline-form" asp-action="UpdateRoom">
                         
-                        <td><input name="id" type="hidden" value="@room.Id" />
+                        <td><input name="Id" type="hidden" value="@room.Id" />
                             @if (room.Owner != null)
                             {
                                 <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}
@@ -47,10 +47,10 @@
                         <td style="padding-right: 10px;">
 
                             <label style="display:block" for="name">Name</label>
-                            <input style="width: 100%;" type="text" name="name" value="@room.Name"/>
+                            <input style="width: 100%;" type="text" name="Name" value="@room.Name"/>
                             <br/>
                             <label style="display:block" for="description">Description</label>
-                            <input style="width: 100%;" type="text" name="description" value="@room.Description"/>
+                            <input style="width: 100%;" type="text" name="Description" value="@room.Description"/>
 
                         </td>
                         <td style="text-align: center">
@@ -63,9 +63,9 @@
                                 };
                             }
                             
-                            <select asp-for="@room.AccessType" asp-items="doorModes"></select>
+                            <select name="AccessType" asp-for="@room.AccessType" asp-items="doorModes"></select>
                         </td>
-                        <td style="text-align: center"><input type="checkbox" name="show_owner" @((@room.ShowOwner == 1) ? "checked" : "") /></td>
+                        <td style="text-align: center"><input type="checkbox" name="ShowOwner" value="1" @((@room.ShowOwner == 1) ? "checked" : "") /></td>
                         <td style="text-align: center"><input type="submit" value="Save" /></td>
                     </form>
                 </tr>
@@ -91,12 +91,20 @@
         $(".rooms-inline-form").submit(function (e) {
             e.preventDefault();
             var form = $(this);
+            var formData = form.serializeArray();
+            var model = {};
+        
+            $.each(formData, function (index, element) {
+                model[element.name] = element.value;
+            });
+        
             $.ajax({
                 type: "POST",
                 url: form.attr("action"),
-                data: form.serialize(),
+                contentType: "application/json",
+                data: JSON.stringify(model),
                 success: function (data) {
-                    if (data.success) {
+                    if (data == "success") {
                         alert("Room updated");
                     } else {
                         alert("Error");
