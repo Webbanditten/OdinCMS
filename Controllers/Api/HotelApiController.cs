@@ -1,4 +1,5 @@
-﻿using KeplerCMS.Data;
+﻿using System;
+using KeplerCMS.Data;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,13 +25,15 @@ namespace KeplerCMS.Controllers
         private readonly IUserService _userService;
         private readonly ICommandQueueService _commandQueueService;
         private readonly IPhotoService _photoService;
+        private readonly IFurniService _furniService;
 
-        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService, IPhotoService photoService)
+        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService, IPhotoService photoService, IFurniService furniService)
         {
             _settingService = settingsService;
             _userService = userService;
             _commandQueueService = commandQueueService;
             _photoService = photoService;
+            _furniService = furniService;
         }
 
         [HttpGet("api/hotel/online")]
@@ -73,5 +76,36 @@ namespace KeplerCMS.Controllers
             _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
             return Content("ok");
         }
+        
+        [Route("api/hotel/furni")]
+        public async Task<IActionResult> GetFurni(string id)
+        {
+            if (id.Contains(','))
+            {
+                var stringIds = id.Split(',');
+                var ids = new int[stringIds.Length];
+                for (var i = 0; i < stringIds.Length; i++)
+                {
+                    ids[i] = int.Parse(stringIds[i]);
+                }
+                var furnis = await _furniService.Get(ids);
+                return Ok(furnis);
+            }
+            
+            var furni = await _furniService.Get(int.Parse(id));
+            if (furni != null)
+            {
+                return Ok(furni);
+            }
+            return NotFound();
+        }
+        
+        [Route("api/hotel/furni/search")]
+        public async Task<IActionResult> SearchFurni(string query)
+        {
+            return Ok(await _furniService.Search(query));
+        }
+        
+        
     }
 }

@@ -38,7 +38,9 @@ namespace KeplerCMS.Models
         [Description("fuse_ban")]
         fuse_ban,
         [Description("fuse_private_rooms")]
-        fuse_private_rooms
+        fuse_private_rooms,
+        [Description("fuse_rewards")]
+        fuse_rewards
         
     }
 }
