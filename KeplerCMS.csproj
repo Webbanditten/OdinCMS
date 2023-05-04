@@ -117,4 +117,8 @@
     <Folder Include="Areas\Housekeeping\Views\Shared" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Rewards\Index.cshtml" />
+  </ItemGroup>
+
 </Project>

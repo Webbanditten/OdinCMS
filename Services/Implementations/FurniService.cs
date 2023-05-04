@@ -22,7 +22,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<ItemsDefinitions>> Search(string query)
         {
-            return await _context.ItemsDefinitions.Where(x => x.sprite.Contains(query)).ToListAsync();
+            return await _context.ItemsDefinitions.Where(x => x.sprite.Contains(query) || x.Name.Contains(query)).ToListAsync();
         }
 
         public async Task<ItemsDefinitions> Get(int id)

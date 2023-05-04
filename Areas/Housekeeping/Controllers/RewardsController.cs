@@ -18,7 +18,7 @@ namespace KeplerCMS.Areas.Housekeeping
             _rewardService = rewardService;
         }
 
-        [HousekeepingFilter(Fuse.fuse_rewards)]
+        [HousekeepingFilter(Fuse.housekeeping_rewards)]
         public async Task<IActionResult> Index(bool previousRewards)
         {
            
