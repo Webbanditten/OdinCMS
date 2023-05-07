@@ -40,7 +40,7 @@ namespace KeplerCMS.Services.Implementations
                     foreach (var itemDefinition in itemDefinitions)
                     {
                         var itemDefinitionInt = int.TryParse(itemDefinition, out int itemDefinitionIntResult) ? itemDefinitionIntResult : 0;
-                        var dbDefinition = _context.ItemsDefinitions.Where(s => s.Id == itemDefinitionInt).FirstOrDefault();
+                        var dbDefinition = _context.ItemsDefinitions.FirstOrDefault(s => s.Id == itemDefinitionInt);
                         if (dbDefinition != null)
                         {
                             reward.ItemsDefinitions.Add(dbDefinition);
@@ -49,6 +49,21 @@ namespace KeplerCMS.Services.Implementations
                 }
             }
             return rewards;
+        }
+
+        public async Task<List<Rewards>> GetPreviousRewards()
+        {
+            return await GetRewardsBetweenDates(DateTime.Now.AddYears(-100), DateTime.Now);
+        }
+
+        public async Task<List<Rewards>> GetCurrentRewards()
+        {
+            return await GetRewardsBetweenDates(DateTime.Now, DateTime.Now.AddYears(100));
+        }
+        
+        public async Task<List<Rewards>> GetRewards()
+        {
+            return await _context.Rewards.ToListAsync();
         }
     }
 }

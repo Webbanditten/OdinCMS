@@ -6,6 +6,7 @@ using KeplerCMS.Areas.Housekeeping.Models.Views;
 using KeplerCMS.Models;
 using KeplerCMS.Data.Models;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace KeplerCMS.Areas.Housekeeping
 {
@@ -24,9 +25,18 @@ namespace KeplerCMS.Areas.Housekeeping
            
             return View();
         }
-        
 
-        
+        public async Task<IActionResult> GetRewards(bool previous)
+        {
+            if (previous)
+            {
+                return Content(JsonConvert.SerializeObject(await _rewardService.GetPreviousRewards()));
+            }
+            return Content(JsonConvert.SerializeObject(await _rewardService.GetCurrentRewards()));
+        }
+
+
+
     }
 
 }
