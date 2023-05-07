@@ -148,7 +148,18 @@
                     <div id="habbologo"><a href="/"></a></div>
                     <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
                     <div id="enter-hotel">
-                        <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                        @{
+                            var downloadableClient = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.downloadable_client") : null;
+                            if (downloadableClient != null && downloadableClient.Value == "1")
+                            {
+                                <a href="/hotel/download" id="enter-hotel-link"></a>
+                            }
+                            else
+                            {
+                                <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                            }
+                        }
+                        
                     </div>
 
                     <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">
