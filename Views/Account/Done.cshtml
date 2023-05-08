@@ -1,7 +1,9 @@
 ﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @model KeplerCMS.Data.Models.Users
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
+    var settings = await SettingsService.GetAll();
     Layout = "_Register";
     ViewData["Title"] = DbRes.T("orange_box_header", "register");
 }
@@ -55,7 +57,18 @@
                                         <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@Model.Figure&amp;action=wlk&amp;direction=0&amp;head_direction=1&amp;gesture=sml&amp;size=b" alt="">
                                     </div>
                                     <div id="hh_welcome_enter" style="padding-left: 0px;padding-top: 55px;position: absolute;margin-left: 170px;margin-top: 120px;">
-                                        <a href='/client' target="client" onclick="redirectNewHabbo(this); return false;"><img src="~/images/welcome/enter_button.gif" style="height:95px; width:134px;" alt="enter"></a>
+                                        @{
+                                            var downloadableClient = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.downloadable_client") : null;
+                                            if (downloadableClient != null && downloadableClient.Value == "1")
+                                            {
+                                                <a href="/hotel/download"><img src="~/images/welcome/enter_button.gif" style="height:95px; width:134px;" alt="enter"></a>
+                                            }
+                                            else
+                                            {
+                                                <a href='/client' target="client" onclick="redirectNewHabbo(this); return false;"><img src="~/images/welcome/enter_button.gif" style="height:95px; width:134px;" alt="enter"></a>
+                                            }
+                                        }
+                                        
                                     </div>
                                 </div>
 
@@ -78,7 +91,17 @@
 
                                 </div>
                                 <div align="left" style="margin-top: 10px;">
-                                    <a href="/" class="process-button" style=" width: 0px; height: 0px; padding-top: 2px; padding-bottom: 2px; padding-left: 4px; padding-right: 4px;">@DbRes.T("continue", "register")</a>
+                                    @{
+                                        if (downloadableClient != null && downloadableClient.Value == "1")
+                                        {
+                                            <a href="/hotel/download" class="process-button" style=" width: 0px; height: 0px; padding-top: 2px; padding-bottom: 2px; padding-left: 4px; padding-right: 4px;">@DbRes.T("continue", "register")</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="/" class="process-button" style=" width: 0px; height: 0px; padding-top: 2px; padding-bottom: 2px; padding-left: 4px; padding-right: 4px;">@DbRes.T("continue", "register")</a>
+                                        }
+                                    }
+                                    
                                 </div>
                             </div>
                             <div class="clear"></div>
