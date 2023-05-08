@@ -22,32 +22,35 @@ namespace KeplerCMS.Services.Implementations
         public async Task<List<Rewards>> GetRewardsBetweenDates(DateTime from, DateTime to)
         {
             var rewards = await _context.Rewards.Where(s => s.AvailableFrom >= from && s.AvailableTo <= to).ToListAsync();
+
+            var itemDefinitionIds = rewards
+                .Where(r => !string.IsNullOrEmpty(r.ItemDefinitions))
+                .SelectMany(r => r.ItemDefinitions.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => int.TryParse(s, out int itemDefinitionIntResult) ? itemDefinitionIntResult : 0))
+                .Where(id => id != 0)
+                .Distinct()
+                .ToList();
+
+            var dbDefinitions = await _context.ItemsDefinitions
+                .Where(s => itemDefinitionIds.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id);
+
             foreach (var reward in rewards)
             {
                 if (!string.IsNullOrEmpty(reward.ItemDefinitions))
                 {
-                    string[] itemDefinitions;
-                    if (reward.ItemDefinitions.Contains(","))
-                    {
-                        itemDefinitions = reward.ItemDefinitions.Split(",");
-                    }
-                    else
-                    {
-                        itemDefinitions = new string[] { reward.ItemDefinitions };
-                    }
+                    var itemDefinitions = reward.ItemDefinitions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => int.TryParse(s, out int itemDefinitionIntResult) ? itemDefinitionIntResult : 0)
+                        .Where(id => id != 0)
+                        .ToList();
 
-                    reward.ItemsDefinitions = new List<ItemsDefinitions>();
-                    foreach (var itemDefinition in itemDefinitions)
-                    {
-                        var itemDefinitionInt = int.TryParse(itemDefinition, out int itemDefinitionIntResult) ? itemDefinitionIntResult : 0;
-                        var dbDefinition = _context.ItemsDefinitions.FirstOrDefault(s => s.Id == itemDefinitionInt);
-                        if (dbDefinition != null)
-                        {
-                            reward.ItemsDefinitions.Add(dbDefinition);
-                        }
-                    }
+                    reward.ItemsDefinitions = itemDefinitions
+                        .Where(id => dbDefinitions.ContainsKey(id))
+                        .Select(id => dbDefinitions[id])
+                        .ToList();
                 }
             }
+
             return rewards;
         }
 

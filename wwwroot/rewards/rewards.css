@@ -1,0 +1,123 @@
+/*#region fontface Stuff*/
+@font-face {
+  font-family: "HabboTwelve";
+  src: url("../habbowood/styles/15_HabboTwelveBold.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/15_HabboTwelveBold.ttf")
+      format("truetype"); /* Safari, Android, iOS */
+  font-weight: bold;
+}
+@font-face {
+    font-family: "HabboTwelve";
+  src: url("../habbowood/styles/260_HabboTwelveRg.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/260_HabboTwelveRg.ttf")
+      format("truetype"); /* Safari, Android, iOS */
+  font-weight: normal;
+}
+@font-face {
+  font-family: "Volter";
+  src: url("../habbowood/styles/volter.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/volter.ttf") format("truetype"); /* Safari, Android, iOS */
+}
+/*#endregion */
+
+.rewards-container {
+  border: 18px solid transparent;
+  border-image: url(./images/reward_box.gif) 18;
+}
+.rewards-inner {
+  background: #ffd503;
+  position: relative;
+  padding:4px;
+}
+.rewards-header {
+  font-weight: bold;
+  font-size: 12px;
+  color: #000;
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: -4px;
+}
+.rewards-body {
+  width: 260px;
+  overflow:scroll;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #F47920 #DFE9EB;
+}
+
+/* Chrome, Edge and Safari */
+.rewards-body::-webkit-scrollbar {
+  width: 10px;
+  width: 10px;
+}
+.rewards-body::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #DFE9EB;
+}
+
+.rewards-body::-webkit-scrollbar-track:hover {
+  background-color: #B8C0C2;
+}
+
+.rewards-body::-webkit-scrollbar-track:active {
+  background-color: #B8C0C2;
+}
+
+.rewards-body::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #F47920;
+}
+
+.rewards-body::-webkit-scrollbar-thumb:hover {
+  background-color: #C7631A;
+}
+
+.rewards-body::-webkit-scrollbar-thumb:active {
+  background-color: #bf5b11;
+}
+.rewards-item-current-status {
+  text-align: center;
+}
+.rewards-items {
+  list-style:none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin:0px;
+  padding: 0px;
+  margin-top: 14px;
+}
+.rewards-item:not(:last-child) {
+  margin-right: 4px;
+}
+.rewards-item {
+
+  padding:4px;
+}
+.rewards-item-header {
+  font-weight: bold;
+  font-size:12px;
+  text-align:center;
+}
+.rewards-item-body {
+  background: #fffbaa;
+  width:74px;
+  height:74px;
+  border-radius: 4px;
+  margin-top:4px;
+  margin-bottom:4px;
+}
+.reward-item-current {
+  margin-top:-8px;
+  padding:8px;
+}
+.reward-item-current .rewards-item-body {
+  background: #f47920;
+  width:82px;
+  height:82px;
+}
+
+
+
+
