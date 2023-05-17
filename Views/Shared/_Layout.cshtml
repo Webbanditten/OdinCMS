@@ -152,7 +152,14 @@
                             var downloadableClient = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.downloadable_client") : null;
                             if (downloadableClient != null && downloadableClient.Value == "1")
                             {
-                                <a href="/hotel/download" id="enter-hotel-link"></a>
+                                if (User.Identity.IsAuthenticated)
+                                {
+                                    <a href="/hotel/download" id="enter-hotel-link"></a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Index", "Account")" id="enter-hotel-link"></a>
+                                }
                             }
                             else
                             {
