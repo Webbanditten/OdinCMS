@@ -73,6 +73,7 @@ namespace KeplerCMS.Data
         public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<Rewards> Rewards { get; set; }
+        public DbSet<RewardsRedeemed> RewardsRedeemed { get; set; }
         public DbSet<RankBadges> RankBadges { get; set; }
         public DbSet<UsersBans> UsersBans { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }

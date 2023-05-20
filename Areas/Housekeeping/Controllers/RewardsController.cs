@@ -26,6 +26,7 @@ namespace KeplerCMS.Areas.Housekeeping
             return View();
         }
 
+        [HousekeepingFilter(Fuse.housekeeping_rewards)]
         public async Task<IActionResult> GetRewards(bool previous)
         {
             if (previous)
@@ -33,6 +34,42 @@ namespace KeplerCMS.Areas.Housekeeping
                 return Content(JsonConvert.SerializeObject(await _rewardService.GetPreviousRewards()));
             }
             return Content(JsonConvert.SerializeObject(await _rewardService.GetCurrentRewards()));
+        }
+        
+        [HttpPost]
+        [HousekeepingFilter(Fuse.housekeeping_rewards)]
+        public async Task<IActionResult> CreateReward(Rewards reward)
+        {
+            if (ModelState.IsValid)
+            {
+                Response.StatusCode = 201;
+                return Content(JsonConvert.SerializeObject(await _rewardService.CreateReward(reward)));
+            }
+            return StatusCode(400);
+        }
+        
+        [HttpPost]
+        [HousekeepingFilter(Fuse.housekeeping_rewards)]
+        public async Task<IActionResult> UpdateReward(Rewards reward)
+        {
+            if (ModelState.IsValid)
+            {
+                Response.StatusCode = 204;
+                return Content(JsonConvert.SerializeObject(await _rewardService.UpdateReward(reward)));
+            }
+            return StatusCode(400);
+        }
+        
+        [HttpPost]
+        [HousekeepingFilter(Fuse.housekeeping_rewards)]
+        public async Task<IActionResult> DeleteReward(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                Response.StatusCode = 201;
+                return Content(JsonConvert.SerializeObject(await _rewardService.DeleteReward(id)));
+            }
+            return StatusCode(400);
         }
 
 

@@ -25,6 +25,11 @@
   
 }
 
+.rewards-body p {
+  text-align: center;
+  padding: 16px;
+}
+
 .rewards-item-current-status {
   height:22px;
   width:22px;

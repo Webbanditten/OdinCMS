@@ -115,6 +115,8 @@
 
   <ItemGroup>
     <Folder Include="Areas\Housekeeping\Views\Shared" />
+    <Folder Include="wwwroot\lib\datetimepicker\" />
+    <Folder Include="wwwroot\lib\select2\" />
   </ItemGroup>
 
   <ItemGroup>

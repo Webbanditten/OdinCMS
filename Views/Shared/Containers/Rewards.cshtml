@@ -7,7 +7,27 @@
 
 
 @{
-    var rewards = await RewardService.GetRewardsBetweenDates(new DateTime(DateTime.Now.Year,11,30,00,00,00), new DateTime(DateTime.Now.Year,12,31,23,59,59));
+    var rewards = new List<RewardsViewModel>();
+    var day1 = DateTime.Now.AddDays(-15);
+    var day2 = DateTime.Now.AddDays(15);
+    if (User.Identity is {IsAuthenticated: true})
+    {
+        rewards = await RewardService.GetRewardsBetweenDates(day1, day2, int.Parse(User.Identity.Name));
+    }
+    else
+    {
+        var rewardEntities = await RewardService.GetRewardsBetweenDates(day1, day2);
+        rewards = rewardEntities.Select(reward => new RewardsViewModel
+        {
+            Id = reward.Id,
+            RequiredStreak = reward.RequiredStreak,
+            Description = reward.Description,
+            AvailableFrom = reward.AvailableFrom,
+            AvailableTo = reward.AvailableTo,
+            ItemDefinitions = reward.ItemDefinitions,
+            Redeemed = false,
+        }).ToList();
+    }
 
     var rewardsList = new List<RewardsViewModel>
     {
@@ -136,18 +156,18 @@
     };
 
 }
-<link rel="stylesheet" href="/rewards/rewards.css" />
-<script src="/rewards/rewards.js" type="text/javascript"></script>
+<link rel="stylesheet" href="~/rewards/rewards.css" />
+<script src="~/rewards/rewards.js" type="text/javascript"></script>
 <div class="rewards-container">
     <div class="rewards-inner">
         <div class="rewards-header">Gaver</div>
         <div class="rewards-body">
             @{
-                if (rewardsList.Count > 0)
+                if (rewards.Count > 0)
                 {
                     <ol class="rewards-items">
 
-                        @foreach (var reward in rewardsList)
+                        @foreach (var reward in rewards)
                         {
                             var isToday = (reward.AvailableFrom.Date == DateTime.Now.Date);
                             var todayClass = isToday ? "reward-item-current" : "";
@@ -167,72 +187,73 @@
                                     }
 
                                 </div>
-
-
+                                
+                               @{
+                                   /*
+                                    * 0 = Available
+                                    * 1 = Redeemed
+                                    * 2 = Not redeemed
+                                    * 3 = Not logged in
+                                    */
+                                   var status = 0;
+                               }
+                               
+                               @if (isToday)
+                               {
+                                   if (User.Identity is {IsAuthenticated: true})
+                                   {
+                                       status = reward.Redeemed ? 1 : 0;
+                                   }
+                                   else
+                                   {
+                                       status = 3;
+                                   }
+                               }
+                               else
+                               {
+                                   if (User.Identity is {IsAuthenticated: true} && reward.AvailableTo < DateTime.Now)
+                                   {
+                                       status = reward.Redeemed ? 1 : 2;
+                                   }
+                                   else
+                                   {
+                                       status = 3;
+                                   }
+                               }
+                                @{
+                                    switch (status)
+                                    {
+                                        case 0:
+                                            <div class="rewards-item-current-status">
+                                                <a href=""><img src="~/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
+                                                <span class="tooltiptext">Modtag gaven ved log-ind</span>
+                                            </div>
+                                            break;
+                                        case 1:
+                                            <div class="rewards-item-current-status">
+                                                <img src="~/rewards/images/v20_4.gif" alt="Gave modtaget"/>
+                                                <span class="tooltiptext">Modtaget</span>
+                                            </div>
+                                            break;
+                                        case 2:
+                                            <div class="rewards-item-current-status">
+                                                <img src="~/rewards/images/v22_3.gif" alt="Ikke modtaget"/>
+                                                <span class="tooltiptext">Ikke modtaget</span>
+                                            </div>
+                                            break;
+                                        default:
+                                            <div class="rewards-item-current-status">
+                                                <a href=""><img src="~/rewards/images/new_13.gif" alt="Log-ind for at se status"/> </a>
+                                                <span class="tooltiptext">Log-ind</span>
+                                            </div>
+                                        break;
+                                            
+                                    }
+                                }
+                                
                                 @if (isToday)
                                 {
-                                    @if (User.Identity.IsAuthenticated)
-                                    {
-                                        if (reward.Redeemed)
-                                        {
-                                            <div class="rewards-item-current-status"><img src="/rewards/images/v20_4.gif" alt="Du har fået denne gave"/>
-                                                <span class="tooltiptext">Du har fået denne gave</span></div>
-                                        }
-                                        else
-                                        {
-                                            <div class="rewards-item-current-status">
-                                                <a href=""><img src="/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
-                                                <span class="tooltiptext">Måske?</span>
-                                            </div>
-                                            
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <div class="rewards-item-current-status">
-                                            <a href=""><img src="/rewards/images/new_13.gif" alt="Log-ind for at se status"/> </a>
-                                            <span class="tooltiptext">Log-ind for at se status</span>
-                                        </div>
-                                    }
-                                    
                                     <div class="rewards-item-current-arrow">I dag</div>
-                                }
-                                else
-                                {
-                                    if (User.Identity.IsAuthenticated)
-                                    {
-                                        if (reward.AvailableTo < DateTime.Now)
-                                        {
-                                            if (reward.Redeemed)
-                                            {
-                                                <div class="rewards-item-current-status"><img src="/rewards/images/v20_4.gif" alt="Gave modtaget"/>
-                                                    <span class="tooltiptext">Modtaget</span>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="rewards-item-current-status"><img src="/rewards/images/v22_3.gif" alt="Ikke modtaget"/>
-                                                    <span class="tooltiptext">Ikke modtaget</span>
-                                                </div>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            
-                                            <div class="rewards-item-current-status">
-                                                <a href=""><img src="/rewards/images/new_13.gif" alt="Log-ind for at se status"/> </a>
-                                                <span class="tooltiptext">Tooltip text</span>
-                                            </div>
-                                        }
-                                        
-                                    }
-                                    else
-                                    {
-                                        <div class="rewards-item-current-status">
-                                            <a href=""><img src="/rewards/images/new_13.gif" alt="Log-ind for at se status"/> </a>
-                                            <span class="tooltiptext">Tooltip text</span>
-                                        </div>
-                                    }
                                 }
                                 
                             </li>
@@ -254,7 +275,7 @@
                         </div>
                     </div>
                     <div class="rewards-item-current-status">
-                        <a href=""><img src="/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
+                        <a href=""><img src="~/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
                         <span class="tooltiptext">Tooltip text</span>
                     </div>
                 </li>
@@ -274,7 +295,7 @@
                             <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
                         </div>
                     </div>
-                    <div class="rewards-item-current-status"><img src="/rewards/images/v22_3.gif" alt="Du har ikke modtaget denne gave"/></div>
+                    <div class="rewards-item-current-status"><img src="~/rewards/images/v22_3.gif" alt="Du har ikke modtaget denne gave"/></div>
                 </li>
                 <li class="rewards-item reward-item-current">
                     <div class="rewards-item-header">2</div>
@@ -296,7 +317,7 @@
                             <span class="tooltiptext">Tooltip text</span>
                         </div>
                     </div>
-                    <div class="rewards-item-current-status"><img src="/rewards/images/v20_4.gif" alt="Du har fået denne gave"/></div>
+                    <div class="rewards-item-current-status"><img src="~/rewards/images/v20_4.gif" alt="Du har fået denne gave"/></div>
                     <div class="rewards-item-current-arrow">I dag</div>
                 </li>
                 <li class="rewards-item">
@@ -310,7 +331,7 @@
                         </div>
                     </div>
 
-                    <div class="rewards-item-current-status"><img src="/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
+                    <div class="rewards-item-current-status"><img src="~/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
                 </li>
                 <li class="rewards-item">
                     <div class="rewards-item-header">3</div>
@@ -319,7 +340,7 @@
                             <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
                         </div>
                     </div>
-                    <div class="rewards-item-current-status"><img src="/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
+                    <div class="rewards-item-current-status"><img src="~/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
                 </li>
             </ol>
         </div>
