@@ -29,138 +29,12 @@
         }).ToList();
     }
 
-    var rewardsList = new List<RewardsViewModel>
-    {
-        new RewardsViewModel
-        {
-            Id = 0,
-            Redeemed = true,
-            Description = "blabla",
-            AvailableFrom = new DateTime(DateTime.Now.Year, 5, 14, 00, 00, 00),
-            AvailableTo = new DateTime(DateTime.Now.Year, 5, 14, 23, 59, 59),
-            ItemsDefinitions = new List<ItemsDefinitions>
-            {
-                new ItemsDefinitions
-                {
-                    Id = 0,
-                    sprite = "penguin_ballet",
-                    Name = "Penguin Ballet"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*6",
-                    Name = "Rare Dragon Lamp"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*3",
-                    Name = "Rare Dragon Lamp"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*4",
-                    Name = "Rare Dragon Lamp"
-                },
-            }
-        },        new RewardsViewModel
-        {
-            Id = 0,
-            Description = "blabla",
-            AvailableFrom = new DateTime(DateTime.Now.Year, 5, 15, 00, 00, 00),
-            AvailableTo = new DateTime(DateTime.Now.Year, 5, 15, 23, 59, 59),
-            ItemsDefinitions = new List<ItemsDefinitions>
-            {
-                new ItemsDefinitions
-                {
-                    Id = 0,
-                    sprite = "penguin_ballet",
-                    Name = "Penguin Ballet"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*6",
-                    Name = "Rare Dragon Lamp"
-                },
-            }
-        },
-        new RewardsViewModel
-        {
-            Id = 0,
-            Description = "blabla",
-            AvailableFrom = new DateTime(DateTime.Now.Year, 5, 17, 00, 00, 00),
-            AvailableTo = new DateTime(DateTime.Now.Year, 5, 17, 23, 59, 59),
-            ItemsDefinitions = new List<ItemsDefinitions>
-            {
-                new ItemsDefinitions
-                {
-                    Id = 0,
-                    sprite = "penguin_ballet",
-                    Name = "Penguin Ballet"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*6",
-                    Name = "Rare Dragon Lamp"
-                },
-            }
-        },
-        new RewardsViewModel
-        {
-            Id = 1,
-            Description = "blabla",
-            AvailableFrom = new DateTime(DateTime.Now.Year, 5, 18, 00, 00, 00),
-            AvailableTo = new DateTime(DateTime.Now.Year, 5, 18, 23, 59, 59),
-            ItemsDefinitions = new List<ItemsDefinitions>
-            {
-                new ItemsDefinitions
-                {
-                    Id = 0,
-                    sprite = "penguin_ballet",
-                    Name = "Penguin Ballet"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*6",
-                    Name = "Rare Dragon Lamp"
-                },
-            }
-        },
-        new RewardsViewModel
-        {
-            Id = 2,
-            Description = "blabla",
-            AvailableFrom = new DateTime(DateTime.Now.Year, 5, 19, 00, 00, 00),
-            AvailableTo = new DateTime(DateTime.Now.Year, 5, 19, 23, 59, 59),
-            ItemsDefinitions = new List<ItemsDefinitions>
-            {
-                new ItemsDefinitions
-                {
-                    Id = 0,
-                    sprite = "penguin_ballet",
-                    Name = "Penguin Ballet"
-                },
-                new ItemsDefinitions
-                {
-                    Id = 1,
-                    sprite = "rare_dragonlamp*6",
-                    Name = "Rare Dragon Lamp"
-                },
-            }
-        },
-    };
-
 }
 <link rel="stylesheet" href="~/rewards/rewards.css" />
 <script src="~/rewards/rewards.js" type="text/javascript"></script>
 <div class="rewards-container">
     <div class="rewards-inner">
-        <div class="rewards-header">Gaver</div>
+        <div class="rewards-header">@DbRes.T("headline", "rewards")</div>
         <div class="rewards-body">
             @{
                 if (rewards.Count > 0)
@@ -181,7 +55,7 @@
                                         var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
                                         var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
                                         <div class="rewards-item-furni">
-                                            <img src="https://habbo-danmark.com/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
+                                            <img src="~/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
                                             <span class="tooltiptext">@rewardItemsDefinition.Name</span>
                                         </div>
                                     }
@@ -225,26 +99,26 @@
                                     {
                                         case 0:
                                             <div class="rewards-item-current-status">
-                                                <a href=""><img src="~/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
-                                                <span class="tooltiptext">Modtag gaven ved log-ind</span>
+                                                <a href=""><img src="~/rewards/images/question.gif" alt="@DbRes.T("status_0", "rewards")"/> </a>
+                                                <span class="tooltiptext">@DbRes.T("status_0", "rewards")</span>
                                             </div>
                                             break;
                                         case 1:
                                             <div class="rewards-item-current-status">
-                                                <img src="~/rewards/images/v20_4.gif" alt="Gave modtaget"/>
-                                                <span class="tooltiptext">Modtaget</span>
+                                                <img src="~/rewards/images/v20_4.gif" alt="@DbRes.T("status_1", "rewards")"/>
+                                                <span class="tooltiptext">@DbRes.T("status_1", "rewards")</span>
                                             </div>
                                             break;
                                         case 2:
                                             <div class="rewards-item-current-status">
-                                                <img src="~/rewards/images/v22_3.gif" alt="Ikke modtaget"/>
-                                                <span class="tooltiptext">Ikke modtaget</span>
+                                                <img src="~/rewards/images/v22_3.gif" alt="@DbRes.T("status_2", "rewards")"/>
+                                                <span class="tooltiptext">@DbRes.T("status_2", "rewards")</span>
                                             </div>
                                             break;
                                         default:
                                             <div class="rewards-item-current-status">
-                                                <a href=""><img src="~/rewards/images/new_13.gif" alt="Log-ind for at se status"/> </a>
-                                                <span class="tooltiptext">Log-ind</span>
+                                                <a href=""><img src="~/rewards/images/new_13.gif" alt="@DbRes.T("status_default", "rewards")"/> </a>
+                                                <span class="tooltiptext">@DbRes.T("status_default", "rewards")</span>
                                             </div>
                                         break;
                                             
@@ -253,7 +127,7 @@
                                 
                                 @if (isToday)
                                 {
-                                    <div class="rewards-item-current-arrow">I dag</div>
+                                    <div class="rewards-item-current-arrow">@DbRes.T("today", "rewards")</div>
                                 }
                                 
                             </li>
@@ -263,86 +137,9 @@
                 }
                 else
                 {
-                    <p>Der er desværre ingen gaver</p>
+                    <p>@DbRes.T("no_rewards", "rewards")</p>
                 }
             }
-            <ol style="display:none" class="rewards-items">
-                <li class="rewards-item">
-                    <div class="rewards-item-header">08/05</div>
-                    <div class="rewards-item-body">
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                    </div>
-                    <div class="rewards-item-current-status">
-                        <a href=""><img src="~/rewards/images/question.gif" alt="Log-ind for at se status"/> </a>
-                        <span class="tooltiptext">Tooltip text</span>
-                    </div>
-                </li>
-                <li class="rewards-item">
-                    <div class="rewards-item-header">3</div>
-                    <div class="rewards-item-body">
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                    </div>
-                    <div class="rewards-item-current-status"><img src="~/rewards/images/v22_3.gif" alt="Du har ikke modtaget denne gave"/></div>
-                </li>
-                <li class="rewards-item reward-item-current">
-                    <div class="rewards-item-header">2</div>
-                    <div class="rewards-item-body">
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                            <span class="tooltiptext">Tooltip text</span>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                            <span class="tooltiptext">Tooltip text</span>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                            <span class="tooltiptext">Tooltip text</span>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                            <span class="tooltiptext">Tooltip text</span>
-                        </div>
-                    </div>
-                    <div class="rewards-item-current-status"><img src="~/rewards/images/v20_4.gif" alt="Du har fået denne gave"/></div>
-                    <div class="rewards-item-current-arrow">I dag</div>
-                </li>
-                <li class="rewards-item">
-                    <div class="rewards-item-header">3</div>
-                    <div class="rewards-item-body">
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                    </div>
-
-                    <div class="rewards-item-current-status"><img src="~/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
-                </li>
-                <li class="rewards-item">
-                    <div class="rewards-item-header">3</div>
-                    <div class="rewards-item-body">
-                        <div class="rewards-item-furni">
-                            <img src="https://habbo-danmark.com/habbo-imaging/furni?sprite=penguin_ballet&icon=true"/>
-                        </div>
-                    </div>
-                    <div class="rewards-item-current-status"><img src="~/rewards/images/new_13.gif" alt="Log-ind på dagen for at modtage gaven"/></div>
-                </li>
-            </ol>
         </div>
     </div>
 </div>
