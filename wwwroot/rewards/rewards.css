@@ -1,0 +1,174 @@
+.rewards-container {
+  border: 18px solid transparent;
+  border-image: url(./images/reward_box.gif) 18;
+}
+.rewards-inner {
+  background: #ffd503;
+  position: relative;
+  padding:4px;
+}
+.rewards-header {
+  font-weight: bold;
+  font-size: 12px;
+  color: #000;
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: -4px;
+}
+.rewards-body {
+  width: 260px;
+  overflow:scroll;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #F47920 #DFE9EB;
+  
+}
+
+.rewards-body p {
+  text-align: center;
+  padding: 16px;
+}
+
+.rewards-item-current-status {
+  height:22px;
+  width:22px;
+  align-content: center;
+  justify-content: center;
+  position:relative;
+  display:flex;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.rewards-item-current-status img {
+  flex-shrink: unset;
+  place-self: flex-start;
+}
+
+/* Tooltip text */
+.tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #004979;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  top: -16px;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.rewards-item-current-status:hover .tooltiptext {
+  visibility: visible;
+}
+
+
+.rewards-items {
+  list-style:none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding: 0px;
+  margin: 14px 0px 0px;
+}
+.rewards-item:not(:last-child) {
+  margin-right: 4px;
+}
+.rewards-item {
+
+  padding:4px;
+}
+.rewards-item-header {
+  font-weight: bold;
+  font-size:12px;
+  text-align:center;
+}
+.rewards-item-body {
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width:80px;
+  height:80px;
+  border-radius: 4px;
+  margin-top:4px;
+  margin-bottom:4px;
+  justify-content: center;
+  align-content: center;
+}
+
+.rewards-item-furni {
+  width: 36px;
+  height: 36px;
+  background: #fffbaa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px 4px 4px 0px;
+  position:relative;
+  cursor: pointer;
+}
+.rewards-item-furni img {
+  flex-shrink: unset;
+}
+.reward-item-current .rewards-item-furni {
+  width: 36px;
+  height: 36px;
+  background: #f47920;
+}
+
+.rewards-item-current-arrow {
+  background: #c97e10;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  color: #fff;
+}
+
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.rewards-item-furni:hover .tooltiptext {
+  visibility: visible;
+}
+
+
+
+/* Scollbar stuff */
+/* Chrome, Edge and Safari */
+.rewards-body::-webkit-scrollbar {
+  width: 6px;
+  width: 6px;
+}
+.rewards-body::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #DFE9EB;
+}
+
+.rewards-body::-webkit-scrollbar-track:hover {
+  background-color: #B8C0C2;
+}
+
+.rewards-body::-webkit-scrollbar-track:active {
+  background-color: #B8C0C2;
+}
+
+.rewards-body::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #F47920;
+}
+
+.rewards-body::-webkit-scrollbar-thumb:hover {
+  background-color: #C7631A;
+}
+
+.rewards-body::-webkit-scrollbar-thumb:active {
+  background-color: #bf5b11;
+}

@@ -23,12 +23,14 @@
         { "/housekeeping/localization", HousekeepingMenu.Localization },
         { "/housekeeping/users", HousekeepingMenu.HobbaTools },
         { "/housekeeping/hobba", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/rooms", HousekeepingMenu.HobbaTools },
         { "/housekeeping/upload", HousekeepingMenu.WebsiteAdmin },
         { "/housekeeping/admin", HousekeepingMenu.AdminTools },
         { "/housekeeping/catalog", HousekeepingMenu.AdminTools },
         { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
         { "/housekeeping/settings", HousekeepingMenu.AdminTools },
         { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/rewards", HousekeepingMenu.AdminTools },
     };
 
     foreach (var key in menuMapping.Keys.Where(key => path.ToString().Contains(key) || path == key))
@@ -113,6 +115,7 @@
                                 @await menuHelper.Render("Messenger Campaign", Url.Action("Index", "MessengerCampaign"), new List<Fuse> { Fuse.housekeeping_campaign })
                                 @await menuHelper.Render("Manage ranks", Url.Action("Index", "Ranks"), new List<Fuse> { Fuse.housekeeping_ranks })
                                 @await menuHelper.Render("Audit log", Url.Action("Index", "AuditLog"), new List<Fuse> { Fuse.fuse_administrator_access })
+                                @await menuHelper.Render("Reward management", Url.Action("Index", "Rewards"), new List<Fuse> { Fuse.housekeeping_rewards })
                             </ul>
                         </div>
                     </div>
@@ -147,6 +150,20 @@
                             <div class="container-content">
                                 <ul>
                                     @await menuHelper.Render("User search & information tool", Url.Action("Index", "Users"), new List<Fuse> { Fuse.fuse_kick })
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                    
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_private_rooms }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Private rooms
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Room admin", Url.Action("Index", "Rooms"), new List<Fuse> { Fuse.fuse_private_rooms })
                                 </ul>
                             </div>
                         </div>

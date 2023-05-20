@@ -62,7 +62,7 @@
                         </div>
                         <div id="fightResults" class="fight-results">
                             <div class="fight-image">
-                                <img src="/images/tagfight/tagfight_start.gif" alt="" name="fightanimation" id="fightanimation" />
+                                <img src="~/images/tagfight/tagfight_start.gif" alt="" name="fightanimation" id="fightanimation" />
                                 <a id="tag-fight-button" href="#" onclick="TagFight.init(); return false;" class="colorlink orange last"><span>Fight</span></a>
                             </div>
                         </div>
@@ -114,11 +114,11 @@
                                                 if(item.User != null ){
                                                     
                                                     <td valign="top" width="40"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(item.User.Figure)&size=s" alt="" align="bottom" border="0" hspace="10" vspace="5"></td>
-                                                    <td valign="top"><strong><a href="/home/@item.User.Username">@item.User.Username</strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
+                                                    <td valign="top"><strong><a href="/home/@item.User.Username">@item.User.Username</a></strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
                                         
                                                 } else if(item.Group != null) {
                                                     <td valign="top" width="40"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(item.Group.GroupBadge).gif" alt="" align="bottom" border="0" hspace="10" vspace="5"></td>
-                                                    <td valign="top"><strong><a href="/groups/@(item.Group.Id)/id">@item.Group.GroupName</strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
+                                                    <td valign="top"><strong><a href="/groups/@(item.Group.Id)/id">@item.Group.GroupName</a></strong><br>@foreach(var tag in item.Tags) { <a href="/tag/search?tag=@(tag.Tag)">@(tag.Tag)</a> }</td>
                                         
                                                 }
                                             }

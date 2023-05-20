@@ -36,7 +36,11 @@ namespace KeplerCMS.Models
         [Description("fuse_room_alert")]
         room_alert,
         [Description("fuse_ban")]
-        fuse_ban
+        fuse_ban,
+        [Description("fuse_private_rooms")]
+        fuse_private_rooms,
+        [Description("housekeeping_rewards")]
+        housekeeping_rewards
         
     }
 }

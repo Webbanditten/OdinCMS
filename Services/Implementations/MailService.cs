@@ -22,7 +22,7 @@ namespace KeplerCMS.Services
         {
             _mjmlServices = mjmlServices;
             _fluentEmail = fluentEmail;
-            _fromEmail = string.IsNullOrEmpty(configuration.GetSection("keplercms:mailAddress").Value) ? "Test" : configuration.GetSection("keplercms:mailAddress").Value;
+            _fromEmail = string.IsNullOrEmpty(configuration.GetSection("keplercms:mailAddress").Value) ? "test@test.com" : configuration.GetSection("keplercms:mailAddress").Value;
             _from = string.IsNullOrEmpty(configuration.GetSection("keplercms:mailFrom").Value) ? "Test <test@test.com>" : configuration.GetSection("keplercms:mailFrom").Value;
             _publicUrl = string.IsNullOrEmpty(configuration.GetSection("keplercms:publicUrl").Value) ? "http://localhost:5000" : configuration.GetSection("keplercms:publicUrl").Value;
         }

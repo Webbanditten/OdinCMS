@@ -78,7 +78,7 @@ namespace KeplerCMS
                 options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
             ));
 
-            services.AddFluentEmail("fromemail@test.test")
+            services.AddFluentEmail(Configuration.GetSection("keplercms:mailAddress").Value)
             .AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
 
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -111,6 +111,7 @@ namespace KeplerCMS
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<IRewardService, RewardService>();
             services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<IFurniService, FurniService>();
 
             services.AddMjmlServices(o =>
             {
