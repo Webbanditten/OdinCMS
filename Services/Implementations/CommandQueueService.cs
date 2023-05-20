@@ -23,7 +23,13 @@ namespace KeplerCMS.Services
             try
             {
                 var json = JsonConvert.SerializeObject(template);
-                var factory = new ConnectionFactory { HostName = _configuration.GetSection("keplercms:rabbitmq:hostname").Value, Port = int.Parse(_configuration.GetSection("keplercms:rabbitmq:port").Value)};
+                var factory = new ConnectionFactory
+                {
+                    HostName = _configuration.GetSection("keplercms:rabbitmq:hostname").Value, 
+                    Port = int.Parse(_configuration.GetSection("keplercms:rabbitmq:port").Value),
+                    UserName = _configuration.GetSection("keplercms:rabbitmq:username").Value,
+                    Password = _configuration.GetSection("keplercms:rabbitmq:password").Value
+                };
                 using var connection = factory.CreateConnection();
                 using var channel = connection.CreateModel();
                 channel.QueueDeclare("command_queue", false, false, false, null);
