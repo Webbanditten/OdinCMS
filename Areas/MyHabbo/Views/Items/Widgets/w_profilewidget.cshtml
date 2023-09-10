@@ -80,7 +80,7 @@
             @Model.WidgetData.User.Motto
             <img id="motto-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
             <div class="clear"></div>
-        </div>
+        </div> 
         @{
             if (User.Identity.IsAuthenticated && User.Identity.Name != Model.WidgetData.User.Id.ToString() && !(bool)ViewData["canFriend"])
             {
@@ -131,7 +131,7 @@
         </div>
         <script type="text/javascript">
             document.observe("dom:loaded", function () {
-                new ProfileWidget('@Model.Item.Id', '@Model.Item.Id', {
+                new ProfileWidget('@Model.WidgetData.User.Id', '@User.Identity.Name', {
                     headerText: "@DbRes.T("friend_header", "habbohome")",
                     messageText: "@DbRes.T("friend_message", "habbohome").Replace("{username}", Model.WidgetData.User.Username)",
                     loginText: "@DbRes.T("friend_login", "habbohome")",
