@@ -37,36 +37,42 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<PopularFurniContainer> GetPopularFurni()
         {
-            var lastMonth = DateTime.Now.AddMonths(-12);
+            var lastMonth = DateTime.Now.AddMonths(-1);
 
             var query = from item in _context.Items
+                where item.CreatedAt >= lastMonth
                 join definition in _context.ItemsDefinitions
                     on item.DefinitionId equals definition.Id into joined
                 from d in joined.DefaultIfEmpty()
-                where item.CreatedAt >= lastMonth && d != null && !d.Behavior.Contains("present")
+                where d != null && !d.Behavior.Contains("present")
                 group item by item.DefinitionId into grouped
                 orderby grouped.Count() descending
-                select new PopularFurniContainer
+                select new
                 {
-                    Name = grouped.FirstOrDefault().Definition.Name, // Assuming you have a navigation property for Name in the Definition entity
-                    Sprite = grouped.FirstOrDefault().Definition.Sprite, // Assuming you have a navigation property for Sprite in the Definition entity
-                    SpriteId = grouped.FirstOrDefault().Definition.SpriteId, // Assuming you have a navigation property for SpriteId in the Definition entity
                     DefinitionId = grouped.Key,
+                    PurchaseCount = grouped.Count(),
                 };
 
-            var mostBoughtProduct = query.FirstOrDefault();
+            var mostBoughtProductInfo = query.FirstOrDefault();
 
-            if (mostBoughtProduct != null)
+            if (mostBoughtProductInfo != null)
             {
-                // Calculate purchase count separately using a subquery
-                var purchaseCount = (from item in _context.Items
-                    where item.DefinitionId == mostBoughtProduct.DefinitionId && item.CreatedAt >= lastMonth
-                    select item).Count();
-    
-                mostBoughtProduct.Amount = purchaseCount;
+                var mostBoughtProduct = _context.Items
+                    .Where(item => item.DefinitionId == mostBoughtProductInfo.DefinitionId)
+                    .Select(item => new PopularFurniContainer
+                    {
+                        DefinitionId = item.DefinitionId,
+                        Name = item.Definition.Name, // Assuming you have a navigation property for Name in the Definition entity
+                        Sprite = item.Definition.Sprite, // Assuming you have a navigation property for Sprite in the Definition entity
+                        SpriteId = item.Definition.SpriteId, // Assuming you have a navigation property for SpriteId in the Definition entity
+                        Amount = mostBoughtProductInfo.PurchaseCount
+                    })
+                    .FirstOrDefault();
+
+                return mostBoughtProduct;
             }
 
-            return mostBoughtProduct;
+            return null;
         }
     }
 }

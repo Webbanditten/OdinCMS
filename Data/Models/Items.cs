@@ -20,7 +20,6 @@ namespace KeplerCMS.Data.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
         
-        [NotMapped]
         public ItemsDefinitions Definition { get; set; }
 
 
