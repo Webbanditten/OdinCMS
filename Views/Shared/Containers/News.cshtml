@@ -27,12 +27,12 @@
                         @:image: "<img src='@promo.Img' alt=''>",
                         @:links: [
 
-                        if(promo.Link1Text != null && promo.Link1Text != "")
+                        if(!string.IsNullOrEmpty(promo.Link1Text))
                         {
                              @: " @{ GenerateLink(promo.Link1Text, promo.Link1Href); } ",
                         }
 
-                        if(promo.Link2Text != null &&promo.Link2Text != "")
+                        if(!string.IsNullOrEmpty(promo.Link2Text))
                         {   
                              @: " @{ GenerateLink(promo.Link2Text, promo.Link2Href); } "
                         }
@@ -76,7 +76,7 @@
                             <div id="promolinks">
                                 <ul id="promolinks-list">
                                     @{
-                                        if (string.IsNullOrEmpty(promos[0].Link1Text))
+                                        if (!string.IsNullOrEmpty(promos[0].Link1Text))
                                         {
                                             <li>@{ GenerateLink(promos[0].Link1Text, promos[0].Link1Href); }</li>
                                         }

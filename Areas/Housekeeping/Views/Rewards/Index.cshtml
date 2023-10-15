@@ -164,6 +164,29 @@
                 }
             });
         }
+        function formatState (state) {
+            if (!state.id) {
+            return state.text;
+            }
+
+            var regExp = /\(([^)]+)\)/;
+            var matches = regExp.exec(state.text);
+            var rawSprite = matches[1];
+            var sprite = rawSprite.includes("*") ? rawSprite.split("*")[0] : rawSprite;
+            var color = rawSprite.includes("*") ? "&s=true&color=" + rawSprite.split("*")[1] : "&icon=true";
+           
+
+                        
+            var img = "https://habbo-danmark.com/habbo-imaging/furni?sprite=" + sprite + color;
+          
+
+            
+            var $state = $(
+                '<span><img src="' + img + '" /> ' + state.text + '</span>'
+                );
+            return $state;
+        }
+        
 
         $(document).ready(function() {
             var datetimeSettings = {
@@ -173,6 +196,7 @@
             $("#available_to").datetimepicker(datetimeSettings);
             getData();
             $('.furni-searcher').select2({
+              templateResult: formatState,
               multiple: true,
               ajax: {
                 url: '/api/hotel/furni/search',

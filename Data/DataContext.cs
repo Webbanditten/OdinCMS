@@ -32,6 +32,12 @@ namespace KeplerCMS.Data
                 .HasOne(r => r.Owner)
                 .WithOne()
                 .HasForeignKey<Rooms>(r => r.OwnerId);
+            
+            modelBuilder.Entity<Items>()
+                .HasOne(i => i.Definition)
+                .WithMany(d => d.Items)
+                .HasForeignKey(i => i.DefinitionId);
+
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }

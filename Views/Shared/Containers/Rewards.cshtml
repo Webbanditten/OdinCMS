@@ -52,7 +52,7 @@
 
                                     @foreach (var rewardItemsDefinition in reward.ItemsDefinitions)
                                     {
-                                        var rawSprite = rewardItemsDefinition.sprite;
+                                        var rawSprite = rewardItemsDefinition.Sprite;
                                         var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
                                         var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
                                         <div class="rewards-item-furni">

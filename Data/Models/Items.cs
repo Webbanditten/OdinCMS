@@ -17,6 +17,11 @@ namespace KeplerCMS.Data.Models
         public int DefinitionId { get; set; }
         [Column("custom_data")]
         public string CustomData { get; set; }
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+        
+        [NotMapped]
+        public ItemsDefinitions Definition { get; set; }
 
 
     }

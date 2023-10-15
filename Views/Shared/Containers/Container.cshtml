@@ -88,6 +88,9 @@
         } else if(text.Contains("{staff}"))
         {
             <partial name="~/Views/Shared/Containers/Staff.cshtml" model=Model />
+        } else if(text.Contains("{popular_furni}"))
+        {
+            <partial name="~/Views/Shared/Containers/PopularFurni.cshtml" model=Model />
         }
         else
         {

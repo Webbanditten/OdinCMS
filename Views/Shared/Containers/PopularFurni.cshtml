@@ -1,0 +1,17 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@inject KeplerCMS.Services.Interfaces.IFurniService FurniService
+
+@{
+    var furni = await FurniService.GetPopularFurni();
+    var rawSprite = furni.Sprite;
+    var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
+    var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
+    <div class="popular_furni">
+    <strong>
+        @furni.Name
+    </strong><br />
+        <img src="~/habbo-imaging/furni?sprite=@sprite@color"/><br />
+        @DbRes.T("containers", "purchase_count").Replace("{amount}", @furni.Amount.ToString())
+    </div>
+}
