@@ -1,10 +1,14 @@
-name: Build Images
+name: Build latest
 on:
   push:
     branches:
       - 'master'
   workflow_dispatch:
-    
+
+concurrency: 
+   group: build-latest
+   cancel-in-progress: true
+   
 jobs:
   build-images:
     runs-on: ubuntu-latest
