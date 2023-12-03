@@ -213,17 +213,19 @@
             container.appendChild(player);
             player.load({
                 url: '@Url.Content("~/flash/HabboRegistration2.swf")',
-                parameters: 'post_url=/profile/updatefigure?&'+
-                            'figuredata_url=@figureDataUrl&'+
-                            'localization_url=@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")&'+
-                            'post_figure=figureData&'+
-                            'post_gender=newGender&'+
-                            'wmode=opaque&'+
-                            'figure=@userData.Figure&'+
-                            'gender=@userData.Gender&'+
-                            'base=@Url.Content("~/flash/")&'+
-                            'draworder_url=@Url.Content("~/xml/v21/draworder.xml")',
-                allowScriptAccess: false,
+                parameters: {
+                    post_url: '/profile/updatefigure?',
+                    figuredata_url: '@figureDataUrl',
+                    localization_url: '@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")',
+                    post_figure: 'figureData',
+                    post_gender: 'newGender',
+                    wmode: 'opaque',
+                    figure: '@userData.Figure',
+                    gender: '@userData.Gender',
+                    base: '@Url.Content("~/flash/")',
+                    draworder_url: '@Url.Content("~/xml/v21/draworder.xml")',
+                },
+                allowScriptAccess: true,
             });
             player.style.width = "406px";
             player.style.height = "327px";
