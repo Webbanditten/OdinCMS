@@ -9,31 +9,31 @@ function shuffleArray(array) {
 const description = `Daglig gave for at besøge Habbo Hotel.`;
 // List of possible unique item_definitions (also used as spriteids) for special items (Friday or Saturday)
 const uniqueItemDefinitionsList = [
-  '295',
-  '312',
-  '267',
+  '716',
+  '1995',
   '350',
+  '326',
+  '327',
+  '328',
+  '331',
+  '309',
+  '759',
+  '333',
   // Add more unique items as needed
 ];
 
 // List of possible item_definitions (also used as spriteids) for regular items
 const itemDefinitionsList = [
-  '212,86',
-  '211,711',
-  '212,887',
-  '211,981',
-  //
-  '212,10',
-  '211,1624',
-  '212,125',
-  '211,187',
-  '212,104',
-  '211,1483',
-  '212,1487',
-  '211,1503',
-  '212,27',
-  '211,98',
-  '212,1439',
+  '209',
+  '212',
+  '71,212',
+  '73,209',
+  '1613,209',
+  '1614,212',
+  '1620,209',
+  '1621,212',
+  '1622,209',
+  '1623,212',
   // Add more regular items as needed
 ];
 
@@ -44,8 +44,8 @@ shuffleArray(uniqueItemDefinitionsList);
 shuffleArray(itemDefinitionsList);
 
 // Date range
-const startDate = new Date('2023-11-06');
-const endDate = new Date('2023-11-30');
+const startDate = new Date('2024-07-03');
+const endDate = new Date('2024-10-10');
 
 // Function to generate a random date within the date range
 function getRandomDate(startDate, endDate) {
@@ -59,9 +59,8 @@ let nextUniqueItemDefinitionIndex = 0;
 
 // Generate and print random INSERT statements within the date range
 while (startDate <= endDate) {
-  const isFridayOrSaturday =
-    startDate.getDay() === 5 /* Friday */ ||
-    startDate.getDay() === 6; /* Saturday */
+  const isFridayOrSaturday = startDate.getDay() === 6; /* Friday */ //||
+  // startDate.getDay() === 6; /* Saturday */
 
   if (isFridayOrSaturday) {
     // Check if there are remaining unique item_definitions (spriteids) for special items to use
