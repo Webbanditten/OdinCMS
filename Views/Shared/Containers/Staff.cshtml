@@ -1,0 +1,49 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@inject KeplerCMS.Services.Interfaces.IFuseService FuseService
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+<style>
+    .staff_name {
+        width: 100%;
+        display: block;
+        background: #D75C03;
+        color: #fff !important;
+        border-radius: 4px;
+        padding: 2px;
+        box-sizing: border-box;
+        text-decoration: none;
+    }
+    .staff_box {
+        width: 124px;
+        box-sizing: border-box;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 4px;
+        margin-bottom: 8px;
+    }
+
+    .staff_container {
+        display:flex;
+        flex-wrap:wrap;
+        justify-content: space-evenly;
+    }
+    
+</style>
+@{
+    var ranks = await FuseService.GetRanksWithUsers();
+    
+    foreach(var rank in ranks.Where(x => x.Users.Any())) {
+        <h2>@rank.Name</h2>
+        <div class="staff_container">
+            @foreach(var user in rank.Users) {
+                <div class="staff_box">
+                    <a class="staff_name" href="/home/@user.Username">@user.Username</a>
+                    <a style="text-decoration:none" href="/home/@user.Username"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@(user.Figure)&size=b&direction=2&head_direction=3&gesture=sml&action=wlk" alt="@user.Username"></a>
+                    
+                </div>
+            }
+        </div>
+    }
+}

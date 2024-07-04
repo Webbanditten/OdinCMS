@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = "Rewards";
+
+}
+<h1>Rewards</h1>
+<p>
+    List of current rewards
+</p>
+
+<form action="@Url.Action("CreateReward", "Rewards")" method="post">
+    <fieldset>
+        <div class="form-group">
+            <label for="available_from">Available from</label>
+            <input type="text" id="available_from" name="available_from" placeholder="Available from">
+        </div>
+        <div class="form-group">
+            <label for="available_to">Available to</label>
+            <input type="text" id="available_to" name="available_to" placeholder="Available to">
+        </div>
+        <div class="form-group">
+            <label for="items">Items</label>
+            <select id="items" name="items" class="furni-searcher"></select>
+        </div>
+        <div class="form-group">
+            <label for="description">Present description</label>
+            <input type="text" id="description" name="description" placeholder="Description">
+        </div>
+        <div class="form-group">
+            <label for="increment_day">Increment day</label>
+            <input type="checkbox" name="increment_day" id="increment_day" value="true">
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Create reward">
+        </div>
+    </fieldset>
+</form>
+<div class="settings form-group" style="width: 180px; background: #f1f1f1; border-radius: 4px; padding: 4px;">
+    <input style="float:right; margin-top: 1px;" type="checkbox" id="previous" name="previous" onclick="getData(this.checked)">
+    <label for="previous" style=" font-size: 12px; margin-bottom: 0;">Load previous rewards</label>
+</div>
+
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Available From</th>
+        <th>Available To</th>
+        <th>Item definitions</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section scripts {
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script src="~/lib/select2/js/select2.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function clearTable() {
+            $(".habboTable tbody tr").remove();
+        }
+
+        function noResults() {
+            clearTable();
+            $(".habboTable tbody").append("<tr><td colspan='3'>No results</td></tr>");
+        }
+
+        function copyEntry(event) {
+
+            
+            var row = $(event.target).closest('tr'); // Get the parent row
+            
+            var items = row.find("textarea").val();
+            var data = JSON.parse(items);
+            data.forEach(function(item) {
+                var newOption = new Option(item.text, item.id, false, true);
+                $('.furni-searcher').append(newOption).trigger('change');
+            });
+            
+            var availableFrom = row.find("td:nth-child(1)").text();
+            var availableTo = row.find("td:nth-child(2)").text();
+            
+            $("#available_from").val(availableFrom.replace("T", " "));
+            $("#available_to").val(availableTo.replace("T", " "));
+           
+            console.log("Copy entry clicked");
+        }
+
+        function deleteEntry(event) {
+            var row = $(event.target).closest('tr'); // Get the parent row
+            var id = row.data("id");
+            row.remove(); // Remove the row from the table
+            
+            $.ajax({
+                url: '@Url.Action("DeleteReward", "Rewards")',
+                method: 'POST',
+                data: {
+                    id: id
+                },
+                success: function(response) {
+                    getData($("#previous").is(":checked"));
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+        
+        
+        function formatDate(date) {
+            var year = date.getFullYear();
+            var month = padZero(date.getMonth() + 1);
+            var day = padZero(date.getDate());
+            var hours = padZero(date.getHours());
+            var minutes = padZero(date.getMinutes());
+            var seconds = padZero(date.getSeconds());
+        
+            return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+        }
+        
+        function padZero(number) {
+            return number.toString().padStart(2, '0');
+        }
+
+        function getData(previous) {
+            clearTable();
+            $.ajax({
+                url: '@Url.Action("GetRewards", "Rewards")',
+                method: 'GET',
+                data: {
+                    previous: previous == true
+                },
+                success: function(response) {
+                    data = JSON.parse(response);
+                    if (data.length == 0) {
+                        noResults();
+                        return;
+                    }
+                    // Iterate through the data and populate the table
+                    $.each(data, function(index, entry) {
+                        var row = $('<tr data-id="'+entry.Id+'">');
+                        row.append($('<td>').html(entry.AvailableFrom));
+                        row.append($('<td>').html(entry.AvailableTo));
+                        
+                        var itemDefs = [];
+                        var itemDefsString = "";
+                        $.each(entry.ItemsDefinitions, function(itemIndex, item) {
+                           itemDefs.push({id: item.Id, text: "("+ item.sprite + ") " + item.Name});
+                           itemDefsString += item.Name + ", <br/>";
+                        });
+                        row.append($("<td>").html("<textarea style='display:none' name='itemdefs'>"+JSON.stringify(itemDefs)+"</textarea>" + itemDefsString));
+                        
+                        var actions = $('<td>');
+                        var copyButton = $('<button>').text('Copy').click(copyEntry);
+                        var deleteButton = $('<button>').text('Delete').click(deleteEntry);
+                        actions.append(copyButton, deleteButton);
+                        row.append(actions);
+
+                        $('.habboTable tbody').append(row);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+        function formatState (state) {
+            if (!state.id) {
+            return state.text;
+            }
+
+            var regExp = /\(([^)]+)\)/;
+            var matches = regExp.exec(state.text);
+            var rawSprite = matches[1];
+            var sprite = rawSprite.includes("*") ? rawSprite.split("*")[0] : rawSprite;
+            var color = rawSprite.includes("*") ? "&s=true&color=" + rawSprite.split("*")[1] : "&icon=true";
+           
+
+                        
+            var img = "https://habbo-danmark.com/habbo-imaging/furni?sprite=" + sprite + color;
+          
+
+            
+            var $state = $(
+                '<span><img src="' + img + '" /> ' + state.text + '</span>'
+                );
+            return $state;
+        }
+        
+
+        $(document).ready(function() {
+            var datetimeSettings = {
+              format: 'Y-m-d H:i:s'
+            }
+            $("#available_from").datetimepicker(datetimeSettings);
+            $("#available_to").datetimepicker(datetimeSettings);
+            getData();
+            $('.furni-searcher').select2({
+              templateResult: formatState,
+              multiple: true,
+              ajax: {
+                url: '/api/hotel/furni/search',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                var query = {
+                  query: params.term,
+                }
+          
+                // Query parameters will be ?search=[term]&type=public
+                return query;
+              },
+              processResults: function (data) {
+                  let items = [];
+                  data.forEach(function(item) {
+                      items.push({
+                          id: item.id,
+                          text: "("+ item.sprite + ") " + item.name
+                      })
+                  });
+                  // Transforms the top-level key of the response object from 'items' to 'results'
+                  return {
+                    results: items
+                  };
+                }
+              },
+              
+            });
+            
+            $("form").on("submit", function(event) {
+                event.preventDefault();
+                var items = $('.furni-searcher').select2('data');
+                var itemIds = [];
+                items.forEach(function(item) {
+                    itemIds.push(item.id);
+                });
+                var data = {
+                    ItemDefinitions: itemIds.join(","),
+                    Description: $("#description").val(),
+                    AvailableFrom: $("#available_from").val(),
+                    AvailableTo: $("#available_to").val()
+                };
+                
+                if (data.ItemDefinitions.length == 0) {
+                    alert("You must select at least one item");
+                    return;
+                }
+                
+                if (data.Description.length == 0) {
+                    alert("You must enter a description");
+                    return;
+                }
+                
+                if (data.AvailableFrom.length == 0) {
+                    alert("You must enter a valid Available From from date");
+                    return;
+                }
+                
+                if (data.AvailableTo.length == 0) {
+                    alert("You must enter a valid Available To to date");
+                    return;
+                }   
+
+
+                $.ajax({
+                    url: '@Url.Action("CreateReward", "Rewards")',
+                    method: 'POST',
+                    data: data,
+                    success: function(response) {
+                        getData($("#previous").is(":checked"));
+                        
+                        if ($("#increment_day").is(":checked")) {
+                            var dateFrom = new Date($("#available_from").val());
+                            dateFrom.setDate(dateFrom.getDate() + 1);
+                            var formattedDateFrom = formatDate(dateFrom);
+                            $("#available_from").val(formattedDateFrom);
+                        
+                            var dateTo = new Date($("#available_to").val());
+                            dateTo.setDate(dateTo.getDate() + 1);
+                            var formattedDateTo = formatDate(dateTo);
+                            $("#available_to").val(formattedDateTo);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+
+    
+<link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css"/>
+
+<style>
+    .furni-searcher {
+        width: 100%;
+    }
+</style>

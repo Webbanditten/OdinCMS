@@ -1,0 +1,65 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.RanksViewModel;
+@{
+    Layout = "_Housekeeping";
+}
+
+<h1>Ranks</h1>
+@if (Model.Message != null)
+{
+    <div class="message">
+        @Model.Message
+    </div>
+}
+<a href="@Url.Action("Create")">Add</a>
+
+<table class="blueTable">
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.Ranks.Count() > 0)
+            {
+                foreach (var item in Model.Ranks.OrderBy(s=>s.Name))
+                {
+                <tr>
+                    <td>@item.Name</td>
+                    <td><a href="@Url.Action("Update", "Ranks", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeRank(@item.Id)">Remove</a></td>
+                </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td>No data</td>
+                    <td></td>
+                </tr>
+            }
+
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script>
+    function removeRank(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    window.location = "@Url.Action("Remove")/" + id;
+                }
+            })
+        }
+    </script>
+}
+

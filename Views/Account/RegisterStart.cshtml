@@ -1,8 +1,8 @@
 ﻿@model KeplerCMS.Models.RegistrationViewModel
-
+@inject KeplerCMS.Services.Interfaces.ISettingsService _SettingsService
 @{
     
-    var _settings = ViewData["settings"] as IEnumerable<KeplerCMS.Data.Models.Settings>;
+    var _settings = await _SettingsService.GetAll();
     Layout = "_Register";
     ViewData["Title"] = DbRes.T("orange_box_header", "register");
 }
@@ -63,7 +63,7 @@
                                     <partial name="./SimpleRegisterWithoutFlash.cshtml" model=Model></partial>
                                 </div>
 
-                                <script type="text/javascript" language="JavaScript">
+                                <script type="text/javascript">
 	                                var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
                                     swfobj.addVariable("post_url", "/register/step/2?");
                                     swfobj.addParam("base", "@Url.Content("~/flash/")");
@@ -124,14 +124,14 @@
                             'day=@Model.Day&'+
                             'year=@Model.Year&'+
                             'wmode=opaque&',
-                allowScriptAccess: false,
+                allowScriptAccess: true,
             });
             player.style.width = "406px";
             player.style.height = "327px";
             player.style.frameRate = "8";
         });
     </script>
-    <script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
+    <script src="https://unpkg.com/@@ruffle-rs/ruffle"></script>
 }
 
 

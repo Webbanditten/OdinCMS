@@ -1,6 +1,10 @@
 ﻿@model KeplerCMS.Areas.Habbowood.MovieViewModel
 @using KeplerCMS.Data.Models 
 @using KeplerCMS.Models.Enums
+@inject KeplerCMS.Services.Interfaces.ISettingsService _SettingsService
+@{
+    var settings = await _SettingsService.GetAll();
+}
 @{
     var userData = (Users)ViewData["user"];
 }
@@ -150,5 +154,18 @@
         </script>
         }
     }
+
+
+@{
+    var shouldUseRuffle = false;
+    var ruffleSetting = settings.FirstOrDefault(s=>s.Setting == "cms.use_ruffle"); 
+    if(ruffleSetting != null && ruffleSetting.Value == "1") {
+        shouldUseRuffle = true;
+    }
+}
+@if (shouldUseRuffle)
+{
+    <script src="https://unpkg.com/@@ruffle-rs/ruffle"></script>
+}
 </body>
 </html>

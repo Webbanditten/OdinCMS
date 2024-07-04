@@ -4,8 +4,14 @@
 }
 * {
     font-size: 12px;
-    font-family: 'MS Sans Serif', Geneva, sans-serif
-}
+    image-rendering: optimizeSpeed; /*                     */
+    image-rendering: -moz-crisp-edges; /* Firefox             */
+    image-rendering: -o-crisp-edges; /* Opera               */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+    image-rendering: pixelated; /* Chrome as of 2019   */
+    image-rendering: optimize-contrast; /* CSS3 Proposed       */
+    -ms-interpolation-mode: nearest-neighbor; /* IE8+                */
+  }
 
 .wrapper {
     width: 920px;
@@ -62,6 +68,8 @@
 }
 
 .content {
+    position: absolute;
+    margin-top:12px;
     display: flex;
 }
 
@@ -82,7 +90,7 @@
 .container .title {
     background: #0066cc;
     height: 20px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     padding-left: 4px;
     border-bottom: 1px solid #000;
@@ -102,6 +110,10 @@
 
 .container .container-content ul li {
     margin-top: 1px;
+}
+
+.container:not(:first-child) {
+    margin-top: 12px;
 }
 
 h1 {
@@ -167,7 +179,14 @@ p {
 .large {
     font-size: 1.25em;
 }
-
+.hidden-item {
+    background: #545454;
+    color:#fff;
+}
+.hidden-item > .board-item-content {
+    background: #545454;
+    color:#fff;
+}
 /**
  * Nestable
  */
@@ -210,7 +229,10 @@ p {
     font-size: 13px;
     line-height: 20px;
 }
-
+.dd-item-greyed > .dd-handle {
+    background: #545454;
+    color:#fff;
+}
 .dd-handle {
     display: block;
     height: 30px;
@@ -682,4 +704,80 @@ table.blueTable tfoot .links a{
     padding:12px;
     border:1px solid #000;
     border-radius:5px;
+    box-sizing: border-box;
+}
+
+
+
+table.habboTable {
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #FFFFFF;
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    margin-top:4px;
+    margin-bottom: 4px;
+}
+table.habboTable td, table.habboTable th {
+    border: 1px solid #FFFFFF;
+    padding: 2px 2px;
+}
+table.habboTable tr:nth-child(even) {
+    background: #FFEEAA;
+}
+table.habboTable thead {
+    background: #FFCC00;
+}
+table.habboTable thead th {
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    border-left: 2px solid #FFFFFF;
+}
+table.habboTable thead th:first-child {
+    border-left: none;
+}
+
+
+
+form.basic {
+    
+}
+
+form.basic label {
+    display: inline-block;
+    width: 100px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size:12px;
+}
+
+form.basic input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]) {
+    width:270px;
+}
+form.basic input[type="submit"] {
+    display: block;
+    margin-left:103px;
+}
+
+form.basic .success-message {
+    display:block;
+    margin-top:16px;
+}
+
+form.basic label.checkbox {
+    display: inline-block;
+    width: auto;
+    margin-bottom: 8px;
+    font-weight: normal;
+    font-size:12px;
+}
+
+form.basic input[type="checkbox"] {
+    margin-left: 104px;
+}
+
+form.basic textarea {
+    width:270px;
+    height:100px;
 }

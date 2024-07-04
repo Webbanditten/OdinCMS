@@ -17,9 +17,11 @@ namespace KeplerCMS.Models
         public string MessageLink { get; set; }
         public int FriendRequestTo { get; set; }
         public bool OnlineOnly { get; set; }
-        public int RoomAccessType { get; set; }
-        public string RoomDescription { get; set; }
-        public string RoomName { get; set; }
-        public bool RoomShowOwnerName { get; set; }
+        public string[] Users { get; set; }
+        
+        public int BanLength { get; set; }
+        public string ExtraInfo { get; set; }
+        public bool BanIp { get; set; }
+        public bool BanMachine { get; set; }
     }
 }

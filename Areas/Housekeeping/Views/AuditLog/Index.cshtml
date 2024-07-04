@@ -1,0 +1,78 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.AuditLogViewModel
+
+@{
+    ViewBag.Title = "Audit log";
+    
+}
+
+<h1>@ViewBag.Title</h1>
+<p>
+    List of administrator actions executed
+</p>
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}
+
+<a href="@Url.Action("Index", "AuditLog", new { a="" })">All</a> 
+@{
+    var actions = Model?.Actions;
+    foreach (var action in actions)
+    {
+        <a href="@Url.Action("Index", "AuditLog", new { a = action })" style="text-transform: uppercase">@action</a> 
+    }
+}
+<br/>
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Action</th>
+        <th>User</th>
+        <th>Target</th>
+        <th>Message</th>
+        <th>Extra</th>
+        <th>DataId</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        if (Model?.AuditLogs != null)
+        {
+            foreach (var log in Model.AuditLogs)
+            {
+                <tr>
+                    <td>@log.Action</td>
+                    <td><a href="@Url.Action("Manage", "Users", new { id = log.UserId })">@log.User.Username</a></td>
+                    <td>@if (log.Target != null)
+                        {
+                            <a href="@Url.Action("Manage", "Users", new { id = log.TargetId })">@log.Target.Username</a>
+                        }</td>
+                    <td>@log.Message</td>
+                    <td>@log.ExtraNotes</td>
+                    <td>@log.DataId</td>
+                    <td>@log.CreatedAt</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7">No logs</td>
+            </tr>
+        }
+        
+    }
+    </tbody>
+</table>
+@{
+    if (Model.CurrentPage != 1)
+    {
+        <a href="@Url.Action("Index", "AuditLog", new { currentPage=@Model.CurrentPage-1, a=@Model.Action })">Previous Page</a>
+    }
+    
+    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    {
+        <a href="@Url.Action("Index", "AuditLog", new { currentPage=@Model.CurrentPage+1, a=@Model.Action })" style="float:right">Next Page</a>
+    }
+}

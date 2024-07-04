@@ -13,6 +13,9 @@ namespace KeplerCMS.Models.Enums
         send_friend_request,
         purchase_furni,
         roomForward,
-        campaign
+        campaign,
+        remote_alert,
+        remote_ban,
+        remote_kick
     }
 }

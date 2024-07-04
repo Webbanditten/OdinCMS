@@ -1,4 +1,5 @@
-﻿using Isopoh.Cryptography.Argon2;
+﻿using System;
+using Isopoh.Cryptography.Argon2;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Helpers;
@@ -16,11 +17,11 @@ using System.Text;
 using System.Net.Mime;
 using FluentEmail.Core;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
@@ -117,6 +118,16 @@ namespace KeplerCMS.Controllers
         [Route("register/start")]
         public async Task<IActionResult> RegisterStart(RegistrationViewModel model)
         {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddMinutes(5)
+            };
+            Response.Cookies.Append("bday", model.Day.ToString(), cookieOptions);
+            Response.Cookies.Append("bmonth", model.Month.ToString(), cookieOptions);
+            Response.Cookies.Append("byear", model.Year.ToString(), cookieOptions);
             return View(model);
         }
         [HttpPost]
@@ -141,14 +152,20 @@ namespace KeplerCMS.Controllers
         [Route("register/done")]
         public async Task<IActionResult> Done(RegistrationViewModel model)
         {
+            var bday = Request.Cookies["bday"];
+            var bmonth = Request.Cookies["bmonth"];
+            var byear = Request.Cookies["byear"];
+            Response.Cookies.Delete("bday"); 
+            Response.Cookies.Delete("bmonth"); 
+            Response.Cookies.Delete("byear"); 
             var newUser = await _userService.Create(new Data.Models.Users
             {
+                Birthday = $"{bday}.{bmonth}.{byear}",
                 Figure = model.FigureData,
                 Username = model.Username,
                 Password = model.Password,
                 Gender = model.Gender,
                 Status = "offline",
-                Rank = 1,
                 Email = model.Email
             });
             // Lets sign the user in if its created
@@ -208,6 +225,7 @@ namespace KeplerCMS.Controllers
         [Route("account/forgot/habboname")]
         public async Task<IActionResult> ForgotHabboName(string email)
         {
+            if (string.IsNullOrEmpty(email)) return View("forgot");
             ViewData["success_sent_habbonames"] = true;
             var users = await _userService.GetUsersByEmail(email);
             if(users.Length > 0) {
@@ -218,6 +236,7 @@ namespace KeplerCMS.Controllers
                 }
                 await _mailService.SendListOfHabboNames(email, habboNames.ToArray());
             }
+
             return View("forgot");
         }
 
@@ -226,6 +245,7 @@ namespace KeplerCMS.Controllers
         [Route("account/forgot/password")]
         public async Task<IActionResult> ForgotHabboName(string username, string email)
         {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username)) return View("forgot");
             ViewData["success_sent_forgot_password"] = true;
             var user = await _userService.GetUserByUsername(username);
             if(user != null && user.Email.ToLower() == email.ToLower()) {

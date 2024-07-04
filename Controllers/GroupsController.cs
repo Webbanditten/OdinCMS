@@ -12,7 +12,6 @@ using System.Linq;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class GroupsController : Controller
     {
         private readonly IUserService _userService;
@@ -223,7 +222,7 @@ namespace KeplerCMS.Controllers
             if(await _homeService.CanEditHome(groupId, currentUserId))
             {
                 var members = await _homeService.GetGroupMembers(groupId);
-                var filtered_members = members.Where(s=>s.IPending == 1).ToList();
+                var filtered_members = members.Where(s=>s.IPending == (pending ? 1 : 0)).ToList();
                 Response.Headers.Add("x-json", "{\"pending\":\"" + DbRes.T("group_pending_members", "habbohome") + " (" + members.Count(s=>s.Pending == true) + ")\",\"members\":\"" + DbRes.T("group_members", "habbohome") + " (" + members.Count(s=>s.Pending == false) + ")\"}");
                 return View(new Memberlist { Search = searchString, PageNumber = pageNumber, Members = filtered_members});
             }
@@ -467,13 +466,8 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         public async Task<IActionResult> GroupById(int id)
         {
-            var enableEditing = false;
-            if (Request.Cookies["editid"] != null)
-            {
-                enableEditing = true;
-            }
-
-
+            var enableEditing = false || Request.Cookies["editid"] != null;
+            
             var group = (User.Identity.IsAuthenticated) ? 
             await _homeService.GetHomeByGroupId(id, enableEditing, int.Parse(User.Identity.Name)) : 
             await _homeService.GetHomeByGroupId(id, enableEditing);

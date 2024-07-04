@@ -1,6 +1,7 @@
 ﻿using KeplerCMS.Data.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KeplerCMS.Areas.Housekeeping.Models.Views;
 
 namespace KeplerCMS.Services.Interfaces
 {
@@ -21,6 +22,20 @@ namespace KeplerCMS.Services.Interfaces
         public Task<string> GeneratePasswordResetLink(int userId);
         public Task<Users> ValidatePasswordResetLink(string guid);
         public Task<bool> ResetPassword(string guid, string password);
+        public Task<UsersSearchModel> SearchUsers(string username, int take, int skip, string letter);
+        public Task<IEnumerable<Users>> GetLatestSignins(int take, int skip);
+        public Task<IEnumerable<Users>> GetLatestSignups(int take, int skip);
+        public Task<int> GetMonthlySignups();
+        public Task<int> TotalUsers();
+        public Task<int> TotalSignedinUsers();
 
+        public Task<Users> Update(Users user);
+        public Task<IEnumerable<Users>> GetUserByRank(int id);
+        public Task<IEnumerable<UsersBadges>> GetBadges(int userId);
+        public Task<UsersBadges> AddBadge(UsersBadges badge);
+        public Task<bool> RemoveBadge(UsersBadges badge);
+        public Task<UsersBanSearchModel> BanSearch(string search, int take, int skip, string letter);
+        public Task<bool> RemoveBan(UsersBans ban);
+        public Task<UsersBans> GetBan(int id);
     }
 }

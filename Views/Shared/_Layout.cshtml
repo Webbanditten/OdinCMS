@@ -2,10 +2,12 @@
 @using KeplerCMS.Models.Enums
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
+@inject KeplerCMS.Services.Interfaces.IMenuService MenuService
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
     var userData = (Users)ViewData["user"];
-    var menu = (List<Menu>)ViewData["menu"];
-    var settings = (List<Settings>)ViewData["settings"];
+    var menu = await MenuService.GetMenu();
+    var settings = await SettingsService.GetAll();
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
@@ -146,7 +148,25 @@
                     <div id="habbologo"><a href="/"></a></div>
                     <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
                     <div id="enter-hotel">
-                        <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                        @{
+                            var downloadableClient = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.downloadable_client") : null;
+                            if (downloadableClient != null && downloadableClient.Value == "1")
+                            {
+                                if (User.Identity.IsAuthenticated)
+                                {
+                                    <a href="/hotel/download" id="enter-hotel-link"></a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Index", "Account")" id="enter-hotel-link"></a>
+                                }
+                            }
+                            else
+                            {
+                                <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                            }
+                        }
+                        
                     </div>
 
                     <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">
@@ -335,7 +355,7 @@
         }
     }
     @if(shouldUseRuffle) {
-        <script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
+        <script src="https://unpkg.com/@@ruffle-rs/ruffle"></script>
     }
 </body>
 </html>

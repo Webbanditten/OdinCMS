@@ -27,7 +27,7 @@
         @{
             foreach (var item in Model.OrderBy(s => s.Slug))
             {
-                <tr>
+                <tr @(item.Hidden ? "class=hidden-item" : "")>
                     <td><a href="@Url.Action("Manage", "Pages", new { id = item.Id })">@item.Name</a></td>
                     <td>@item.Slug</td>
                     <td>@item.DisplayHeader</td>

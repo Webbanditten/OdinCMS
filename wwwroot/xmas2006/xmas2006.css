@@ -1,0 +1,437 @@
+/*#region fontface Stuff*/
+@font-face {
+  font-family: "HabboTwelve";
+  src: url("../habbowood/styles/15_HabboTwelveBold.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/15_HabboTwelveBold.ttf")
+      format("truetype"); /* Safari, Android, iOS */
+  font-weight: bold;
+}
+@font-face {
+  font-family: "HabboTwelve";
+  src: url("../habbowood/styles/260_HabboTwelveRg.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/260_HabboTwelveRg.ttf")
+      format("truetype"); /* Safari, Android, iOS */
+  font-weight: normal;
+}
+@font-face {
+  font-family: "Volter";
+  src: url("../habbowood/styles/volter.woff") format("woff"),
+    /* Pretty Modern Browsers */ url("../habbowood/styles/volter.ttf") format("truetype"); /* Safari, Android, iOS */
+}
+/*#endregion */
+
+.christmas-calendar {
+  background-image: url(./images/19.png);
+  width: 700px;
+  height: 1100px;
+  z-index: 0;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+/*#region snow*/
+/* customizable snowflake styling */
+@-webkit-keyframes snowflakes-fall {
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+@-webkit-keyframes snowflakes-shake {
+  0% {
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+  }
+  50% {
+    -webkit-transform: translateX(80px);
+    transform: translateX(80px);
+  }
+  100% {
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+  }
+}
+@keyframes snowflakes-fall {
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+@keyframes snowflakes-shake {
+  0% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(80px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+.snowflake {
+  position: relative;
+  z-index: 1;
+  top: -10%;
+  z-index: 10;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
+  -webkit-animation-name: snowflakes-fall, snowflakes-shake;
+  -webkit-animation-duration: 10s, 3s;
+  -webkit-animation-timing-function: linear, ease-in-out;
+  -webkit-animation-iteration-count: infinite, infinite;
+  -webkit-animation-play-state: running, running;
+  animation-name: snowflakes-fall, snowflakes-shake;
+  animation-duration: 10s, 3s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-play-state: running, running;
+}
+.snowflake:nth-of-type(1) {
+  background-image: url("./images/snow_1.png");
+  height: 27px;
+  width: 27px;
+}
+.snowflake:nth-of-type(2) {
+  background-image: url("./images/snow_2.png");
+  height: 9px;
+  width: 9px;
+}
+.snowflake:nth-of-type(3) {
+  background-image: url("./images/snow_3.png");
+  height: 13px;
+  width: 13px;
+}
+.snowflake:nth-of-type(4) {
+  background-image: url("./images/snow_4.png");
+  height: 7px;
+  width: 7px;
+}
+.snowflake:nth-of-type(5) {
+  background-image: url("./images/snow_5.png");
+  height: 25px;
+  width: 25px;
+}
+.snowflake:nth-of-type(1) {
+  left: 10%;
+  -webkit-animation-delay: 0s, 0s;
+  animation-delay: 0s, 0s;
+}
+.snowflake:nth-of-type(2) {
+  left: 20%;
+  -webkit-animation-delay: 1s, 1s;
+  animation-delay: 1s, 1s;
+}
+.snowflake:nth-of-type(3) {
+  left: 40%;
+  -webkit-animation-delay: 6s, 0.5s;
+  animation-delay: 6s, 0.5s;
+}
+.snowflake:nth-of-type(4) {
+  left: 60%;
+  -webkit-animation-delay: 4s, 2s;
+  animation-delay: 4s, 2s;
+}
+.snowflake:nth-of-type(5) {
+  left: 80%;
+  -webkit-animation-delay: 2s, 2s;
+  animation-delay: 2s, 2s;
+}
+/*#endregion*/
+.days {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.day {
+  position: absolute;
+  background: url(./images/day.png);
+  width: 79px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.day:hover {
+  background-image: url(./images/day_hover.png);
+}
+
+.lock {
+  width: 38px;
+  height: 52px;
+  background-image: url(./images/lock.png);
+}
+
+/*#region day graphics */
+.day:nth-of-type(1) {
+  left: 295px;
+  top: 520px;
+}
+
+.day:nth-of-type(2) {
+  left: 490px;
+  top: 520px;
+}
+.day:nth-of-type(3) {
+  left: 424px;
+  top: 680px;
+}
+.day:nth-of-type(4) {
+  left: 447px;
+  top: 350px;
+}
+.day:nth-of-type(5) {
+  left: 337px;
+  top: 57px;
+}
+.day:nth-of-type(6) {
+  left: 6px;
+  top: 289px;
+}
+.day:nth-of-type(7) {
+  left: 127px;
+  top: 620px;
+}
+.day:nth-of-type(8) {
+  left: 466px;
+  top: 215px;
+}
+.day:nth-of-type(9) {
+  left: 624px;
+  top: 580px;
+}
+.day:nth-of-type(10) {
+  left: 316px;
+  top: 404px;
+}
+.day:nth-of-type(11) {
+  left: 234px;
+  top: 755px;
+}
+.day:nth-of-type(12) {
+  left: 250px;
+  top: 260px;
+}
+.day:nth-of-type(13) {
+  left: 620px;
+  top: 669px;
+}
+.day:nth-of-type(14) {
+  left: 600px;
+  top: 50px;
+}
+.day:nth-of-type(15) {
+  left: 6px;
+  top: 695px;
+}
+.day:nth-of-type(16) {
+  left: 170px;
+  top: 146px;
+}
+.day:nth-of-type(17) {
+  left: 624px;
+  top: 240px;
+}
+.day:nth-of-type(18) {
+  left: 570px;
+  top: 766px;
+}
+.day:nth-of-type(19) {
+  left: 400px;
+  top: 466px;
+}
+.day:nth-of-type(20) {
+  left: 10px;
+  top: 6px;
+}
+.day:nth-of-type(21) {
+  left: 624px;
+  top: 411px;
+}
+.day:nth-of-type(22) {
+  left: 6px;
+  top: 537px;
+}
+.day:nth-of-type(23) {
+  left: 142px;
+  top: 400px;
+}
+.day:nth-of-type(24) {
+  left: 258px;
+  top: 640px;
+}
+.day:nth-of-type(25) {
+  left: 523px;
+  top: 603px;
+}
+
+.day:nth-of-type(1) .number {
+  background-image: url(./images/cal_1.png);
+}
+.day:nth-of-type(2) .number {
+  background-image: url(./images/cal_2.png);
+}
+.day:nth-of-type(3) .number {
+  background-image: url(./images/cal_3.png);
+}
+.day:nth-of-type(4) .number {
+  background-image: url(./images/cal_4.png);
+}
+.day:nth-of-type(5) .number {
+  background-image: url(./images/cal_5.png);
+}
+.day:nth-of-type(6) .number {
+  background-image: url(./images/cal_6.png);
+}
+.day:nth-of-type(7) .number {
+  background-image: url(./images/cal_7.png);
+}
+.day:nth-of-type(8) .number {
+  background-image: url(./images/cal_8.png);
+}
+.day:nth-of-type(9) .number {
+  background-image: url(./images/cal_9.png);
+}
+.day:nth-of-type(10) .number {
+  background-image: url(./images/cal_10.png);
+}
+.day:nth-of-type(11) .number {
+  background-image: url(./images/cal_11.png);
+}
+.day:nth-of-type(12) .number {
+  background-image: url(./images/cal_12.png);
+}
+.day:nth-of-type(13) .number {
+  background-image: url(./images/cal_13.png);
+}
+.day:nth-of-type(14) .number {
+  background-image: url(./images/cal_14.png);
+}
+.day:nth-of-type(15) .number {
+  background-image: url(./images/cal_15.png);
+}
+.day:nth-of-type(16) .number {
+  background-image: url(./images/cal_16.png);
+}
+.day:nth-of-type(17) .number {
+  background-image: url(./images/cal_17.png);
+}
+.day:nth-of-type(18) .number {
+  background-image: url(./images/cal_18.png);
+}
+.day:nth-of-type(19) .number {
+  background-image: url(./images/cal_19.png);
+}
+.day:nth-of-type(20) .number {
+  background-image: url(./images/cal_20.png);
+}
+.day:nth-of-type(21) .number {
+  background-image: url(./images/cal_21.png);
+}
+.day:nth-of-type(22) .number {
+  background-image: url(./images/cal_22.png);
+}
+.day:nth-of-type(23) .number {
+  background-image: url(./images/cal_23.png);
+}
+.day:nth-of-type(24) .number {
+  background-image: url(./images/cal_24.png);
+}
+.day:nth-of-type(25) .number {
+  background-image: url(./images/cal_25.png);
+}
+/*#endregion*/
+
+.number {
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 100%;
+  position: absolute;
+  left: 8px;
+  top: 8px;
+}
+.present {
+  width: 33px;
+  height: 33px;
+  cursor: pointer;
+  background-image: url(./images/gift_1.png);
+}
+.day:nth-child(2n) .present {
+  background-image: url(./images/gift_2.png);
+}
+.day:nth-child(3n) .present {
+  background-image: url(./images/gift_3.png);
+}
+.present_content {
+  display: none;
+}
+
+.christmas-calendar-wrapper {
+  width: 420px;
+  height: 400px;
+  margin: 0 auto;
+  overflow: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.christmas-calendar-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.present-modal {
+  display:none;
+  position: fixed;
+  z-index: 11;
+  background-image: url(./images/present_modal.png);
+  width: 256px;
+  height: 230px;
+}
+
+.present-modal .title {
+  font-family: 'Volter';
+  font-size: 9px;
+  color: #7b1c12;
+  text-shadow: 0px 1px #fff;
+  padding-top: 4px;
+  text-align: center;
+}
+
+.present-modal .highlighted_items {
+  background:url(./images/present_hightlight.png) #ad0000 no-repeat;
+  width:140px;
+  height:117px;
+  margin: 0 auto;
+  margin-top:8px;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.present-modal .description {
+  font-family: 'HabboTwelve';
+  width: 220px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.present-modal button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0;
+  position: absolute;
+  right: 52px;
+  top: 2px;
+}

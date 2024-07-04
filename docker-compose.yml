@@ -1,0 +1,150 @@
+version: '3.7'
+
+services:
+  mariadb:
+    image: mariadb:10.4.18-focal
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: 
+      - "3306:3306"
+    volumes:
+      - ./dockerdata/data/mariadb:/var/lib/mysql
+    networks:
+      - habbo_network
+ 
+  db-backup:
+    image: tiredofit/db-backup
+    volumes:
+      - /mnt/network_storage/sql_backup/habbo:/backup
+      #- ./post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      # - DEBUG_MODE=TRUE
+      - DB_TYPE=mariadb
+      - DB_HOST=mariadb
+      - DB_NAME=kepler
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_PASSWORD}
+      - DB_DUMP_FREQ=60            # backup every minute
+     #- DB_DUMP_BEGIN=0000      # backup starts immediately
+      - DB_CLEANUP_TIME=40320      # clean backups they are older than 5 minute
+      - CHECKSUM=SHA1
+      - ENABLE_CHECKSUM=FALSE
+      - COMPRESSION=NONE
+      - SPLIT_DB=FALSE
+      - CONTAINER_ENABLE_MONITORING=FALSE
+    restart: unless-stopped
+    networks:
+      - habbo_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      UPLOAD_LIMIT: 1G
+    ports:
+      - "8082:80"
+    depends_on:
+      - mariadb
+    networks:
+      - habbo_network
+
+  rabbitmq:
+    image: rabbitmq:3.11.16-management-alpine
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=habbo
+      - RABBITMQ_DEFAULT_PASS=habbo
+    networks:
+      - habbo_network 
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # RabbitMQ management plugin port
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  kepler_server:
+    restart: unless-stopped
+    image: ghcr.io/webbanditten/kepler:latest
+    volumes:
+      - ./config/server.ini:/usr/src/app/server.ini
+    network_mode: "host" # This is needed to get the correct host ip - So bans work.
+
+    depends_on:
+      mariadb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  kepler_photorenderer:
+    restart: unless-stopped
+    image: ghcr.io/webbanditten/photorenderer:latest
+    expose:
+      - 9000
+    networks:
+      - habbo_network
+
+  kepler_cms:
+    restart: unless-stopped
+    image: ghcr.io/webbanditten/keplercms:latest
+    ports: 
+      - 8080:80
+    volumes:
+      - ./swfs/hof_furni:/app/swfs/hof_furni
+    depends_on:
+      - mariadb
+      - rabbitmq
+      - kepler_server
+      - kepler_photorenderer
+    environment:
+      keplercms__figureUrl: /habbo-imaging/avatarimage
+      keplercms__badgeUrl: https://127.0.0.1/c_images/Badges
+      keplercms__traxUrl: https://127.0.0.1/trax/mp3
+      keplercms__groupBadgeUrl: https://127.0.0.1/habbo-imaging/badge
+      keplercms__port: 12321
+      keplercms__musport: 12322
+      keplercms__host: 127.0.0.1
+      keplercms__texts: https://127.0.0.1/gamedata/external_texts.php
+      keplercms__vars: https://127.0.0.1gamedata/external_vars.php
+      keplercms__dcr: https://127.0.0.1/dcr/latest/habbo.dcr
+      ConnectionStrings__DefaultConnection: server=mariadb;port=3306;database=${MYSQL_DATABASE};user=${MYSQL_USER};password=${MYSQL_PASSWORD}
+      keplercms__dateFormat: dd-MM-yyyy
+      keplercms__shortDateFormat: dd-MM-yy
+      keplercms__photoService: http://kepler_photorenderer:9000
+      keplercms__mailgunApiKey: ${MAILGUN_APIKEY}
+      keplercms__mailgunDomain: yourdomain.com
+      keplercms__mailAddress: no-reply@yourdomain.com
+      keplercms__mailFrom: Habbo Hotel
+      keplercms__publicUrl: https://yourdomain.com
+      culture: da-DK
+      TZ: Europe/Copenhagen
+      keplercms__rabbitmq__hostname: rabbitmq
+      keplercms__rabbitmq__port: 5672
+      keplercms__rabbitmq__username: ${RABBITMQ_USERNAME}
+      keplercms__rabbitmq__password: ${RABBITMQ_PASSWORD}
+    networks:
+      - habbo_network
+
+networks:
+  habbo_network:
+
+
+# Put in .env file
+#MYSQL_ROOT_PASSWORD=wouldntyouliketoknow
+#MYSQL_DATABASE=kepler
+#MYSQL_USER=habbo
+#MYSQL_PASSWORD=nejtak
+#RABBITMQ_USERNAME=habbo
+#RABBITMQ_PASSWORD=habbo
+#MAILGUN_APIKEY=hest

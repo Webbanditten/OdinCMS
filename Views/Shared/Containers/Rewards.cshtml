@@ -1,0 +1,146 @@
+@using KeplerCMS.Data.Models
+@using System.Configuration
+@using Microsoft.Extensions.Configuration
+@model Containers
+@inject KeplerCMS.Services.Interfaces.IRewardService RewardService
+@inject IConfiguration Configuration
+
+
+@{
+    var rewards = new List<RewardsViewModel>();
+    var day1 = DateTime.Now.AddDays(-15);
+    var day2 = DateTime.Now.AddDays(15);
+    if (User.Identity is {IsAuthenticated: true})
+    {
+        rewards = await RewardService.GetRewardsBetweenDates(day1, day2, int.Parse(User.Identity.Name));
+    }
+    else
+    {
+        var rewardEntities = await RewardService.GetRewardsBetweenDates(day1, day2);
+        rewards = rewardEntities.Select(reward => new RewardsViewModel
+        {
+            Id = reward.Id,
+            RequiredStreak = reward.RequiredStreak,
+            Description = reward.Description,
+            AvailableFrom = reward.AvailableFrom,
+            AvailableTo = reward.AvailableTo,
+            ItemDefinitions = reward.ItemDefinitions,
+            Redeemed = false,
+            ItemsDefinitions = reward.ItemsDefinitions
+        }).ToList();
+    }
+
+}
+<link rel="stylesheet" href="~/rewards/rewards.css" />
+<script src="~/rewards/rewards.js" type="text/javascript"></script>
+<div class="rewards-container">
+    <div class="rewards-inner">
+        <div class="rewards-header">@DbRes.T("headline", "rewards")</div>
+        <div class="rewards-body">
+            @{
+                if (rewards.Count > 0)
+                {
+                    <ol class="rewards-items">
+
+                        @foreach (var reward in rewards)
+                        {
+                            var isToday = (reward.AvailableFrom.Date == DateTime.Now.Date);
+                            var todayClass = isToday ? "reward-item-current" : "";
+                            <li class="rewards-item @todayClass">
+                                <div class="rewards-item-header">@reward.AvailableFrom.ToString(Configuration.GetSection("keplercms")["shortDateFormat"])</div>
+                                <div class="rewards-item-body">
+
+                                    @foreach (var rewardItemsDefinition in reward.ItemsDefinitions)
+                                    {
+                                        var rawSprite = rewardItemsDefinition.Sprite;
+                                        var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
+                                        var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
+                                        <div class="rewards-item-furni">
+                                            <img src="~/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
+                                            <span class="tooltiptext">@rewardItemsDefinition.Name</span>
+                                        </div>
+                                    }
+
+                                </div>
+                                
+                               @{
+                                   /*
+                                    * 0 = Available
+                                    * 1 = Redeemed
+                                    * 2 = Not redeemed
+                                    * 3 = Not logged in
+                                    */
+                                   var status = 0;
+                               }
+                               
+                               @if (isToday)
+                               {
+                                   if (User.Identity is {IsAuthenticated: true})
+                                   {
+                                       status = reward.Redeemed ? 1 : 0;
+                                   }
+                                   else
+                                   {
+                                       status = 3;
+                                   }
+                               }
+                               else
+                               {
+                                   if (User.Identity is {IsAuthenticated: true} && reward.AvailableTo < DateTime.Now)
+                                   {
+                                       status = reward.Redeemed ? 1 : 2;
+                                   }
+                                   else
+                                   {
+                                       status = 3;
+                                   }
+                               }
+                                @{
+                                    switch (status)
+                                    {
+                                        case 0:
+                                            <div class="rewards-item-current-status">
+                                                <a href=""><img src="~/rewards/images/question.gif" alt="@DbRes.T("status_0", "rewards")"/> </a>
+                                                <span class="tooltiptext">@DbRes.T("status_0", "rewards")</span>
+                                            </div>
+                                            break;
+                                        case 1:
+                                            <div class="rewards-item-current-status">
+                                                <img src="~/rewards/images/v20_4.gif" alt="@DbRes.T("status_1", "rewards")"/>
+                                                <span class="tooltiptext">@DbRes.T("status_1", "rewards")</span>
+                                            </div>
+                                            break;
+                                        case 2:
+                                            <div class="rewards-item-current-status">
+                                                <img src="~/rewards/images/v22_3.gif" alt="@DbRes.T("status_2", "rewards")"/>
+                                                <span class="tooltiptext">@DbRes.T("status_2", "rewards")</span>
+                                            </div>
+                                            break;
+                                        default:
+                                            <div class="rewards-item-current-status">
+                                                <a href=""><img src="~/rewards/images/new_13.gif" alt="@DbRes.T("status_default", "rewards")"/> </a>
+                                                <span class="tooltiptext">@DbRes.T("status_default", "rewards")</span>
+                                            </div>
+                                        break;
+                                            
+                                    }
+                                }
+                                
+                                @if (isToday)
+                                {
+                                    <div class="rewards-item-current-arrow">@DbRes.T("today", "rewards")</div>
+                                }
+                                
+                            </li>
+                        }
+
+                    </ol>
+                }
+                else
+                {
+                    <p>@DbRes.T("no_rewards", "rewards")</p>
+                }
+            }
+        </div>
+    </div>
+</div>

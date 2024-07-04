@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,11 +10,15 @@ namespace KeplerCMS.Data.Models
     [Table("rank_rights")]
     public class RankRights
     {
-        [Key]
         [Column("rank_id")]
-        public string RankId { get; set; }
-        [Key]
+        [Key,ForeignKey("Rank")]
+        public int RankId { get; set; }
+        
         [Column("fuse")]
-        public string Fuse { get; set; }
+        [ForeignKey("Fuses")]
+        public string FuseName { get; set; }
+
+        public virtual Rank Rank { get; set; }
+        public virtual Fuses Fuse { get; set; }
     }
 }

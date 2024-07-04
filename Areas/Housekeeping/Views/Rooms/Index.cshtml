@@ -1,0 +1,125 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.SearchRoomsViewModel
+
+@{
+    ViewBag.Title = "Room admin";
+    
+}
+
+<h1>@ViewBag.Title</h1>
+<p>
+    Here you can search for rooms by name or owner
+</p>
+<form asp-action="Index" method="get">
+    <label for="search"><strong>Search</strong></label>
+    <input id="search" name="search" type="text" value="@Model.Search" />
+    <input type="submit" value="Submit" />
+</form>
+<hr/>
+@if (Model.Rooms.Any())
+{
+    
+    <h2>Rooms with name starting with '@Model.Search' or owned by '@Model.Search'</h2>
+    <br/>
+    <table class="habboTable">
+        <thead>
+        <tr>
+            <th>Owner</th>
+            <th>Room name and description</th>
+            <th>Door mode</th>
+            <th>Show owner</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @{
+            foreach (var room in Model.Rooms)
+            {
+                <tr>
+                    <form class="rooms-inline-form" asp-action="UpdateRoom">
+                        
+                        <td><input name="Id" type="hidden" value="@room.Id" />
+                            @if (room.Owner != null)
+                            {
+                                <a href="@Url.Action("Manage", "Users", new { id = room.OwnerId })">@room.Owner.Username</a>}
+                            else
+                            {<text>PUBLIC ROOM</text>}
+                        </td>
+                        <td style="padding-right: 10px;">
+
+                            <label style="display:block" for="name">Name</label>
+                            <input style="width: 100%;" type="text" name="Name" value="@room.Name"/>
+                            <br/>
+                            <label style="display:block" for="description">Description</label>
+                            <input style="width: 100%;" type="text" name="Description" value="@room.Description"/>
+
+                        </td>
+                        <td style="text-align: center">
+                            @{
+                                var doorModes = new List<SelectListItem>
+                                {
+                                    new SelectListItem { Value = "0", Text = "Open" },
+                                    new SelectListItem { Value = "1", Text = "Closed" },
+                                    new SelectListItem { Value = "2", Text = "Code" }
+                                };
+                            }
+                            
+                            <select name="AccessType" asp-for="@room.AccessType" asp-items="doorModes"></select>
+                        </td>
+                        <td style="text-align: center"><input type="checkbox" name="ShowOwner" value="1" @((@room.ShowOwner == 1) ? "checked" : "") /></td>
+                        <td style="text-align: center"><input type="submit" value="Save" /></td>
+                    </form>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+    if (Model.CurrentPage != 1)
+    {
+    <a href="@Url.Action("Index", "Rooms", new { search=@Model.Search, currentPage=@Model.CurrentPage-1 })">Previous Page</a>
+    }
+    
+    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    {
+    <a href="@Url.Action("Index", "Rooms", new { search=@Model.Search, currentPage=@Model.CurrentPage+1 })" style="float:right">Next Page</a>
+    }
+
+
+}
+
+@section scripts {
+    <script>
+        $(".rooms-inline-form").submit(function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var formData = form.serializeArray();
+            var model = {};
+        
+            $.each(formData, function (index, element) {
+                model[element.name] = element.value;
+            });
+        
+            $.ajax({
+                type: "POST",
+                url: form.attr("action"),
+                contentType: "application/json",
+                data: JSON.stringify(model),
+                success: function (data) {
+                    if (data == "success") {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: "Room updated!",
+                            icon: 'success',
+                            timer: 1500
+                        })
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Room was not updated! " + data,
+                            icon: 'error'
+                        })
+                    }
+                }
+            });
+        });
+    </script>
+}

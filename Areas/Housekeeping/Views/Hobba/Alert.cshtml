@@ -1,0 +1,29 @@
+﻿@model AlertViewModel
+
+@{
+    ViewBag.Title = "Remote alert";
+    Layout = "_Housekeeping";
+}
+
+<h2>Remote alerting</h2>
+<p>
+    This tool allows you to send an alert to a Habbo if you are not in the same room (you don't even need to be in the hotel). 
+    You can use this to answer Calls for help that aren't urgent (eg 'How do I dance?' or 'How do I become a Hobba?'), so that you don't have to go to the room.   
+</p>
+<form asp-action="Alert" method="post" asp-controller="Hobba" class="basic">
+    <label asp-for="Username"></label>
+    <input asp-for="Username" value="@Model.Username" />
+    <span asp-validation-for="Username"></span>
+    <br />
+    <label asp-for="Message"></label>
+    <input asp-for="Message" value="@Model.Message"/>
+    <span asp-validation-for="Message"></span>
+    <input type="submit" value="Alert" />
+    
+    @{
+        if (Model != null && !string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <span class="success-message">@Model.SuccessMessage</span>
+        }
+    }
+</form>

@@ -11,10 +11,12 @@ namespace KeplerCMS.Areas.Housekeeping
     public class UploadController : Controller
     {
         private readonly IUploadService _uploadService;
+        private readonly IAuditLogService _auditService;
 
-        public UploadController(IUploadService uploadService)
+        public UploadController(IUploadService uploadService, IAuditLogService auditService)
         {
             _uploadService = uploadService;
+            _auditService = auditService;
         }
 
         [HousekeepingFilter(Fuse.housekeeping_upload)]
@@ -36,7 +38,8 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             if (ModelState.IsValid)
             {
-                await _uploadService.Add(model);
+                var upload = await _uploadService.Add(model);
+                await _auditService.AddLog(AuditLogType.file_upload, int.Parse(HttpContext.User.Identity.Name), 0);
                 return RedirectToAction("Index", "Upload", new { message = "File uploaded" });
             }
             return View(model);
@@ -56,6 +59,7 @@ namespace KeplerCMS.Areas.Housekeeping
             if (ModelState.IsValid)
             {
                 await _uploadService.Update(model);
+                await _auditService.AddLog(AuditLogType.file_edit, int.Parse(HttpContext.User.Identity.Name), null, null, model.Id);
                 return RedirectToAction("Index", "Upload", new { message = "File edited" });
             }
             return View(model);
@@ -65,6 +69,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> Remove(int id)
         {
             await _uploadService.Remove(id);
+            await _auditService.AddLog(AuditLogType.file_deleted, int.Parse(HttpContext.User.Identity.Name), null,null, id);
             return RedirectToAction("Index", "Upload", new { message = "File Removed" });
         }
     }

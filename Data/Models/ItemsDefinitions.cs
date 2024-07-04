@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Data.Models
 {
-    [Table("items_definitions")]
+  [Table("items_definitions")]
     public class ItemsDefinitions
     {
         [Column("id")]
         public int Id { get; set; }
         [Column("sprite")]
-        public string sprite { get; set; }
+        public string Sprite { get; set; }
         [Column("sprite_id")]
         public int SpriteId { get; set; }
         [Column("name")]
@@ -39,5 +39,7 @@ namespace KeplerCMS.Data.Models
         public int IsRecyclable { get; set; }
         [Column("drink_ids")]
         public string DrinkIds { get; set; }
+        
+        public ICollection<Items> Items { get; set; }
     }
 }

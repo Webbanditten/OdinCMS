@@ -36,5 +36,15 @@ namespace KeplerCMS.Data.Models
             get { return INews == 1; }
             set { INews = value ? 1 : 0; }
         }
+        
+        [Column("hidden")]
+        public int IHidden { get; set; }
+        
+        [NotMapped]
+        public bool Hidden
+        {
+            get => IHidden == 1;
+            set => IHidden = value ? 1 : 0;
+        }
     }
 }

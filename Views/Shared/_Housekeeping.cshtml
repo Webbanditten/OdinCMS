@@ -1,57 +1,41 @@
 ﻿@using KeplerCMS.Areas.Housekeeping.Helpers
 @using KeplerCMS.Data.Models
 @using KeplerCMS.Areas.Housekeeping.Models.Enums
-@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Html
+@using KeplerCMS.Areas.Housekeeping.Models.Views
 @{
     var userData = (Users)ViewData["user"];
-    var fuses = userData.Fuses.ToList();
-    var menu = (List<Menu>)ViewData["menu"];
-    var subMenu = new List<Menu>();
     var path = Context.Request.Path;
+    var userFuses = userData?.Fuses.Select(s => s.FuseName).ToList();
+    var menuHelper = new HousekeepingMenuItemHelper(userFuses, Html);
+    
+    var activeMenuItem = HousekeepingMenu.Home;
+    var menuMapping = new Dictionary<string, HousekeepingMenu>
+    {
+        { "/housekeeping", HousekeepingMenu.Home },
+        { "/housekeeping/website", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/menu", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/pages", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/news", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/promo", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/promotions", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/ranks", HousekeepingMenu.AdminTools },
+        { "/housekeeping/localization", HousekeepingMenu.Localization },
+        { "/housekeeping/users", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/hobba", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/rooms", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/upload", HousekeepingMenu.WebsiteAdmin },
+        { "/housekeeping/admin", HousekeepingMenu.AdminTools },
+        { "/housekeeping/catalog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
+        { "/housekeeping/settings", HousekeepingMenu.AdminTools },
+        { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/rewards", HousekeepingMenu.AdminTools },
+    };
 
-    HousekeepingMenu activeMenuItem;
-
-    switch (path)
-    { 
-        case var activeMenu when path == "/housekeeping":
-            activeMenuItem = HousekeepingMenu.Home;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/website"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/menu"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/pages"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/news"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/promotions"):
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case var activeMenu when path.StartsWithSegments("/housekeeping/localization"):
-            activeMenuItem = HousekeepingMenu.Localization;
-            break;
-        case "/housekeeping/upload":
-            activeMenuItem = HousekeepingMenu.WebsiteAdmin;
-            break;
-        case "/housekeeping/admin":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/catalogue":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/messengercampaign":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        case "/housekeeping/settings":
-            activeMenuItem = HousekeepingMenu.AdminTools;
-            break;
-        default:
-            activeMenuItem = HousekeepingMenu.Frontpage;
-            break;
+    foreach (var key in menuMapping.Keys.Where(key => path.ToString().Contains(key) || path == key))
+    {
+        activeMenuItem = menuMapping[key];
     }
 }
 <!doctype html>
@@ -59,7 +43,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Housekeeping</title>
+    <title>Housekeeping ~ @ViewBag.Title</title>
 
     <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css">
     <link rel="stylesheet" href="~/housekeeping/css/sweetalert2.min.css">
@@ -67,73 +51,136 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <div class="top">
-            <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
-            <ul class="menu">
-                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.Home) ? "class=active" : "")><a href="@Url.Action("Index", "Home")">Home</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping_website)) {
-                    <li @(activeMenuItem == HousekeepingMenu.WebsiteAdmin ? "class=active" : "")><a href="@Url.Action("Index", "Website")">Website management</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(fuses, Fuse.fuse_administrator_access)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.AdminTools) ? "class=active" : "")><a href="@Url.Action("Index", "Admin")">Admin tools</a></li>
-                }
-                @if(HousekeepingAccess.HasAccess(fuses, Fuse.housekeeping_localization)) {
-                    <li @(activeMenuItem.Equals(HousekeepingMenu.Localization) ? "class=active" : "")><a href="@Url.Action("Index", "Localization")">Localization</a></li>
-                }
-            </ul>
-        </div>
-        <div class="content">
-            <div class="sidebar">
-                @{if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
-                    {
-                        <div class="container">
-                            <div class="title">
-                                Website administration
-                            </div>
-                            <div class="container-content">
-                                <ul>
-                                    <li><a href="@Url.Action("Index", "Menu")">Menu</a></li>
-                                    <li><a href="@Url.Action("Index", "Pages")">Pages</a></li>
-                                    <li><a href="@Url.Action("Index", "Upload")">Upload</a></li>
-                                    <li><a href="@Url.Action("Index", "News")">News</a></li>
-                                </ul>
-                            </div>
+<div class="wrapper">
+    <div class="top">
+        <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
+        <ul class="menu">
+            @await menuHelper.Render("Home", 
+                           Url.Action("Index", "Home"), 
+                           new List<Fuse> { Fuse.housekeeping }, 
+                           activeMenuItem == HousekeepingMenu.Home)
+            
+           @await menuHelper.Render("Website management", 
+                                      Url.Action("Index", "Website"), 
+                                      new List<Fuse> { Fuse.housekeeping_website }, 
+                                      activeMenuItem == HousekeepingMenu.WebsiteAdmin)
+            
+           @await menuHelper.Render("Hobba tools", 
+                                      Url.Action("Index", "Hobba"), 
+                                      new List<Fuse> { Fuse.fuse_kick }, 
+                                      activeMenuItem == HousekeepingMenu.HobbaTools)
+            
+            @await menuHelper.Render("Admin tools", 
+                                      Url.Action("Index", "Admin"), 
+                                      new List<Fuse> { Fuse.fuse_administrator_access, Fuse.housekeeping_ranks }, 
+                                      activeMenuItem == HousekeepingMenu.AdminTools)
+            
+            @await menuHelper.Render("Localization", 
+                                                  Url.Action("Index", "Localization"), 
+                                                  new List<Fuse> { Fuse.housekeeping_localization }, 
+                                                  activeMenuItem == HousekeepingMenu.Localization)
+        </ul>
+    </div>
+    <div class="content">
+        <div class="sidebar">
+            @{
+                if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
+                {
+                    <div class="container">
+                        <div class="title">
+                            Website administration
                         </div>
-                    }
+                        <div class="container-content">
+                            <ul>
+                                @await menuHelper.Render("Menu", Url.Action("Index", "Menu"), new List<Fuse> { Fuse.housekeeping_menu })
+                                @await menuHelper.Render("Pages", Url.Action("Index", "Pages"), new List<Fuse> { Fuse.housekeeping_pages })
+                                @await menuHelper.Render("News", Url.Action("Index", "News"), new List<Fuse> { Fuse.housekeeping_news })
+                                @await menuHelper.Render("Upload", Url.Action("Index", "Upload"), new List<Fuse> { Fuse.housekeeping_upload })
+                            </ul>
+                        </div>
+                    </div>
                 }
+            }
 
-                @{if (activeMenuItem == HousekeepingMenu.AdminTools)
+            @{
+                if (activeMenuItem == HousekeepingMenu.AdminTools)
+                {
+                    <div class="container">
+                        <div class="title">
+                            Admin tools
+                        </div>
+                        <div class="container-content">
+                            <ul>
+                                @await menuHelper.Render("Settings", Url.Action("Index", "Settings"), new List<Fuse> { Fuse.housekeeping_settings })
+                                @await menuHelper.Render("Messenger Campaign", Url.Action("Index", "MessengerCampaign"), new List<Fuse> { Fuse.housekeeping_campaign })
+                                @await menuHelper.Render("Manage ranks", Url.Action("Index", "Ranks"), new List<Fuse> { Fuse.housekeeping_ranks })
+                                @await menuHelper.Render("Audit log", Url.Action("Index", "AuditLog"), new List<Fuse> { Fuse.fuse_administrator_access })
+                                @await menuHelper.Render("Reward management", Url.Action("Index", "Rewards"), new List<Fuse> { Fuse.housekeeping_rewards })
+                            </ul>
+                        </div>
+                    </div>
+                }
+            }
+            
+            @{
+                if (activeMenuItem == HousekeepingMenu.HobbaTools)
+                {
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.room_alert, Fuse.fuse_ban }))
                     {
                         <div class="container">
                             <div class="title">
-                                Admin tools
+                                Hobba Tools
                             </div>
                             <div class="container-content">
                                 <ul>
-                                    <li><a href="@Url.Action("Index", "Settings")">Settings</a></li>
-                                    <li><a href="@Url.Action("Index", "MessengerCampaign")">Messenger Campaign</a></li>
-                                    <li><a href="@Url.Action("Index", "ItemDefinitions")">Furni</a></li>
-                                    <li><a href="@Url.Action("Index", "Catalogue")">Catalogue</a></li>
+                                    @await menuHelper.Render("Remote alerting", Url.Action("Alert", "Hobba"), new List<Fuse> { Fuse.room_alert })
+                                    @await menuHelper.Render("Remote banning and kicking", Url.Action("Ban", "Hobba"), new List<Fuse> { Fuse.fuse_ban })
+                                    @await menuHelper.Render("List of current bans", Url.Action("BanList", "Hobba"), new List<Fuse> { Fuse.fuse_ban })
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_kick }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Scam Detection
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("User search & information tool", Url.Action("Index", "Users"), new List<Fuse> { Fuse.fuse_kick })
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                    
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_private_rooms }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Private rooms
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Room admin", Url.Action("Index", "Rooms"), new List<Fuse> { Fuse.fuse_private_rooms })
                                 </ul>
                             </div>
                         </div>
                     }
                 }
-            </div>
-            <div class="main-content">
-                @RenderBody()
-            </div>
+            }
+        </div>
+        <div class="main-content">
+            @RenderBody()
         </div>
     </div>
+</div>
 
-    <script src="~/housekeeping/js/jquery.js" type="text/javascript"></script>
-    <script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
-    <script src="~/housekeeping/js/sweetalert2.min.js" type="text/javascript"></script>
-    @RenderSection("scripts", false)
+<script src="~/housekeeping/js/jquery.js" type="text/javascript"></script>
+<script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
+<script src="~/housekeeping/js/sweetalert2.min.js" type="text/javascript"></script>
+@await RenderSectionAsync("scripts", false)
 </body>
 
 </html>
-

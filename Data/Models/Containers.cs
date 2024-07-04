@@ -25,11 +25,21 @@ namespace KeplerCMS.Data.Models
         public string Theme { get; set; }
         [Column("order")]
         public int Order { get; set; }
+        [Column("hidden")]
+        public int IHidden { get; set; }
+        
+        [NotMapped]
+        public bool Hidden
+        {
+            get => IHidden == 1;
+            set => IHidden = value ? 1 : 0;
+        }
 
         [NotMapped]
         public List<Homes> TopGroups { get; set; }
         
         [NotMapped]
         public List<Homes> MyGroups { get; set; }
+        
     }
 }

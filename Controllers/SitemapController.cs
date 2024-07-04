@@ -38,6 +38,8 @@ namespace KeplerCMS.Controllers
                 }
                 data.Add(new SitemapViewModel { Loc="/" + page.Slug,Priority=priority.ToString(),ChangeFreq="Weekly"});
             }
+            
+            data.Add(new SitemapViewModel { Loc="/news",Priority="1",ChangeFreq="Weekly"});
             string host = _configuration.GetSection("keplercms:publicUrl").Value;
             Response.ContentType = "application/xml"; 
             using (var xml = XmlWriter.Create(Response.Body, new XmlWriterSettings { Indent = true }))
@@ -48,7 +50,6 @@ namespace KeplerCMS.Controllers
                 {
                     xml.WriteStartElement("url");
                     xml.WriteElementString("loc", host + item.Loc);
-                    xml.WriteElementString("priority",item.Priority);
                     xml.WriteElementString("changefreq",item.ChangeFreq);
                     xml.WriteEndElement();
                 }

@@ -110,10 +110,15 @@ body:after {
     width: 542px;
     margin-top:256px;   
 }
+.editor.player ruffle-embed {
+    height: 366px !important;
+    min-height: 366px !important;
+    width: 542px;
+    margin-top:256px;
+}
 
 .scoreboard {
-    background: url(../images/scoreboard.png);
-    background-repeat: no-repeat;
+    background: url(../images/scoreboard.png) no-repeat;
     height: 264px;
     width: 239px;
     padding-top: 10px;
