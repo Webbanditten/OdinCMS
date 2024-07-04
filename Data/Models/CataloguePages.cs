@@ -41,5 +41,7 @@ namespace KeplerCMS.Data.Models
         public string LabelExtraS { get; set; }
         [Column("label_extra_t")]
         public string LabelExtraT { get; set; }
+        [Column("fuse")]
+        public string Fuse { get; set; }
     }
 }

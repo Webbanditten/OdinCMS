@@ -32,13 +32,13 @@
         {
             var sprite = "";
             if(item.ItemDefinition != null) {
-                if(item.ItemDefinition.sprite.Contains("*")) {
-                    var sprites = item.ItemDefinition.sprite.Split('*');
+                if(item.ItemDefinition.Sprite.Contains("*")) {
+                    var sprites = item.ItemDefinition.Sprite.Split('*');
                     sprite = $"/habbo-imaging/furni?sprite={sprites[0]}&color={sprites[1]}&small=true&direction=2";
-                } else if(item.ItemDefinition.sprite.Contains("poster")) {
-                    sprite =  $"/habbo-imaging/furni?sprite={item.ItemDefinition.sprite}{item.ItemSpecialSpriteId}&icon=true";
+                } else if(item.ItemDefinition.Sprite.Contains("poster")) {
+                    sprite =  $"/habbo-imaging/furni?sprite={item.ItemDefinition.Sprite}{item.ItemSpecialSpriteId}&icon=true";
                 } else {
-                    sprite =  $"/habbo-imaging/furni?sprite={item.ItemDefinition.sprite}&small=true&direction=2";
+                    sprite =  $"/habbo-imaging/furni?sprite={item.ItemDefinition.Sprite}&small=true&direction=2";
                 }
             }
             <div class="product"><img src="@sprite" /></div>

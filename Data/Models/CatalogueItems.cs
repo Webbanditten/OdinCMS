@@ -35,6 +35,8 @@ namespace KeplerCMS.Data.Models
         public string PackageName { get; set; }
         [Column("package_description")]
         public string PackageDescription { get; set; }
+        [Column("sprite")]
+        public string Sprite { get; set; }
         
         [NotMapped]
         public bool IsHidden

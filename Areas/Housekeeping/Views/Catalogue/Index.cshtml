@@ -23,7 +23,7 @@
                             <div class="dd-handle">
                                 @Html.Raw((item.IndexVisible == 1) ? "<img src='/images/navi/new_04.gif' title='Visible' />" : "")
                                 @Html.Raw((item.ClubOnly == 1) ? "<img src='/images/navi/new_03.gif' title='Club only' />" : "")
-                                @Html.Raw((item.MinRole != 1) ? "<img src='/images/navi/new_11.gif' title='Required role: " + item.MinRole + "' />" : "")
+                                <div style="text-align: right; float: right;">@item.Fuse@Html.Raw((item.Fuse != "DEFAULT") ? "<img src='/images/navi/new_11.gif' />" : "")</div>
                                 @item.Name (@item.NameIndex) </div>
                             <div class="options"><a href="@Url.Action("Products", "Catalogue", new { pageId = item.Id })"><img src="/images/navi/my_2.gif" alt="Products" title="Products" /></a>
                             <a href="@Url.Action("Update", "Catalogue", new { id = item.Id })"><img src="/images/navi/my_5.gif" alt="Edit" title="Edit" /></a>
