@@ -94,6 +94,11 @@ namespace KeplerCMS.Services.Implementations
             }
             
         }
+        
+        public async Task<Rooms> GetRoom(int id)
+        {
+            return await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
+        }
     }
 
 }

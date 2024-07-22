@@ -1,7 +1,10 @@
 using System.Globalization;
 using System.Net;
+using KeplerCMS.BackgroundServices;
 using KeplerCMS.Data;
+using KeplerCMS.Filters;
 using KeplerCMS.Helpers;
+using KeplerCMS.Hubs;
 using KeplerCMS.Services;
 using KeplerCMS.Services.Implementations;
 using KeplerCMS.Services.Interfaces;
@@ -11,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -92,7 +96,7 @@ namespace KeplerCMS
             services.AddTransient<IViewLocalizer, DbResViewLocalizer>();
 
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ICommandQueueService, CommandQueueService>();
+            services.AddSingleton<ICommandQueueService, CommandQueueService>();
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IPageService, PageService>();
             services.AddScoped<IFuseService, FuseService>();
@@ -136,6 +140,10 @@ namespace KeplerCMS
             {
                 options.AllowSynchronousIO = true;
             });
+            
+            services.AddHostedService<HabboActivityBackgroundService>();
+            
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -170,7 +178,8 @@ namespace KeplerCMS
                 // UI strings that we have localized.
                 SupportedUICultures = supportedCultures
             });
-
+            
+            
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -221,7 +230,7 @@ namespace KeplerCMS
                     constraints: new { slug = ".+" }
                 );
 
-                
+                endpoints.MapHub<ChatLogHub>("sockets/housekeeping/chatlogs");
             });
 
         }

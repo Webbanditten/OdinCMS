@@ -53,6 +53,13 @@ namespace KeplerCMS.Areas.Housekeeping
             return Content(result);
         }
 
+        [HousekeepingFilter(Fuse.fuse_private_rooms)]
+        public async Task<IActionResult> View(int id)
+        {
+            var room = await _roomService.GetRoom(id);
+            if (room == null) return NotFound();
+            return View(room);
+        }
         
     }
 

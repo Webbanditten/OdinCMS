@@ -1,0 +1,33 @@
+﻿@model KeplerCMS.Data.Models.Rooms
+
+@{
+    ViewBag.Title = "Room admin";
+    
+}
+
+<h1>@ViewBag.Title</h1>
+<p>
+    Here you can search for rooms by name or owner
+</p>
+
+<div id="log"></div>
+@section scripts {
+    <script src="~/lib/signalr.js" type="text/javascript"></script>
+    
+    <script>
+            $(document).ready(function() {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl(`/sockets/housekeeping/chatlogs?roomId=@Model.Id`)
+                    .build();
+    
+                connection.on("ReceiveMessage", function (user, message) {
+                    var msg = $("<p />").text(user + ": " + message);
+                    $("#log").append(msg);
+                });
+    
+                connection.start().catch(function (err) {
+                    return console.error(err.toString());
+                });
+            });
+        </script>
+}

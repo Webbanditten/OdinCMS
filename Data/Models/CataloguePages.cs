@@ -38,7 +38,7 @@ namespace KeplerCMS.Data.Models
         [Column("label_pick")]
         public string LabelPick { get; set; }
         [Column("label_extra_s")]
-        public string LabelExtraS { get; set; }
+        public string LabelExtraS { get; set; } 
         [Column("label_extra_t")]
         public string LabelExtraT { get; set; }
         [Column("fuse")]
