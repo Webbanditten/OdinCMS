@@ -20,24 +20,7 @@ namespace KeplerCMS
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.ConfigureAppConfiguration((context, config) =>
-                    {
-                        // Load the configuration
-                        var builtConfig = config.Build();
-                    
-                        // Check if the configuration contains the Sentry DSN
-                        var sentryDsn = builtConfig["keplercms:sentry_dsn"];
-                        if (!string.IsNullOrEmpty(sentryDsn))
-                        {
-                            Console.WriteLine("Sentry DSN found, configuring Sentry...");
-                            // Configure Sentry if DSN is present
-                            webBuilder.UseSentry(o =>
-                            {
-                                o.Dsn = sentryDsn;
-                            });
-                        }
-                    });
-                    
+                    webBuilder.UseSentry();
                     webBuilder.UseStartup<Startup>();
                 });
     }
