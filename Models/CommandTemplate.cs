@@ -23,5 +23,9 @@ namespace KeplerCMS.Models
         public string ExtraInfo { get; set; }
         public bool BanIp { get; set; }
         public bool BanMachine { get; set; }
+        public string RoomDescription { get; set; }
+        public string RoomName { get; set; }
+        public int RoomAccessType { get; set; }
+        public bool RoomShowOwnerName { get; set; }
     }
 }
