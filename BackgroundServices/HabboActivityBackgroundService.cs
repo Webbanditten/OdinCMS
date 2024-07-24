@@ -20,6 +20,7 @@ namespace KeplerCMS.BackgroundServices
         public string ChatMessageType { get; set; }
         public int RoomId { get; set; }
         public long SentTime { get; set; }
+        public string Username { get; set; }
     }
 
     public class HabboActivityBackgroundService : BackgroundService
@@ -77,7 +78,7 @@ namespace KeplerCMS.BackgroundServices
                             _logger.LogInformation($"Received message from user: {messageObject.PlayerId}, message: {messageObject.Message}, room: {messageObject.RoomId}");
                             // Process the message here
 
-                            await _chatlogHub.Clients.Groups(new List<string> { "room_" + messageObject.RoomId }).SendAsync("ReceiveMessage", messageObject.PlayerId, messageObject.Message, stoppingToken);
+                            await _chatlogHub.Clients.Groups(new List<string> { "room_" + messageObject.RoomId }).SendAsync("ReceiveMessage", messageObject.PlayerId,messageObject.Username, messageObject.Message, messageObject.SentTime, stoppingToken);
                         }
                         catch (JsonException ex)
                         {

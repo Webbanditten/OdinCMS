@@ -107,6 +107,7 @@ namespace KeplerCMS
             services.AddScoped<IPromoService, PromoService>();
             services.AddScoped<IHomeService, HomeService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IRoomChatlogsService, RoomChatlogsService>();
             services.AddScoped<ITraxService, TraxService>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<ISettingsService, SettingsService>();

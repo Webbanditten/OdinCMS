@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using System.Threading.Tasks;
@@ -13,9 +14,13 @@ namespace KeplerCMS.Areas.Housekeeping
     public class RoomsController : Controller
     {
         private readonly IRoomService _roomService;
-        public RoomsController(IRoomService roomService)
+        private readonly IUserService _userService;
+        private readonly IRoomChatlogsService _roomChatlogsService;
+        public RoomsController(IRoomService roomService, IUserService userService, IRoomChatlogsService roomChatlogsService)
         {
             _roomService = roomService;
+            _userService = userService;
+            _roomChatlogsService = roomChatlogsService;
         }
 
         [HousekeepingFilter(Fuse.fuse_private_rooms)]
@@ -58,7 +63,28 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             var room = await _roomService.GetRoom(id);
             if (room == null) return NotFound();
+            
+            room.Owner = await _userService.GetUserById(room.OwnerId);
+            
             return View(room);
+        }
+        
+        [HousekeepingFilter(Fuse.fuse_see_chat_log_link)]
+        public async Task<IActionResult> Chatlogs(int? userId, int? roomId, int? timestampLimiter, int take = 25, int skip = 0)
+        {
+            var currentTimestamp = timestampLimiter ?? (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (userId != null)
+            {
+                var chatlogs = await _roomChatlogsService.GetByUserId(userId.Value,currentTimestamp, take, skip);
+                return Json(chatlogs);
+            }
+            if (roomId != null)
+            {
+                var chatlogs = await _roomChatlogsService.GetByRoomId(roomId.Value,currentTimestamp, take, skip);
+                return Json(chatlogs);
+            }
+            
+            return BadRequest();
         }
         
     }
