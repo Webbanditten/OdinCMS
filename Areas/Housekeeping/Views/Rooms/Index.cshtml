@@ -27,6 +27,7 @@
             <th>Room name and description</th>
             <th>Door mode</th>
             <th>Show owner</th>
+            <th>Actions</th>
             <th></th>
         </tr>
         </thead>
@@ -67,6 +68,9 @@
                         </td>
                         <td style="text-align: center"><input type="checkbox" name="ShowOwner" value="1" @((@room.ShowOwner == 1) ? "checked" : "") /></td>
                         <td style="text-align: center"><input type="submit" value="Save" /></td>
+                        <td style="text-align: center">
+                            <a href="@Url.Action("View", "Rooms", new { id = room.Id })">Manage</a>
+                        </td>
                     </form>
                 </tr>
             }

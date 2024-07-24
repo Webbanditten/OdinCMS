@@ -26,7 +26,7 @@
         { "/housekeeping/rooms", HousekeepingMenu.HobbaTools },
         { "/housekeeping/upload", HousekeepingMenu.WebsiteAdmin },
         { "/housekeeping/admin", HousekeepingMenu.AdminTools },
-        { "/housekeeping/catalog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/catalogue", HousekeepingMenu.AdminTools },
         { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
         { "/housekeeping/settings", HousekeepingMenu.AdminTools },
         { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
@@ -116,6 +116,7 @@
                                 @await menuHelper.Render("Manage ranks", Url.Action("Index", "Ranks"), new List<Fuse> { Fuse.housekeeping_ranks })
                                 @await menuHelper.Render("Audit log", Url.Action("Index", "AuditLog"), new List<Fuse> { Fuse.fuse_administrator_access })
                                 @await menuHelper.Render("Reward management", Url.Action("Index", "Rewards"), new List<Fuse> { Fuse.housekeeping_rewards })
+                                @await menuHelper.Render("Catalogue", Url.Action("Index", "Catalogue"), new List<Fuse> { Fuse.fuse_administrator_access })
                             </ul>
                         </div>
                     </div>

@@ -8,12 +8,13 @@
   -ms-interpolation-mode: nearest-neighbor; /* IE8+                */
 }
 body {
-  background-color: #083940;
-  margin: 0;
-  padding: 0;
-  font-size: 11px;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-  text-align: center;
+    background-color: #083940;
+    background-image: url(../images/bg_patterns/bday_background.png);
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    text-align: center;
 }
 
 a {

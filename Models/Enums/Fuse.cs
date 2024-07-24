@@ -40,7 +40,9 @@ namespace KeplerCMS.Models
         [Description("fuse_private_rooms")]
         fuse_private_rooms,
         [Description("housekeeping_rewards")]
-        housekeeping_rewards
+        housekeeping_rewards,
+        [Description("fuse_see_chat_log_link")]
+        fuse_see_chat_log_link
         
     }
 }

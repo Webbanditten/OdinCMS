@@ -28,7 +28,8 @@ namespace KeplerCMS.Services
                     HostName = _configuration.GetSection("keplercms:rabbitmq:hostname").Value, 
                     Port = int.Parse(_configuration.GetSection("keplercms:rabbitmq:port").Value),
                     UserName = _configuration.GetSection("keplercms:rabbitmq:username").Value,
-                    Password = _configuration.GetSection("keplercms:rabbitmq:password").Value
+                    Password = _configuration.GetSection("keplercms:rabbitmq:password").Value,
+                    ClientProvidedName = "CommandQueueService"
                 };
                 using var connection = factory.CreateConnection();
                 using var channel = connection.CreateModel();

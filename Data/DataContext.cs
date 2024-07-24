@@ -33,6 +33,18 @@ namespace KeplerCMS.Data
                 .WithOne()
                 .HasForeignKey<Rooms>(r => r.OwnerId);
             
+            modelBuilder.Entity<RoomChatlogs>()
+                .HasOne(r => r.Room)
+                .WithOne()
+                .HasForeignKey<RoomChatlogs>(r => r.RoomId);
+
+            modelBuilder.Entity<RoomChatlogs>().HasNoKey();
+            
+            modelBuilder.Entity<RoomChatlogs>()
+                .HasOne(r => r.User)
+                .WithOne()
+                .HasForeignKey<RoomChatlogs>(r => r.UserId);
+            
             modelBuilder.Entity<Items>()
                 .HasOne(i => i.Definition)
                 .WithMany(d => d.Items)
@@ -62,6 +74,7 @@ namespace KeplerCMS.Data
         public DbSet<HomesRating> HomesRating { get; set; }
         public DbSet<HomesGuestbook> HomesGuestbook { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
+        public DbSet<RoomChatlogs> RoomChatlogs { get; set; }
         public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
         public DbSet<UsersBadges> UsersBadges { get; set; }
 
