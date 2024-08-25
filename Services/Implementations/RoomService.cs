@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KeplerCMS.Areas.Housekeeping.Models.Views;
+using KeplerCMS.Models;
+using KeplerCMS.Models.Enums;
 using MySql.Data.MySqlClient;
 
 namespace KeplerCMS.Services.Implementations
@@ -15,9 +17,11 @@ namespace KeplerCMS.Services.Implementations
     public class RoomService : IRoomService
     {
         private readonly DataContext _context;
+        private readonly ICommandQueueService _commandQueueService;
 
-        public RoomService(DataContext context)
+        public RoomService(ICommandQueueService commandQueueService, DataContext context)
         {
+            _commandQueueService = commandQueueService;
             _context = context;
         }
 
@@ -87,12 +91,26 @@ namespace KeplerCMS.Services.Implementations
             
                 await _context.SaveChangesAsync();
                 
+                _commandQueueService.QueueCommand(CommandQueueType.update_room, new CommandTemplate
+                {
+                    RoomId = room.Id,
+                    RoomAccessType = room.AccessType,
+                    RoomDescription = room.Description,
+                    RoomName = room.Name,
+                    RoomShowOwnerName = room.ShowOwner == 1
+                });
+                
                 return "success";
             } catch (Exception e)
             {
                 return "error";
             }
             
+        }
+        
+        public async Task<Rooms> GetRoom(int id)
+        {
+            return await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
         }
     }
 

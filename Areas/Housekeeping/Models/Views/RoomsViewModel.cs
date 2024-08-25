@@ -30,4 +30,5 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
             public int AccessType { get; set; }
             public int ShowOwner { get; set; }
         }
+        
 }

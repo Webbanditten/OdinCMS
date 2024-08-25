@@ -9,6 +9,8 @@ namespace KeplerCMS.Models
     {
         [Description("housekeeping_pages")]
         housekeeping_pages,
+        [Description("fuse_infobus")]
+        fuse_infobus,
         [Description("housekeeping_website")]
         housekeeping_website,
         [Description("housekeeping_menu")]
@@ -40,7 +42,9 @@ namespace KeplerCMS.Models
         [Description("fuse_private_rooms")]
         fuse_private_rooms,
         [Description("housekeeping_rewards")]
-        housekeeping_rewards
+        housekeeping_rewards,
+        [Description("fuse_see_chat_log_link")]
+        fuse_see_chat_log_link
         
     }
 }
