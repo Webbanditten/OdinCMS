@@ -137,6 +137,7 @@
                                     @await menuHelper.Render("Remote alerting", Url.Action("Alert", "Hobba"), new List<Fuse> { Fuse.room_alert })
                                     @await menuHelper.Render("Remote banning and kicking", Url.Action("Ban", "Hobba"), new List<Fuse> { Fuse.fuse_ban })
                                     @await menuHelper.Render("List of current bans", Url.Action("BanList", "Hobba"), new List<Fuse> { Fuse.fuse_ban })
+                                    @await menuHelper.Render("Infobus", Url.Action("Infobus", "Hobba"), new List<Fuse> { Fuse.fuse_infobus })
                                 </ul>
                             </div>
                         </div>

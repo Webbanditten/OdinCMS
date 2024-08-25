@@ -58,7 +58,12 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Letter { get; set; }
 
     }
-    
+
+    public class UpdateInfobusModel
+    {
+        public string Type { get; set; }
+        public string Message { get; set; }
+    }
     
 
 }

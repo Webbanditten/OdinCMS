@@ -136,5 +136,19 @@ namespace KeplerCMS.Areas.Housekeeping
             await _auditLogService.AddLog(AuditLogType.unban_user, int.Parse(HttpContext.User.Identity.Name),null,null,ban.UserId, ban.Id);
             return RedirectToAction("BanList", new { Message = "Unbanned " + ban.Username });
         }
+        
+        [HousekeepingFilter(Fuse.fuse_infobus)]
+        public async Task<IActionResult> Infobus()
+        {
+            return View();
+        }
+
+        [HousekeepingFilter(Fuse.fuse_infobus)]
+        [HttpPost]
+        public async Task<IActionResult> UpdateInfobus([FromBody] UpdateInfobusModel model)
+        {
+            _commandQueueService.QueueCommand(CommandQueueType.update_infobus, new CommandTemplate { Type = model.Type, Message = model.Message });
+            return Ok();
+        }
     }
 }

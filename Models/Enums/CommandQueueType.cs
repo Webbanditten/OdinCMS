@@ -17,6 +17,7 @@ namespace KeplerCMS.Models.Enums
         remote_alert,
         remote_ban,
         remote_kick,
-        update_room
+        update_room,
+        update_infobus
     }
 }

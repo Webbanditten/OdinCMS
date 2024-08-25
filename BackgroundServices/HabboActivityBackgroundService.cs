@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using KeplerCMS.BackgroundServices.HabboActivityModels;
 using KeplerCMS.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -13,16 +14,6 @@ using RabbitMQ.Client.Events;
 
 namespace KeplerCMS.BackgroundServices
 {
-    public class ChatlogEventMessageModel
-    {
-        public int PlayerId { get; set; }
-        public string Message { get; set; }
-        public string ChatMessageType { get; set; }
-        public int RoomId { get; set; }
-        public long SentTime { get; set; }
-        public string Username { get; set; }
-    }
-
     public class HabboActivityBackgroundService : BackgroundService
     {
         private readonly ILogger<HabboActivityBackgroundService> _logger;
@@ -31,13 +22,15 @@ namespace KeplerCMS.BackgroundServices
         private IModel _channel;
         private readonly IConfiguration _configuration;
         private readonly IHubContext<ChatLogHub> _chatlogHub;
+        private readonly IHubContext<InfobusHub> _infobusHub;
 
-        public HabboActivityBackgroundService(IConfiguration configuration, ILogger<HabboActivityBackgroundService> logger, IHubContext<ChatLogHub> chatlogHubContext)
+        public HabboActivityBackgroundService(IConfiguration configuration, ILogger<HabboActivityBackgroundService> logger, IHubContext<ChatLogHub> chatlogHubContext, IHubContext<InfobusHub> infobusHub)
         {
             _configuration = configuration;
             _exchangeName = "habbo_activity";
             _logger = logger;
             _chatlogHub = chatlogHubContext;
+            _infobusHub = infobusHub;
             InitRabbitMq();
         }
 
@@ -63,7 +56,8 @@ namespace KeplerCMS.BackgroundServices
             // Declare and bind the queue to the exchange within ExecuteAsync
             var queueName = _channel.QueueDeclare("activity", false, false, false, null).QueueName;
             _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "chat");
-
+            _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "infobus");
+            
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += async (model, ea) =>
             { var body = ea.Body.ToArray();
@@ -86,6 +80,23 @@ namespace KeplerCMS.BackgroundServices
                         }
                     }
                     break;
+                    case "infobus":
+                    {
+                        try
+                        {
+                            var messageObject = JsonConvert.DeserializeObject<InfobusStatusEventMessage>(messageJson);
+
+                            _logger.LogInformation($"Received message from infobus updater: {messageJson}");
+                            // Process the message here
+
+                            await _infobusHub.Clients.All.SendAsync("ReceiveUpdate", messageObject, stoppingToken);
+                        }
+                        catch (JsonException ex)
+                        {
+                            _logger.LogError($"Error parsing message: {ex.Message}");
+                        }
+                    }
+                        break;
                     default:
                     {
                         _logger.LogWarning($"Received message with unknown routing key: {ea.RoutingKey}");

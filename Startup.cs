@@ -233,6 +233,7 @@ namespace KeplerCMS
                 );
 
                 endpoints.MapHub<ChatLogHub>("sockets/housekeeping/chatlogs");
+                endpoints.MapHub<InfobusHub>("sockets/housekeeping/infobus");
             });
 
         }

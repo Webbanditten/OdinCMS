@@ -7,6 +7,7 @@ namespace KeplerCMS.Models
 {
     public class CommandTemplate
     {
+        public string Type { get; set; }
         public int UserId { get; set; }
         public int Credits { get; set; }
         public int DefinitionId { get; set; }
