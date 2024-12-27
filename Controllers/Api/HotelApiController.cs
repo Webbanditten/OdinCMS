@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,9 +15,6 @@ using KeplerCMS.Services.Implementations;
 
 namespace KeplerCMS.Controllers
 {
-    interface HabboNameRequest {
-        public string habboName { get; set; }
-    }
     [ApiController]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class HotelApiController : Controller
@@ -104,6 +102,16 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> SearchFurni(string query)
         {
             return Ok(await _furniService.Search(query));
+        }
+        
+        
+        [Route("api/hotel/latest-logins/{take:int}")]
+        public async Task<IActionResult> OnlineStats(int take)
+        {
+            var amount = take > 30 ? take : 30;
+            var users = await _userService.GetLatestSignins(amount, 0);
+            var onlyShowNames = users.Select(u => new { u.Username, u.Figure, u.LastOnline, u.Status });
+            return Ok(onlyShowNames);
         }
         
         

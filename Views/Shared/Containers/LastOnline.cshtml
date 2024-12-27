@@ -1,0 +1,40 @@
+@using KeplerCMS.Data.Models
+@using Microsoft.Extensions.Configuration
+@model Containers
+@inject IConfiguration Configuration
+
+
+<link href="~/styles/myhabbo/myhabbo2.css" rel="stylesheet" />
+
+<script>
+    jQuery(document).ready(function () {
+        jQuery.ajax("api/hotel/latest-logins/30").then(function (response) {
+            jQuery("#avatar-list-list").empty();
+            response.forEach(function (element) {
+                // Format is "lastOnline": "2024-12-22T21:57:58+01:00"
+                const formatLastOnline = new Date(element.lastOnline.split("+")[0]);
+                const day = formatLastOnline.getDate();
+                const month = formatLastOnline.getMonth() + 1;
+                const year = formatLastOnline.getFullYear();
+                const hours = formatLastOnline.getHours() < 10 ? "0" + formatLastOnline.getHours() : formatLastOnline.getHours();
+                const minutes = formatLastOnline.getMinutes() < 10 ? "0" + formatLastOnline.getMinutes() : formatLastOnline.getMinutes();
+                
+                const lastOnlineAsString = day + "-" + month + "-" + year + "<br />" + hours + ":" + minutes;
+                jQuery("#avatar-list-list").append('<li title="' + element.username + '"><div class="avatar-list-avatar"><img src="' + '@Configuration.GetSection("keplercms")["figureUrl"]' + '?figure=' + element.figure + '&size=s&direction=2&head_direction=2&crr=0&gesture=&frame=1" alt=""></div><h4><div class="'+ element.status +'"><a href="/home/' + element.username + '">' + element.username + '</a></div></h4><p class="avatar-list-birthday">' + lastOnlineAsString + '</p><p></p></li>');
+            });
+        });
+        jQuery("#avatar-list-list").empty();
+    });
+</script>
+<div class="avatar-widget-list-container">
+        <ul id="avatar-list-list" class="avatar-widget-list">
+            <li id="avatar-list-109-5" title="Oscar">
+                <div class="avatar-list-avatar"><img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=1650318501270012900921002&amp;size=s&amp;direction=4&amp;head_direction=4&amp;crr=0&amp;gesture=&amp;frame=1" alt=""></div>
+                <h4><a href="/home/Oscar">Oscar</a></h4>
+                <p class="avatar-list-birthday">27-02-2020</p>
+                <p>
+
+                </p>
+            </li>
+        </ul>
+</div>

@@ -4,6 +4,10 @@
 
 @{
     var furni = await FurniService.GetPopularFurni();
+    if(furni == null)
+    {
+        return;
+    }
     var rawSprite = furni.Sprite;
     var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
     var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";

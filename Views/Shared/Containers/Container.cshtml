@@ -85,6 +85,9 @@
         } else if(text.Contains("{rewards}"))
         {
             <partial name="~/Views/Shared/Containers/Rewards.cshtml" model=Model />
+        } else if(text.Contains("{lastonline}"))
+        {
+            <partial name="~/Views/Shared/Containers/LastOnline.cshtml" model=Model />
         } else if(text.Contains("{staff}"))
         {
             <partial name="~/Views/Shared/Containers/Staff.cshtml" model=Model />

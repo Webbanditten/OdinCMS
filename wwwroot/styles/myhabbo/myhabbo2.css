@@ -407,18 +407,20 @@ hr.divider {
 }
 
 .guestbook-message .offline,
-.guestbook-message .online {
+.guestbook-message .online, .avatar-widget-list .offline, .avatar-widget-list .online {
     text-indent: 17px;
     height: 18px;
 }
 
-.guestbook-message .offline {
+.guestbook-message .offline, .avatar-widget-list .offline {
     background: transparent url(/c_images/myhabbo/status/habbo_offline.gif) no-repeat top left;
 }
 
-.guestbook-message .online {
+.guestbook-message .online, .avatar-widget-list .online {
     background: transparent url(/c_images/myhabbo/status/habbo_online_anim.gif) no-repeat top left;
 }
+
+
 
 .rating-unit-rating {
     list-style: none;
