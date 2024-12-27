@@ -9,16 +9,13 @@ function shuffleArray(array) {
 const description = `Daglig gave for at besøge Habbo Hotel.`;
 // List of possible unique item_definitions (also used as spriteids) for special items (Friday or Saturday)
 const uniqueItemDefinitionsList = [
-  '716',
-  '1995',
-  '350',
-  '326',
-  '327',
-  '328',
-  '331',
-  '309',
-  '759',
-  '333',
+  '335',
+  '1507',
+  '726',
+  '1518',
+  '1478',
+  '2011',
+  '175','177', '174','179', '340', '339', '338', '1992'
   // Add more unique items as needed
 ];
 
@@ -27,8 +24,11 @@ const itemDefinitionsList = [
   '209',
   '212',
   '71,212',
+  '74,212',
   '73,209',
+  '1439,209',
   '1613,209',
+  '68,212',
   '1614,212',
   '1620,209',
   '1621,212',
@@ -44,8 +44,8 @@ shuffleArray(uniqueItemDefinitionsList);
 shuffleArray(itemDefinitionsList);
 
 // Date range
-const startDate = new Date('2024-07-03');
-const endDate = new Date('2024-10-10');
+const startDate = new Date('2024-10-27');
+const endDate = new Date('2025-01-31');
 
 // Function to generate a random date within the date range
 function getRandomDate(startDate, endDate) {
