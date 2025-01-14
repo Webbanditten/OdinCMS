@@ -108,6 +108,17 @@ function openEmptyHabboWindow(target) { return _openHabboWindow('', target); }
 function _isHabboPopupOpen() { return openedHabbo && !openedHabbo.closed && openedHabbo.focus; }
 
 function roomForward(link, roomId, roomType) {
+    
+    if(document.isHabboOnline) {
+        fetch(habboReqPath + "/components/roomNavigation?roomId=" + roomId + "&roomType=" + roomType + "&move=true", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+        return;
+    }
+    
     var isHabboClient = false;
     try { isHabboClient = window.habboClient; } catch (error) {}
     if (isHabboClient) {

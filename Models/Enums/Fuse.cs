@@ -44,7 +44,9 @@ namespace KeplerCMS.Models
         [Description("housekeeping_rewards")]
         housekeeping_rewards,
         [Description("fuse_see_chat_log_link")]
-        fuse_see_chat_log_link
+        fuse_see_chat_log_link,
+        [Description("fuse_bots")]
+        fuse_bots
         
     }
 }

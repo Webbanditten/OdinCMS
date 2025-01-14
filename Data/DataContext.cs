@@ -52,6 +52,7 @@ namespace KeplerCMS.Data
 
         }
         public DbSet<Users> Users { get; set; }
+        public DbSet<Bots> Bots { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
         public DbSet<Menu> Menu { get; set; }
         public DbSet<Containers> Containers { get; set; }

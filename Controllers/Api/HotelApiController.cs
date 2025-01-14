@@ -71,7 +71,7 @@ namespace KeplerCMS.Controllers
         [Route("components/roomNavigation")]
         public IActionResult RoomNavigation(int roomId, string roomType)
         {
-            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.roomForward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
+            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.room_forward, new Models.CommandTemplate { UserId = int.Parse(User.Identity.Name), RoomId = roomId, RoomType = roomType });
             return Content("ok");
         }
         

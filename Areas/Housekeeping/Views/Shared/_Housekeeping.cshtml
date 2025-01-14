@@ -30,6 +30,7 @@
         { "/housekeeping/messengercampaign", HousekeepingMenu.AdminTools },
         { "/housekeeping/settings", HousekeepingMenu.AdminTools },
         { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
+        { "/housekeeping/bots", HousekeepingMenu.AdminTools },
         { "/housekeeping/rewards", HousekeepingMenu.AdminTools },
     };
 
@@ -117,6 +118,7 @@
                                 @await menuHelper.Render("Audit log", Url.Action("Index", "AuditLog"), new List<Fuse> { Fuse.fuse_administrator_access })
                                 @await menuHelper.Render("Reward management", Url.Action("Index", "Rewards"), new List<Fuse> { Fuse.housekeeping_rewards })
                                 @await menuHelper.Render("Catalogue", Url.Action("Index", "Catalogue"), new List<Fuse> { Fuse.fuse_administrator_access })
+                                @await menuHelper.Render("Bots", Url.Action("Index", "Bots"), new List<Fuse> { Fuse.fuse_bots })
                             </ul>
                         </div>
                     </div>
