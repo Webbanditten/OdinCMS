@@ -16,13 +16,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta name="dc.language" content="da" />
+    <meta http-equiv="content-language" content="da" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
     <title>Habbo ~ @ViewData["Title"]</title>
-    <link href="~/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="~/favicon.ico" rel="icon" type="image/x-icon"/>
     <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
-    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
-    <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
-    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet'/>
+    <link href='~/styles/ads.css' type='text/css' rel='stylesheet'/>
+    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet'/>
     @RenderSection("Styles", required: false)
 
     <script type='text/javascript'>
@@ -30,6 +32,7 @@
         var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
         document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
+        document.isHabboOnline = '@(User.Identity.IsAuthenticated && userData.Status != null ? userData.Status : "offline")' === "online";
         window.name = 'habboMain';
     </script>
 

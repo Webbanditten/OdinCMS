@@ -25,6 +25,11 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        public async Task<List<Rooms>> GetPublicRooms()
+        {
+            return await _context.Rooms.Where(s => s.OwnerId == 0).ToListAsync();
+        }
+
         public async Task<List<Rooms>> GetRoomsByOwner(int ownerId)
         {
             return await _context.Rooms.Where(s => s.OwnerId == ownerId).ToListAsync();

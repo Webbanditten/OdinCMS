@@ -1,0 +1,230 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.BotsListView
+
+@{
+    ViewBag.Title = "Bots";
+}
+
+<h1>@ViewBag.Title</h1>
+<p>
+    Here you can see a list of all the bots on the hotel.
+</p>
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Room</th>
+        <th>Name</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        foreach (var bot in Model.Bots)
+        {
+            <tr data-id="@bot.Id">
+                <td>@bot.Room.Name</td>
+                <td class="botName">@bot.Name</td>
+                <td>
+                    <button class="btn btn-primary" onclick="editBot('@bot.Id')">Edit</button>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+
+
+
+@section scripts {
+    <script>
+    async function editBot(id) {
+        const bot = await fetch('@Url.Action("GetBot")' + '/' + id);
+        const room = await fetch('@Url.Action("GetAllPublicRooms")');
+        const botResponse = await bot.json();
+        const roomResponse = await room.json();
+        
+        let roomOptions = [];
+        
+        roomOptions = roomResponse.map(room => {
+            if (room.id === botResponse.roomId) {
+                return `<option value="${room.id}" selected>${room.name}</option>`;
+            }
+            return `<option value="${room.id}">${room.name}</option>`;
+        });
+
+        let speeches = [];
+        
+        if (botResponse.speech.length > 0) {
+
+            speeches = botResponse.speech.split("|").map(speech => {
+                return `<input class="swal2-input" name="speech" value="${speech}">`;
+            });
+        }
+        
+        let response = [];
+        
+        if (botResponse.response.length > 0) {
+
+            response = botResponse.response.split("|").map(speech => {
+                return `<input class="swal2-input" name="response" value="${speech}">`;
+            });
+        }
+        
+        let unrecognised_response = [];
+        
+        if (botResponse.unrecognisedResponse.length > 0) {
+
+            unrecognised_response = botResponse.unrecognisedResponse.split("|").map(speech => {
+                return `<input class="swal2-input" name="unrecognised_response" value="${speech}">`;
+            });
+        }
+        
+        
+        
+        const { value: formValues } = await Swal.fire({
+            title: "Edit bot " + botResponse.name,
+            showCloseButton: true,
+            width: 600,
+            showCancelButton: true,
+            html: `
+                <input type="hidden" id="id" value="${botResponse.id}">
+                <label for="name">Name</label>
+                <input id="name" class="swal2-input" value="${botResponse.name}">
+    
+                <label for="mission">Mission</label>
+                <input id="mission" class="swal2-input" value="${botResponse.mission}">
+    
+                <label for="figure">Figure</label>
+                <input id="figure" class="swal2-input" value="${botResponse.figure}">
+
+                <label for="room">Room</label>  
+                <select id="room" class="swal2-input">
+                    ${roomOptions}
+                </select>   
+
+                <fieldset>
+                    <legend>Position</legend>
+                    <label for="start_look">Start look rotation</label>
+                    <input id="start_look" class="swal2-input" value="${botResponse.startLook}">   
+
+                    <label for="x">Start X coordinate</label>    
+                    <input id="x" class="swal2-input" value="${botResponse.x}">    
+
+                    <label for="y">Start Y coordinate</label>    
+                    <input id="y" class="swal2-input" value="${botResponse.y}">    
+
+                    <label for="walkspace">Walkspace</label>
+                    <input id="walkspace" class="swal2-input" value="${botResponse.walkspace}">    
+                </fieldset>
+
+                <fieldset>
+                    <legend>Speeches</legend>
+                    <p>End the chat with #WHISPER or #SHOUT to make the bot shout or whisper</P>
+                    <button class="btn btn-primary" id="addSpeech" onclick="addSpeech()">Add speech</button>
+                    <div id="speeches">
+                        ${speeches}
+                    </div>  
+                </fieldset>
+
+                <fieldset>
+                    <legend>Unrecognised response</legend>
+                    <button class="btn btn-primary" id="addUnrecognisedResponse" onclick="addUnrecognisedResponse()">Add unrecognised response</button>
+                                  <div id="unrecognised_response">
+                                    ${unrecognised_response}
+                                </div>  
+
+                </fieldset>
+
+                <fieldset>
+                    <legend>Hand item responses</legend>
+                    <p>Use %lowercaseDrink% to indicate the drink name</P>
+                    <button class="btn btn-primary" id="addResponse" onclick="addResponse()">Add response</button>
+                    <div id="response">
+                        ${response}
+                    </div>  
+                </fieldset> 
+
+                <label for="hand_itmes">Hand items</label>
+                <input id="hand_items" class="swal2-input" value="${botResponse.handItems}">   
+
+                
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+            const result = {
+                id: Number(document.getElementById('id').value),
+                name: document.getElementById('name').value,
+                roomId: Number(document.getElementById('room').value),
+                mission: document.getElementById('mission').value,
+                speech: Array.from(document.getElementsByName('speech')).map(speech => speech.value).join("|"),
+                response: Array.from(document.getElementsByName('response')).map(speech => speech.value).join("|"),
+                unrecognisedResponse: Array.from(document.getElementsByName('unrecognised_response')).map(speech => speech.value).join("|"),
+                figure: document.getElementById('figure').value,
+                startLook: document.getElementById('start_look').value,
+                x: Number(document.getElementById('x').value),
+                y: Number(document.getElementById('y').value),
+                walkspace: document.getElementById('walkspace').value,
+                handItems: document.getElementById('hand_items').value
+            };
+                console.log(result);
+                return result;
+            }
+        });
+        // Bind using jQuery
+        
+        $('#addSpeech').click(addSpeech);
+        $('#addResponse').click(addResponse);
+        $('#addUnrecognisedResponse').click(addUnrecognisedResponse);
+        
+        if (formValues) {
+            const response = await fetch('@Url.Action("UpdateBot")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formValues)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Bot updated',
+                    icon: 'success'
+                });
+                // Also update the UI
+                const fetchPublicRooms = await fetch('@Url.Action("GetAllPublicRooms")');
+                const publicRooms = await fetchPublicRooms.json();
+                
+                const room = publicRooms.find(room => room.id === formValues.roomId);
+                const roomName = document.querySelector(`tr[data-id="${formValues.id}"] td:first-child`);
+                roomName.textContent = room.name;
+                
+                const botName = document.querySelector(`tr[data-id="${formValues.id}"] .botName`);
+                botName.textContent = formValues.name;
+                
+                
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        }
+    }
+    function addSpeech() {
+        $('#speeches').prepend('<input class="swal2-input" name="speech" placeholder="Enter speech" name="speech">');
+    }
+    
+    function addResponse() {
+        $('#response').prepend('<input class="swal2-input" name="response" placeholder="Enter response">');
+    }
+    
+    function addUnrecognisedResponse() {
+        $('#unrecognised_response').prepend('<input class="swal2-input" name="unrecognised_response" placeholder="Enter unrecognised response">');
+    }
+    </script>
+}

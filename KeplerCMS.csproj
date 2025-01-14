@@ -115,7 +115,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Housekeeping\Views\Shared" />
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Bots\Alert.cshtml" />
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Bots\Ban.cshtml" />
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Bots\BanList.cshtml" />
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Bots\Index.cshtml" />
+    <AdditionalFiles Include="Areas\Housekeeping\Views\Bots\Infobus.cshtml" />
   </ItemGroup>
 
 </Project>

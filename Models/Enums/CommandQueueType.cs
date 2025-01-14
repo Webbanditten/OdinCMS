@@ -12,12 +12,13 @@ namespace KeplerCMS.Models.Enums
         reduce_credits,
         send_friend_request,
         purchase_furni,
-        roomForward,
+        room_forward,
         campaign,
         remote_alert,
         remote_ban,
         remote_kick,
         update_room,
-        update_infobus
+        update_infobus,
+        reset_bots
     }
 }
