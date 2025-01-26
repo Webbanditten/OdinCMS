@@ -25,6 +25,8 @@ namespace KeplerCMS.Data.Models
         public string Description { get; set; }
         [Column("required_streak")]
         public int RequiredStreak { get; set; }
+        [Column("badge")]
+        public string Badge { get; set; }
 
         [NotMapped]
         public List<ItemsDefinitions> ItemsDefinitions { get; set; }

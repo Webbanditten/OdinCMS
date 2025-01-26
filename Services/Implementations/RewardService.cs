@@ -21,7 +21,9 @@ namespace KeplerCMS.Services.Implementations
         }
         public async Task<List<Rewards>> GetRewardsBetweenDates(DateTime from, DateTime to)
         {
-            var rewards = await _context.Rewards.Where(s => s.AvailableFrom >= from && s.AvailableTo <= to).ToListAsync();
+            var rewards = await _context.Rewards
+                .Where(s => (s.AvailableFrom <= to && s.AvailableTo >= from) || s.AvailableFrom > to)
+                .ToListAsync();
 
             var itemDefinitionIds = rewards
                 .Where(r => !string.IsNullOrEmpty(r.ItemDefinitions))
@@ -64,6 +66,7 @@ namespace KeplerCMS.Services.Implementations
                 Description = reward.Description,
                 AvailableFrom = reward.AvailableFrom,
                 AvailableTo = reward.AvailableTo,
+                Badge = reward.Badge,
                 ItemDefinitions = reward.ItemDefinitions,
                 Redeemed = false,
             }).ToListAsync();
