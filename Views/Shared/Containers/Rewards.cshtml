@@ -24,6 +24,7 @@
             Description = reward.Description,
             AvailableFrom = reward.AvailableFrom,
             AvailableTo = reward.AvailableTo,
+            Badge = reward.Badge,
             ItemDefinitions = reward.ItemDefinitions,
             Redeemed = false,
             ItemsDefinitions = reward.ItemsDefinitions
@@ -49,18 +50,27 @@
                             <li class="rewards-item @todayClass">
                                 <div class="rewards-item-header">@reward.AvailableFrom.ToString(Configuration.GetSection("keplercms")["shortDateFormat"])</div>
                                 <div class="rewards-item-body">
-
-                                    @foreach (var rewardItemsDefinition in reward.ItemsDefinitions)
+                                    @if (reward.ItemsDefinitions is { Count: > 0 })
                                     {
-                                        var rawSprite = rewardItemsDefinition.Sprite;
-                                        var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
-                                        var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
+                                        @foreach (var rewardItemsDefinition in reward.ItemsDefinitions)
+                                        {
+                                            var rawSprite = rewardItemsDefinition.Sprite;
+                                            var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
+                                            var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
+                                            <div class="rewards-item-furni">
+                                                <img src="~/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
+                                                <span class="tooltiptext">@rewardItemsDefinition.Name</span>
+                                            </div>
+                                        }
+                                    }
+                                    
+                                    @if(reward.Badge != null)
+                                    {
                                         <div class="rewards-item-furni">
-                                            <img src="~/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
-                                            <span class="tooltiptext">@rewardItemsDefinition.Name</span>
+                                            <img width="32" height="32"  src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(reward.Badge).gif"/>
+                                            <span class="tooltiptext"><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(reward.Badge).gif"/><br/>@DbRes.T("badge", "rewards")</span>
                                         </div>
                                     }
-
                                 </div>
                                 
                                @{

@@ -1,4 +1,7 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
     ViewBag.Title = "Rewards";
 
 }
@@ -26,6 +29,13 @@
             <input type="text" id="description" name="description" placeholder="Description">
         </div>
         <div class="form-group">
+            <label for="description">Badge reward? Enter Badge Code</label>
+            <input maxlength="3" type="text" id="badge" name="badge" placeholder="Badge Code">
+            <div id="badgePreview">
+                <img src=""/>
+            </div>
+        </div>
+        <div class="form-group">
             <label for="increment_day">Increment day</label>
             <input type="checkbox" name="increment_day" id="increment_day" value="true">
         </div>
@@ -45,6 +55,7 @@
         <th>Available From</th>
         <th>Available To</th>
         <th>Item definitions</th>
+        <th>Badge Code</th>
         <th>Actions</th>
     </tr>
     </thead>
@@ -65,6 +76,10 @@
             $(".habboTable tbody").append("<tr><td colspan='3'>No results</td></tr>");
         }
 
+        function setBadgePreview(badgeCode) {
+            $("#badgePreview img").attr("src", `@(Configuration.GetSection("keplercms")["badgeUrl"])/${badgeCode}.gif`);
+        }
+        
         function copyEntry(event) {
 
             
@@ -82,9 +97,20 @@
             
             $("#available_from").val(availableFrom.replace("T", " "));
             $("#available_to").val(availableTo.replace("T", " "));
+            
+            $("#badge").val(row.find("td:nth-child(4)").text());
+            
+            if ($("#badge").val().length > 0) {
+                $('.furni-searcher').prop('disabled', true);
+                
+                setBadgePreview($("#badge").val());
+
+            }
            
             console.log("Copy entry clicked");
         }
+        
+
 
         function deleteEntry(event) {
             var row = $(event.target).closest('tr'); // Get the parent row
@@ -149,6 +175,8 @@
                            itemDefsString += item.Name + ", <br/>";
                         });
                         row.append($("<td>").html("<textarea style='display:none' name='itemdefs'>"+JSON.stringify(itemDefs)+"</textarea>" + itemDefsString));
+                        
+                        row.append($('<td>').html(entry.Badge));
                         
                         var actions = $('<td>');
                         var copyButton = $('<button>').text('Copy').click(copyEntry);
@@ -238,10 +266,11 @@
                     ItemDefinitions: itemIds.join(","),
                     Description: $("#description").val(),
                     AvailableFrom: $("#available_from").val(),
-                    AvailableTo: $("#available_to").val()
+                    AvailableTo: $("#available_to").val(),
+                    Badge: $("#badge").val(),
                 };
                 
-                if (data.ItemDefinitions.length == 0) {
+                if (data.ItemDefinitions.length == 0 && data.Badge.length == 0) {
                     alert("You must select at least one item");
                     return;
                 }
@@ -259,7 +288,11 @@
                 if (data.AvailableTo.length == 0) {
                     alert("You must enter a valid Available To to date");
                     return;
-                }   
+                }
+                if (data.Badge.length != 0 && data.Badge.length != 3) {
+                    alert("Badge code must be 3 characters long");
+                    return;
+                }
 
 
                 $.ajax({
@@ -285,6 +318,18 @@
                         console.error('Error:', error);
                     }
                 });
+            });
+            
+            // If badge code has text disable and empty the items field
+            $("#badge").on("input", function() {
+                if ($(this).val().length > 0) {
+                    $('.furni-searcher').val(null).trigger('change');
+                    $('.furni-searcher').prop('disabled', true);
+                } else {
+                    $('.furni-searcher').prop('disabled', false);
+                }
+                
+                setBadgePreview($(this).val());
             });
         });
     </script>
