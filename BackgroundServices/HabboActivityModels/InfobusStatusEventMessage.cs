@@ -1,6 +1,6 @@
 ﻿namespace KeplerCMS.BackgroundServices.HabboActivityModels;
 
-public class InfobusStatusEventMessage
+public class InfobusStatusEventMessage : EventMessage
 {
     public int[] Players { get; set; }
     public int Time { get; set; }

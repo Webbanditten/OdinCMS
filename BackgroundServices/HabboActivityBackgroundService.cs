@@ -46,7 +46,7 @@ namespace KeplerCMS.BackgroundServices
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: "habbo_activity", type: ExchangeType.Topic, durable: false);
+            _channel.ExchangeDeclare(exchange: _exchangeName, type: ExchangeType.Fanout, durable: false);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -55,14 +55,14 @@ namespace KeplerCMS.BackgroundServices
 
             // Declare and bind the queue to the exchange within ExecuteAsync
             var queueName = _channel.QueueDeclare("", false, false, false, null).QueueName;
-            _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "chat");
-            _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "infobus");
+            _channel.QueueBind(queue: queueName, exchange: _exchangeName, routingKey: "");
             
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += async (model, ea) =>
             { var body = ea.Body.ToArray();
                 var messageJson = Encoding.UTF8.GetString(body);
-                switch(ea.RoutingKey) {
+                var messageTempObject = JsonConvert.DeserializeObject<EventMessage>(messageJson);
+                switch(messageTempObject.EventType) {
                     case "chat":
                     {
                         try

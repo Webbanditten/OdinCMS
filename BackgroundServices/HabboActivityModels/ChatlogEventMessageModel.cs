@@ -1,6 +1,6 @@
 ﻿namespace KeplerCMS.BackgroundServices.HabboActivityModels;
 
-public class ChatlogEventMessageModel
+public class ChatlogEventMessageModel : EventMessage
 {
     public int PlayerId { get; set; }
     public string Message { get; set; }
