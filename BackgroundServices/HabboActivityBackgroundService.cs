@@ -46,7 +46,7 @@ namespace KeplerCMS.BackgroundServices
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: "habbo_activity", type: ExchangeType.Direct, durable: true);
+            _channel.ExchangeDeclare(exchange: "habbo_activity", type: ExchangeType.Topic, durable: false);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,7 +54,7 @@ namespace KeplerCMS.BackgroundServices
             stoppingToken.ThrowIfCancellationRequested();
 
             // Declare and bind the queue to the exchange within ExecuteAsync
-            var queueName = _channel.QueueDeclare("activity", false, false, false, null).QueueName;
+            var queueName = _channel.QueueDeclare("", false, false, false, null).QueueName;
             _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "chat");
             _channel.QueueBind(queue: queueName, exchange: "habbo_activity", routingKey: "infobus");
             
@@ -107,6 +107,7 @@ namespace KeplerCMS.BackgroundServices
                
             };
 
+            
             _channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
 
             return Task.CompletedTask;
