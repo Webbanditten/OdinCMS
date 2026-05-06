@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KeplerCMS.Areas.Housekeeping.Models.Views;
+using KeplerCMS.Models;
 
 namespace KeplerCMS.Services.Interfaces
 {
@@ -37,5 +38,6 @@ namespace KeplerCMS.Services.Interfaces
         public Task<UsersBanSearchModel> BanSearch(string search, int take, int skip, string letter);
         public Task<bool> RemoveBan(UsersBans ban);
         public Task<UsersBans> GetBan(int id);
+        public Task<IEnumerable<SimpleUser>> GetOtherAccounts(int userId);
     }
 }

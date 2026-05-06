@@ -8,6 +8,11 @@ namespace KeplerCMS.Data
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<UsersIpLogs>()
+                .HasNoKey();
+
+            modelBuilder.Entity<UsersMachineIdLogs>().HasNoKey();
+            
             modelBuilder.Entity<UsersBadges>()
                 .HasKey(c => new { c.UserId, c.Badge });
 
@@ -88,6 +93,8 @@ namespace KeplerCMS.Data
         public DbSet<Movies> Movies { get; set; }
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
+        public DbSet<UsersMachineIdLogs> UsersMachineIdLogs { get; set; }
+        public DbSet<UsersIpLogs> UsersIpLogs { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
         public DbSet<RankRights> RankRights { get; set; }
         public DbSet<Fuses> Fuses { get; set; }

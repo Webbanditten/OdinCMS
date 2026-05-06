@@ -30,7 +30,39 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
             _configuration = configuration;
         }
+        
+        public async Task<IEnumerable<SimpleUser>> GetOtherAccounts(int userId)
+        {
+            var machineMatches = from uml1 in _context.UsersMachineIdLogs
+                join uml2 in _context.UsersMachineIdLogs 
+                    on uml1.MachineId equals uml2.MachineId
+                where uml1.UserId == userId && uml1.UserId != uml2.UserId
+                select new { OtherUserId = uml2.UserId };
 
+            var ipMatches = from uil1 in _context.UsersIpLogs
+                join uil2 in _context.UsersIpLogs 
+                    on uil1.IpAddress equals uil2.IpAddress
+                where uil1.UserId == userId && uil1.UserId != uil2.UserId
+                select new { OtherUserId = uil2.UserId };
+
+            // Combine machine and IP matches
+            var allMatches = machineMatches
+                .Concat(ipMatches)
+                .Distinct(); // Ensure no duplicates
+
+            // Join with users table to get usernames
+            var result = from match in allMatches
+                join u in _context.Users 
+                    on match.OtherUserId equals u.Id
+                select new SimpleUser
+                {
+                    Username = u.Username,
+                    Id = u.Id
+                };
+
+            return await result.ToListAsync();
+        }
+        
         public async Task<Users> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();

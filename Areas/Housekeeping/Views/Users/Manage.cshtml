@@ -158,6 +158,21 @@
     </div>
 </div>
 <hr>
+<h2>Other Accounts: </h2>
+<p>
+    This users has @Model.OtherAccounts.Count() alt-accounts
+    <br />
+
+    @{
+        @foreach (var account in Model.OtherAccounts)
+        {
+            <a href="@Url.Action("Manage", "Users", new { id = account.Id })">@account.Username</a><br />
+        }
+    }
+</p>
+
+
+<hr>
 <h2>Badges: </h2>
 <details>
     <summary>Manage badges</summary>
