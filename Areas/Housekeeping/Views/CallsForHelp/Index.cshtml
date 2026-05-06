@@ -1,0 +1,151 @@
+@using KeplerCMS.Data.Models
+@model IEnumerable<CallsForHelp>
+@{
+    ViewData["Title"] = "Calls for Help";
+    var filterDate = (DateTime)ViewBag.FilterDate;
+}
+
+<h2>Results on @filterDate.ToString("yyyy-MM-dd")</h2>
+
+<form method="get" style="margin-bottom: 10px;">
+    <label for="date">Filter by date:</label>
+    <input type="date" id="date" name="date" value="@filterDate.ToString("yyyy-MM-dd")" />
+    <button type="submit">Filter</button>
+</form>
+
+@if (Model.Any())
+{
+    <table class="habboTable">
+        <thead>
+            <tr>
+                <th>Caller</th>
+                <th>Time</th>
+                <th>Room name</th>
+                <th>Category</th>
+                <th>Message</th>
+                <th>Picked by</th>
+                <th>Time picked</th>
+                <th>Status</th>
+                <th>Chat Log</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var call in Model)
+            {
+                var rowClass = call.Category == 1 ? "cfh-emergency" : call.Category == 3 ? "cfh-automatic" : "";
+                <tr class="@rowClass">
+                    <td>
+                        <a href="@Url.Action("Manage", "Users", new { id = call.CallerId })">@call.CallerUsername</a>
+                        <a href="@Url.Action("Manage", "Users", new { id = call.CallerId })">[?]</a>
+                    </td>
+                    <td>@call.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@call.RoomName</td>
+                    <td>
+                        @switch (call.Category)
+                        {
+                            case 1:
+                                <span>Emergency</span>
+                                break;
+                            case 2:
+                                <span>Normal</span>
+                                break;
+                            case 3:
+                                <span>Automatic</span>
+                                break;
+                        }
+                    </td>
+                    <td>@call.Message</td>
+                    <td>
+                        @if (call.PickedUpBy > 0)
+                        {
+                            <a href="@Url.Action("Manage", "Users", new { id = call.PickedUpBy })">@call.PickedUpUsername</a>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (call.PickedUpAt.HasValue)
+                        {
+                            @call.PickedUpAt.Value.ToString("yyyy-MM-dd HH:mm")
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(call.ClosedReason))
+                        {
+                            switch (call.ClosedReason)
+                            {
+                                case "replied":
+                                    <span class="cfh-status-replied" title="@call.ReplyMessage">&#x2709;</span>
+                                    break;
+                                case "cancelled":
+                                    <span class="cfh-status-cancelled" title="Cancelled by caller">&#x2715;</span>
+                                    break;
+                                case "expired":
+                                    <span class="cfh-status-expired" title="Expired without response">&#x23F0;</span>
+                                    break;
+                            }
+                        }
+                        else if (call.PickedUpBy > 0)
+                        {
+                            <span class="cfh-status-progress" title="In progress">&#x270E;</span>
+                        }
+                        else
+                        {
+                            <span class="cfh-status-open" title="Open">&#x25CF;</span>
+                        }
+                    </td>
+                    <td>
+                        @if (call.RoomId > 0)
+                        {
+                            <a href="@Url.Action("View", "Rooms", new { id = call.RoomId })">Chat Log</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No calls for help found for this date.</p>
+}
+
+<style>
+    tr.cfh-emergency td {
+        background-color: #FFCC00 !important;
+    }
+    tr.cfh-automatic td {
+        background-color: #FFD700 !important;
+    }
+    .cfh-status-replied {
+        color: #006600;
+        font-size: 16px;
+        cursor: help;
+    }
+    .cfh-status-cancelled {
+        color: #999999;
+        font-size: 16px;
+        cursor: help;
+    }
+    .cfh-status-expired {
+        color: #CC0000;
+        font-size: 16px;
+        cursor: help;
+    }
+    .cfh-status-progress {
+        color: #FF6600;
+        font-size: 16px;
+        cursor: help;
+    }
+    .cfh-status-open {
+        color: #FF6600;
+        font-size: 16px;
+        cursor: help;
+    }
+</style>
