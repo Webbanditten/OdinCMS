@@ -158,6 +158,48 @@
     </div>
 </div>
 <hr>
+<h2>Last unique machine ID: <strong>@(Model.LastMachineId ?? "N/A")</strong></h2>
+<h3>Characters with same ID:</h3>
+@if (Model.OtherAccounts.Any())
+{
+    <style>
+        #otherAccountsTable, #otherAccountsTable td, #otherAccountsTable th {
+            font-size: 10px !important;
+            white-space: nowrap;
+        }
+    </style>
+    <table class="habboTable" id="otherAccountsTable" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Current email</th>
+                <th>Last machine ID</th>
+                <th>Last IP</th>
+                <th>Last access</th>
+                <th>Access count</th>
+                <th>Match type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in Model.OtherAccounts)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Manage", "Users", new { id = account.Id })">@account.Username</a></td>
+                    <td>@account.Email</td>
+                    <td>@account.LastMachineId</td>
+                    <td>@account.LastIp</td>
+                    <td>@(account.LastAccess?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Never")</td>
+                    <td>@account.AccessCount</td>
+                    <td>@account.MatchType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No duplicate accounts found.</p>
+}<hr>
 <h2>Badges: </h2>
 <details>
     <summary>Manage badges</summary>

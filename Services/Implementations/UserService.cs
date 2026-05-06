@@ -30,7 +30,95 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
             _configuration = configuration;
         }
+        
+        public async Task<List<SimpleUser>> GetOtherAccounts(int userId)
+        {
+            // Get this user's v2 machine IDs (v1 IDs were truncated and prone to collisions)
+            var userV2MachineIds = await _context.UsersMachineIdLogs
+                .Where(m => m.UserId == userId && EF.Functions.Like(m.MachineId, "v2%"))
+                .Select(m => m.MachineId)
+                .Distinct()
+                .ToListAsync();
 
+            var machineMatchUserIds = userV2MachineIds.Any()
+                ? await _context.UsersMachineIdLogs
+                    .Where(m => userV2MachineIds.Contains(m.MachineId) && m.UserId != userId)
+                    .Select(m => m.UserId)
+                    .Distinct()
+                    .Take(100)
+                    .ToListAsync()
+                : new List<int>();
+
+            var ipMatchUserIds = await (
+                from uil1 in _context.UsersIpLogs
+                join uil2 in _context.UsersIpLogs
+                    on uil1.IpAddress equals uil2.IpAddress
+                where uil1.UserId == userId && uil2.UserId != userId
+                      && uil1.IpAddress != null 
+                      && uil1.IpAddress != "" 
+                      && uil1.IpAddress != "127.0.0.1"
+                select uil2.UserId
+            ).Distinct().Take(100).ToListAsync();
+
+            // Determine match type per user
+            var allUserIds = machineMatchUserIds.Union(ipMatchUserIds).ToList();
+
+            if (!allUserIds.Any())
+                return new List<SimpleUser>();
+
+            var users = await _context.Users
+                .Where(u => allUserIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.Username, u.Email, u.LastOnlineTimestamp, u.TimesLoggedIn })
+                .ToListAsync();
+
+            // Get latest machine ID per matched user (client-side grouping for keyless entity)
+            var machineIdRows = await _context.UsersMachineIdLogs
+                .Where(m => allUserIds.Contains(m.UserId))
+                .ToListAsync();
+            var latestMachineIds = machineIdRows
+                .GroupBy(m => m.UserId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.CreatedAt).First().MachineId);
+
+            // Get latest IP per matched user (client-side grouping for keyless entity)
+            var ipRows = await _context.UsersIpLogs
+                .Where(ip => allUserIds.Contains(ip.UserId))
+                .ToListAsync();
+            var latestIps = ipRows
+                .GroupBy(ip => ip.UserId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(ip => ip.CreatedAt).First().IpAddress);
+
+            var machineIdLookup = latestMachineIds;
+            var ipLookup = latestIps;
+            var machineSet = new HashSet<int>(machineMatchUserIds);
+            var ipSet = new HashSet<int>(ipMatchUserIds);
+
+            return users.Select(u => new SimpleUser
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                LastMachineId = machineIdLookup.ContainsKey(u.Id) ? machineIdLookup[u.Id] : null,
+                LastIp = ipLookup.ContainsKey(u.Id) ? ipLookup[u.Id] : null,
+                LastAccess = u.LastOnlineTimestamp > 0
+                    ? DateTimeOffset.FromUnixTimeSeconds(u.LastOnlineTimestamp).UtcDateTime
+                    : null,
+                AccessCount = u.TimesLoggedIn,
+                MatchType = machineSet.Contains(u.Id) && ipSet.Contains(u.Id)
+                    ? "Both"
+                    : machineSet.Contains(u.Id) ? "MachineID" : "IP"
+            }).ToList();
+        }
+
+        public async Task<string> GetLastMachineId(int userId)
+        {
+            var latest = await _context.UsersMachineIdLogs
+                .Where(m => m.UserId == userId)
+                .OrderByDescending(m => m.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            return latest?.MachineId;
+        }
+        
         public async Task<Users> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();

@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "organization": "KeplerCMS",
+  "date": "2026-05-06",
+  "abstract": "Guidelines for building Habbo Hotel CMS features in the KeplerCMS ASP.NET Core MVC project. Covers Housekeeping admin tools, services, database models, views, and Kepler game server integration.",
+  "references": [
+    {
+      "name": "KeplerCMS",
+      "path": "C:\\Users\\Patrick\\Documents\\github\\KeplerCMS",
+      "description": "The CMS project (ASP.NET Core 6 MVC, Razor, MySQL)"
+    },
+    {
+      "name": "Kepler Server",
+      "path": "C:\\Users\\Patrick\\Documents\\github\\Kepler",
+      "description": "Java game server (Netty, custom binary protocol, RabbitMQ)"
+    },
+    {
+      "name": "Habbo Decompiled Client",
+      "path": "C:\\Users\\Patrick\\Documents\\forgejo\\habbo-vibe-playground\\decompiled",
+      "description": "Decompiled Shockwave Lingo Script (.ls) files from the original Habbo client"
+    },
+    {
+      "name": "UI Design Screenshots",
+      "path": "C:\\Users\\Patrick\\Pictures\\housekeeping stuff",
+      "description": "Screenshots of original Habbo Hotel housekeeping admin panel for design reference"
+    }
+  ],
+  "tags": [
+    "habbo-hotel",
+    "cms",
+    "asp-net-core",
+    "mvc",
+    "razor",
+    "mysql",
+    "entity-framework",
+    "game-server",
+    "admin-panel",
+    "housekeeping",
+    "moderation"
+  ]
+}

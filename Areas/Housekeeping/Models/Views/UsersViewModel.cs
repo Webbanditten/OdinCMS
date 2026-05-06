@@ -40,5 +40,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public IEnumerable<Rank> Ranks { get; set; }
         public string Message { get; set; }
         public IEnumerable<UsersBadges> Badges { get; set; }
+        public List<SimpleUser> OtherAccounts { get; set; }
+        public string LastMachineId { get; set; }
     }
 }
