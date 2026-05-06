@@ -54,10 +54,12 @@ namespace KeplerCMS.Areas.Housekeeping
             var ranks = await _fuseService.GetRanks();
             var badges = await _userService.GetBadges(user.Id);
             var otherAccounts = await _userService.GetOtherAccounts(user.Id);
+            var lastMachineId = await _userService.GetLastMachineId(user.Id);
             var model = new ManageUserViewModel
             {
                 User = user,
                 OtherAccounts = otherAccounts,
+                LastMachineId = lastMachineId,
                 Friends = friends,
                 Rank = rank,
                 Ranks = ranks,

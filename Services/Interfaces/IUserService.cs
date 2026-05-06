@@ -39,5 +39,6 @@ namespace KeplerCMS.Services.Interfaces
         public Task<bool> RemoveBan(UsersBans ban);
         public Task<UsersBans> GetBan(int id);
         public Task<List<SimpleUser>> GetOtherAccounts(int userId);
+        public Task<string> GetLastMachineId(int userId);
     }
 }
