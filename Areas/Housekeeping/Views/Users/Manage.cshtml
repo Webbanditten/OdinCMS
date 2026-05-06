@@ -160,19 +160,28 @@
 <hr>
 <h2>Other Accounts: </h2>
 <p>
-    This users has @Model.OtherAccounts.Count() alt-accounts
-    <br />
-
-    @{
-        @foreach (var account in Model.OtherAccounts)
-        {
-            <a href="@Url.Action("Manage", "Users", new { id = account.Id })">@account.Username</a><br />
-        }
-    }
+    This user has @Model.OtherAccounts.Count alt-account(s)
 </p>
-
-
-<hr>
+@if (Model.OtherAccounts.Any())
+{
+    <table class="habboTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Match Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in Model.OtherAccounts)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Manage", "Users", new { id = account.Id })">@account.Username</a></td>
+                    <td>@account.MatchType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}<hr>
 <h2>Badges: </h2>
 <details>
     <summary>Manage badges</summary>

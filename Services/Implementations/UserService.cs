@@ -31,36 +31,48 @@ namespace KeplerCMS.Services.Implementations
             _configuration = configuration;
         }
         
-        public async Task<IEnumerable<SimpleUser>> GetOtherAccounts(int userId)
+        public async Task<List<SimpleUser>> GetOtherAccounts(int userId)
         {
-            var machineMatches = from uml1 in _context.UsersMachineIdLogs
-                join uml2 in _context.UsersMachineIdLogs 
+            // Only match on v2 machine IDs (v1 IDs were truncated and prone to collisions)
+            var machineMatchUserIds = await (
+                from uml1 in _context.UsersMachineIdLogs
+                join uml2 in _context.UsersMachineIdLogs
                     on uml1.MachineId equals uml2.MachineId
-                where uml1.UserId == userId && uml1.UserId != uml2.UserId
-                select new { OtherUserId = uml2.UserId };
+                where uml1.UserId == userId && uml2.UserId != userId
+                      && uml1.MachineId.StartsWith("v2")
+                select uml2.UserId
+            ).Distinct().Take(100).ToListAsync();
 
-            var ipMatches = from uil1 in _context.UsersIpLogs
-                join uil2 in _context.UsersIpLogs 
+            var ipMatchUserIds = await (
+                from uil1 in _context.UsersIpLogs
+                join uil2 in _context.UsersIpLogs
                     on uil1.IpAddress equals uil2.IpAddress
-                where uil1.UserId == userId && uil1.UserId != uil2.UserId
-                select new { OtherUserId = uil2.UserId };
+                where uil1.UserId == userId && uil2.UserId != userId
+                      && uil1.IpAddress != null 
+                      && uil1.IpAddress != "" 
+                      && uil1.IpAddress != "127.0.0.1"
+                select uil2.UserId
+            ).Distinct().Take(100).ToListAsync();
 
-            // Combine machine and IP matches
-            var allMatches = machineMatches
-                .Concat(ipMatches)
-                .Distinct(); // Ensure no duplicates
+            // Determine match type per user
+            var allUserIds = machineMatchUserIds.Union(ipMatchUserIds).ToList();
 
-            // Join with users table to get usernames
-            var result = from match in allMatches
-                join u in _context.Users 
-                    on match.OtherUserId equals u.Id
-                select new SimpleUser
-                {
-                    Username = u.Username,
-                    Id = u.Id
-                };
+            var users = await _context.Users
+                .Where(u => allUserIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.Username })
+                .ToListAsync();
 
-            return await result.ToListAsync();
+            var machineSet = new HashSet<int>(machineMatchUserIds);
+            var ipSet = new HashSet<int>(ipMatchUserIds);
+
+            return users.Select(u => new SimpleUser
+            {
+                Id = u.Id,
+                Username = u.Username,
+                MatchType = machineSet.Contains(u.Id) && ipSet.Contains(u.Id)
+                    ? "Both"
+                    : machineSet.Contains(u.Id) ? "MachineID" : "IP"
+            }).ToList();
         }
         
         public async Task<Users> GetUserByUsername(string username)

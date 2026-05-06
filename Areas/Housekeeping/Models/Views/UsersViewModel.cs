@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -41,6 +40,6 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public IEnumerable<Rank> Ranks { get; set; }
         public string Message { get; set; }
         public IEnumerable<UsersBadges> Badges { get; set; }
-        public IEnumerable<SimpleUser> OtherAccounts { get; set; }
+        public List<SimpleUser> OtherAccounts { get; set; }
     }
 }
