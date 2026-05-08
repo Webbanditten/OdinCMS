@@ -1,0 +1,269 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.PollCreateViewModel
+@{
+    var pollId = (int)ViewBag.PollId;
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Edit Poll #@pollId</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update" asp-route-id="@pollId" method="post" id="pollForm">
+            <div class="form-group">
+                <label asp-for="Headline" class="label-control">Headline (shown at top of poll)</label>
+                <input asp-for="Headline" class="form-control" />
+                <span asp-validation-for="Headline" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="label-control">Description (shown in offer popup)</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ThankYou" class="label-control">Thank you message</label>
+                <input asp-for="ThankYou" class="form-control" />
+            </div>
+
+            <hr />
+            <h5>Trigger Settings</h5>
+            <div class="form-group">
+                <label class="label-control">Room (search by name or owner)</label>
+                <select id="roomSearcher" name="TriggerRoomId" class="form-control">
+                    @if (Model.TriggerRoomId.HasValue && Model.TriggerRoomId.Value > 0)
+                    {
+                        <option value="@Model.TriggerRoomId" selected>Room ID: @Model.TriggerRoomId (loaded)</option>
+                    }
+                    else
+                    {
+                        <option value="0">Any room (no specific room)</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="label-control">Active From</label>
+                <input type="text" id="timeFrom" class="form-control datetimepicker" placeholder="Leave empty for no start restriction" autocomplete="off"
+                       value="@(Model.TriggerTimeFrom.HasValue && Model.TriggerTimeFrom.Value > 0 ? DateTimeOffset.FromUnixTimeSeconds(Model.TriggerTimeFrom.Value).LocalDateTime.ToString("yyyy-MM-dd HH:mm") : "")" />
+                <input type="hidden" name="TriggerTimeFrom" id="timeFromUnix" value="@(Model.TriggerTimeFrom ?? 0)" />
+            </div>
+            <div class="form-group">
+                <label class="label-control">Active Until</label>
+                <input type="text" id="timeTo" class="form-control datetimepicker" placeholder="Leave empty for no end restriction" autocomplete="off"
+                       value="@(Model.TriggerTimeTo.HasValue && Model.TriggerTimeTo.Value > 0 ? DateTimeOffset.FromUnixTimeSeconds(Model.TriggerTimeTo.Value).LocalDateTime.ToString("yyyy-MM-dd HH:mm") : "")" />
+                <input type="hidden" name="TriggerTimeTo" id="timeToUnix" value="@(Model.TriggerTimeTo ?? 0)" />
+            </div>
+
+            <hr />
+            <h5>Questions</h5>
+            <div id="questions-container"></div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="addQuestion()">+ Add Question</button>
+
+            <hr />
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css" />
+    <script src="~/lib/select2/js/select2.min.js" type="text/javascript"></script>
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+    <script>
+        // Room search with Select2
+        $('#roomSearcher').select2({
+            placeholder: 'Search for a room...',
+            allowClear: true,
+            ajax: {
+                url: '/api/hotel/rooms/search',
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return { query: params.term };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function(room) {
+                            return { id: room.id, text: room.name + ' (by ' + room.owner + ', ID: ' + room.id + ')' };
+                        })
+                    };
+                }
+            }
+        });
+
+        // Datetime pickers
+        $('.datetimepicker').datetimepicker({
+            format: 'Y-m-d H:i',
+            step: 15
+        });
+
+        // Convert datetime to unix on form submit
+        $('#pollForm').on('submit', function() {
+            var fromVal = $('#timeFrom').val();
+            var toVal = $('#timeTo').val();
+            $('#timeFromUnix').val(fromVal ? Math.floor(new Date(fromVal).getTime() / 1000) : 0);
+            $('#timeToUnix').val(toVal ? Math.floor(new Date(toVal).getTime() / 1000) : 0);
+        });
+
+        // Question builder
+        var questionIndex = 0;
+
+        function addQuestion(text, type, minSelect, maxSelect, options) {
+            var qType = type || 'CHOICE';
+            var qText = text || '';
+            var qMin = minSelect || 1;
+            var qMax = maxSelect || 1;
+
+            var html = '<div class="question-block" id="question-' + questionIndex + '" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">';
+            html += '<h6>Question ' + (questionIndex + 1) + ' <button type="button" class="btn btn-sm btn-danger" onclick="removeQuestion(' + questionIndex + ')">Remove</button></h6>';
+            html += '<div class="form-group">';
+            html += '<label>Question Text</label>';
+            html += '<input name="Questions[' + questionIndex + '].Text" class="form-control" value="' + escapeHtml(qText) + '" required />';
+            html += '</div>';
+            html += '<div class="form-group">';
+            html += '<label>Type</label>';
+            html += '<select name="Questions[' + questionIndex + '].Type" class="form-control" onchange="onTypeChange(this, ' + questionIndex + ')">';
+            html += '<option value="CHOICE"' + (qType === 'CHOICE' ? ' selected' : '') + '>Single Choice (radio buttons)</option>';
+            html += '<option value="MULTI_CHOICE"' + (qType === 'MULTI_CHOICE' ? ' selected' : '') + '>Multiple Choice (checkboxes)</option>';
+            html += '<option value="TEXT"' + (qType === 'TEXT' ? ' selected' : '') + '>Free Text</option>';
+            html += '</select>';
+            html += '</div>';
+
+            // Options section (hidden for TEXT)
+            var showOptions = qType !== 'TEXT';
+            html += '<div class="options-section" id="options-section-' + questionIndex + '" style="display: ' + (showOptions ? 'block' : 'none') + ';">';
+
+            // Min/Max section (only shown for MULTI_CHOICE)
+            var showMinMax = qType === 'MULTI_CHOICE';
+            html += '<div class="minmax-section" id="minmax-section-' + questionIndex + '" style="display: ' + (showMinMax ? 'flex' : 'none') + '; gap: 10px;">';
+            html += '<div class="form-group" style="flex:1;">';
+            html += '<label>Min selections</label>';
+            html += '<input id="minSelect-' + questionIndex + '" name="Questions[' + questionIndex + '].MinSelect" type="number" class="form-control" value="' + qMin + '" min="0" />';
+            html += '</div>';
+            html += '<div class="form-group" style="flex:1;">';
+            html += '<label>Max selections</label>';
+            html += '<input id="maxSelect-' + questionIndex + '" name="Questions[' + questionIndex + '].MaxSelect" type="number" class="form-control" value="' + qMax + '" min="1" />';
+            html += '</div>';
+            html += '</div>';
+
+            // Hidden min/max for single choice (always 1/1)
+            html += '<input type="hidden" id="minSelectHidden-' + questionIndex + '" ' + (showMinMax ? 'disabled' : '') + ' name="' + (showMinMax ? '' : 'Questions[' + questionIndex + '].MinSelect') + '" value="1" />';
+            html += '<input type="hidden" id="maxSelectHidden-' + questionIndex + '" ' + (showMinMax ? 'disabled' : '') + ' name="' + (showMinMax ? '' : 'Questions[' + questionIndex + '].MaxSelect') + '" value="1" />';
+
+            html += '<label style="margin-top:8px;"><strong>Answer options</strong></label>';
+            html += '<div class="options-list" id="options-' + questionIndex + '"></div>';
+            html += '<button type="button" class="btn btn-sm btn-secondary" onclick="addOption(' + questionIndex + ')">+ Add Option</button>';
+            html += '</div>';
+
+            html += '<input type="hidden" name="Questions[' + questionIndex + '].Order" value="' + questionIndex + '" />';
+            html += '</div>';
+
+            document.getElementById('questions-container').insertAdjacentHTML('beforeend', html);
+
+            if (options && options.length > 0) {
+                for (var i = 0; i < options.length; i++) {
+                    addOption(questionIndex, options[i]);
+                }
+            } else if (showOptions && !text) {
+                addOption(questionIndex);
+                addOption(questionIndex);
+            }
+
+            questionIndex++;
+        }
+
+        function onTypeChange(select, qIndex) {
+            var type = select.value;
+            var optionsSection = document.getElementById('options-section-' + qIndex);
+            var minmaxSection = document.getElementById('minmax-section-' + qIndex);
+            var minInput = document.getElementById('minSelect-' + qIndex);
+            var maxInput = document.getElementById('maxSelect-' + qIndex);
+            var minHidden = document.getElementById('minSelectHidden-' + qIndex);
+            var maxHidden = document.getElementById('maxSelectHidden-' + qIndex);
+
+            if (type === 'TEXT') {
+                // Free text: hide everything
+                optionsSection.style.display = 'none';
+                if (minInput) { minInput.removeAttribute('name'); }
+                if (maxInput) { maxInput.removeAttribute('name'); }
+                minHidden.setAttribute('name', 'Questions[' + qIndex + '].MinSelect');
+                minHidden.disabled = false;
+                minHidden.value = '0';
+                maxHidden.setAttribute('name', 'Questions[' + qIndex + '].MaxSelect');
+                maxHidden.disabled = false;
+                maxHidden.value = '0';
+            } else if (type === 'CHOICE') {
+                // Single choice: show options, hide min/max (locked to 1/1)
+                optionsSection.style.display = 'block';
+                minmaxSection.style.display = 'none';
+                if (minInput) { minInput.removeAttribute('name'); }
+                if (maxInput) { maxInput.removeAttribute('name'); }
+                minHidden.setAttribute('name', 'Questions[' + qIndex + '].MinSelect');
+                minHidden.disabled = false;
+                minHidden.value = '1';
+                maxHidden.setAttribute('name', 'Questions[' + qIndex + '].MaxSelect');
+                maxHidden.disabled = false;
+                maxHidden.value = '1';
+            } else if (type === 'MULTI_CHOICE') {
+                // Multi choice: show options + min/max inputs
+                optionsSection.style.display = 'block';
+                minmaxSection.style.display = 'flex';
+                minInput.setAttribute('name', 'Questions[' + qIndex + '].MinSelect');
+                maxInput.setAttribute('name', 'Questions[' + qIndex + '].MaxSelect');
+                minHidden.removeAttribute('name');
+                minHidden.disabled = true;
+                maxHidden.removeAttribute('name');
+                maxHidden.disabled = true;
+                if (parseInt(maxInput.value) <= 1) {
+                    maxInput.value = '2';
+                }
+            }
+        }
+
+        var optionCounters = {};
+        function addOption(qIndex, value) {
+            if (!optionCounters[qIndex]) optionCounters[qIndex] = 0;
+            var optIndex = optionCounters[qIndex];
+            var val = value || '';
+
+            var html = '<div class="form-group" id="option-' + qIndex + '-' + optIndex + '" style="display: flex; gap: 5px; align-items: center; margin: 4px 0;">';
+            html += '<input name="Questions[' + qIndex + '].Options[' + optIndex + ']" class="form-control" placeholder="Option ' + (optIndex + 1) + '" value="' + escapeHtml(val) + '" />';
+            html += '<button type="button" class="btn btn-sm btn-danger" onclick="removeOption(' + qIndex + ', ' + optIndex + ')">X</button>';
+            html += '</div>';
+
+            document.getElementById('options-' + qIndex).insertAdjacentHTML('beforeend', html);
+            optionCounters[qIndex]++;
+        }
+
+        function removeOption(qIndex, optIndex) {
+            var el = document.getElementById('option-' + qIndex + '-' + optIndex);
+            if (el) el.remove();
+        }
+
+        function removeQuestion(index) {
+            var el = document.getElementById('question-' + index);
+            if (el) el.remove();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Load existing questions from the model
+        @if (Model.Questions != null)
+        {
+            foreach (var q in Model.Questions)
+            {
+                var optionsJs = q.Options != null && q.Options.Count > 0
+                    ? "[" + string.Join(",", q.Options.Select(o => "'" + o.Replace("'", "\\'") + "'")) + "]"
+                    : "[]";
+                <text>
+                addQuestion('@q.Text.Replace("'", "\\'")', '@q.Type.ToString()', @q.MinSelect, @q.MaxSelect, @Html.Raw(optionsJs));
+                </text>
+            }
+        }
+    </script>
+}

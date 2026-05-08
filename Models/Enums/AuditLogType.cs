@@ -22,6 +22,9 @@ namespace KeplerCMS.Models
         kick_user,
         file_edit,
         file_deleted,
-        file_upload
+        file_upload,
+        create_poll,
+        edit_poll,
+        delete_poll
     }
 }

@@ -117,6 +117,23 @@ namespace KeplerCMS.Services.Implementations
         {
             return await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
         }
+
+        public async Task<List<object>> SearchAll(string search, int take)
+        {
+            var results = await (from room in _context.Rooms
+                join owner in _context.Users on room.OwnerId equals owner.Id into owners
+                from owner in owners.DefaultIfEmpty()
+                where room.Name.Contains(search) || (owner != null && owner.Username.Contains(search))
+                orderby room.Name ascending
+                select new
+                {
+                    id = room.Id,
+                    name = room.Name,
+                    owner = owner != null ? owner.Username : "Public Room"
+                }).Take(take).ToListAsync();
+
+            return results.Select(r => (object)r).ToList();
+        }
     }
 
 }

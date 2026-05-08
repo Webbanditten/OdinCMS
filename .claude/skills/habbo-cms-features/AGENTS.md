@@ -2,6 +2,30 @@
 
 This document contains the full compiled guide for building features in the KeplerCMS Habbo Hotel Content Management System. Follow these patterns when creating any new CMS feature.
 
+> **Important: Project Distinction**
+>
+> There are TWO separate projects that work together:
+>
+> | Project | Path | Language | Role |
+> |---------|------|----------|------|
+> | **KeplerCMS** | `C:\Users\Patrick\Documents\github\KeplerCMS` | C# / ASP.NET Core | Front-end website, admin panel (Housekeeping), user-facing pages |
+> | **Kepler Server** | `C:\Users\Patrick\Documents\github\Kepler` | Java | Game server (handles Habbo client packets, game logic, database for game state) |
+>
+> When asked to work on **backend/server/packets/game logic**, work in the **Kepler** Java project.
+> When asked to work on **CMS/admin/housekeeping/website features**, work in the **KeplerCMS** C# project.
+> The decompiled Habbo client source is at `C:\Users\Patrick\Documents\forgejo\habbo-vibe-playground\decompiled` and is the authority on packet structures.
+>
+> **Database Access:**
+> Always use `docker exec` to interact with MySQL. The container is named `kepler_db`.
+> ```
+> # Run a query
+> docker exec kepler_db mysql -u kepler -pkepler123 kepler -e "YOUR SQL HERE;"
+>
+> # Execute a .sql file (pipe from host)
+> $sql = Get-Content "path\to\file.sql" -Raw; $sql | docker exec -i kepler_db mysql -u kepler -pkepler123 kepler
+> ```
+> Do NOT attempt to use a local `mysql` CLI binary - it is not installed on the host.
+
 ---
 
 ## 1. Architecture Overview

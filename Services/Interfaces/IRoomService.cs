@@ -10,6 +10,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<Rooms>> GetPublicRooms();
         Task<List<Rooms>> GetRoomsByOwner(int ownerId);
         Task<SearchRoomsModel> Search(string search, int take, int skip);
+        Task<List<object>> SearchAll(string search, int take);
         Task<string> UpdateRoom(RoomsUpdateModel model);
         
         Task<Rooms> GetRoom(int id);

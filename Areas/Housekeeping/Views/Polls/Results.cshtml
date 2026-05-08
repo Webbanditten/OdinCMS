@@ -1,0 +1,108 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.PollResultsViewModel
+
+<h1>Poll Results: @Model.Poll.Headline</h1>
+
+<a href="@Url.Action("Index")">Back to polls</a>
+
+<div class="card" style="margin: 15px 0;">
+    <div class="card-header">
+        <h4>Overview</h4>
+    </div>
+    <div class="card-body">
+        <table class="blueTable">
+            <tbody>
+                <tr>
+                    <td><strong>Poll ID</strong></td>
+                    <td>@Model.Poll.Id</td>
+                </tr>
+                <tr>
+                    <td><strong>Description</strong></td>
+                    <td>@Model.Poll.Description</td>
+                </tr>
+                <tr>
+                    <td><strong>Status</strong></td>
+                    <td>@(Model.Poll.Enabled ? "Active" : "Disabled")</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Offered</strong></td>
+                    <td>@(Model.AcceptedOffers + Model.RejectedOffers)</td>
+                </tr>
+                <tr>
+                    <td><strong>Accepted</strong></td>
+                    <td>@Model.AcceptedOffers</td>
+                </tr>
+                <tr>
+                    <td><strong>Rejected</strong></td>
+                    <td>@Model.RejectedOffers</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@foreach (var qResult in Model.QuestionResults)
+{
+    <div class="card" style="margin: 15px 0;">
+        <div class="card-header">
+            <h5>Q@(qResult.Question.Order + 1): @qResult.Question.Text</h5>
+            <small>Type: @qResult.Question.Type | Answers: @qResult.TotalAnswers</small>
+        </div>
+        <div class="card-body">
+            @if (qResult.Question.Type == KeplerCMS.Data.Models.PollQuestionTypes.TEXT)
+            {
+                @if (qResult.TextAnswers.Any())
+                {
+                    <table class="blueTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < qResult.TextAnswers.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@qResult.TextAnswers[i]</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No responses yet.</p>
+                }
+            }
+            else
+            {
+                <table class="blueTable">
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Votes</th>
+                            <th>Percentage</th>
+                            <th>Bar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var optResult in qResult.OptionResults)
+                        {
+                            <tr>
+                                <td>@optResult.Option.Name</td>
+                                <td>@optResult.Count</td>
+                                <td>@optResult.Percentage.ToString("F1")%</td>
+                                <td>
+                                    <div style="background: #eee; width: 200px; height: 16px; border-radius: 3px; overflow: hidden;">
+                                        <div style="background: #4a90d9; width: @(optResult.Percentage)%; height: 100%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
