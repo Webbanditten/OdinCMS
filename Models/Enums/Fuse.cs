@@ -46,7 +46,9 @@ namespace KeplerCMS.Models
         [Description("fuse_see_chat_log_link")]
         fuse_see_chat_log_link,
         [Description("fuse_bots")]
-        fuse_bots
+        fuse_bots,
+        [Description("fuse_receive_calls_for_help")]
+        fuse_receive_calls_for_help
         
     }
 }

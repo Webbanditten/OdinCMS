@@ -121,6 +121,7 @@ namespace KeplerCMS
             services.AddScoped<IFurniService, FurniService>();
             services.AddScoped<IBotService, BotService>();
             services.AddScoped<IPollService, PollService>();
+            services.AddScoped<ICallsForHelpService, CallsForHelpService>();
 
             services.AddMjmlServices(o =>
             {

@@ -115,6 +115,7 @@ namespace KeplerCMS.Data
         public DbSet<RankBadges> RankBadges { get; set; }
         public DbSet<UsersBans> UsersBans { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<CallsForHelp> CallsForHelp { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }
