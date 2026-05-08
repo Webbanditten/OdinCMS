@@ -34,16 +34,16 @@ namespace KeplerCMS.Services.Implementations
         public async Task<List<SimpleUser>> GetOtherAccounts(int userId)
         {
             // Get this user's v2 machine IDs (v1 IDs were truncated and prone to collisions)
-            var userV2MachineIds = await _context.UsersMachineIdLogs
+            var userMachineIds = await _context.UsersMachineIdLogs
                 .Where(m => m.UserId == userId && EF.Functions.Like(m.MachineId, "v2%"))
                 .Select(m => m.MachineId)
                 .Distinct()
                 .ToListAsync();
 
-            // Only match by v2 machine ID — IP matching alone produces too many false positives
-            var machineMatchUserIds = userV2MachineIds.Any()
+            // Match other users sharing any of these machine IDs
+            var machineMatchUserIds = userMachineIds.Any()
                 ? await _context.UsersMachineIdLogs
-                    .Where(m => userV2MachineIds.Contains(m.MachineId) && m.UserId != userId)
+                    .Where(m => userMachineIds.Contains(m.MachineId) && m.UserId != userId)
                     .Select(m => m.UserId)
                     .Distinct()
                     .Take(100)
