@@ -24,14 +24,16 @@ namespace KeplerCMS.Controllers
         private readonly ICommandQueueService _commandQueueService;
         private readonly IPhotoService _photoService;
         private readonly IFurniService _furniService;
+        private readonly IRoomService _roomService;
 
-        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService, IPhotoService photoService, IFurniService furniService)
+        public HotelApiController(ISettingsService settingsService, IUserService userService, ICommandQueueService commandQueueService, IPhotoService photoService, IFurniService furniService, IRoomService roomService)
         {
             _settingService = settingsService;
             _userService = userService;
             _commandQueueService = commandQueueService;
             _photoService = photoService;
             _furniService = furniService;
+            _roomService = roomService;
         }
 
         [HttpGet("api/hotel/online")]
@@ -112,6 +114,16 @@ namespace KeplerCMS.Controllers
             var users = await _userService.GetLatestSignins(amount, 0);
             var onlyShowNames = users.Select(u => new { u.Username, u.Figure, u.LastOnline, u.Status });
             return Ok(onlyShowNames);
+        }
+        
+        [Route("api/hotel/rooms/search")]
+        public async Task<IActionResult> SearchRooms(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+                return Ok(new object[0]);
+
+            var results = await _roomService.SearchAll(query, 20);
+            return Ok(results);
         }
         
         

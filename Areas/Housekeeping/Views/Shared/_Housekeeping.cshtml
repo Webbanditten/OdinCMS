@@ -32,6 +32,7 @@
         { "/housekeeping/auditlog", HousekeepingMenu.AdminTools },
         { "/housekeeping/bots", HousekeepingMenu.AdminTools },
         { "/housekeeping/rewards", HousekeepingMenu.AdminTools },
+        { "/housekeeping/polls", HousekeepingMenu.AdminTools },
         { "/housekeeping/callsforhelp", HousekeepingMenu.HobbaTools },
     };
 
@@ -120,6 +121,7 @@
                                 @await menuHelper.Render("Reward management", Url.Action("Index", "Rewards"), new List<Fuse> { Fuse.housekeeping_rewards })
                                 @await menuHelper.Render("Catalogue", Url.Action("Index", "Catalogue"), new List<Fuse> { Fuse.fuse_administrator_access })
                                 @await menuHelper.Render("Bots", Url.Action("Index", "Bots"), new List<Fuse> { Fuse.fuse_bots })
+                                @await menuHelper.Render("Polls / Surveys", Url.Action("Index", "Polls"), new List<Fuse> { Fuse.fuse_administrator_access })
                             </ul>
                         </div>
                     </div>

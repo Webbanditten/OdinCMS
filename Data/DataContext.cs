@@ -55,6 +55,11 @@ namespace KeplerCMS.Data
                 .WithMany(d => d.Items)
                 .HasForeignKey(i => i.DefinitionId);
 
+            modelBuilder
+                .Entity<Question>()
+                .Property(q => q.Type)
+                .HasConversion(new EnumToStringConverter<PollQuestionTypes>());
+
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<Bots> Bots { get; set; }
@@ -93,6 +98,12 @@ namespace KeplerCMS.Data
         public DbSet<Movies> Movies { get; set; }
         public DbSet<MovieVotes> MovieVotes { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<Answer> PollsAnswers { get; set; }
+        public DbSet<Question> PollsQuestions { get; set; }
+        public DbSet<QuestionOption> PollsQuestionsOptions { get; set; }
+        public DbSet<PollTrigger> PollsTriggers { get; set; }
+        public DbSet<PollOffer> PollsOffers { get; set; }
         public DbSet<UsersMachineIdLogs> UsersMachineIdLogs { get; set; }
         public DbSet<UsersIpLogs> UsersIpLogs { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }

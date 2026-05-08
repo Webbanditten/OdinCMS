@@ -1,0 +1,96 @@
+@model IEnumerable<KeplerCMS.Data.Models.Poll>
+
+<h1>Polls / Surveys</h1>
+
+@if (Context.Request.Query["message"].Count > 0)
+{
+    <div class="message">
+        @Context.Request.Query["message"]
+    </div>
+}
+
+<a href="@Url.Action("Create")">Create new poll</a>
+
+<table class="blueTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Headline</th>
+            <th>Questions</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model != null && Model.Any())
+            {
+                foreach (var poll in Model)
+                {
+                    <tr>
+                        <td>@poll.Id</td>
+                        <td>@poll.Headline</td>
+                        <td>@(poll.Questions?.Count ?? 0)</td>
+                        <td>
+                            @if (!poll.Enabled)
+                            {
+                                <span style="color: red;">Disabled</span>
+                            }
+                            else
+                            {
+                                var trigger = poll.Triggers?.FirstOrDefault();
+                                var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                                if (trigger?.TimeFrom != null && trigger.TimeFrom > 0 && now < trigger.TimeFrom)
+                                {
+                                    <span style="color: orange;">Pending</span>
+                                }
+                                else if (trigger?.TimeTo != null && trigger.TimeTo > 0 && now > trigger.TimeTo)
+                                {
+                                    <span style="color: gray;">Expired</span>
+                                }
+                                else
+                                {
+                                    <span style="color: green;">Active</span>
+                                }
+                            }
+                        </td>
+                        <td>@poll.CreatedAt.ToString("dd-MM-yyyy")</td>
+                        <td>
+                            <a href="@Url.Action("Results", "Polls", new { id = poll.Id })">Results</a> -
+                            <a href="@Url.Action("Update", "Polls", new { id = poll.Id })">Edit</a> -
+                            <a href="@Url.Action("Toggle", "Polls", new { id = poll.Id })">@(poll.Enabled ? "Disable" : "Enable")</a> -
+                            <a href="#" onclick="removePoll(@poll.Id)">Remove</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6">No polls created yet</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script>
+        function removePoll(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will permanently delete the poll and all its answers!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    window.location = "@Url.Action("Remove")/" + id;
+                }
+            })
+        }
+    </script>
+}
