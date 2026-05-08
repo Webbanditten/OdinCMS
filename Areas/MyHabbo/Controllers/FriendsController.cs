@@ -25,7 +25,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> Add(int accountId)
         {
             var userId = int.Parse(User.Identity.Name);
-            await _friendService.AddFriend(accountId, userId);
+            await _friendService.AddFriend(userId, accountId);
             Response.ContentType = "application/x-javascript";
             return Content("Dialog.showInfoDialog(\"add-friend-messages\", \"" + DbRes.T("add_friend_message", "habbohome") + "\", \"" + DbRes.T("ok", "habbohome") + "\");");
         }

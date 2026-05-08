@@ -12,7 +12,6 @@ using System.Linq;
 
 namespace KeplerCMS.Controllers
 {
-    [MenuFilter]
     public class TagController : Controller
     {
         private readonly ITagService _tagService;

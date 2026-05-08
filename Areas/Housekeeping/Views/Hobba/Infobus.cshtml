@@ -1,0 +1,165 @@
+﻿@model KeplerCMS.Data.Models.Rooms
+
+@{
+    ViewBag.Title = "Infobus";
+    
+}
+<style>
+    label {
+        display: block;
+    }
+    input {
+        margin-bottom: 10px;
+    }
+</style>
+<h1>@ViewBag.Title</h1>
+<fieldset>
+    <legend><strong>Infobus status</strong></legend>
+    <p id="status"></p>
+</fieldset>
+<br/>
+<fieldset>
+      <legend><strong>Infobus configuration</strong></legend>
+
+<label id="door">Door status</label>
+<input type="text" id="doorStatus" disabled>
+
+<button id="openBus">Open bus door</button>
+<button id="closeBus">Close bus door</button>
+<br />
+<label>Question</label>
+<input type="text" id="question" disabled>
+<button id="setQuestion">Set question</button>
+<br />
+<label>Options</label>
+<table class="habboTable" id="options">
+    <thead>
+    <tr>
+        <th>Option</th>
+        <th>Votes</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Loading</td>
+        <td>...</td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+<button id="addOption">Add option</button>
+<hr/>
+<button id="start">Start</button>
+<button id="reset">Reset</button>
+</fieldset>
+@section scripts {
+    <script src="~/lib/signalr.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(`/sockets/housekeeping/infobus`)
+                .build();
+
+            connection.on("ReceiveUpdate", function (data) {
+                $("#question").val(data.question)
+                $("#doorStatus").val(data.door ? "Open" : "Closed");
+                $("#options tbody").empty();
+                data.options.forEach((option, index) => {
+                    const votes = data.votes.filter(vote => vote === index).length;
+                    $("#options tbody").append(`<tr><td>${option}</td><td>(${votes})</td><td><button data-id="${index}" class="deleteOption">Delete</button></td></tr>`)
+                });
+                
+                // If data.time is set, we are in a voting state
+                if (data.time > 0) {
+                    $("#start").prop("disabled", true);
+                    $("#reset").prop("disabled", true);
+                    $("#addOption").prop("disabled", true);
+                    $("#status").text(`Voting time left: ${data.time} seconds`);
+                } else {
+                    
+                    if (data.question !== "" && data.options.length !== 0) {
+                        $("#status").text(`Infobus is ready to start`);
+                        $("#start").prop("disabled", false);
+                        $("#reset").prop("disabled", false);
+                    } else {
+                        $("#status").text(`Infobus is waiting for a question and options to be added.`);
+                        $("#start").prop("disabled", true);
+                        $("#reset").prop("disabled", true);
+                        $("#addOption").prop("disabled", false);
+                        return;
+                    } 
+                }
+            });
+
+            connection.start().catch(function (err) {
+                return console.error(err.toString());
+            }).then(function () {
+               sendInfobusUpdate("status", "n/a")
+            });
+            
+            $("#openBus").click(function () {
+                sendInfobusUpdate("open", "n/a")
+            });
+            
+            $("#closeBus").click(function () {
+                sendInfobusUpdate("close", "n/a")
+            });
+            
+            function sendInfobusUpdate(type, message) {
+                 $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdateInfobus")",
+                    contentType: "application/json",
+                    data: JSON.stringify({Type: type, Message: message})
+                });
+            }
+            
+            $("#setQuestion").click(function () {
+                swal.fire({
+                    title: "Set question",
+                    input: "text",
+                    showCancelButton: true,
+                    confirmButtonText: "Set",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.value) {
+                        sendInfobusUpdate("setQuestion", result.value)
+                    }
+                });
+            });
+              
+            $("#addOption").click(function () {
+                swal.fire({
+                    title: "Add option",
+                    input: "text",
+                    showCancelButton: true,
+                    confirmButtonText: "Add",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.value) {
+                        sendInfobusUpdate("addOption", result.value)
+                    }
+                });
+            });
+            
+            $(document).on("click", ".deleteOption", function () {
+                const id = $(this).data("id");
+                sendInfobusUpdate("removeOption", id.toString())
+            });
+            
+            $("#start").click(function () {
+                sendInfobusUpdate("start", "n/a")
+            });
+            
+             $("#reset").click(function () {
+                sendInfobusUpdate("reset", "n/a")
+            });
+            
+            
+        });
+    </script>
+
+
+}

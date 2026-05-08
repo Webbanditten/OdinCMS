@@ -73,6 +73,9 @@
                                         <div id="usernameStatus" style="display:none" class="field-status-error">
                                             <b>@DbRes.T("habbo_name", "register"): </b> @DbRes.T("habbo_name_used", "register")
                                         </div>
+                                        <div id="usernameContainsInvalidChars" style="display:none" class="field-status-error">
+                                            <b>@DbRes.T("habbo_name", "register"): </b> @DbRes.T("habbo_name_invalid", "register")
+                                        </div>
                                         <hr>
 
                                         <p>
@@ -144,10 +147,13 @@
                     new Ajax.Request("/api/hotel/habboname_exists", {
                         method: "post", parameters: "habboName=" + encodeURIComponent(form.username.value), onComplete: function (req, text) {
                           console.log(req)
-                            if (req.responseText == 'True') {
+                            j("#usernameStatus").hide();
+                            j("#usernameContainsInvalidChars").hide();
+                            if (req.responseText == "1") {
                                 j("#usernameStatus").show();
+                            } else if (req.responseText == "2") { 
+                                j("#usernameContainsInvalidChars").show();
                             } else {
-                                j("#usernameStatus").hide();
                                 usernameValid = true;
                                 if (pwTotal[0] && pwTotal[2] && usernameValid) {
                                     setTimeout(function () { form.submit(); }, 500);

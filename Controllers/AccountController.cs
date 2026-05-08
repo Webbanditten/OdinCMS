@@ -1,27 +1,40 @@
-﻿using Isopoh.Cryptography.Argon2;
+﻿using System;
+using Isopoh.Cryptography.Argon2;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
+using KeplerCMS.Helpers;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Text;
+using System.Net.Mime;
+using FluentEmail.Core;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
         private readonly ISettingsService _settingsService;
+        private readonly IConfiguration _configuration;
+        private readonly IMailService _mailService;
 
-        public AccountController(IUserService userService, ISettingsService settingsService)
+        public AccountController(IConfiguration configuration, IUserService userService, ISettingsService settingsService, IMailService mailService)
         {
+            _configuration = configuration;
             _settingsService = settingsService;
             _userService = userService;
+            _mailService = mailService;
         }
 
         [HttpGet]
@@ -34,7 +47,7 @@ namespace KeplerCMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string username, string password, string returnUrl)
         {
-            if(username != null && password != null)
+            if (username != null && password != null)
             {
                 var user = await _userService.GetUserByUsername(username);
                 if (user != null && Argon2.Verify(user.Password, password))
@@ -76,7 +89,7 @@ namespace KeplerCMS.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
-                    if(returnUrl != null && returnUrl != "")
+                    if (returnUrl != null && returnUrl != "")
                     {
                         return Redirect(returnUrl);
                     }
@@ -88,14 +101,15 @@ namespace KeplerCMS.Controllers
                     ViewData["wrong_users_or_password"] = true;
                     return View("index", returnUrl);
                 }
-            } else
+            }
+            else
             {
                 ViewData["please_enter_username"] = true;
                 return View("index", returnUrl);
             }
         }
 
-        public async Task <IActionResult> Logout()
+        public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("index", "home");
@@ -104,6 +118,16 @@ namespace KeplerCMS.Controllers
         [Route("register/start")]
         public async Task<IActionResult> RegisterStart(RegistrationViewModel model)
         {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddMinutes(5)
+            };
+            Response.Cookies.Append("bday", model.Day.ToString(), cookieOptions);
+            Response.Cookies.Append("bmonth", model.Month.ToString(), cookieOptions);
+            Response.Cookies.Append("byear", model.Year.ToString(), cookieOptions);
             return View(model);
         }
         [HttpPost]
@@ -128,18 +152,24 @@ namespace KeplerCMS.Controllers
         [Route("register/done")]
         public async Task<IActionResult> Done(RegistrationViewModel model)
         {
+            var bday = Request.Cookies["bday"];
+            var bmonth = Request.Cookies["bmonth"];
+            var byear = Request.Cookies["byear"];
+            Response.Cookies.Delete("bday"); 
+            Response.Cookies.Delete("bmonth"); 
+            Response.Cookies.Delete("byear"); 
             var newUser = await _userService.Create(new Data.Models.Users
             {
+                Birthday = $"{bday}.{bmonth}.{byear}",
                 Figure = model.FigureData,
                 Username = model.Username,
                 Password = model.Password,
                 Gender = model.Gender,
                 Status = "offline",
-                Rank = 1,
                 Email = model.Email
             });
             // Lets sign the user in if its created
-            if(newUser != null)
+            if (newUser != null)
             {
                 var user = await _userService.GetUserById(newUser.Id);
                 if (user != null && Argon2.Verify(user.Password, model.Password))
@@ -158,11 +188,71 @@ namespace KeplerCMS.Controllers
                         authProperties);
                 }
             }
-            if(newUser == null )
+            if (newUser == null)
             {
                 return Redirect("/");
             }
             return View(newUser);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Forgot()
+        {
+            return View();
+        }
+        [HttpGet]
+        [Route("account/forgot/reset/{guid}")]
+        public async Task<IActionResult> ResetPassword(string guid)
+        {
+            var valid = false;
+            var user = await _userService.ValidatePasswordResetLink(guid);
+            if(user != null) {
+                valid = true;
+            }
+            return View(new ResetPasswordViewModel { Valid = valid, Code = guid });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("account/forgot/reset")]
+        public async Task<IActionResult> ResetPassword(string code, string password)
+        {
+            var success = await _userService.ResetPassword(code, password);
+            if(success) return View("ResetPasswordSuccess");
+            
+            return View(new ResetPasswordViewModel { Valid = false });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("account/forgot/habboname")]
+        public async Task<IActionResult> ForgotHabboName(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return View("forgot");
+            ViewData["success_sent_habbonames"] = true;
+            var users = await _userService.GetUsersByEmail(email);
+            if(users.Length > 0) {
+                List<string> habboNames = new List<string>();
+                foreach (var user in users)
+                {
+                    habboNames.Add(user.Username);
+                }
+                await _mailService.SendListOfHabboNames(email, habboNames.ToArray());
+            }
+
+            return View("forgot");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("account/forgot/password")]
+        public async Task<IActionResult> ForgotHabboName(string username, string email)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username)) return View("forgot");
+            ViewData["success_sent_forgot_password"] = true;
+            var user = await _userService.GetUserByUsername(username);
+            if(user != null && user.Email.ToLower() == email.ToLower()) {
+                var link = await _userService.GeneratePasswordResetLink(user.Id);
+                await _mailService.SendForgotPassword(email, link);
+            }
+            return View("forgot");
         }
     }
 }

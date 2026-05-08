@@ -10,40 +10,37 @@
 }
 <a href="@Url.Action("Create", "Promo", new { pageId = ViewData["pageId"] })">Add</a>
 
-<table class="blueTable">
-    <thead>
-        <tr>
-            <th>Teaser</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            if (Model != null)
+
+<div class="form-group">
+    <div class="dd">
+        <ol class="dd-list">
+            
+            @if (Model != null)
             {
-                foreach (var item in Model.OrderBy(s => s.Id))
                 {
-                <tr>
-                    <td>@item.Teaser</td>
-                    <td><a href="@Url.Action("Update", "Promo", new { id = item.Id })">Edit</a> - <a href="#" onclick="removeUpload(@item.Id)">Remove</a></td>
-                </tr>
+                    foreach (var item in Model.OrderBy(s => s.Order))
+                    {
+                        <li class="dd-item @(item.Hidden ? "dd-item-greyed" : "")" data-id="@item.Id">
+                            <div class="dd-handle">@item.Teaser</div>
+                            <div class="options">
+                                <a href="@Url.Action("Update", "Promo", new { id = item.Id })">Edit</a> - <a href="#" onclick="removePromo(@item.Id)">Remove</a>
+                            </div>
+                        </li>
+                    }
                 }
             }
             else
             {
-                <tr>
-                    <td>No promos</td>
-                    <td></td>
-                </tr>
+                <li>No promos</li>
             }
-
-        }
-    </tbody>
-</table>
-
+        </ol>
+    </div>
+</div>
+<button id="saveorder">Save order</button>
 @section scripts {
+    <script src="~/housekeeping/js/jquery.nestable.js" type="text/javascript"></script>
     <script>
-    function removeUpload(id) {
+    function removePromo(id) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -58,5 +55,31 @@
                 }
             })
         }
+        $(document).ready(function () {
+            $('.dd').nestable({
+                maxDepth:1
+            });
+    
+            $("#saveorder").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Index")",
+                    data: JSON.stringify({ 
+                        promos: $('.dd').nestable('serialize'),
+                        pageId: "@ViewData["PageId"]"
+                    }),
+                    success: function () {
+                        Swal.fire({
+                            title: 'Saved!',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            timer: 1500
+                        });
+                    },
+                    contentType: "application/json; charset=utf-8"
+                });
+    
+            });
+        });
     </script>
 }

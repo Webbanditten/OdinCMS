@@ -5,10 +5,14 @@ using KeplerCMS.Helpers;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KeplerCMS.Areas.Housekeeping.Models.Views;
+using MySql.Data.MySqlClient;
+using Westwind.Utilities;
 
 namespace KeplerCMS.Services.Implementations
 {
@@ -17,20 +21,110 @@ namespace KeplerCMS.Services.Implementations
         private readonly ICommandQueueService _commandQueueService;
         private readonly IFuseService _fuseService;
         private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserService(ICommandQueueService commandQueueService, IFuseService fuseService, DataContext context)
+        public UserService(IConfiguration configuration, ICommandQueueService commandQueueService, IFuseService fuseService, DataContext context)
         {
             _commandQueueService = commandQueueService;
             _fuseService = fuseService;
             _context = context;
+            _configuration = configuration;
+        }
+        
+        public async Task<List<SimpleUser>> GetOtherAccounts(int userId)
+        {
+            // Get this user's v2 machine IDs (v1 IDs were truncated and prone to collisions)
+            var userV2MachineIds = await _context.UsersMachineIdLogs
+                .Where(m => m.UserId == userId && EF.Functions.Like(m.MachineId, "v2%"))
+                .Select(m => m.MachineId)
+                .Distinct()
+                .ToListAsync();
+
+            var machineMatchUserIds = userV2MachineIds.Any()
+                ? await _context.UsersMachineIdLogs
+                    .Where(m => userV2MachineIds.Contains(m.MachineId) && m.UserId != userId)
+                    .Select(m => m.UserId)
+                    .Distinct()
+                    .Take(100)
+                    .ToListAsync()
+                : new List<int>();
+
+            var ipMatchUserIds = await (
+                from uil1 in _context.UsersIpLogs
+                join uil2 in _context.UsersIpLogs
+                    on uil1.IpAddress equals uil2.IpAddress
+                where uil1.UserId == userId && uil2.UserId != userId
+                      && uil1.IpAddress != null 
+                      && uil1.IpAddress != "" 
+                      && uil1.IpAddress != "127.0.0.1"
+                select uil2.UserId
+            ).Distinct().Take(100).ToListAsync();
+
+            // Determine match type per user
+            var allUserIds = machineMatchUserIds.Union(ipMatchUserIds).ToList();
+
+            if (!allUserIds.Any())
+                return new List<SimpleUser>();
+
+            var users = await _context.Users
+                .Where(u => allUserIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.Username, u.Email, u.LastOnlineTimestamp, u.TimesLoggedIn })
+                .ToListAsync();
+
+            // Get latest machine ID per matched user (client-side grouping for keyless entity)
+            var machineIdRows = await _context.UsersMachineIdLogs
+                .Where(m => allUserIds.Contains(m.UserId))
+                .ToListAsync();
+            var latestMachineIds = machineIdRows
+                .GroupBy(m => m.UserId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.CreatedAt).First().MachineId);
+
+            // Get latest IP per matched user (client-side grouping for keyless entity)
+            var ipRows = await _context.UsersIpLogs
+                .Where(ip => allUserIds.Contains(ip.UserId))
+                .ToListAsync();
+            var latestIps = ipRows
+                .GroupBy(ip => ip.UserId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(ip => ip.CreatedAt).First().IpAddress);
+
+            var machineIdLookup = latestMachineIds;
+            var ipLookup = latestIps;
+            var machineSet = new HashSet<int>(machineMatchUserIds);
+            var ipSet = new HashSet<int>(ipMatchUserIds);
+
+            return users.Select(u => new SimpleUser
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                LastMachineId = machineIdLookup.ContainsKey(u.Id) ? machineIdLookup[u.Id] : null,
+                LastIp = ipLookup.ContainsKey(u.Id) ? ipLookup[u.Id] : null,
+                LastAccess = u.LastOnlineTimestamp > 0
+                    ? DateTimeOffset.FromUnixTimeSeconds(u.LastOnlineTimestamp).UtcDateTime
+                    : null,
+                AccessCount = u.TimesLoggedIn,
+                MatchType = machineSet.Contains(u.Id) && ipSet.Contains(u.Id)
+                    ? "Both"
+                    : machineSet.Contains(u.Id) ? "MachineID" : "IP"
+            }).ToList();
         }
 
+        public async Task<string> GetLastMachineId(int userId)
+        {
+            var latest = await _context.UsersMachineIdLogs
+                .Where(m => m.UserId == userId)
+                .OrderByDescending(m => m.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            return latest?.MachineId;
+        }
+        
         public async Task<Users> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();
             if(user != null)
             {
-                user.Fuses = await _fuseService.GetFusesByRank(user.Rank);
+                user.Fuses = await _fuseService.GetFusesByRank(user.Rank, user.HasHabboClub);
             }
             return user;
         }
@@ -40,7 +134,7 @@ namespace KeplerCMS.Services.Implementations
             var user = await _context.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
             if (user != null)
             {
-                user.Fuses = await _fuseService.GetFusesByRank(user.Rank);
+                user.Fuses = await _fuseService.GetFusesByRank(user.Rank, user.HasHabboClub);
             }
             return user;
         }
@@ -95,6 +189,232 @@ namespace KeplerCMS.Services.Implementations
                 await _context.SaveChangesAsync();
             }
             return user;
+        }
+
+        public Task<Users[]> GetUsersByEmail(string email)
+        {
+            return _context.Users.Where(user => user.Email.ToLower() == email.ToLower()).ToArrayAsync();
+        }
+
+        public async Task<string> GeneratePasswordResetLink(int userId)
+        {
+            var user = await GetUserById(userId);
+            if(user != null)
+            {
+                var guid = Guid.NewGuid().ToString();
+                var timestamp = DateTime.Now;
+                var resetPassword = new ResetPassword
+                {
+                    UserId = userId,
+                    Timestamp = timestamp,
+                    guid = guid
+                };
+                _context.ResetPasswords.Add(resetPassword);
+                await _context.SaveChangesAsync();
+                return string.IsNullOrEmpty(_configuration.GetSection("keplercms:publicUrl").Value) ? "http://localhost:5000/account/forgot/reset/"+guid : _configuration.GetSection("keplercms:publicUrl").Value+"/account/forgot/reset/"+guid;
+            }
+            return null;
+        }
+
+        public async Task<Users> ValidatePasswordResetLink(string guid)
+        {
+            var resetPasswordEntry = await _context.ResetPasswords.Where(reset => reset.guid == guid).FirstOrDefaultAsync();
+            if(resetPasswordEntry != null && resetPasswordEntry.Timestamp.AddMinutes(10) >= DateTime.Now) {
+                return await GetUserById(resetPasswordEntry.UserId);
+            }
+            return null;
+        }
+
+        public async Task<bool> ResetPassword(string guid, string password)
+        {
+            var resetPasswordEntry = await _context.ResetPasswords.Where(reset => reset.guid == guid).FirstOrDefaultAsync();
+            if(resetPasswordEntry != null) {
+                var user = await ValidatePasswordResetLink(guid);
+                _context.ResetPasswords.Remove(resetPasswordEntry);
+                if(user != null) {
+                    user.Password = Argon2.Hash(password);
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return false;
+        }
+
+        public async Task<UsersSearchModel> SearchUsers(string username, int take, int skip, string letter)
+        {
+            if (username != null)
+            {
+                if(letter != null)
+                {
+                    var allUsers = _context.Users
+                        .FromSqlRaw(
+                            "SELECT * FROM users where (username like @letter AND username like @search) ORDER BY username ASC",
+                            new MySqlParameter("@search", "%" + username + "%"),
+                            new MySqlParameter("@letter", letter + "%"));
+                    var total = await allUsers.CountAsync();
+                    var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
+                    return new UsersSearchModel { Users = users, TotalResults = total };
+                }
+                else
+                {
+                    var allUsers = _context.Users.Where(user => user.Username.ToLower().Contains(username.ToLower()))
+                        .OrderBy(user => user.Username);
+                    var total = await allUsers.CountAsync();
+                    var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
+                    return new UsersSearchModel { Users = users, TotalResults = total };
+                }
+            }
+            if (letter != null)
+            {
+                var allUsers = _context.Users.FromSqlRaw(
+                    "SELECT * FROM users where username like @letter ORDER BY username ASC",
+                    new MySqlParameter("@letter", letter + "%"));
+                var total = await allUsers.CountAsync();
+                var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
+                return new UsersSearchModel { Users = users, TotalResults = total };
+            }
+            else
+            {
+                var allUsers = _context.Users.OrderBy(user => user.Username);
+                var total = await allUsers.CountAsync();
+                var users = await allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take).ToListAsync();
+                return new UsersSearchModel { Users = users, TotalResults = total };
+            }
+        }
+
+        public async Task<IEnumerable<Users>> GetLatestSignins(int take, int skip)
+        {
+            return await _context.Users.OrderByDescending(u => u.LastOnlineTimestamp).Take(take).Skip(skip).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Users>> GetLatestSignups(int take, int skip)
+        {
+            return await _context.Users.OrderByDescending(u => u.CreateAt).Take(take).Skip(skip).ToListAsync();
+        }
+
+        public async Task<int> GetMonthlySignups()
+        {
+            var previousMonth = DateTime.Now.AddMonths(-1);
+            return await _context.Users.Where(user => user.CreateAt >= previousMonth).CountAsync();
+        }
+
+        public async Task<int> TotalUsers()
+        {
+            return await _context.Users.CountAsync();
+        }
+
+        public async Task<int> TotalSignedinUsers()
+        {
+            return await _context.Users.Where(user => user.LastOnlineTimestamp != 0).CountAsync();
+        }
+
+        public async Task<Users> Update(Users user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<IEnumerable<Users>> GetUserByRank(int id)
+        {
+            return await  _context.Users.Where(user => user.Rank == id).ToListAsync();
+        }
+
+        public async Task<IEnumerable<UsersBadges>> GetBadges(int userId)
+        {
+            return await _context.UsersBadges.Where(s=>s.UserId == userId).ToListAsync();
+        }
+        public async Task<UsersBadges> AddBadge(UsersBadges badge)
+        {
+            _context.UsersBadges.Add(badge);
+            await _context.SaveChangesAsync();
+            return badge;
+        }
+        public async Task<bool> RemoveBadge(UsersBadges badge)
+        {
+            _context.UsersBadges.Remove(badge);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<UsersBanSearchModel> BanSearch(string username, int take, int skip, string letter)
+        {
+            if (username != null)
+            {
+                if(letter != null)
+                {
+                    var allUsers = await _context.UsersBans
+                        .FromSqlRaw(
+                            "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where (username like @letter AND username like @search) and banned_until >= UNIX_TIMESTAMP() ORDER BY username ASC",
+                            new MySqlParameter("@search", "%" + username + "%"),
+                            new MySqlParameter("@letter", letter + "%")).ToListAsync();
+                    foreach (var user in allUsers)
+                    {
+                        user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                    }
+                    var total = allUsers.Count();
+                    var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                    return new UsersBanSearchModel { Bans = users, TotalResults = total };
+                }
+                else
+                {
+                    var allUsers = await _context.UsersBans
+                        .FromSqlRaw(
+                            "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where (username like @search) and banned_until >= UNIX_TIMESTAMP() ORDER BY username ASC", new MySqlParameter("@search", "%" + username + "%")).ToListAsync();
+                    foreach (var user in allUsers)
+                    {
+                        user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                    }
+                    var total = allUsers.Count();
+                    var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                    return new UsersBanSearchModel { Bans = users, TotalResults = total };
+                }
+            }
+            if (letter != null)
+            {
+                var allUsers = await _context.UsersBans.FromSqlRaw(
+                    "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where username like @letter and banned_until >= UNIX_TIMESTAMP() ORDER BY username ASC",
+                    new MySqlParameter("@letter", letter + "%")).ToListAsync();
+                foreach (var user in allUsers)
+                {
+                    user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                }
+                var total = allUsers.Count();
+                var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                return new UsersBanSearchModel { Bans = users, TotalResults = total };
+            }
+            else
+            {
+                var allUsers = await _context.UsersBans.FromSqlRaw(
+                    "SELECT users_bans.*, username FROM users_bans LEFT JOIN users on users_bans.user_id = users.id where banned_until >= UNIX_TIMESTAMP() ORDER BY users.username ASC").ToListAsync();
+                foreach (var user in allUsers)
+                {
+                    user.Username = await _context.Users.Where(u => u.Id == user.UserId).Select(u => u.Username).FirstOrDefaultAsync();
+                }
+                var total = allUsers.Count();
+                var users = allUsers.OrderBy(u=>u.Username).Skip(skip).Take(take);
+                return new UsersBanSearchModel { Bans = users, TotalResults = total };
+            }
+        }
+        
+        // Remove ban
+        public async Task<bool> RemoveBan(UsersBans ban)
+        {
+            ban.BannedUntilTimestamp = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            _context.UsersBans.Update(ban);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        // Get specific ban
+        public async Task<UsersBans> GetBan(int id)
+        {
+            var ban = await _context.UsersBans.FirstOrDefaultAsync(ban => ban.Id == id);
+            ban.Username = (await this.GetUserById(ban.UserId)).Username;
+            return ban;
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
@@ -23,6 +24,14 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             ViewData["PageId"] = pageId;
             return View(await _promoService.GetPromos(pageId));
+        }
+        
+        [HousekeepingFilter(Fuse.housekeeping_pages)]
+        [HttpPost]
+        public async Task<IActionResult> Index([FromBody] PromoReArrangePostModel model)
+        {
+            await _promoService.ReArrange(model);
+            return Content("OK");
         }
 
 

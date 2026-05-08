@@ -36,6 +36,12 @@ namespace KeplerCMS.Services.Implementations
             return await _context.Settings.Where(s => s.Setting.ToLower() == setting.ToLower()).FirstOrDefaultAsync();
         }
 
+        public async Task<Settings> Get(string setting, string fallback)
+        {
+            var dbSetting = await Get(setting);
+            return dbSetting ?? new Settings { Setting = setting, Value = fallback };
+        }
+
         public async Task<Settings> Update(Settings setting)
         {
             var dbSetting = await this.Get(setting.Setting);
@@ -64,7 +70,8 @@ namespace KeplerCMS.Services.Implementations
                 new DefaultSetting { Setting = "cms.vars", Value = "0", FriendlyName = "Variables for hotel" },
                 new DefaultSetting { Setting = "cms.dcr", Value = "0", FriendlyName = "DCR file for hotel" },
                 new DefaultSetting { Setting = "cms.hotel_banner", Value = "0", FriendlyName = "Hotel banner" },
-                new DefaultSetting { Setting = "cms.maintenance", Value = "0", FriendlyName = "Enable maintenance" }
+                new DefaultSetting { Setting = "cms.maintenance", Value = "0", FriendlyName = "Enable maintenance" },
+                new DefaultSetting { Setting = "allowed_username_chars", Value ="1234567890qwertyuiopasdfghjklzxcvbnm-=?!@:.æøå,+<>_", FriendlyName = "Allowed characters in usernames" },
             };
         }
 

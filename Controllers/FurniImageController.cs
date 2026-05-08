@@ -41,7 +41,7 @@ namespace KeplerCMS.Controllers
             }
 
             if (Request.Query.ContainsKey("s"))
-            {
+            {   
                 Request.Query.TryGetValue("s", out var value);
 
                 if (value == "1" || value == "true")

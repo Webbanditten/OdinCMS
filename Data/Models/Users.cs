@@ -17,6 +17,8 @@ namespace KeplerCMS.Data.Models
         public string Password { get; set; }
         [Column("figure")]
         public string Figure { get; set; }
+        [Column("birthday")]
+        public string Birthday { get; set; }
         [Column("club_subscribed")]
         public double ClubSubscribed { get; set; }
         [Column("club_expiration")]
@@ -25,6 +27,8 @@ namespace KeplerCMS.Data.Models
         public double ClubGiftDue { get; set; }
         [Column("created_at")]
         public DateTime CreateAt { get; set; }
+        [Column("last_online")]
+        public long LastOnlineTimestamp { get; set; }
         [Column("sex")]
         public string Gender { get; set; }
 
@@ -54,6 +58,10 @@ namespace KeplerCMS.Data.Models
 
         [Column("group_id")]
         public int Group { get; set; }
+        [Column("online_time_seconds")]
+        public int OnlineTimeInSeconds { get; set; }
+        [Column("times_logged_in")]
+        public int TimesLoggedIn { get; set; }
 
         public bool HasHabboClub
         {
@@ -68,6 +76,17 @@ namespace KeplerCMS.Data.Models
         {
             get { return IBadgeActive == 1; }
             set { IBadgeActive = value ? 1 : 0; }
+        }
+        
+        [NotMapped]
+        public DateTime LastOnline
+        {
+            get
+            {
+                var unixDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                unixDate = unixDate.AddSeconds(this.LastOnlineTimestamp).ToLocalTime();
+                return unixDate;
+            }
         }
 
         [NotMapped]
@@ -85,6 +104,6 @@ namespace KeplerCMS.Data.Models
         }
 
         [NotMapped]
-        public IEnumerable<string> Fuses { get; set; }
+        public IEnumerable<RankRights> Fuses { get; set; }
     }
 }

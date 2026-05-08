@@ -1,0 +1,153 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.RanksEditViewModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+<div class="card">
+    <div class="card-header">
+        <h1 class="text-uppercase">Update rank</h1>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update">
+            <input asp-for="RankId" hidden class="form-control" />
+            <div class="form-group">
+                <label asp-for="Name" class="label-control"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+
+                <table class="blueTable">
+                    <thead>
+                        <tr>
+                            <th>Selected</th>
+                            <th>Fuse</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (Model != null)
+                            {
+                                foreach (var item in Model.Fuses.OrderBy(s => s.Name))
+                                {
+                                    var disabled = item.UserGroup == KeplerCMS.Data.Models.FuseUserGroup.ANYONE;
+                                    var selected = item.Selected || disabled;
+
+                                    <tr>
+                                        <td><input type="checkbox" value="@item.Name" name="RankRights[]" checked="@selected" disabled="@disabled" /></td>
+                                        <td>@item.Name</td>
+                                        <td>@item.Description</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>No Fuses</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <h2>Badges</h2>
+            <!-- List of badges -->
+            <table class="habboTable" id="badges">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Badge name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        foreach(var badge in Model.RankBadges) {
+                            <tr>
+                                <td>
+                                    <img src="@Configuration.GetSection("keplercms")["badgeUrl"]/@(badge.Badge).gif" />
+                                </td>
+                                 <td>
+                                    @badge.Badge
+                                </td>
+                                <td>
+                                    <button type="button" onClick="removeBadge('@badge.Rank', '@badge.Badge')">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                        if(!Model.RankBadges.Any()) {
+                            <tr>
+                                <td colspan="2">No badges</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td><input type="text" maxlength="3" placeholder="E.g. ADM or DK1" name="badge" /></td>
+                        <td><button type="button" onClick="addBadge('@Model.RankId')">Add badge</button></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function addBadge(rank) {
+            
+            var badge = document.getElementsByName('badge')[0].value;
+            if (badge.length == 0 && badge.length > 3) {
+                return;
+            }
+
+            fetch('/housekeeping/ranks/addbadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    rank: rank,
+                    badge: badge.toUpperCase()
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                table.querySelector('input').value = '';
+                table.querySelector('tbody').appendChild(document.createElement('tr')).innerHTML = '<td><img src="@Configuration.GetSection("keplercms")["badgeUrl"]/'+badge+'.gif" /></td><td>' + badge + '</td><td><button type="button" onClick="removeBadge(\'' + rank + '\', \'' + badge + '\')">Remove</button></td>';
+                return response.json();
+
+            });
+        }
+
+        function removeBadge(rank, badge) {
+            
+            fetch('/housekeeping/ranks/removebadge', {
+                method: 'POST',
+                body: JSON.stringify({
+                    rank: rank,
+                    badge: badge.toUpperCase()
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                var table = document.getElementById('badges');
+                var rows = table.querySelectorAll('tbody tr');
+                rows.forEach(function (row) {
+                    if (row.querySelector('td:nth-child(2)').innerText == badge) {
+                        row.remove();
+                    }
+                });
+                return response.json();
+
+            });
+        }
+    </script>
+}

@@ -14,7 +14,7 @@ namespace KeplerCMS.Services.Implementations
     {
         private readonly DataContext _context;
 
-        public readonly INewsService _newsService;
+        private readonly INewsService _newsService;
 
         private readonly IPromoService _promoService;
 
@@ -27,12 +27,12 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<Page> GetPageBySlug(string slug)
         {
-            var pageDetails = await _context.Pages.Where(p => p.Slug == slug).FirstOrDefaultAsync();
+            var pageDetails = await _context.Pages.Where(p => p.Slug == slug && p.IHidden == 0).FirstOrDefaultAsync();
             if(pageDetails == null)
             {
                 return null;
             }
-            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id).ToListAsync();
+            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id && c.IHidden == 0).ToListAsync();
             var news = await _newsService.GetNews(0, 5);
             var promos = await _promoService.GetPromos(pageDetails.Id);
             return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
@@ -73,7 +73,8 @@ namespace KeplerCMS.Services.Implementations
                 DisplayHeader = model.DisplayHeader,
                 News = model.News,
                 Design = model.Design,
-                NewsHeader = model.NewsHeader
+                NewsHeader = model.NewsHeader,
+                Hidden = model.Hidden
         };
             await _context.Pages.AddAsync(page);
             await _context.SaveChangesAsync();
@@ -90,7 +91,8 @@ namespace KeplerCMS.Services.Implementations
                 Type = model.Type,
                 Column = model.Column,
                 Theme = model.Theme,
-                Order = 0
+                Order = 0,
+                Hidden = model.Hidden
             };
             await _context.Containers.AddAsync(container);
             await _context.SaveChangesAsync();
@@ -125,6 +127,7 @@ namespace KeplerCMS.Services.Implementations
                 item.News = model.News;
                 item.Design = model.Design;
                 item.NewsHeader = model.NewsHeader;
+                item.Hidden = model.Hidden;
                 _context.Pages.Update(item);
                 await _context.SaveChangesAsync();
             }
@@ -140,7 +143,8 @@ namespace KeplerCMS.Services.Implementations
                 item.Text = model.Text;
                 item.Type = model.Type;
                 item.Theme = model.Theme;
-
+                item.Hidden = model.Hidden;
+                
                 _context.Containers.Update(item);
                 await _context.SaveChangesAsync();
             }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 
@@ -11,7 +12,7 @@ namespace KeplerCMS.Areas.Housekeeping
         {
         }
 
-        [HousekeepingFilter(Fuse.fuse_administrator_access)]
+        [HousekeepingFilter(new Fuse[] { Fuse.fuse_administrator_access, Fuse.housekeeping_ranks })]
         public IActionResult Index()
         {
             return View();

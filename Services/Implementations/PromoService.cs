@@ -56,6 +56,20 @@ namespace KeplerCMS.Services.Implementations
             await _context.SaveChangesAsync();
             return model;
         }
+        
+        public async Task<bool> ReArrange(PromoReArrangePostModel model)
+        {
+
+            for (var i = 0; i < model.Promos.Count; i++)
+            {
+                var item = model.Promos[i];
+                var dbItem = await _context.Promos.Where(m => m.Id == item.Id).FirstOrDefaultAsync();
+                dbItem.Order = i;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 
 }

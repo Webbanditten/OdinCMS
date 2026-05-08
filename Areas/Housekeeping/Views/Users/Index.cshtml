@@ -1,0 +1,64 @@
+﻿@model KeplerCMS.Areas.Housekeeping.Models.Views.UsersViewModel
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
+
+@{
+    ViewBag.Title = "Users";
+    
+}
+
+<h1>Users</h1>
+<p>
+    Here you can search and filter users
+</p>
+<form asp-action="Index" method="get">
+    <label for="search">Search for username</label>
+    <input name="search" type="text" value="@Model.Search" />
+    <input type="submit" value="Submit" />
+</form>
+<hr/>
+
+<a href="@Url.Action("Index", "Users", new { search=@Model.Search, letter="" })">All</a> 
+@{
+    var dbCharacters = await SettingsService.Get("allowed_username_chars");
+    var characters = dbCharacters.Value.ToArray();
+    Array.Sort(characters);
+    foreach (var t in characters)
+    {
+        var character = t.ToString();
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, letter=character })" style="text-transform: uppercase">@character</a> 
+    }
+}
+<br/>
+<table class="habboTable">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Last Login</th>
+        <th>Created</th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        foreach (var user in Model.Users)
+        {
+            <tr>
+                <td><a href="@Url.Action("Manage", "Users", new { id = user.Id})">@user.Username</a></td>
+                <td>@user.LastOnline</td>
+                <td>@user.CreateAt</td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+@{
+    if (Model.CurrentPage != 1)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage-1, letter=@Model.Letter })">Previous Page</a>
+    }
+    
+    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    {
+        <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage+1, letter=@Model.Letter })" style="float:right">Next Page</a>
+    }
+}
+

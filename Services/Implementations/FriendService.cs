@@ -24,6 +24,37 @@ namespace KeplerCMS.Services.Implementations
             _userService = userService;
         }
 
+        public async Task<List<Users>> GetFriendsWithIdAndUsername(int userId)
+        {
+            var friends = await GetFriends(userId);
+            var friendsWithDetails = new List<Users>();
+            foreach(var friend in friends)
+            {
+                Users friendDetails = null;
+                if(friend.ToId != userId)
+                {
+                    var getFriend = (from u in _context.Users
+                                     where u.Id == friend.ToId
+                                     select new { u.Id, u.Username }).FirstOrDefault();
+                    if(getFriend != null)
+                        friendDetails = new Users { Id = getFriend.Id, Username = getFriend.Username };
+                    
+                } else if(friend.FromId != userId)
+                {
+                    var getFriend = (from u in _context.Users
+                                     where u.Id == friend.FromId
+                                     select new { u.Id, u.Username }).FirstOrDefault();
+                    if (getFriend != null)
+                        friendDetails = new Users { Id = getFriend.Id, Username = getFriend.Username };
+                }
+                if(!friendsWithDetails.Any(s=>friendDetails != null && s.Id == friendDetails.Id))
+                {
+                    friendsWithDetails.Add(friendDetails);
+                }
+            }
+            return friendsWithDetails;
+        }
+
         public async Task<FriendRequests> AddFriend(int from, int to)
         {
             if (!(await RequestExists(from, to))) {

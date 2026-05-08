@@ -10,6 +10,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<Friends>> GetFriends(int userId);
 
         Task<List<FriendsViewModel>> GetFriendsWithUserData(int userId);
+        Task<List<Users>> GetFriendsWithIdAndUsername(int userId);
 
         Task<FriendRequests> AddFriend(int to, int from);
         Task<bool> RequestExists(int from, int to);

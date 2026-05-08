@@ -12,6 +12,7 @@ namespace KeplerCMS.Services.Interfaces
         
         Task<Settings> Update(Settings setting);
         Task<Settings> Get(string setting);
+        Task<Settings> Get(string setting, string fallback);
         IEnumerable<DefaultSetting> GetDefaultSettings();
         Task<IEnumerable<DefaultSetting>> GetMissingDefaultSettings();
         Task<IEnumerable<Settings>> InstallDefaultSettings();

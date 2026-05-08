@@ -18,7 +18,7 @@ namespace KeplerCMS.Avatara.Extensions
         {
             using (var memoryStream = new MemoryStream())
             {
-                var imageEncoder = image.GetConfiguration().ImageFormatsManager.FindEncoder(PngFormat.Instance);
+                var imageEncoder = Configuration.Default.ImageFormatsManager.GetEncoder(PngFormat.Instance);
                 image.Save(memoryStream, imageEncoder);
 
                 memoryStream.Seek(0, SeekOrigin.Begin);

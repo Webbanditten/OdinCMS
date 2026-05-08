@@ -7,6 +7,7 @@
     <div class="card-body">
         <form asp-action="Update">
             <input asp-for="PageId" type="hidden" class="form-control" />
+            <input asp-for="Order" type="hidden" class="form-control" />
             <div class="form-group">
                 <label asp-for="Teaser" class="label-control"></label>
                 <input asp-for="Teaser" class="form-control" />
@@ -36,6 +37,11 @@
                 <label asp-for="Link2Href" class="label-control"></label>
                 <input asp-for="Link2Href" class="form-control" />
                 <span asp-validation-for="Link2Href" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Hidden" class="label-control"></label>
+                <input asp-for="Hidden" class="form-control" />
+                <span asp-validation-for="Hidden" class="text-danger"></span>
             </div>
 
             <div class="form-group">

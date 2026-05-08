@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 namespace KeplerCMS.Controllers
 {
     [MaintenanceFilter]
-    [MenuFilter]
     public class ProfileController : Controller
     {
         private readonly IUserService _userService;

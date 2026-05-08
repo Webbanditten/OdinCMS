@@ -1,6 +1,7 @@
 ﻿using KeplerCMS.Data.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KeplerCMS.Areas.Housekeeping.Models.Views;
 
 namespace KeplerCMS.Services.Interfaces
 {
@@ -12,5 +13,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<Promo> Add(Promo model);
         Task<bool> Remove(int id);
         Task<Promo> Update(Promo model);
+        Task<bool> ReArrange(PromoReArrangePostModel model);
     }
 }

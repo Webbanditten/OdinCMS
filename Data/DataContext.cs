@@ -1,11 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using KeplerCMS.Data.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
 namespace KeplerCMS.Data
 {
     public class DataContext : DbContext
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<UsersIpLogs>()
+                .HasNoKey();
+
+            modelBuilder.Entity<UsersMachineIdLogs>().HasNoKey();
+            
             modelBuilder.Entity<UsersBadges>()
                 .HasKey(c => new { c.UserId, c.Badge });
 
@@ -14,13 +21,47 @@ namespace KeplerCMS.Data
 
             modelBuilder.Entity<FriendRequests>()
                 .HasKey(c => new { c.FromId, c.ToId });
+
+            modelBuilder.Entity<RankRights>()
+                .HasKey(c => new { c.FuseName, c.RankId });
+                
+            modelBuilder.Entity<RankBadges>()
+            .HasKey(c => new { c.Rank, c.Badge });
+
+            modelBuilder
+                .Entity<Fuses>()
+                .Property(d => d.UserGroup)
+                .HasConversion(new EnumToStringConverter<FuseUserGroup>());
+            
+            modelBuilder.Entity<Rooms>()
+                .HasOne(r => r.Owner)
+                .WithOne()
+                .HasForeignKey<Rooms>(r => r.OwnerId);
+            
+            modelBuilder.Entity<RoomChatlogs>()
+                .HasOne(r => r.Room)
+                .WithOne()
+                .HasForeignKey<RoomChatlogs>(r => r.RoomId);
+
+            modelBuilder.Entity<RoomChatlogs>().HasNoKey();
+            
+            modelBuilder.Entity<RoomChatlogs>()
+                .HasOne(r => r.User)
+                .WithOne()
+                .HasForeignKey<RoomChatlogs>(r => r.UserId);
+            
+            modelBuilder.Entity<Items>()
+                .HasOne(i => i.Definition)
+                .WithMany(d => d.Items)
+                .HasForeignKey(i => i.DefinitionId);
+
         }
         public DbSet<Users> Users { get; set; }
+        public DbSet<Bots> Bots { get; set; }
         public DbSet<CommandQueue> CommandQueue { get; set; }
         public DbSet<Menu> Menu { get; set; }
         public DbSet<Containers> Containers { get; set; }
         public DbSet<Pages> Pages { get; set; }
-        public DbSet<Fuses> Fuses { get; set; }
         public DbSet<Upload> Uploads { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<Promo> Promos { get; set; }
@@ -39,6 +80,7 @@ namespace KeplerCMS.Data
         public DbSet<HomesRating> HomesRating { get; set; }
         public DbSet<HomesGuestbook> HomesGuestbook { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
+        public DbSet<RoomChatlogs> RoomChatlogs { get; set; }
         public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
         public DbSet<UsersBadges> UsersBadges { get; set; }
 
@@ -56,6 +98,17 @@ namespace KeplerCMS.Data
         public DbSet<Question> PollsQuestions { get; set; }
         public DbSet<QuestionOption> PollsQuestionsOptions { get; set; }
         public DbSet<Trigger> PollsTriggers { get; set; }
+        public DbSet<UsersMachineIdLogs> UsersMachineIdLogs { get; set; }
+        public DbSet<UsersIpLogs> UsersIpLogs { get; set; }
+        public DbSet<ResetPassword> ResetPasswords { get; set; }
+        public DbSet<RankRights> RankRights { get; set; }
+        public DbSet<Fuses> Fuses { get; set; }
+        public DbSet<Rank> Ranks { get; set; }
+        public DbSet<Rewards> Rewards { get; set; }
+        public DbSet<RewardsRedeemed> RewardsRedeemed { get; set; }
+        public DbSet<RankBadges> RankBadges { get; set; }
+        public DbSet<UsersBans> UsersBans { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
     }

@@ -1,4 +1,4 @@
-﻿@model PageUpdateViewModel
+﻿@model PageAddViewModel
 
 <div class="card">
     <div class="card-header">
@@ -40,6 +40,11 @@
                     <option value="one_wide_one_medium">One wide one Medium</option>
                 </select>
                 <span asp-validation-for="Design" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Hidden" class="label-control"></label>
+                <input asp-for="Hidden" class="form-control" />
+                <span asp-validation-for="Hidden" class="text-danger"></span>
             </div>
 
             <div class="form-group">

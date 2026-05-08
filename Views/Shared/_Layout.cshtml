@@ -2,10 +2,12 @@
 @using KeplerCMS.Models.Enums
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
+@inject KeplerCMS.Services.Interfaces.IMenuService MenuService
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
     var userData = (Users)ViewData["user"];
-    var menu = (List<Menu>)ViewData["menu"];
-    var settings = (List<Settings>)ViewData["settings"];
+    var menu = await MenuService.GetMenu();
+    var settings = await SettingsService.GetAll();
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
@@ -14,13 +16,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta name="dc.language" content="da" />
+    <meta http-equiv="content-language" content="da" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
     <title>Habbo ~ @ViewData["Title"]</title>
-    <link href="~/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="~/favicon.ico" rel="icon" type="image/x-icon"/>
     <!-- IMPORT LAYOUT CONTENT(CSS/JS) -->
-    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
-    <link href='~/styles/ads.css' type='text/css' rel='stylesheet' />
-    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet' />
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet'/>
+    <link href='~/styles/ads.css' type='text/css' rel='stylesheet'/>
+    <link href='~/styles/boxes.css' type='text/css' rel='stylesheet'/>
     @RenderSection("Styles", required: false)
 
     <script type='text/javascript'>
@@ -28,6 +32,7 @@
         var habboStaticFilePath = habboReqPath + '//@Url.Content("~")';
         var habboImagerUrl = '/habbo-imaging/';
         document.habboLoggedIn = @User.Identity.IsAuthenticated.ToString().ToLower();
+        document.isHabboOnline = '@(User.Identity.IsAuthenticated && userData.Status != null ? userData.Status : "offline")' === "online";
         window.name = 'habboMain';
     </script>
 
@@ -146,7 +151,25 @@
                     <div id="habbologo"><a href="/"></a></div>
                     <!-- TOPMENU INCLUDE ( Enter Hotel ) -->
                     <div id="enter-hotel">
-                        <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                        @{
+                            var downloadableClient = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.downloadable_client") : null;
+                            if (downloadableClient != null && downloadableClient.Value == "1")
+                            {
+                                if (User.Identity.IsAuthenticated)
+                                {
+                                    <a href="/hotel/download" id="enter-hotel-link"></a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Index", "Account")" id="enter-hotel-link"></a>
+                                }
+                            }
+                            else
+                            {
+                                <a href="/client" id="enter-hotel-link" target="client" onclick="openOrFocusHabbo(this); return false;"></a>
+                            }
+                        }
+                        
                     </div>
 
                     <div id="tabmenu" onmouseover="lockCurrentTab();" onmouseout="fadeTab('myhabbo')">
@@ -335,7 +358,7 @@
         }
     }
     @if(shouldUseRuffle) {
-        <script src='@Url.Content("~/js/ruffle/ruffle.js")'></script>
+        <script src="https://cdn.jsdelivr.net/npm/@@ruffle-rs/ruffle@0.1.0-nightly.2024.7.17/ruffle.min.js"></script>
     }
 </body>
 </html>

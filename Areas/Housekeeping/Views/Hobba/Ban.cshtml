@@ -1,0 +1,48 @@
+﻿@model BanViewModel
+
+@{
+    ViewBag.Title = "Remote banning and kicking";
+    Layout = "_Housekeeping";
+    var banLengths = new int[] { 2, 4, 12, 24, 2 * 24, 3 * 24, 7 * 24, 14 * 24, 21 * 24, 30 * 24, 60 * 24, 365 * 24, 730 * 24, 100000 };
+    var banLengthItems = banLengths.Select(x => new SelectListItem { Text = x + " hours", Value = x.ToString() }).ToList();
+}
+
+<h2>@ViewBag.Title</h2>
+<p>
+    This tool allows you to kick or ban Habbos if you are not in the same room (you don't even need to be in the hotel). 
+    You must include a message to explain to the Habbo why they are being removed from the hotel.
+</p>
+<form asp-action="Ban" method="post" asp-controller="Hobba" class="basic">
+    <label asp-for="Username"></label>
+    <input asp-for="Username" />
+    <span asp-validation-for="Username"></span>
+    <br />
+    <label asp-for="Message"></label>
+    <input asp-for="Message"/>
+    <span asp-validation-for="Message"></span>
+    <br />
+    <label asp-for="BanLength"></label>
+    <select asp-for="BanLength" asp-items="banLengthItems"></select>
+    <span asp-validation-for="BanLength"></span>
+    <br />
+    <label asp-for="ExtraInfo"></label>
+    <textarea asp-for="ExtraInfo"></textarea>
+    <span asp-validation-for="ExtraInfo"></span>  
+    <br />
+    <input asp-for="BanMachine"/>
+    <label class="checkbox" asp-for="BanMachine"></label>
+    <span asp-validation-for="BanMachine"></span>
+    <br />
+    <input asp-for="BanIP"/>
+    <label class="checkbox" asp-for="BanIP"></label>
+    <span asp-validation-for="BanIP"></span>
+    <br />
+    <input type="submit" style="display:inline-block;" asp-for="Action" value="Ban" />
+    <input type="submit" style="display:inline-block; margin-left:0;" asp-for="Action" value="Kick" />
+    @{
+        if (Model != null && !string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <span class="success-message">@Model.SuccessMessage</span>
+        }
+    }
+</form>

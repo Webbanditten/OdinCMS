@@ -8,7 +8,7 @@ using System;
 
 namespace KeplerCMS.Controllers
 {
-    [MenuFilter]
+    [MaintenanceFilter]
     public class HabboHomeController : Controller
     {
         private readonly IUserService _userService;
