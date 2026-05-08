@@ -40,6 +40,7 @@ namespace KeplerCMS.Services.Implementations
                 .Distinct()
                 .ToListAsync();
 
+            // Only match by v2 machine ID — IP matching alone produces too many false positives
             var machineMatchUserIds = userV2MachineIds.Any()
                 ? await _context.UsersMachineIdLogs
                     .Where(m => userV2MachineIds.Contains(m.MachineId) && m.UserId != userId)
@@ -49,63 +50,54 @@ namespace KeplerCMS.Services.Implementations
                     .ToListAsync()
                 : new List<int>();
 
-            var ipMatchUserIds = await (
-                from uil1 in _context.UsersIpLogs
-                join uil2 in _context.UsersIpLogs
-                    on uil1.IpAddress equals uil2.IpAddress
-                where uil1.UserId == userId && uil2.UserId != userId
-                      && uil1.IpAddress != null 
-                      && uil1.IpAddress != "" 
-                      && uil1.IpAddress != "127.0.0.1"
-                select uil2.UserId
-            ).Distinct().Take(100).ToListAsync();
-
-            // Determine match type per user
-            var allUserIds = machineMatchUserIds.Union(ipMatchUserIds).ToList();
-
-            if (!allUserIds.Any())
+            if (!machineMatchUserIds.Any())
                 return new List<SimpleUser>();
 
             var users = await _context.Users
-                .Where(u => allUserIds.Contains(u.Id))
+                .Where(u => machineMatchUserIds.Contains(u.Id))
                 .Select(u => new { u.Id, u.Username, u.Email, u.LastOnlineTimestamp, u.TimesLoggedIn })
                 .ToListAsync();
 
             // Get latest machine ID per matched user (client-side grouping for keyless entity)
             var machineIdRows = await _context.UsersMachineIdLogs
-                .Where(m => allUserIds.Contains(m.UserId))
+                .Where(m => machineMatchUserIds.Contains(m.UserId))
                 .ToListAsync();
             var latestMachineIds = machineIdRows
                 .GroupBy(m => m.UserId)
                 .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.CreatedAt).First().MachineId);
 
-            // Get latest IP per matched user (client-side grouping for keyless entity)
+            // Get latest IP per matched user for display context
             var ipRows = await _context.UsersIpLogs
-                .Where(ip => allUserIds.Contains(ip.UserId))
+                .Where(ip => machineMatchUserIds.Contains(ip.UserId))
                 .ToListAsync();
             var latestIps = ipRows
                 .GroupBy(ip => ip.UserId)
                 .ToDictionary(g => g.Key, g => g.OrderByDescending(ip => ip.CreatedAt).First().IpAddress);
 
-            var machineIdLookup = latestMachineIds;
-            var ipLookup = latestIps;
-            var machineSet = new HashSet<int>(machineMatchUserIds);
-            var ipSet = new HashSet<int>(ipMatchUserIds);
+            // Check which matched users also share an IP with the target user
+            var userIps = await _context.UsersIpLogs
+                .Where(ip => ip.UserId == userId)
+                .Select(ip => ip.IpAddress)
+                .Distinct()
+                .ToListAsync();
+            var ipOverlapUserIds = ipRows
+                .Where(ip => userIps.Contains(ip.IpAddress))
+                .Select(ip => ip.UserId)
+                .Distinct()
+                .ToHashSet();
 
             return users.Select(u => new SimpleUser
             {
                 Id = u.Id,
                 Username = u.Username,
                 Email = u.Email,
-                LastMachineId = machineIdLookup.ContainsKey(u.Id) ? machineIdLookup[u.Id] : null,
-                LastIp = ipLookup.ContainsKey(u.Id) ? ipLookup[u.Id] : null,
+                LastMachineId = latestMachineIds.ContainsKey(u.Id) ? latestMachineIds[u.Id] : null,
+                LastIp = latestIps.ContainsKey(u.Id) ? latestIps[u.Id] : null,
                 LastAccess = u.LastOnlineTimestamp > 0
                     ? DateTimeOffset.FromUnixTimeSeconds(u.LastOnlineTimestamp).UtcDateTime
                     : null,
                 AccessCount = u.TimesLoggedIn,
-                MatchType = machineSet.Contains(u.Id) && ipSet.Contains(u.Id)
-                    ? "Both"
-                    : machineSet.Contains(u.Id) ? "MachineID" : "IP"
+                MatchType = ipOverlapUserIds.Contains(u.Id) ? "MachineID + IP" : "MachineID"
             }).ToList();
         }
 
