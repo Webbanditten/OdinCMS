@@ -130,6 +130,7 @@
                             <option value="CreateNews">Create News Article</option>
                             <option value="CataloguePageVisibility">Catalogue Page Visibility</option>
                             <option value="RoomCcts">Room CCTs</option>
+                            <option value="CatalogueRareItem">Catalogue Rare Item</option>
                         </select>
                     </div>
 
@@ -261,6 +262,16 @@
                         </table>
                         <button class="btn btn-sm btn-success action-submit-btn mt-2" onclick="submitAction('RoomCcts')">Add Action</button>
                     </div>
+
+                    <!-- Catalogue Rare Item Form -->
+                    <div id="form-CatalogueRareItem" class="action-form" style="display:none;">
+                        <p class="text-muted">Pick the furni sold as the catalogue rare item while this campaign is active. The rare page is shown to everyone (DEFAULT) when the campaign is active and hidden (admin only) when it ends.</p>
+                        <div class="form-group">
+                            <label class="label-control">Rare item</label>
+                            <select id="rare-item-searcher" class="furni-searcher form-control" style="width:100%;"></select>
+                        </div>
+                        <button class="btn btn-sm btn-success action-submit-btn mt-2" onclick="submitAction('CatalogueRareItem')">Add Action</button>
+                    </div>
                 </div>
             </div>
         }
@@ -330,12 +341,63 @@
 
 @section scripts {
     <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/housekeeping/js/tinymce/tinymce.min.js"></script>
+    <script src="~/housekeeping/js/tinymce/jquery.tinymce.min.js"></script>
     <script>
+        // Renders a furni image preview next to each search result (mirrors the Rewards picker).
+        function formatState(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var matches = /\(([^)]+)\)/.exec(state.text);
+            if (!matches) { return state.text; }
+            var rawSprite = matches[1];
+            var sprite = rawSprite.includes("*") ? rawSprite.split("*")[0] : rawSprite;
+            var color = rawSprite.includes("*") ? "&s=true&color=" + rawSprite.split("*")[1] : "&icon=true";
+            var img = "https://habbo-danmark.com/habbo-imaging/furni?sprite=" + sprite + color;
+            return $('<span><img src="' + img + '" /> ' + state.text + '</span>');
+        }
+
         $(document).ready(function () {
             var datetimeSettings = { format: 'Y-m-d H:i:s' };
             $("#startDatepicker").datetimepicker(datetimeSettings);
             $("#endDatepicker").datetimepicker(datetimeSettings);
+
+            // Rich text editor for the Create News action body (matches the News admin pages)
+            $('#news-text').tinymce({
+                relative_urls: false,
+                convert_urls: false,
+                remove_script_host: false,
+                forced_root_block: '',
+                force_br_newlines: true,
+                force_p_newlines: false,
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table paste imagetools wordcount"
+                ]
+            });
+
+            $('#rare-item-searcher').select2({
+                templateResult: formatState,
+                placeholder: 'Search for a furni...',
+                ajax: {
+                    url: '/api/hotel/furni/search',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) { return { query: params.term }; },
+                    processResults: function (data) {
+                        return {
+                            results: data.map(function (item) {
+                                return { id: item.id, text: "(" + item.sprite + ") " + item.name };
+                            })
+                        };
+                    }
+                }
+            });
 
             document.querySelectorAll('.edit-action-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -392,7 +454,11 @@
                     document.getElementById('news-slug').value = data.slug || '';
                     document.getElementById('news-teaser').value = data.teaser || '';
                     document.getElementById('news-writer').value = data.writer || '';
-                    document.getElementById('news-text').value = data.text || '';
+                    if (window.tinymce && tinymce.get('news-text')) {
+                        tinymce.get('news-text').setContent(data.text || '');
+                    } else {
+                        document.getElementById('news-text').value = data.text || '';
+                    }
                     break;
                 case 'CataloguePageVisibility':
                     document.querySelectorAll('.catalogue-page-check').forEach(function (cb) { cb.checked = false; });
@@ -420,6 +486,14 @@
                         var desc = document.querySelector('.room-desc-new[data-room-id="' + r.roomId + '"]');
                         if (desc) desc.value = r.newDescription || '';
                     });
+                    break;
+                case 'CatalogueRareItem':
+                    var $rare = $('#rare-item-searcher');
+                    $rare.empty();
+                    if (data.definitionId) {
+                        var label = data.label || ('#' + data.definitionId);
+                        $rare.append(new Option(label, data.definitionId, true, true)).trigger('change');
+                    }
                     break;
             }
         }
@@ -452,12 +526,15 @@
                     actionData = { value: document.getElementById('banner-value').value };
                     break;
                 case 'CreateNews':
+                    var newsBody = (window.tinymce && tinymce.get('news-text'))
+                        ? tinymce.get('news-text').getContent()
+                        : document.getElementById('news-text').value;
                     actionData = {
                         title: document.getElementById('news-title').value,
                         slug: document.getElementById('news-slug').value,
                         teaser: document.getElementById('news-teaser').value,
                         writer: document.getElementById('news-writer').value,
-                        text: document.getElementById('news-text').value
+                        text: newsBody
                     };
                     break;
                 case 'CataloguePageVisibility':
@@ -499,6 +576,14 @@
                         return;
                     }
                     actionData = { rooms: rooms };
+                    break;
+                case 'CatalogueRareItem':
+                    var rareData = $('#rare-item-searcher').select2('data');
+                    if (!rareData || rareData.length === 0 || !rareData[0].id) {
+                        alert('Please select a rare item');
+                        return;
+                    }
+                    actionData = { definitionId: parseInt(rareData[0].id), label: rareData[0].text };
                     break;
             }
 
@@ -564,6 +649,10 @@
                     var roomData = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(action.ActionData);
                     var roomCount = roomData.GetProperty("rooms").GetArrayLength();
                     return $"Update CCTs for {roomCount} room(s)";
+                case "CatalogueRareItem":
+                    var rareData = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(action.ActionData);
+                    var rareLabel = rareData.TryGetProperty("label", out var lbl) ? lbl.GetString() : "?";
+                    return $"Set rare item to: {rareLabel}";
                 default:
                     return action.ActionType;
             }

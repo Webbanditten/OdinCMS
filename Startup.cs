@@ -133,6 +133,7 @@ namespace KeplerCMS
             services.AddScoped<NewsActionHandler>();
             services.AddScoped<CatalogueVisibilityActionHandler>();
             services.AddScoped<RoomCctsActionHandler>();
+            services.AddScoped<CatalogueRareItemActionHandler>();
 
             services.AddMjmlServices(o =>
             {

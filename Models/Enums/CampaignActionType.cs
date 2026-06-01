@@ -6,6 +6,7 @@ namespace KeplerCMS.Models.Enums
         ChangeBanner,
         CreateNews,
         CataloguePageVisibility,
-        RoomCcts
+        RoomCcts,
+        CatalogueRareItem
     }
 }

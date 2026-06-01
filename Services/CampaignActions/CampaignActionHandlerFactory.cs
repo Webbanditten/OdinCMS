@@ -32,6 +32,7 @@ namespace KeplerCMS.Services.CampaignActions
                 CampaignActionType.CreateNews => _serviceProvider.GetRequiredService<NewsActionHandler>(),
                 CampaignActionType.CataloguePageVisibility => _serviceProvider.GetRequiredService<CatalogueVisibilityActionHandler>(),
                 CampaignActionType.RoomCcts => _serviceProvider.GetRequiredService<RoomCctsActionHandler>(),
+                CampaignActionType.CatalogueRareItem => _serviceProvider.GetRequiredService<CatalogueRareItemActionHandler>(),
                 _ => throw new ArgumentException($"No handler registered for action type: {actionType}")
             };
         }

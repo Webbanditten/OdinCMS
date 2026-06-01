@@ -91,7 +91,8 @@ namespace KeplerCMS.Services.Implementations
                     await handler.Apply(action.ActionData);
 
                     // Track what needs reloading
-                    if (action.ActionType == CampaignActionType.CataloguePageVisibility.ToString())
+                    if (action.ActionType == CampaignActionType.CataloguePageVisibility.ToString()
+                        || action.ActionType == CampaignActionType.CatalogueRareItem.ToString())
                         needsCatalogueReload = true;
                     if (action.ActionType == CampaignActionType.RoomCcts.ToString())
                         needsNavigatorReload = true;
@@ -195,7 +196,8 @@ namespace KeplerCMS.Services.Implementations
                     }
 
                     // Track what needs reloading
-                    if (action.ActionType == CampaignActionType.CataloguePageVisibility.ToString())
+                    if (action.ActionType == CampaignActionType.CataloguePageVisibility.ToString()
+                        || action.ActionType == CampaignActionType.CatalogueRareItem.ToString())
                         needsCatalogueReload = true;
                     if (action.ActionType == CampaignActionType.RoomCcts.ToString())
                         needsNavigatorReload = true;

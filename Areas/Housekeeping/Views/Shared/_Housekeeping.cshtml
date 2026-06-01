@@ -3,6 +3,7 @@
 @using KeplerCMS.Areas.Housekeeping.Models.Enums
 @using Microsoft.AspNetCore.Html
 @using KeplerCMS.Areas.Housekeeping.Models.Views
+@inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
     var userData = (Users)ViewData["user"];
     var path = Context.Request.Path;
@@ -88,6 +89,44 @@
     <div class="content">
         <div class="sidebar">
             @{
+                if (activeMenuItem == HousekeepingMenu.Home)
+                {
+                    var onlineSetting = await SettingsService.Get("players.online", "0");
+                    <div class="container">
+                        <div class="title">
+                            Server status
+                        </div>
+                        <div class="container-content">
+                            <ul>
+                                <li>Server time: <strong id="hk-server-time">@DateTime.Now.ToString("HH:mm:ss")</strong></li>
+                                <li>Habbos online: <strong id="hk-online-count">@onlineSetting.Value</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <script>
+                        (function () {
+                            // Live server clock, seeded from the server-rendered time
+                            var t = new Date(@DateTime.Now.Year, @(DateTime.Now.Month - 1), @DateTime.Now.Day, @DateTime.Now.Hour, @DateTime.Now.Minute, @DateTime.Now.Second);
+                            function pad(n) { return n < 10 ? '0' + n : n; }
+                            setInterval(function () {
+                                t.setSeconds(t.getSeconds() + 1);
+                                var el = document.getElementById('hk-server-time');
+                                if (el) el.textContent = pad(t.getHours()) + ':' + pad(t.getMinutes()) + ':' + pad(t.getSeconds());
+                            }, 1000);
+                            // Refresh the online count periodically
+                            setInterval(function () {
+                                fetch('/api/hotel/online')
+                                    .then(function (r) { return r.text(); })
+                                    .then(function (v) {
+                                        var el = document.getElementById('hk-online-count');
+                                        if (el) el.textContent = v;
+                                    })
+                                    .catch(function () { });
+                            }, 30000);
+                        })();
+                    </script>
+                }
+
                 if (activeMenuItem == HousekeepingMenu.WebsiteAdmin)
                 {
                     <div class="container">
