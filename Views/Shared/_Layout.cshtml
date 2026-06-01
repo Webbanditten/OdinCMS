@@ -6,7 +6,9 @@
 @inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
 @{
     var userData = (Users)ViewData["user"];
-    var menu = await MenuService.GetMenu();
+    // Only render menu items inside their scheduled window (start/end dates). Items
+    // with no dates are always shown. Admin menu management still sees every item.
+    var menu = (await MenuService.GetMenu()).Where(m => m.IsScheduledVisible).ToList();
     var settings = await SettingsService.GetAll();
     var subMenu = new List<Menu>();
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");

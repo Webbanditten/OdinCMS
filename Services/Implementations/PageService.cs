@@ -4,6 +4,7 @@ using KeplerCMS.Data.Models;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,7 +33,10 @@ namespace KeplerCMS.Services.Implementations
             {
                 return null;
             }
-            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id && c.IHidden == 0).ToListAsync();
+            var now = DateTime.Now;
+            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id && c.IHidden == 0
+                && (c.StartDate == null || c.StartDate <= now)
+                && (c.EndDate == null || c.EndDate >= now)).ToListAsync();
             var news = await _newsService.GetNews(0, 5);
             var promos = await _promoService.GetPromos(pageDetails.Id);
             return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };
@@ -92,7 +96,9 @@ namespace KeplerCMS.Services.Implementations
                 Column = model.Column,
                 Theme = model.Theme,
                 Order = 0,
-                Hidden = model.Hidden
+                Hidden = model.Hidden,
+                StartDate = model.StartDate,
+                EndDate = model.EndDate
             };
             await _context.Containers.AddAsync(container);
             await _context.SaveChangesAsync();
@@ -144,7 +150,9 @@ namespace KeplerCMS.Services.Implementations
                 item.Type = model.Type;
                 item.Theme = model.Theme;
                 item.Hidden = model.Hidden;
-                
+                item.StartDate = model.StartDate;
+                item.EndDate = model.EndDate;
+
                 _context.Containers.Update(item);
                 await _context.SaveChangesAsync();
             }

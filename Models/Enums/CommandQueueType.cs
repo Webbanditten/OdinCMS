@@ -19,6 +19,8 @@ namespace KeplerCMS.Models.Enums
         remote_kick,
         update_room,
         update_infobus,
-        reset_bots
+        reset_bots,
+        reload_catalogue,
+        reload_navigator
     }
 }

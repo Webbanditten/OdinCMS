@@ -1,0 +1,134 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.CampaignListViewModel
+
+<h1>Campaigns</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="message">
+        @Model.Message
+    </div>
+}
+
+<div class="mb-3">
+    <a href="@Url.Action("Create")" class="btn btn-sm btn-primary">Create Campaign</a>
+</div>
+
+<table class="blueTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+            <th>Created</th>
+            <th>Operations</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Campaigns != null && Model.Campaigns.Any())
+        {
+            foreach (var campaign in Model.Campaigns)
+            {
+                var statusClass = campaign.Status switch
+                {
+                    "active" => "badge-success",
+                    "scheduled" => "badge-info",
+                    "ended" => "badge-secondary",
+                    "cancelled" => "badge-danger",
+                    _ => "badge-warning"
+                };
+                <tr>
+                    <td>@campaign.Name</td>
+                    <td><span class="badge @statusClass">@campaign.Status</span></td>
+                    <td>@(campaign.StartDate?.ToString("dd-MM-yyyy HH:mm") ?? "Manual")</td>
+                    <td>@(campaign.EndDate?.ToString("dd-MM-yyyy HH:mm") ?? "Manual")</td>
+                    <td>@campaign.Actions.Count action(s)</td>
+                    <td>@campaign.CreatedAt.ToString("dd-MM-yyyy")</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = campaign.Id })">Edit</a>
+                        @if (campaign.Status != "active")
+                        {
+                            <span> - </span>
+                            <a href="#" onclick="cloneCampaign(@campaign.Id, '@campaign.Name')">Clone</a>
+                            <span> - </span>
+                            <a href="#" onclick="deleteCampaign(@campaign.Id)">Delete</a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7">No campaigns created yet</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+    <script>
+        function cloneCampaign(id, name) {
+            Swal.fire({
+                title: 'Clone Campaign',
+                text: 'Enter a name for the cloned campaign:',
+                input: 'text',
+                inputValue: name + ' (Copy)',
+                showCancelButton: true,
+                confirmButtonText: 'Clone',
+                inputValidator: (value) => {
+                    if (!value) return 'Please enter a name';
+                }
+            }).then((result) => {
+                if (result.value) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '@Url.Action("Clone")';
+
+                    var idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'CampaignId';
+                    idInput.value = id;
+                    form.appendChild(idInput);
+
+                    var nameInput = document.createElement('input');
+                    nameInput.type = 'hidden';
+                    nameInput.name = 'NewName';
+                    nameInput.value = result.value;
+                    form.appendChild(nameInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function deleteCampaign(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will permanently delete the campaign!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '@Url.Action("Delete")';
+
+                    var idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = id;
+                    form.appendChild(idInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

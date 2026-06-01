@@ -21,6 +21,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         [Required]
         public string Theme { get; set; }
         public bool Hidden { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
     public class ContainerUpdateViewModel
     {
@@ -38,5 +40,7 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Theme { get; set; }
 
         public bool Hidden { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

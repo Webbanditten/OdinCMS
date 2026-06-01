@@ -1,0 +1,50 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.CampaignCreateModel
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-uppercase">Create Campaign</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div class="form-group">
+                <label class="label-control">Name</label>
+                <input asp-for="Name" class="form-control" placeholder="e.g. Christmas 2025" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="label-control">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Optional notes about this campaign"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="label-control">Start Date (optional - leave empty for manual activation)</label>
+                        <input asp-for="StartDate" id="startDatepicker" type="text" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="label-control">End Date (optional - leave empty for manual deactivation)</label>
+                        <input asp-for="EndDate" id="endDatepicker" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-primary">Create Campaign</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script>
+        $(document).ready(function () {
+            var datetimeSettings = { format: 'Y-m-d H:i:s' };
+            $("#startDatepicker").datetimepicker(datetimeSettings);
+            $("#endDatepicker").datetimepicker(datetimeSettings);
+        });
+    </script>
+}

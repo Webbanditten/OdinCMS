@@ -33,7 +33,9 @@ namespace KeplerCMS.Services.Implementations
                 Icon = model.Icon,
                 Href = model.Href,
                 Order = 0,
-                State = model.State
+                State = model.State,
+                StartDate = model.StartDate,
+                EndDate = model.EndDate
             };
             await _context.Menu.AddAsync(menu);
             await _context.SaveChangesAsync();
@@ -58,6 +60,8 @@ namespace KeplerCMS.Services.Implementations
                 item.Icon = model.Icon;
                 item.Href = model.Href;
                 item.State = model.State;
+                item.StartDate = model.StartDate;
+                item.EndDate = model.EndDate;
                 _context.Menu.Update(item);
                 await _context.SaveChangesAsync();
             }

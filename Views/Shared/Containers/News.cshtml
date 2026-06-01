@@ -20,7 +20,7 @@
             var promoPages = [
                 @{
                     
-                    var promos = Model.Promos.Where(s => s.Hidden == false).OrderBy(s => s.Order).ToList();
+                    var promos = Model.Promos.Where(s => s.Hidden == false && s.IsScheduledVisible).OrderBy(s => s.Order).ToList();
                     foreach (var promo in promos)
                     {
                         @:{
