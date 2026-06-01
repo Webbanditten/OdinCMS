@@ -98,7 +98,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> UpdateContainer(int id)
         {
             var details = await _pageService.GetContainerById(id);
-            return View(new ContainerUpdateViewModel { Id = details.Id, Title = details.Title, Text = details.Text, Theme = details.Theme, Type = details.Type, PageId = details.PageId, Hidden = details.Hidden });
+            return View(new ContainerUpdateViewModel { Id = details.Id, Title = details.Title, Text = details.Text, Theme = details.Theme, Type = details.Type, PageId = details.PageId, Hidden = details.Hidden, StartDate = details.StartDate, EndDate = details.EndDate });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]

@@ -37,6 +37,23 @@ namespace KeplerCMS.Data.Models
         [Column("order")]
         public int Order { get; set; }
 
+        [Column("start_date")]
+        public DateTime? StartDate { get; set; }
 
+        [Column("end_date")]
+        public DateTime? EndDate { get; set; }
+
+        // True when the promo is within its (optional) scheduled window right now.
+        // An empty bound is open-ended. Bounds are inclusive.
+        [NotMapped]
+        public bool IsScheduledVisible
+        {
+            get
+            {
+                var now = DateTime.Now;
+                return (StartDate == null || StartDate <= now)
+                    && (EndDate == null || EndDate >= now);
+            }
+        }
     }
 }

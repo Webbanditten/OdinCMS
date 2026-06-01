@@ -57,7 +57,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> Update(int id)
         {
             var menu = await _menuService.Get(id);
-            return View(new MenuUpdateViewModel{ Id = menu.Id, Href = menu.Href, Icon = menu.Icon, State = menu.State, Text = menu.Text });
+            return View(new MenuUpdateViewModel{ Id = menu.Id, Href = menu.Href, Icon = menu.Icon, State = menu.State, Text = menu.Text, StartDate = menu.StartDate, EndDate = menu.EndDate });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_menu)]

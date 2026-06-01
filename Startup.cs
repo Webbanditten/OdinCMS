@@ -6,6 +6,7 @@ using KeplerCMS.Filters;
 using KeplerCMS.Helpers;
 using KeplerCMS.Hubs;
 using KeplerCMS.Services;
+using KeplerCMS.Services.CampaignActions;
 using KeplerCMS.Services.Implementations;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -123,6 +124,16 @@ namespace KeplerCMS
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<ICallsForHelpService, CallsForHelpService>();
 
+            // Campaign system
+            services.AddScoped<ICampaignService, CampaignService>();
+            services.AddScoped<ICampaignExecutor, CampaignExecutor>();
+            services.AddScoped<ICampaignActionHandlerFactory, CampaignActionHandlerFactory>();
+            services.AddScoped<BackgroundActionHandler>();
+            services.AddScoped<BannerActionHandler>();
+            services.AddScoped<NewsActionHandler>();
+            services.AddScoped<CatalogueVisibilityActionHandler>();
+            services.AddScoped<RoomCctsActionHandler>();
+
             services.AddMjmlServices(o =>
             {
                 if (CurrentEnvironment.IsDevelopment())
@@ -147,6 +158,7 @@ namespace KeplerCMS
             });
             
             services.AddHostedService<HabboActivityBackgroundService>();
+            services.AddHostedService<CampaignSchedulerService>();
             
             services.AddSignalR();
         }

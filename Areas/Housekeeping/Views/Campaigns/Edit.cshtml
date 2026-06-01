@@ -1,0 +1,576 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.CampaignEditViewModel
+@using KeplerCMS.Models.Enums
+
+@{
+    var campaign = Model.Campaign;
+    var isActive = campaign.StatusEnum == CampaignStatus.Active;
+    var isDraft = campaign.StatusEnum == CampaignStatus.Draft || campaign.StatusEnum == CampaignStatus.Scheduled;
+}
+
+<h1>Campaign: @campaign.Name</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="message">@Model.Message</div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Campaign Details -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="text-uppercase mb-0">Campaign Details</h4>
+                <span class="badge @(campaign.Status switch { "active" => "badge-success", "scheduled" => "badge-info", "ended" => "badge-secondary", _ => "badge-warning" })">
+                    @campaign.Status
+                </span>
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" method="post">
+                    <input type="hidden" name="Id" value="@campaign.Id" />
+                    <div class="form-group">
+                        <label class="label-control">Name</label>
+                        <input name="Name" class="form-control" value="@campaign.Name" @(isActive ? "disabled" : "") />
+                    </div>
+                    <div class="form-group">
+                        <label class="label-control">Description</label>
+                        <textarea name="Description" class="form-control" rows="2" @(isActive ? "disabled" : "")>@campaign.Description</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="label-control">Start Date</label>
+                                <input name="StartDate" id="startDatepicker" type="text" class="form-control"
+                                       value="@(campaign.StartDate?.ToString("yyyy-MM-dd HH:mm:ss"))" @(isActive ? "disabled" : "") />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="label-control">End Date</label>
+                                <input name="EndDate" id="endDatepicker" type="text" class="form-control"
+                                       value="@(campaign.EndDate?.ToString("yyyy-MM-dd HH:mm:ss"))" @(isActive ? "disabled" : "") />
+                            </div>
+                        </div>
+                    </div>
+                    @if (!isActive)
+                    {
+                        <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <!-- Actions List -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="text-uppercase">Actions (@campaign.Actions.Count)</h4>
+            </div>
+            <div class="card-body">
+                @if (campaign.Actions.Any())
+                {
+                    <table class="blueTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Summary</th>
+                                <th>Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var action in campaign.Actions.OrderBy(a => a.OrderIndex))
+                            {
+                                <tr>
+                                    <td>@action.OrderIndex</td>
+                                    <td><span class="badge badge-primary">@action.ActionType</span></td>
+                                    <td>@GetActionSummary(action)</td>
+                                    <td>
+                                        @if (!isActive)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-info edit-action-btn"
+                                                    data-action-id="@action.Id"
+                                                    data-action-type="@action.ActionType"
+                                                    data-action-data="@action.ActionData">Edit</button>
+                                            <form asp-action="RemoveAction" method="post" style="display:inline;">
+                                                <input type="hidden" name="actionId" value="@action.Id" />
+                                                <input type="hidden" name="campaignId" value="@campaign.Id" />
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('Remove this action?')">Remove</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No actions configured yet. Add actions below.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Add Action -->
+        @if (!isActive)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4 class="text-uppercase" id="actionCardTitle">Add Action</h4>
+                </div>
+                <div class="card-body">
+                    <div id="editModeBanner" class="alert alert-info" style="display:none;">
+                        Editing existing action — <a href="#" onclick="cancelEdit(); return false;">cancel and add a new action instead</a>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-control">Action Type</label>
+                        <select id="actionTypeSelect" class="form-control" onchange="showActionForm()">
+                            <option value="">-- Select action type --</option>
+                            <option value="ChangeBackground">Change Background</option>
+                            <option value="ChangeBanner">Change Banner</option>
+                            <option value="CreateNews">Create News Article</option>
+                            <option value="CataloguePageVisibility">Catalogue Page Visibility</option>
+                            <option value="RoomCcts">Room CCTs</option>
+                        </select>
+                    </div>
+
+                    <!-- Background Form -->
+                    <div id="form-ChangeBackground" class="action-form" style="display:none;">
+                        <div class="form-group">
+                            <label class="label-control">Background Value</label>
+                            <input id="bg-value" class="form-control" placeholder="e.g. christmas_bg" />
+                        </div>
+                        <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('ChangeBackground')">Add Action</button>
+                    </div>
+
+                    <!-- Banner Form -->
+                    <div id="form-ChangeBanner" class="action-form" style="display:none;">
+                        <div class="form-group">
+                            <label class="label-control">Banner Value</label>
+                            <input id="banner-value" class="form-control" placeholder="e.g. christmas_banner" />
+                        </div>
+                        <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('ChangeBanner')">Add Action</button>
+                    </div>
+
+                    <!-- News Form -->
+                    <div id="form-CreateNews" class="action-form" style="display:none;">
+                        <div class="form-group">
+                            <label class="label-control">Title</label>
+                            <input id="news-title" class="form-control" placeholder="News article title" />
+                        </div>
+                        <div class="form-group">
+                            <label class="label-control">Slug</label>
+                            <input id="news-slug" class="form-control" placeholder="url-friendly-slug" />
+                        </div>
+                        <div class="form-group">
+                            <label class="label-control">Teaser</label>
+                            <input id="news-teaser" class="form-control" placeholder="Short description" />
+                        </div>
+                        <div class="form-group">
+                            <label class="label-control">Writer</label>
+                            <input id="news-writer" class="form-control" placeholder="Author name" />
+                        </div>
+                        <div class="form-group">
+                            <label class="label-control">Body</label>
+                            <textarea id="news-text" class="form-control" rows="5" placeholder="Full article HTML"></textarea>
+                        </div>
+                        <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('CreateNews')">Add Action</button>
+                    </div>
+
+                    <!-- Catalogue Visibility Form -->
+                    <div id="form-CataloguePageVisibility" class="action-form" style="display:none;">
+                        <p class="text-muted">Select pages and configure their visibility when this campaign is active. The fuse controls who can see the page (DEFAULT = everyone).</p>
+                        <table class="blueTable">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Page</th>
+                                    <th>Current Fuse</th>
+                                    <th>New Fuse</th>
+                                    <th>Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var catPage in Model.AllCataloguePages.OrderBy(p => p.OrderId).ThenBy(p => p.Id))
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" class="catalogue-page-check" data-page-id="@catPage.Id" /></td>
+                                        <td>@catPage.Name (@catPage.NameIndex)</td>
+                                        <td><code>@catPage.Fuse</code></td>
+                                        <td>
+                                            <select class="form-control form-control-sm cat-fuse" data-page-id="@catPage.Id" data-current="@catPage.Fuse">
+                                                <option value="DEFAULT">DEFAULT (visible to all)</option>
+                                                <option value="fuse_catalogue_administrator">Admin only (hidden)</option>
+                                                <option value="fuse_catalogue_clubshop">Club shop</option>
+                                                <option value="fuse_catalogue_habboclub">Habbo Club</option>
+                                                <option value="fuse_catalogue_trophies">Trophies</option>
+                                                <option value="fuse_catalogue_xmas">Christmas</option>
+                                                <option value="fuse_catalogue_easter">Easter</option>
+                                                <option value="fuse_catalogue_summer">Summer</option>
+                                                <option value="fuse_catalogue_halloween">Halloween</option>
+                                                <option value="fuse_catalogue_valentines">Valentines</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" class="form-control form-control-sm cat-order" data-page-id="@catPage.Id" value="@catPage.OrderId" style="width:60px;" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-success action-submit-btn mt-2" onclick="submitAction('CataloguePageVisibility')">Add Action</button>
+                    </div>
+
+                    <!-- Room CCTs Form -->
+                    <div id="form-RoomCcts" class="action-form" style="display:none;">
+                        <p class="text-muted">Theme public rooms for the campaign. Tick a room and fill any of the fields below — leave a field blank to keep its current value. CCTs, title and description are restored automatically when the campaign ends.</p>
+                        <table class="blueTable" id="room-ccts-table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Current CCTs</th>
+                                    <th>New CCTs</th>
+                                    <th>Current Title</th>
+                                    <th>New Title</th>
+                                    <th>Current Description</th>
+                                    <th>New Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var room in Model.PublicRooms)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="room-cct-check" data-room-id="@room.Id" />
+                                        </td>
+                                        <td><code style="display:inline-block;max-width:220px;overflow-wrap:anywhere;">@room.Casts</code></td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm room-cct-new"
+                                                   data-room-id="@room.Id" placeholder="e.g. @(room.Casts)_xmas" />
+                                        </td>
+                                        <td><code>@room.Name</code></td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm room-name-new"
+                                                   data-room-id="@room.Id" placeholder="unchanged" />
+                                        </td>
+                                        <td><code>@room.Description</code></td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm room-desc-new"
+                                                   data-room-id="@room.Id" placeholder="e.g. theatredrome_xmas" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-success action-submit-btn mt-2" onclick="submitAction('RoomCcts')">Add Action</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Activation Controls -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="text-uppercase">Controls</h4>
+            </div>
+            <div class="card-body">
+                @if (isDraft && campaign.Actions.Any())
+                {
+                    <form asp-action="Activate" method="post" class="mb-2">
+                        <input type="hidden" name="id" value="@campaign.Id" />
+                        <button type="submit" class="btn btn-success btn-block"
+                                onclick="return confirm('Activate this campaign? All actions will be applied.')">
+                            Activate Now
+                        </button>
+                    </form>
+                }
+                @if (isActive)
+                {
+                    <form asp-action="Deactivate" method="post" class="mb-2">
+                        <input type="hidden" name="id" value="@campaign.Id" />
+                        <button type="submit" class="btn btn-warning btn-block"
+                                onclick="return confirm('Deactivate this campaign? All changes will be reverted.')">
+                            Deactivate &amp; Revert
+                        </button>
+                    </form>
+                }
+                <hr />
+                <p class="text-muted small">
+                    <strong>Created:</strong> @campaign.CreatedAt.ToString("dd-MM-yyyy HH:mm")<br />
+                    @if (campaign.ActivatedAt.HasValue)
+                    {
+                        <strong>Activated:</strong> @campaign.ActivatedAt.Value.ToString("dd-MM-yyyy HH:mm")<br />
+                    }
+                    @if (campaign.ClonedFromId.HasValue)
+                    {
+                        <text><strong>Cloned from:</strong> Campaign #@(campaign.ClonedFromId)<br /></text>
+                    }
+                </p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-uppercase">Help</h4>
+            </div>
+            <div class="card-body small">
+                <p><strong>How it works:</strong></p>
+                <ul>
+                    <li><strong>Draft</strong> - Configure actions, not yet active</li>
+                    <li><strong>Scheduled</strong> - Will auto-activate on start date</li>
+                    <li><strong>Active</strong> - Changes are live, cannot edit</li>
+                    <li><strong>Ended</strong> - Deactivated, changes reverted</li>
+                </ul>
+                <p>If multiple campaigns overlap on the same setting, the most recently activated one takes priority.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script>
+        $(document).ready(function () {
+            var datetimeSettings = { format: 'Y-m-d H:i:s' };
+            $("#startDatepicker").datetimepicker(datetimeSettings);
+            $("#endDatepicker").datetimepicker(datetimeSettings);
+
+            document.querySelectorAll('.edit-action-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    editAction(parseInt(this.dataset.actionId), this.dataset.actionType, this.dataset.actionData);
+                });
+            });
+        });
+
+        // Tracks the action currently being edited (null = adding a new action)
+        window.editingActionId = null;
+
+        function editAction(actionId, type, dataJson) {
+            window.editingActionId = actionId;
+
+            var data = {};
+            try { data = JSON.parse(dataJson); } catch (e) { }
+
+            var typeSelect = document.getElementById('actionTypeSelect');
+            typeSelect.value = type;
+            typeSelect.disabled = true; // type cannot change while editing
+            showActionForm();
+
+            populateActionForm(type, data);
+
+            document.getElementById('editModeBanner').style.display = 'block';
+            document.getElementById('actionCardTitle').textContent = 'Edit Action';
+            document.querySelectorAll('.action-submit-btn').forEach(function (b) { b.textContent = 'Save Changes'; });
+
+            var form = document.getElementById('form-' + type);
+            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelEdit() {
+            window.editingActionId = null;
+            var typeSelect = document.getElementById('actionTypeSelect');
+            typeSelect.disabled = false;
+            typeSelect.value = '';
+            document.getElementById('editModeBanner').style.display = 'none';
+            document.getElementById('actionCardTitle').textContent = 'Add Action';
+            document.querySelectorAll('.action-submit-btn').forEach(function (b) { b.textContent = 'Add Action'; });
+            showActionForm();
+        }
+
+        function populateActionForm(type, data) {
+            switch (type) {
+                case 'ChangeBackground':
+                    document.getElementById('bg-value').value = data.value || '';
+                    break;
+                case 'ChangeBanner':
+                    document.getElementById('banner-value').value = data.value || '';
+                    break;
+                case 'CreateNews':
+                    document.getElementById('news-title').value = data.title || '';
+                    document.getElementById('news-slug').value = data.slug || '';
+                    document.getElementById('news-teaser').value = data.teaser || '';
+                    document.getElementById('news-writer').value = data.writer || '';
+                    document.getElementById('news-text').value = data.text || '';
+                    break;
+                case 'CataloguePageVisibility':
+                    document.querySelectorAll('.catalogue-page-check').forEach(function (cb) { cb.checked = false; });
+                    (data.pages || []).forEach(function (p) {
+                        var cb = document.querySelector('.catalogue-page-check[data-page-id="' + p.pageId + '"]');
+                        if (cb) cb.checked = true;
+                        var fuse = document.querySelector('.cat-fuse[data-page-id="' + p.pageId + '"]');
+                        if (fuse && p.fuse) fuse.value = p.fuse;
+                        var order = document.querySelector('.cat-order[data-page-id="' + p.pageId + '"]');
+                        if (order && p.orderId != null) order.value = p.orderId;
+                    });
+                    break;
+                case 'RoomCcts':
+                    document.querySelectorAll('.room-cct-check').forEach(function (cb) { cb.checked = false; });
+                    document.querySelectorAll('.room-cct-new').forEach(function (i) { i.value = ''; });
+                    document.querySelectorAll('.room-name-new').forEach(function (i) { i.value = ''; });
+                    document.querySelectorAll('.room-desc-new').forEach(function (i) { i.value = ''; });
+                    (data.rooms || []).forEach(function (r) {
+                        var cb = document.querySelector('.room-cct-check[data-room-id="' + r.roomId + '"]');
+                        if (cb) cb.checked = true;
+                        var ccts = document.querySelector('.room-cct-new[data-room-id="' + r.roomId + '"]');
+                        if (ccts) ccts.value = r.newCcts || '';
+                        var name = document.querySelector('.room-name-new[data-room-id="' + r.roomId + '"]');
+                        if (name) name.value = r.newName || '';
+                        var desc = document.querySelector('.room-desc-new[data-room-id="' + r.roomId + '"]');
+                        if (desc) desc.value = r.newDescription || '';
+                    });
+                    break;
+            }
+        }
+
+        function showActionForm() {
+            document.querySelectorAll('.action-form').forEach(f => f.style.display = 'none');
+            var type = document.getElementById('actionTypeSelect').value;
+            if (type) {
+                document.getElementById('form-' + type).style.display = 'block';
+            }
+        }
+
+        // Show/hide visibility select when catalogue page checkbox is toggled
+        // (no longer needed with table layout)
+
+        // Set initial selected values for catalogue fuse dropdowns
+        document.querySelectorAll('.cat-fuse').forEach(function (select) {
+            var current = select.dataset.current;
+            if (current) select.value = current;
+        });
+
+        function submitAction(type) {
+            var actionData = {};
+
+            switch (type) {
+                case 'ChangeBackground':
+                    actionData = { value: document.getElementById('bg-value').value };
+                    break;
+                case 'ChangeBanner':
+                    actionData = { value: document.getElementById('banner-value').value };
+                    break;
+                case 'CreateNews':
+                    actionData = {
+                        title: document.getElementById('news-title').value,
+                        slug: document.getElementById('news-slug').value,
+                        teaser: document.getElementById('news-teaser').value,
+                        writer: document.getElementById('news-writer').value,
+                        text: document.getElementById('news-text').value
+                    };
+                    break;
+                case 'CataloguePageVisibility':
+                    var pages = [];
+                    document.querySelectorAll('.catalogue-page-check:checked').forEach(function (cb) {
+                        var pageId = parseInt(cb.dataset.pageId);
+                        var fuse = document.querySelector('.cat-fuse[data-page-id="' + pageId + '"]').value;
+                        var orderId = parseInt(document.querySelector('.cat-order[data-page-id="' + pageId + '"]').value);
+                        pages.push({
+                            pageId: pageId,
+                            fuse: fuse,
+                            orderId: orderId,
+                            indexVisible: 1
+                        });
+                    });
+                    if (pages.length === 0) {
+                        alert('Please select at least one catalogue page');
+                        return;
+                    }
+                    actionData = { pages: pages };
+                    break;
+                case 'RoomCcts':
+                    var rooms = [];
+                    document.querySelectorAll('.room-cct-check:checked').forEach(function (cb) {
+                        var roomId = parseInt(cb.dataset.roomId);
+                        var newCcts = document.querySelector('.room-cct-new[data-room-id="' + roomId + '"]').value.trim();
+                        var newName = document.querySelector('.room-name-new[data-room-id="' + roomId + '"]').value.trim();
+                        var newDesc = document.querySelector('.room-desc-new[data-room-id="' + roomId + '"]').value.trim();
+                        if (newCcts || newName || newDesc) {
+                            var entry = { roomId: roomId };
+                            if (newCcts) entry.newCcts = newCcts;
+                            if (newName) entry.newName = newName;
+                            if (newDesc) entry.newDescription = newDesc;
+                            rooms.push(entry);
+                        }
+                    });
+                    if (rooms.length === 0) {
+                        alert('Please select at least one room and provide a new CCT, title, or description value');
+                        return;
+                    }
+                    actionData = { rooms: rooms };
+                    break;
+            }
+
+            // Submit via form
+            var editing = window.editingActionId;
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = editing ? '@Url.Action("UpdateAction")' : '@Url.Action("AddAction")';
+
+            var campaignIdInput = document.createElement('input');
+            campaignIdInput.type = 'hidden';
+            campaignIdInput.name = 'CampaignId';
+            campaignIdInput.value = '@campaign.Id';
+            form.appendChild(campaignIdInput);
+
+            if (editing) {
+                var actionIdInput = document.createElement('input');
+                actionIdInput.type = 'hidden';
+                actionIdInput.name = 'ActionId';
+                actionIdInput.value = editing;
+                form.appendChild(actionIdInput);
+            } else {
+                var typeInput = document.createElement('input');
+                typeInput.type = 'hidden';
+                typeInput.name = 'ActionType';
+                typeInput.value = type;
+                form.appendChild(typeInput);
+            }
+
+            var dataInput = document.createElement('input');
+            dataInput.type = 'hidden';
+            dataInput.name = 'ActionData';
+            dataInput.value = JSON.stringify(actionData);
+            form.appendChild(dataInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+}
+
+@functions {
+    string GetActionSummary(KeplerCMS.Data.Models.CampaignAction action)
+    {
+        try
+        {
+            switch (action.ActionType)
+            {
+                case "ChangeBackground":
+                    var bgData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(action.ActionData);
+                    return $"Set background to: {bgData.GetValueOrDefault("value", "?")}";
+                case "ChangeBanner":
+                    var bannerData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(action.ActionData);
+                    return $"Set banner to: {bannerData.GetValueOrDefault("value", "?")}";
+                case "CreateNews":
+                    var newsData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(action.ActionData);
+                    return $"Create article: \"{newsData.GetValueOrDefault("title", "?")}\"";
+                case "CataloguePageVisibility":
+                    var catData = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(action.ActionData);
+                    var catPageCount = catData.GetProperty("pages").GetArrayLength();
+                    return $"Update {catPageCount} catalogue page(s) (fuse/order)";
+                case "RoomCcts":
+                    var roomData = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(action.ActionData);
+                    var roomCount = roomData.GetProperty("rooms").GetArrayLength();
+                    return $"Update CCTs for {roomCount} room(s)";
+                default:
+                    return action.ActionType;
+            }
+        }
+        catch
+        {
+            return action.ActionType;
+        }
+    }
+}

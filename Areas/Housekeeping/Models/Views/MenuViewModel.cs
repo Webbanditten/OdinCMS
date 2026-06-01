@@ -16,6 +16,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Href { get; set; }
         [Required]
         public string State { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
     public class MenuUpdateViewModel
     {
@@ -29,6 +31,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Href { get; set; }
         [Required]
         public string State { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class MenuReArrangeModel

@@ -27,12 +27,31 @@ namespace KeplerCMS.Data.Models
         public int Order { get; set; }
         [Column("hidden")]
         public int IHidden { get; set; }
-        
+
+        [Column("start_date")]
+        public DateTime? StartDate { get; set; }
+
+        [Column("end_date")]
+        public DateTime? EndDate { get; set; }
+
         [NotMapped]
         public bool Hidden
         {
             get => IHidden == 1;
             set => IHidden = value ? 1 : 0;
+        }
+
+        // True when the container is within its (optional) scheduled window right now.
+        // An empty bound is open-ended. Bounds are inclusive.
+        [NotMapped]
+        public bool IsScheduledVisible
+        {
+            get
+            {
+                var now = DateTime.Now;
+                return (StartDate == null || StartDate <= now)
+                    && (EndDate == null || EndDate >= now);
+            }
         }
 
         [NotMapped]

@@ -42,6 +42,17 @@
                 <label asp-for="Hidden" class="label-control"></label>
                 <input asp-for="Hidden" class="form-control" />
                 <span asp-validation-for="Hidden" class="text-danger"></span>
+                <small class="text-muted d-block">If checked, the promo is always hidden regardless of the schedule below.</small>
+            </div>
+            <div class="form-group">
+                <label class="label-control">Schedule start (optional)</label>
+                <input type="text" id="startDatepicker" name="StartDate" value="@(Model.StartDate?.ToString("yyyy-MM-dd HH:mm:ss"))" class="form-control" placeholder="Leave blank for no start" autocomplete="off" />
+                <small class="text-muted">When set, the promo only shows from this time.</small>
+            </div>
+            <div class="form-group">
+                <label class="label-control">Schedule end (optional)</label>
+                <input type="text" id="endDatepicker" name="EndDate" value="@(Model.EndDate?.ToString("yyyy-MM-dd HH:mm:ss"))" class="form-control" placeholder="Leave blank for no end" autocomplete="off" />
+                <small class="text-muted">When set, the promo stops showing after this time.</small>
             </div>
 
             <div class="form-group">
@@ -49,4 +60,16 @@
             </div>
         </form>
     </div>
-</div>  
+</div>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script>
+        $(document).ready(function () {
+            var datetimeSettings = { format: 'Y-m-d H:i:s' };
+            $("#startDatepicker").datetimepicker(datetimeSettings);
+            $("#endDatepicker").datetimepicker(datetimeSettings);
+        });
+    </script>
+}
