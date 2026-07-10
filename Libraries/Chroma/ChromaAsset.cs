@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Xml;
 using System.Linq;
@@ -130,12 +129,10 @@ namespace KeplerCMS.Chroma
                 {
                     if (flipH)
                     {
-                        var bitmap1 = (Bitmap)Bitmap.FromFile(newPath);
+                        var imageInfo = SixLabors.ImageSharp.Image.Identify(newPath);
 
-                        RelativeX = bitmap1.Width - RelativeX;
+                        RelativeX = imageInfo.Width - RelativeX;
                         ImageX = RelativeX;
-
-                        bitmap1.Dispose();
                     }
                 }
             }

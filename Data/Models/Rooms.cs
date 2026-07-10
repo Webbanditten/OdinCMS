@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.EntityFrameworkCore.DataAnnotations;
 
 namespace KeplerCMS.Data.Models
 {
@@ -26,7 +25,6 @@ namespace KeplerCMS.Data.Models
         [Column("category")]
         public int Category { get; set; }
         [Column("model")]
-        [MySqlCollation("utf8mb4_bin")]
         public string Model { get; set; }
         [Column("ccts")]
         public string Casts { get; set; }

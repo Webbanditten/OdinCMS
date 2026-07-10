@@ -10,6 +10,9 @@
         @Html.Raw(link);
     }
 }
+@{
+    var promos = Model.Promos.Where(s => s.Hidden == false && s.IsScheduledVisible).OrderBy(s => s.Order).ToList();
+}
 <tr>
     <td colspan="3" style="padding-bottom: 3px;">
 
@@ -19,8 +22,6 @@
             <script type="text/javascript">
             var promoPages = [
                 @{
-                    
-                    var promos = Model.Promos.Where(s => s.Hidden == false && s.IsScheduledVisible).OrderBy(s => s.Order).ToList();
                     foreach (var promo in promos)
                     {
                         @:{

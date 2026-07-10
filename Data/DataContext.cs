@@ -37,6 +37,11 @@ namespace KeplerCMS.Data
                 .HasOne(r => r.Owner)
                 .WithOne()
                 .HasForeignKey<Rooms>(r => r.OwnerId);
+
+            // Replaces the [MySqlCollation] attribute removed from MySql.EntityFrameworkCore
+            modelBuilder.Entity<Rooms>()
+                .Property(r => r.Model)
+                .UseCollation("utf8mb4_bin");
             
             modelBuilder.Entity<RoomChatlogs>()
                 .HasOne(r => r.Room)
