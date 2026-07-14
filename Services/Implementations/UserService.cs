@@ -33,22 +33,18 @@ namespace KeplerCMS.Services.Implementations
         
         public async Task<List<SimpleUser>> GetOtherAccounts(int userId)
         {
-            // Get this user's v2 machine IDs (v1 IDs were truncated and prone to collisions)
-            var userMachineIds = await _context.UsersMachineIdLogs
-                .Where(m => m.UserId == userId && EF.Functions.Like(m.MachineId, "v2%"))
-                .Select(m => m.MachineId)
+            // Match other users sharing any of this user's v2 machine IDs (v1 IDs were
+            // truncated and prone to collisions). Correlated EXISTS instead of a string-list
+            // Contains, which MySql.EntityFrameworkCore 10 cannot translate to SQL.
+            var machineMatchUserIds = await _context.UsersMachineIdLogs
+                .Where(m => m.UserId != userId && _context.UsersMachineIdLogs.Any(um =>
+                    um.UserId == userId
+                    && EF.Functions.Like(um.MachineId, "v2%")
+                    && um.MachineId == m.MachineId))
+                .Select(m => m.UserId)
                 .Distinct()
+                .Take(100)
                 .ToListAsync();
-
-            // Match other users sharing any of these machine IDs
-            var machineMatchUserIds = userMachineIds.Any()
-                ? await _context.UsersMachineIdLogs
-                    .Where(m => userMachineIds.Contains(m.MachineId) && m.UserId != userId)
-                    .Select(m => m.UserId)
-                    .Distinct()
-                    .Take(100)
-                    .ToListAsync()
-                : new List<int>();
 
             if (!machineMatchUserIds.Any())
                 return new List<SimpleUser>();

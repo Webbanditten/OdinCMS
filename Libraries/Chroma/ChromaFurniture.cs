@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using KeplerCMS.Chroma.Extensions;
-using System.Drawing;
 using Color = SixLabors.ImageSharp.Color;
 using System;
 using Newtonsoft.Json;
@@ -465,30 +464,24 @@ namespace KeplerCMS.Chroma
                 }
 
 
-                using (Bitmap tempBitmap = canvas.ToBitmap())
+                if (CropImage && cropColours.Count > 0)
                 {
-                    if (CropImage && cropColours.Count > 0)
+                    // Crop the image
+                    using (var croppedImage = ImageUtil.Trim(canvas, cropColours.ToArray()))
                     {
-                        var temp = canvas.ToBitmap();
-
-                        // Crop the image
-                        using (Bitmap croppedBitmap = ImageUtil.TrimBitmap(tempBitmap, cropColours.ToArray()))
-                        {
-                            return RenderImage(croppedBitmap);
-                        }
-
+                        return RenderImage(croppedImage);
                     }
-                    else
-                    {
-                        return RenderImage(tempBitmap);
-                    }
+                }
+                else
+                {
+                    return RenderImage(canvas);
                 }
             }
         }
 
-        private byte[] RenderImage(Bitmap croppedBitmap)
+        private byte[] RenderImage(Image<Rgba32> croppedImage)
         {
-            return croppedBitmap.ToByteArray();
+            return croppedImage.ToByteArray();
         }
 
         private void TintImage(Image<Rgba32> image, string colourCode, byte alpha)

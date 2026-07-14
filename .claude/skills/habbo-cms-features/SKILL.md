@@ -36,7 +36,7 @@ Reference these guidelines when:
 
 | Component | Technology |
 |-----------|-----------|
-| Language | C# (.NET 6.0) |
+| Language | C# (.NET 10.0) |
 | Framework | ASP.NET Core MVC |
 | Views | Razor (.cshtml) |
 | Database | MySQL via Entity Framework Core |

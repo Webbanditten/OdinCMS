@@ -1,20 +1,21 @@
-﻿﻿using SixLabors.ImageSharp.PixelFormats;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
-using System.Drawing;
 
 namespace KeplerCMS.Avatara.Util
 {
     public class ImageUtil
     {
-        public static Bitmap TrimBitmap(Bitmap bmp)
+        public static Image<Rgba32> Trim(Image<Rgba32> image)
         {
-            int w = bmp.Width;
-            int h = bmp.Height;
+            int w = image.Width;
+            int h = image.Height;
 
             Func<int, bool> allWhiteRow = r =>
             {
                 for (int i = 0; i < w; ++i)
-                    if ((bmp.GetPixel(i, r).A != 0))
+                    if ((image[i, r].A != 0))
                         return false;
                 return true;
             };
@@ -22,7 +23,7 @@ namespace KeplerCMS.Avatara.Util
             Func<int, bool> allWhiteColumn = c =>
             {
                 for (int i = 0; i < h; ++i)
-                    if ((bmp.GetPixel(c, i).A != 0))
+                    if ((image[c, i].A != 0))
                         return false;
                 return true;
             };
@@ -78,15 +79,7 @@ namespace KeplerCMS.Avatara.Util
 
             try
             {
-                var target = new Bitmap(croppedWidth, croppedHeight);
-                using (Graphics g = Graphics.FromImage(target))
-                {
-                    g.DrawImage(bmp,
-                      new System.Drawing.RectangleF(0, 0, croppedWidth, croppedHeight),
-                      new System.Drawing.RectangleF(leftmost, topmost, croppedWidth, croppedHeight),
-                      GraphicsUnit.Pixel);
-                }
-                return target;
+                return image.Clone(ctx => ctx.Crop(new Rectangle(leftmost, topmost, croppedWidth, croppedHeight)));
             }
             catch (Exception ex)
             {
@@ -96,16 +89,16 @@ namespace KeplerCMS.Avatara.Util
             }
         }
 
-        public static Bitmap TrimBitmap(Bitmap bmp, params Rgba32[] colors)
+        public static Image<Rgba32> Trim(Image<Rgba32> image, params Rgba32[] colors)
         {
-            int w = bmp.Width;
-            int h = bmp.Height;
+            int w = image.Width;
+            int h = image.Height;
 
 
             int topmost = 0;
             for (int row = 0; row < h; ++row)
             {
-                if (!allWhiteRow(bmp, row, colors))
+                if (!allWhiteRow(image, row, colors))
                     break;
                 topmost = row;
             }
@@ -113,7 +106,7 @@ namespace KeplerCMS.Avatara.Util
             int bottommost = 0;
             for (int row = h - 1; row >= 0; --row)
             {
-                if (!allWhiteRow(bmp, row, colors))
+                if (!allWhiteRow(image, row, colors))
                     break;
                 bottommost = row;
             }
@@ -121,14 +114,14 @@ namespace KeplerCMS.Avatara.Util
             int leftmost = 0, rightmost = 0;
             for (int col = 0; col < w; ++col)
             {
-                if (!allWhiteCol(bmp, col, colors))
+                if (!allWhiteCol(image, col, colors))
                     break;
                 leftmost = col;
             }
 
             for (int col = w - 1; col >= 0; --col)
             {
-                if (!allWhiteCol(bmp, col, colors))
+                if (!allWhiteCol(image, col, colors))
                     break;
                 rightmost = col;
             }
@@ -153,15 +146,7 @@ namespace KeplerCMS.Avatara.Util
 
             try
             {
-                var target = new Bitmap(croppedWidth, croppedHeight);
-                using (Graphics g = Graphics.FromImage(target))
-                {
-                    g.DrawImage(bmp,
-                      new System.Drawing.RectangleF(0, 0, croppedWidth, croppedHeight),
-                      new System.Drawing.RectangleF(leftmost, topmost, croppedWidth, croppedHeight),
-                      GraphicsUnit.Pixel);
-                }
-                return target;
+                return image.Clone(ctx => ctx.Crop(new Rectangle(leftmost, topmost, croppedWidth, croppedHeight)));
             }
             catch (Exception ex)
             {
@@ -171,14 +156,13 @@ namespace KeplerCMS.Avatara.Util
             }
         }
 
-        private static bool allWhiteRow(Bitmap bmp, int r, params Rgba32[] colors)
+        private static bool allWhiteRow(Image<Rgba32> image, int r, params Rgba32[] colors)
         {
-            int w = bmp.Width;
-            int h = bmp.Height;
+            int w = image.Width;
 
             for (int i = 0; i < w; ++i)
             {
-                var pixel = bmp.GetPixel(i, r);
+                var pixel = image[i, r];
 
                 if (!ColorEquals(colors, pixel))
                 {
@@ -189,14 +173,13 @@ namespace KeplerCMS.Avatara.Util
             return true;
         }
 
-        private static bool allWhiteCol(Bitmap bmp, int c, params Rgba32[] colors)
+        private static bool allWhiteCol(Image<Rgba32> image, int c, params Rgba32[] colors)
         {
-            int w = bmp.Width;
-            int h = bmp.Height;
+            int h = image.Height;
 
             for (int i = 0; i < h; ++i)
             {
-                var pixel = bmp.GetPixel(c, i);
+                var pixel = image[c, i];
 
                 if (!ColorEquals(colors, pixel))
                 {
@@ -207,7 +190,7 @@ namespace KeplerCMS.Avatara.Util
             return true;
         }
 
-        private static bool ColorEquals(Rgba32[] colors, System.Drawing.Color pixel)
+        private static bool ColorEquals(Rgba32[] colors, Rgba32 pixel)
         {
             foreach (var color in colors)
             {

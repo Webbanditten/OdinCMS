@@ -7,7 +7,6 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -235,20 +234,16 @@ namespace KeplerCMS.Avatara
                     finalCanvas = this.FaceCanvas;
                 }
 
-                using (Bitmap tempBitmap = finalCanvas.ToBitmap())
+                if (!RenderEntireFigure)
                 {
-                    if (!RenderEntireFigure)
+                    using (var trimmed = ImageUtil.Trim(finalCanvas))
                     {
-                        using (var bitmap = ImageUtil.TrimBitmap(tempBitmap))
-                        {
-                            return RenderImage(bitmap);
-                        }
+                        return RenderImage(trimmed);
                     }
-                    else
-                    {
-                        // Crop the image
-                        return RenderImage(tempBitmap);
-                    }
+                }
+                else
+                {
+                    return RenderImage(finalCanvas);
                 }
             }
         }
@@ -328,24 +323,23 @@ namespace KeplerCMS.Avatara
             }
         }
 
-        private byte[] RenderImage(Bitmap croppedBitmap)
+        private byte[] RenderImage(Image<Rgba32> croppedImage)
         {
             if (Size == "l")
             {
-                using (var image = croppedBitmap.ToImageSharpImage<Rgba32>())
+                var resizeOptions = new ResizeOptions();
+                resizeOptions.Size = new SixLabors.ImageSharp.Size(
+                   croppedImage.Width * 2, croppedImage.Height * 2
+                );
+
+                resizeOptions.Sampler = KnownResamplers.NearestNeighbor;
+
+                using (var image = croppedImage.Clone(x => x.Resize(resizeOptions)))
                 {
-                    var resizeOptions = new ResizeOptions();
-                    resizeOptions.Size = new SixLabors.ImageSharp.Size(
-                       image.Width * 2, image.Height * 2
-                    );
-
-                    resizeOptions.Sampler = KnownResamplers.NearestNeighbor;
-                    image.Mutate(x => x.Resize(resizeOptions));
-
-                    return image.ToBitmap().ToByteArray();
+                    return image.ToByteArray();
                 }
             }
-            return croppedBitmap.ToByteArray();
+            return croppedImage.ToByteArray();
         }
 
         private List<AvatarAsset> BuildDrawQueue()

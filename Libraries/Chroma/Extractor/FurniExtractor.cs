@@ -3,9 +3,9 @@ using Flazzy;
 using Flazzy.Tags;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -95,10 +95,12 @@ namespace KeplerCMS.Chroma.Extractor
                         if (asset.Attributes.GetNamedItem("flipH") != null &&
                             asset.Attributes.GetNamedItem("flipH").InnerText == "1")
                         {
-                            var bitmap1 = (Bitmap)Bitmap.FromFile(newPath);
-                            bitmap1.RotateFlip(RotateFlipType.Rotate180FlipY);
-                            bitmap1.Save(newPath);
-                            bitmap1.Dispose();
+                            using (var flipped = SixLabors.ImageSharp.Image.Load<Rgba32>(newPath))
+                            {
+                                // Rotate180FlipY in GDI+ is equivalent to a horizontal mirror
+                                flipped.Mutate(x => x.Flip(FlipMode.Horizontal));
+                                flipped.Save(newPath);
+                            }
                         }
                     }
                 }
