@@ -1,0 +1,119 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    Layout = null;
+    var cms = Configuration.GetSection("keplercms");
+    var web = cms.GetSection("webclient");
+    var baseUrl = Context.Request.Host;
+    // Prod terminates TLS upstream without forwarded headers, so Request.Scheme reads "http" there:
+    // keep https for real hosts and only use the request scheme for local development (as Index.cshtml).
+    var isLocalHost = baseUrl.Host == "localhost" || baseUrl.Host == "127.0.0.1";
+    var scheme = isLocalHost ? Context.Request.Scheme : "https";
+    var url = $"{scheme}://{baseUrl}";
+
+    // The web client can use its own copies of the client files (local dev routes them through a CORS proxy);
+    // by default it uses the same ones as the Shockwave client.
+    string Pick(string key) => string.IsNullOrEmpty(web[key]) ? cms[key] : web[key];
+    var dcr = Pick("dcr");
+    var vars = Pick("vars");
+    var texts = Pick("texts");
+
+    var host = cms["host"];
+    var port = int.TryParse(cms["port"], out var p) ? p : 0;
+    var musPort = int.TryParse(cms["musport"], out var mp) ? mp : 0;
+    var gameSocket = web["gameSocket"];
+    var musSocket = string.IsNullOrEmpty(web["musSocket"]) ? gameSocket.Replace("/game", "/mus") : web["musSocket"];
+
+    var forward = (int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0
+        ? $"forward.type={ViewData["forwardId"]};forward.id={ViewData["roomId"]}"
+        : null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Habbo ~ Client</title>
+    <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
+    <style>
+        body#client { margin: 0; }
+        #webclient-loading { color: #fff; font: 11px Verdana, Arial, sans-serif; padding: 8px; }
+    </style>
+
+    @* No Prototype here on purpose: it replaces native Array methods and Array.prototype.toJSON, which breaks
+       DirPlayer's bundle. The few helpers the Shockwave page takes from habbo.js are inlined below. *@
+    <script type="text/javascript">
+        var habboClient = true;
+        var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
+        document.habboLoggedIn = true;
+
+        (function () {
+            try {
+                if (window.opener != null) {
+                    if (window.opener.document.logoutPage != null && window.opener.document.logoutPage == true) {
+                        window.opener.location.href = "/";
+                    } else if (window.opener.document.habboLoggedIn != null && window.opener.document.habboLoggedIn == false) {
+                        window.opener.location.reload();
+                    }
+                }
+            } catch (error) { }
+        })();
+
+        window.addEventListener('unload', function () {
+            try { if (window.opener && window.opener.openedHabbo) { window.opener.openedHabbo = null; } } catch (e) { }
+        });
+
+        // DirPlayer reports Lingo script errors with alert(), which would block the game. Log them instead.
+        window.alert = function (message) { console.error('[DirPlayer]', message); };
+    </script>
+
+    <script src='@web["polyfill"]' data-manual-init></script>
+    <script type="text/javascript">
+        DirPlayer.configureFlash({
+            disableFlash: true,
+            // The client is told to connect to host:port over TCP (sw2/sw4); map both to Odin's WebSocket listener.
+            socketProxy: [
+                { host: @Json.Serialize(host), port: @port, proxyUrl: @Json.Serialize(gameSocket) },
+                { host: @Json.Serialize(host), port: @musPort, proxyUrl: @Json.Serialize(musSocket) }
+            ]
+        });
+        window.addEventListener('DOMContentLoaded', function () {
+            var topbar = document.getElementById('client-topbar');
+            if (topbar && screen.height > 600) { topbar.style.display = 'block'; }
+            DirPlayer.init();
+        });
+    </script>
+    <script src='~/js/jquery.min.js' asp-append-version="true"></script>
+    <script type='text/javascript'>
+        var j = jQuery.noConflict();
+        j(function () {
+            function refreshOnlineCount() {
+                j.get(habboReqPath + '/api/hotel/online').done(function (msg) { j('.online-count').text(msg); });
+            }
+            refreshOnlineCount();
+            setInterval(refreshOnlineCount, 60000);
+        });
+    </script>
+</head>
+<body id="client">
+    <div id="client-topbar" style="display:none">
+        <div class="logo"><img src="~/images/popup/popup_topbar_habbologo.gif" alt="" align="middle" /></div>
+        <div class="habbocount">
+            <div id="habboCountUpdateTarget">
+                <span class="online-count"></span> @DbRes.T("online_on_habbo", "shared")
+            </div>
+        </div>
+        <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
+    </div>
+    <div>
+        <embed src='@dcr' bgColor='#000000' width='720' height='540' type='application/x-director'
+               swStretchStyle='none' swText=''
+               sw1='site.url=@url;url.prefix=@url'
+               sw2='connection.info.host=@host;connection.info.port=@port'
+               sw3='client.reload.url=@url/client/web;client.allow.cross.domain=1;client.notify.cross.domain=0'
+               sw4='connection.mus.host=@host;connection.mus.port=@musPort'
+               sw5='external.variables.txt=@vars;external.texts.txt=@texts'
+               sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
+               sw7='@forward' />
+    </div>
+</body>
+</html>
