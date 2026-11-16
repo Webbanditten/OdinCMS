@@ -341,11 +341,11 @@
 
 @section scripts {
     <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
-    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" asp-append-version="true" />
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
-    <script src="~/lib/select2/js/select2.min.js"></script>
-    <script src="~/housekeeping/js/tinymce/tinymce.min.js"></script>
-    <script src="~/housekeeping/js/tinymce/jquery.tinymce.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>
     <script>
         // Renders a furni image preview next to each search result (mirrors the Rewards picker).
         function formatState(state) {
@@ -367,19 +367,7 @@
             $("#endDatepicker").datetimepicker(datetimeSettings);
 
             // Rich text editor for the Create News action body (matches the News admin pages)
-            $('#news-text').tinymce({
-                relative_urls: false,
-                convert_urls: false,
-                remove_script_host: false,
-                forced_root_block: '',
-                force_br_newlines: true,
-                force_p_newlines: false,
-                plugins: [
-                    "advlist autolink lists link image charmap print preview anchor",
-                    "searchreplace visualblocks code fullscreen",
-                    "insertdatetime media table paste imagetools wordcount"
-                ]
-            });
+            initHabboEditor('#news-text');
 
             $('#rare-item-searcher').select2({
                 templateResult: formatState,

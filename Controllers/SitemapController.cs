@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Services.Interfaces;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +28,7 @@ namespace KeplerCMS.Controllers
         }
 
         [Route("/sitemap.xml")]
-        public async void SitemapXml()
+        public async Task<IActionResult> SitemapXml()
         {
             var data = new List<SitemapViewModel>();
             foreach (var page in await _pageService.GetAll())
@@ -38,11 +41,16 @@ namespace KeplerCMS.Controllers
                 }
                 data.Add(new SitemapViewModel { Loc="/" + page.Slug,Priority=priority.ToString(),ChangeFreq="Weekly"});
             }
-            
+
             data.Add(new SitemapViewModel { Loc="/news",Priority="1",ChangeFreq="Weekly"});
             string host = _configuration.GetSection("keplercms:publicUrl").Value;
-            Response.ContentType = "application/xml"; 
-            using (var xml = XmlWriter.Create(Response.Body, new XmlWriterSettings { Indent = true }))
+
+            // Build the document in memory and return it. This used to be `async void` writing straight to
+            // Response.Body: the request completed before the DB query finished, the scoped DbContext went back
+            // to the pool while still in use (corrupting other requests), and the unobserved exception from the
+            // async void could terminate the whole process.
+            using var stream = new MemoryStream();
+            using (var xml = XmlWriter.Create(stream, new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(false) }))
             {
                 xml.WriteStartDocument();
                 xml.WriteStartElement("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -55,6 +63,7 @@ namespace KeplerCMS.Controllers
                 }
                 xml.WriteEndElement();
             }
+            return File(stream.ToArray(), "application/xml");
         }
     }
 }

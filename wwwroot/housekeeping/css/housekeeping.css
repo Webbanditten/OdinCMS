@@ -781,3 +781,9 @@ form.basic textarea {
     width:270px;
     height:100px;
 }
+
+/* jQuery UI positions #ui-datepicker-div at z-index 1 (inline, derived from the input). TinyMCE 6+ puts its
+   toolbar at z-index 2, so the calendar opened behind the editor on the news/page/campaign forms. */
+#ui-datepicker-div {
+    z-index: 10 !important;
+}

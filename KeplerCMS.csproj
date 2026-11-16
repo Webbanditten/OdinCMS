@@ -41,73 +41,26 @@
     <None Include="wwwroot\habbowood\flash\scenes\habbowood_scene_street.swf" />
     <None Include="wwwroot\habbowood\flash\scenes\habbowood_title_1.swf" />
     <None Include="wwwroot\habbowood\js\flashobject.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\jquery.tinymce.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\langs\readme.md" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\advlist\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\anchor\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autolink\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autoresize\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\autosave\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\bbcode\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\charmap\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\codesample\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\code\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\colorpicker\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\contextmenu\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\directionality\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\js\emojis.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\js\emojis.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\emoticons\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\fullpage\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\fullscreen\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\help\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\hr\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\imagetools\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\image\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\importcss\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\insertdatetime\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\legacyoutput\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\link\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\lists\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\media\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\nonbreaking\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\noneditable\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\pagebreak\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\paste\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\preview\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\print\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\quickbars\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\save\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\searchreplace\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\spellchecker\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\tabfocus\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\table\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\template\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\textcolor\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\textpattern\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\toc\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\visualblocks\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\visualchars\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\plugins\wordcount\plugin.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\themes\mobile\theme.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\themes\silver\theme.min.js" />
-    <None Include="wwwroot\housekeeping\js\tinymce\tinymce.min.js" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentEmail.Mailgun" Version="3.0.2" />
-    <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.12" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.9" />
+    <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.15" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
     <PackageReference Include="Mjml.AspNetCore" Version="1.3.0" />
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.12" />
     <PackageReference Include="Narochno.BBCode" Version="2.1.0" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-    <PackageReference Include="Sentry.AspNetCore" Version="6.6.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
+    <PackageReference Include="Sentry.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Westwind.Globalization.AspnetCore" Version="3.1.8" />
+    <!-- Held at 3.1.12: 3.2+ fails Release builds without a Six Labors license key. Its advisories (crafted
+         TIFF/ICC input) aren't reachable here: ImageSharp only decodes trusted server-side assets
+         (Avatara figure parts, Chroma furni SWFs), never uploads. NU1902/NU1903 for it are expected. -->
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <!-- Not used directly: pins the version Westwind.Globalization pulls in via Microsoft.Data.SqlClient 5.2 (1.10.3 has advisories). -->
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>
