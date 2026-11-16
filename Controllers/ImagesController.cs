@@ -20,6 +20,11 @@ namespace KeplerCMS.Controllers
 
         public async Task<IActionResult> Index(string category, string fileName)
         {
+            if (string.IsNullOrEmpty(category) || string.IsNullOrEmpty(fileName))
+            {
+                return NotFound();
+            }
+
             int durationInSeconds = 60 * 60 * 24;
             HttpContext.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + durationInSeconds;
 
@@ -42,6 +47,10 @@ namespace KeplerCMS.Controllers
             }
 
             var metadata = await _uploadService.GetByCategoryAndNameNoBlob(category, fileName);
+            if (metadata == null)
+            {
+                return NotFound();
+            }
             return File(cachedFile, metadata.ContentType);
            
             

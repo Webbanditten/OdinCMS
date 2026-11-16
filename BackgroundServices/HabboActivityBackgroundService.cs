@@ -69,7 +69,7 @@ namespace KeplerCMS.BackgroundServices
                         {
                             var messageObject = JsonConvert.DeserializeObject<ChatlogEventMessageModel>(messageJson);
 
-                            _logger.LogInformation($"Received message from user: {messageObject.PlayerId}, message: {messageObject.Message}, room: {messageObject.RoomId}");
+                            _logger.LogDebug($"Received message from user: {messageObject.PlayerId}, message: {messageObject.Message}, room: {messageObject.RoomId}");
                             // Process the message here
 
                             await _chatlogHub.Clients.Groups(new List<string> { "room_" + messageObject.RoomId }).SendAsync("ReceiveMessage", messageObject.PlayerId,messageObject.Username, messageObject.Message, messageObject.SentTime, stoppingToken);

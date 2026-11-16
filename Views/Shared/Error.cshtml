@@ -1,25 +1,34 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    // Standalone on purpose: the shared layout hits the DB and filters, which may be what failed.
+    Layout = null;
 }
-
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
-
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habbo ~ Fejl</title>
+    <style>
+        body { margin: 0; background: #1e3d4f; font: 13px Verdana, Arial, sans-serif; color: #000; }
+        .box { max-width: 420px; margin: 80px auto; background: #fff; border: 2px solid #000; border-radius: 6px; }
+        .box h1 { margin: 0; padding: 6px 10px; background: #e2621d; color: #fff; font-size: 13px; border-bottom: 2px solid #000; }
+        .box div { padding: 12px 14px; line-height: 1.5; }
+        .box a { color: #e2621d; font-weight: bold; }
+        .box code { font-size: 11px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Ups! Der skete en fejl</h1>
+        <div>
+            <p>Noget gik galt, mens vi behandlede din forespørgsel. Prøv igen om lidt.</p>
+            <p><a href="/">Tilbage til forsiden</a></p>
+            @if (Model?.ShowRequestId == true)
+            {
+                <p><code>Fejl-ID: @Model.RequestId</code></p>
+            }
+        </div>
+    </div>
+</body>
+</html>
