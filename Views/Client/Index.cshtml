@@ -11,6 +11,8 @@
     var isLocalHost = baseUrl.Host == "localhost" || baseUrl.Host == "127.0.0.1";
     var scheme = isLocalHost ? Context.Request.Scheme : "https";
     var url = $"{scheme}://{baseUrl}";
+    var webClientEnabled = !string.IsNullOrEmpty(Configuration["keplercms:webclient:polyfill"])
+        && !string.IsNullOrEmpty(Configuration["keplercms:webclient:gameSocket"]);
 }
 <!DOCTYPE html>
 
@@ -44,6 +46,12 @@
         j(document).ready(function() {
 
             if(determineSWVersion() == "undefined") {
+                @if (webClientEnabled)
+                {
+                    @:// No Shockwave plugin: run the same client in the browser instead (DirPlayer).
+                    @:window.location.replace("/client/web" + window.location.search);
+                    @:return;
+                }
                 j("#habbo").hide();
                 j("#noshockwave").show();
             }
