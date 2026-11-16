@@ -250,6 +250,54 @@ else
     </table>
 </details>
 <hr />
+<h2>Purchases: </h2>
+@{
+    string PurchaseKind(KeplerCMS.Areas.Housekeeping.Models.Views.PurchaseRow p) => p.Kind switch
+    {
+        "catalogue" => "Catalogue",
+        "gift" => "Gift" + (p.ReceiverName != null ? " to " + p.ReceiverName : ""),
+        "club" => "Habbo Club",
+        "tickets" => "Tickets" + (p.ReceiverName != null ? " for " + p.ReceiverName : ""),
+        "song" => "Trax disc",
+        "web_furni" => "Furni (website)",
+        "home_store" => "Habbo Home store",
+        "group" => "Group",
+        _ => p.Kind,
+    };
+}
+<details>
+    <summary>@Model.Purchases.Count purchase(s) shown, @Model.Purchases.Sum(p => p.Credits) credits (newest first, up to 200)</summary>
+    <table class="habboTable" id="purchases" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Item</th>
+                <th>Credits</th>
+                <th>Where</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var purchase in Model.Purchases)
+            {
+                <tr>
+                    <td>@purchase.CreatedAt.ToString("dd-MM-yyyy HH:mm")</td>
+                    <td>@PurchaseKind(purchase)</td>
+                    <td>@purchase.ItemName</td>
+                    <td>@purchase.Credits</td>
+                    <td>@(purchase.Source == "web" ? "Website" : "Hotel")@(purchase.StaffPage ? " (staff page)" : "")</td>
+                </tr>
+            }
+            @if (!Model.Purchases.Any())
+            {
+                <tr>
+                    <td colspan="5">No purchases logged. Purchases before the purchase log (Odin v1.25.8) only show up as totals in the in-game purse.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</details>
+<hr />
 
 <h2>Buddies: </h2>
 <p>

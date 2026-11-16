@@ -55,6 +55,7 @@ namespace KeplerCMS.Areas.Housekeeping
             var badges = await _userService.GetBadges(user.Id);
             var otherAccounts = await _userService.GetOtherAccounts(user.Id);
             var lastMachineId = await _userService.GetLastMachineId(user.Id);
+            var purchases = await _userService.GetPurchases(user.Id, 200);
             var model = new ManageUserViewModel
             {
                 User = user,
@@ -64,7 +65,8 @@ namespace KeplerCMS.Areas.Housekeeping
                 Rank = rank,
                 Ranks = ranks,
                 Message = message,
-                Badges = badges
+                Badges = badges,
+                Purchases = purchases
             };
             return View(model);
         }

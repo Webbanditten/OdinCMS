@@ -1,4 +1,5 @@
-﻿using Isopoh.Cryptography.Argon2;
+﻿using KeplerCMS.Data.Models;
+using Isopoh.Cryptography.Argon2;
 using KeplerCMS.Data;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
@@ -52,6 +53,7 @@ namespace KeplerCMS.Controllers
             var userId = int.Parse(User.Identity.Name);
             if(await _creditService.Purchase(10, userId))
             {
+                await _creditService.LogPurchase(userId, PurchaseLog.Group, name, 10);
                 var group = await _homeService.InitGroup(name, description, userId);
                 return View("Success", group);
             } else

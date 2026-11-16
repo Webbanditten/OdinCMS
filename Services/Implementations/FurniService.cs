@@ -35,44 +35,44 @@ namespace KeplerCMS.Services.Implementations
             return await _context.ItemsDefinitions.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
+        /// <summary>
+        /// The furni bought most in the last 30 days, from purchase_log: paid catalogue and website purchases
+        /// for yourself. Gifts, purchases from staff pages and purchases by staff accounts (rank above 0) don't
+        /// count, nor do items handed out by housekeeping, rewards or vouchers (they never enter the log).
+        /// </summary>
         public async Task<PopularFurniContainer> GetPopularFurni()
         {
-            var lastMonth = DateTime.Now.AddMonths(-1);
+            var since = DateTime.Now.AddDays(-30);
 
-            var query = from item in _context.Items
-                where item.CreatedAt >= lastMonth
-                join definition in _context.ItemsDefinitions
-                    on item.DefinitionId equals definition.Id into joined
-                from d in joined.DefaultIfEmpty()
-                where d != null && !d.Behavior.Contains("present")
-                group item by item.DefinitionId into grouped
-                orderby grouped.Count() descending
-                select new
-                {
-                    DefinitionId = grouped.Key,
-                    PurchaseCount = grouped.Count(),
-                };
+            var top = await (from purchase in _context.PurchaseLog
+                             join buyer in _context.Users on purchase.UserId equals buyer.Id
+                             where purchase.CreatedAt >= since
+                                   && (purchase.Kind == PurchaseLog.Catalogue || purchase.Kind == PurchaseLog.WebFurni)
+                                   && purchase.Credits > 0
+                                   && purchase.DefinitionId != null
+                                   && (purchase.PageFuse == null || PurchaseLog.PlayerPageFuses.Contains(purchase.PageFuse.ToLower()))
+                                   && buyer.Rank == 0
+                             group purchase by purchase.DefinitionId into grouped
+                             orderby grouped.Count() descending
+                             select new { DefinitionId = grouped.Key.Value, Purchases = grouped.Count() })
+                            .FirstOrDefaultAsync();
 
-            var mostBoughtProductInfo = query.FirstOrDefault();
-
-            if (mostBoughtProductInfo != null)
+            if (top == null)
             {
-                var mostBoughtProduct = _context.Items
-                    .Where(item => item.DefinitionId == mostBoughtProductInfo.DefinitionId)
-                    .Select(item => new PopularFurniContainer
-                    {
-                        DefinitionId = item.DefinitionId,
-                        Name = item.Definition.Name, // Assuming you have a navigation property for Name in the Definition entity
-                        Sprite = item.Definition.Sprite, // Assuming you have a navigation property for Sprite in the Definition entity
-                        SpriteId = item.Definition.SpriteId, // Assuming you have a navigation property for SpriteId in the Definition entity
-                        Amount = mostBoughtProductInfo.PurchaseCount
-                    })
-                    .FirstOrDefault();
-
-                return mostBoughtProduct;
+                return null;
             }
 
-            return null;
+            return await _context.ItemsDefinitions
+                .Where(d => d.Id == top.DefinitionId)
+                .Select(d => new PopularFurniContainer
+                {
+                    DefinitionId = d.Id,
+                    Name = d.Name,
+                    Sprite = d.Sprite,
+                    SpriteId = d.SpriteId,
+                    Amount = top.Purchases,
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

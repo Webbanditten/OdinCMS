@@ -107,6 +107,30 @@ namespace KeplerCMS.Services.Implementations
             return latest?.MachineId;
         }
         
+        public async Task<List<KeplerCMS.Areas.Housekeeping.Models.Views.PurchaseRow>> GetPurchases(int userId, int limit)
+        {
+            var rows = await _context.PurchaseLog
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.Id)
+                .Take(limit)
+                .ToListAsync();
+            var receiverIds = rows.Where(r => r.ReceiverId != null).Select(r => r.ReceiverId.Value).Distinct().ToList();
+            var receivers = await _context.Users
+                .Where(u => receiverIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.Username })
+                .ToDictionaryAsync(u => u.Id, u => u.Username);
+            return rows.Select(r => new KeplerCMS.Areas.Housekeeping.Models.Views.PurchaseRow
+            {
+                CreatedAt = r.CreatedAt,
+                Kind = r.Kind,
+                ItemName = r.ItemName,
+                Credits = r.Credits,
+                ReceiverName = r.ReceiverId != null && receivers.TryGetValue(r.ReceiverId.Value, out var name) ? name : null,
+                Source = r.Source,
+                StaffPage = r.PageFuse != null && !PurchaseLog.PlayerPageFuses.Contains(r.PageFuse.ToLower()),
+            }).ToList();
+        }
+
         public async Task<Users> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.Username.ToLower() == username.ToLower()).FirstOrDefaultAsync();
