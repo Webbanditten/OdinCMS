@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using KeplerCMS.Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
@@ -104,7 +105,10 @@ namespace KeplerCMS.Areas.MyHabbo
 				var giveItem = await _homeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId); ;
 				if (giveItem)
 				{
-					await _creditService.Purchase(product.Details.Price, userId);
+					if (await _creditService.Purchase(product.Details.Price, userId))
+					{
+						await _creditService.LogPurchase(userId, PurchaseLog.HomeStore, product.Definition?.Name, product.Details.Price);
+					}
 					return Content("OK");
 				}
 				return Content(DbRes.T("store_owned", "habbohome"));

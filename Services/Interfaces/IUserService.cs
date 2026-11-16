@@ -9,6 +9,8 @@ namespace KeplerCMS.Services.Interfaces
     public interface IUserService
     {
         Task<Users> GetUserByUsername(string username);
+        /// <summary>The user's latest purchases from purchase_log, newest first.</summary>
+        Task<List<PurchaseRow>> GetPurchases(int userId, int limit);
 
         Task<Users> GetUserById(int id);
 

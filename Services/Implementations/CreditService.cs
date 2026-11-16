@@ -105,6 +105,23 @@ namespace KeplerCMS.Services.Implementations
             }
         }
 
+        public async Task LogPurchase(int userId, string kind, string itemName, int credits, int? definitionId = null, int? catalogueItemId = null, string pageFuse = null)
+        {
+            _context.PurchaseLog.Add(new PurchaseLog
+            {
+                UserId = userId,
+                Kind = kind,
+                ItemName = itemName ?? string.Empty,
+                Credits = credits,
+                DefinitionId = definitionId,
+                CatalogueItemId = catalogueItemId,
+                PageFuse = pageFuse,
+                Source = "web",
+                CreatedAt = DateTime.Now,
+            });
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<Items> PurchaseFurni(int catalogId, int userId)
         {
             var catalogItem = await _context.CatalogueItems.Where(s => s.Id == catalogId).FirstOrDefaultAsync();
@@ -119,6 +136,8 @@ namespace KeplerCMS.Services.Implementations
                         _context.Items.Add(newItem);
                         await _context.SaveChangesAsync();
                         _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.purchase_furni, new Models.CommandTemplate { UserId = userId, DefinitionId = catalogItem.DefinitionId });
+                        var definitionName = await _context.ItemsDefinitions.Where(d => d.Id == catalogItem.DefinitionId).Select(d => d.Name).FirstOrDefaultAsync();
+                        await LogPurchase(userId, PurchaseLog.WebFurni, definitionName ?? catalogItem.SaleCode, catalogItem.Price, catalogItem.DefinitionId, catalogItem.Id, catalogPage.Fuse);
                         return newItem;
                     }
                 }

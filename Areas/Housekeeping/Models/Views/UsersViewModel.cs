@@ -42,5 +42,18 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public IEnumerable<UsersBadges> Badges { get; set; }
         public List<SimpleUser> OtherAccounts { get; set; }
         public string LastMachineId { get; set; }
+        public List<PurchaseRow> Purchases { get; set; } = new List<PurchaseRow>();
+    }
+
+    /// <summary>A purchase_log row as housekeeping shows it.</summary>
+    public class PurchaseRow
+    {
+        public System.DateTime CreatedAt { get; set; }
+        public string Kind { get; set; }
+        public string ItemName { get; set; }
+        public int Credits { get; set; }
+        public string ReceiverName { get; set; }
+        public string Source { get; set; }
+        public bool StaffPage { get; set; }
     }
 }
