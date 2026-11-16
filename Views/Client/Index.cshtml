@@ -27,6 +27,10 @@
         var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
         var habboStaticFilePath = habboReqPath + '/@Url.Content("~")';
         document.habboLoggedIn = true;
+        // The site names its tab 'habboMain' (_Layout), and the name stays when the client opens in the
+        // same tab. The client opens links in 'habboMain' (default.url.open.target), so it navigated itself
+        // away (Messenger links, Habbo Home). Renamed, links open in a separate 'habboMain' tab again.
+        if (window.name === 'habboMain') { window.name = 'habboClient'; }
     </script>
 
     <script language='JavaScript' type='text/javascript' src='~/js/prototype-guard.js' asp-append-version="true"></script>
