@@ -6,8 +6,11 @@
     var userData = (Users)ViewData["user"];
     var pathList = Context.Request.Path.ToString().Substring(1).Split("/");
     var baseUrl = Context.Request.Host;
-    var scheme = Context.Request.Scheme;
-    var url = $"https://{baseUrl}";
+    // Prod terminates TLS upstream without forwarded headers, so Request.Scheme reads "http" there:
+    // keep https for real hosts and only use the request scheme for local development.
+    var isLocalHost = baseUrl.Host == "localhost" || baseUrl.Host == "127.0.0.1";
+    var scheme = isLocalHost ? Context.Request.Scheme : "https";
+    var url = $"{scheme}://{baseUrl}";
 }
 <!DOCTYPE html>
 
@@ -26,7 +29,7 @@
 
     <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
-    <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js'></script>
+    <script language='JavaScript' type='text/javascript' src='~/js/jquery.min.js' asp-append-version="true"></script>
     <script type='text/javascript'>var j = jQuery.noConflict();</script>
 
     <script language='JavaScript' type='text/javascript' src='~/js/site.js'></script>
