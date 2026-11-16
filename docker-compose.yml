@@ -2,9 +2,11 @@ version: '3.7'
 
 services:
   mariadb:
-    image: mariadb:10.4.18-focal
+    # 11.4 LTS. MARIADB_AUTO_UPGRADE upgrades an existing (10.4) data dir in place on first start.
+    image: mariadb:11.4.13
     restart: unless-stopped
     environment:
+      MARIADB_AUTO_UPGRADE: "1"
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
@@ -56,10 +58,12 @@ services:
       - habbo_network
 
   rabbitmq:
-    image: rabbitmq:3.11.16-management-alpine
+    # RabbitMQ 4 can't start on a 3.11 data dir, hence the new path. Nothing in it needs keeping:
+    # Odin and the CMS re-declare their exchanges and queues.
+    image: rabbitmq:4.4.0-management-alpine
     restart: unless-stopped
     volumes:
-      - ./data:/var/lib/rabbitmq
+      - ./data-rabbitmq4:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=habbo
       - RABBITMQ_DEFAULT_PASS=habbo

@@ -49,7 +49,8 @@ namespace KeplerCMS.Services
                 var connection = await GetConnectionAsync();
 
                 await using var channel = await connection.CreateChannelAsync();
-                await channel.QueueDeclareAsync(QueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                // Durable: RabbitMQ 4 refuses transient non-exclusive queues. Odin declares it with the same arguments.
+                await channel.QueueDeclareAsync(QueueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
                 await channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Direct, durable: true);
                 await channel.BasicPublishAsync(exchange: ExchangeName, routingKey: Enum.GetName(command), body: body);
             }
