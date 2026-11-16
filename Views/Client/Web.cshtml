@@ -101,12 +101,29 @@
                 { host: @Json.Serialize(host), port: @musPort, proxyUrl: @Json.Serialize(musSocket) }
             ]
         });
+        // The site opens the client in a popup (habbo.js _openHabboWindow), and a script-opened window may be
+        // resized. Fit it to the client, so switching between the normal and the large client ("Stor klient")
+        // needs no manual resize. In a normal tab browsers ignore resizeBy/moveTo, so this does nothing there.
+        function fitWindowToClient(topbar) {
+            try {
+                var w = Math.min(@(large ? 1440 : 720), screen.availWidth);
+                var h = Math.min(@(large ? 1080 : 540) + (topbar ? topbar.offsetHeight : 0), screen.availHeight);
+                var dw = w - window.innerWidth, dh = h - window.innerHeight;
+                if (dw !== 0 || dh !== 0) { window.resizeBy(dw, dh); }
+                // Keep the resized window on the screen.
+                var left = screen.availLeft || 0, top = screen.availTop || 0;
+                var x = Math.max(left, Math.min(window.screenX, left + screen.availWidth - window.outerWidth));
+                var y = Math.max(top, Math.min(window.screenY, top + screen.availHeight - window.outerHeight));
+                if (x !== window.screenX || y !== window.screenY) { window.moveTo(x, y); }
+            } catch (e) { }
+        }
         window.addEventListener('DOMContentLoaded', function () {
             var topbar = document.getElementById('client-topbar');
             if (topbar && screen.height > 600) { topbar.style.display = 'block'; }
             // The client only goes 2x when the screen fits 1440x1080, so don't offer it otherwise.
             var bigLink = document.getElementById('webclient-large');
             if (bigLink && (screen.width < 1440 || screen.height < 1080)) { bigLink.style.display = 'none'; }
+            fitWindowToClient(topbar);
             DirPlayer.init();
         });
     </script>
