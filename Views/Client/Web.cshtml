@@ -52,7 +52,11 @@
     <style>
         body#client { margin: 0; }
         #webclient-loading { color: #fff; font: 11px Verdana, Arial, sans-serif; padding: 8px; }
-        #client-stage { display: flex; justify-content: center; }
+        @* Auto margins, not justify-content: center. A centred flex item wider than the window (the 1440 px large
+           client) overflows on both sides, and the left overflow can't be scrolled to. Auto margins collapse to
+           zero instead, so the client starts at the left edge and the page scrolls right. *@
+        #client-stage { display: flex; }
+        #client-stage > * { margin-left: auto; margin-right: auto; }
         #client-topbar .logout a.webclient-size { text-transform: none; padding-right: 10px; }
     </style>
 
