@@ -1,0 +1,14 @@
+@using KeplerCMS.Models
+@model string
+@* Stored page/news HTML with the widget codes in it replaced in place (see HighscoreWidget for the codes). *@
+@{
+    var text = Model ?? string.Empty;
+    var position = 0;
+}
+@foreach (System.Text.RegularExpressions.Match match in HighscoreWidget.Code.Matches(text))
+{
+    @Html.Raw(text.Substring(position, match.Index - position))
+    <partial name="~/Views/Shared/Containers/Highscores.cshtml" model="HighscoreWidget.FromCode(match)" />
+    position = match.Index + match.Length;
+}
+@Html.Raw(text.Substring(position))

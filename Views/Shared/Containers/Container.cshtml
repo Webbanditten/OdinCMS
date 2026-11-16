@@ -97,7 +97,7 @@
         }
         else
         {
-            @Html.Raw(Model.Text)
+            <partial name="~/Views/Shared/Containers/TextWithCodes.cshtml" model="Model.Text" />
         }
     }
 
