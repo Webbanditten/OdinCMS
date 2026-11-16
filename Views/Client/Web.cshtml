@@ -30,7 +30,10 @@
 
     // ?large=1: habbo.dcr's prepareMovie doubles the stage to 1440x1080 when the embed has
     // dynamicResolution=1 and the screen is at least that big. The toggle link keeps the room forward.
+    // The link is only shown when keplercms:webclient:largeClient is true (off while 2x still has
+    // rendering and hit-detection issues); ?large=1 keeps working for testing.
     var large = Context.Request.Query["large"] == "1";
+    var offerLarge = string.Equals(web["largeClient"], "true", StringComparison.OrdinalIgnoreCase);
     string ClientUrl(bool big)
     {
         var query = new List<string>();
@@ -124,7 +127,7 @@
             {
                 <a class="webclient-size" href="@ClientUrl(false)">Normal klient</a>
             }
-            else
+            else if (offerLarge)
             {
                 <a class="webclient-size" id="webclient-large" href="@ClientUrl(true)">Stor klient</a>
             }
