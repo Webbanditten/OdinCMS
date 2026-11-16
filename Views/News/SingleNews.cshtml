@@ -58,7 +58,7 @@
                                                 <p class="article-author">@Model.News.Writer</p>
                                                 <p class="teaser">@Model.News.Teaser</p>
                                                 <div>
-                                                    @Html.Raw(Model.News.Text)
+                                                    <partial name="~/Views/Shared/Containers/TextWithCodes.cshtml" model="Model.News.Text" />
                                                 </div>
                                             </div>
                                             <div class="clear"></div>

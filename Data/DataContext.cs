@@ -93,6 +93,7 @@ namespace KeplerCMS.Data
         public DbSet<RoomChatlogs> RoomChatlogs { get; set; }
         public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
         public DbSet<UsersBadges> UsersBadges { get; set; }
+        public DbSet<Highscores> Highscores { get; set; }
 
         public DbSet<Friends> Friends { get; set; }
         public DbSet<FriendRequests> FriendRequests { get; set; }

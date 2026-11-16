@@ -1,0 +1,54 @@
+@using KeplerCMS.Models
+@model HighscoreWidget
+@inject KeplerCMS.Services.Interfaces.IHighscoreService HighscoreService
+@functions
+{
+    // Labels live in the "highscores" localization set; until someone fills them in there,
+    // DbRes hands back the key itself, so fall back to Danish.
+    string L(string key, string fallback)
+    {
+        var value = DbRes.T(key, "highscores");
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+@{
+    var entries = await HighscoreService.GetTop(Model.GameType, Model.Period, Model.Limit);
+    var perGame = Model.Period != HighscorePeriod.AllTime;
+    var columns = perGame ? 5 : 3;
+}
+<div class="highscores-widget">
+    <table class="scores">
+        <thead>
+            <tr class="scores-header">
+                <th class="scores-position"></th>
+                <th class="scores-name">@L("name", "Habbo")</th>
+                @if (perGame)
+                {
+                    <th class="scores-games">@L("games", "Spil")</th>
+                    <th class="scores-won">@L("won", "Sejre")</th>
+                }
+                <th class="scores-total">@L("score", "Point")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (entries.Count == 0)
+            {
+                <tr class="odd"><td colspan="@columns">@L("empty", "Ingen har fået point endnu.")</td></tr>
+            }
+            @for (var i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                <tr class="@(i % 2 == 0 ? "odd" : "even")">
+                    <td class="scores-position">@(i + 1).</td>
+                    <td class="scores-name"><a href="/home/@Uri.EscapeDataString(entry.Username)">@entry.Username</a></td>
+                    @if (perGame)
+                    {
+                        <td class="scores-games">@entry.Games</td>
+                        <td class="scores-won">@entry.Wins</td>
+                    }
+                    <td class="scores-total">@entry.Score</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

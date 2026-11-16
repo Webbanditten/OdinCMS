@@ -100,6 +100,7 @@ namespace KeplerCMS
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ICommandQueueService, CommandQueueService>();
             services.AddScoped<IMenuService, MenuService>();
+            services.AddScoped<IHighscoreService, HighscoreService>();
             services.AddScoped<IPageService, PageService>();
             services.AddScoped<IFuseService, FuseService>();
             services.AddScoped<IUploadService, UploadService>();
