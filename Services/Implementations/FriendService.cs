@@ -93,7 +93,8 @@ namespace KeplerCMS.Services.Implementations
                     if (getFriend != null)
                         friendDetails = getFriend;
                 }
-                if(friendsWithDetails.Where(s=>s.UserDetails.Id == friendDetails.Id).Count() == 0)
+                // A friend whose user row is gone has no details: skip them.
+                if(friendDetails != null && friendsWithDetails.Where(s=>s.UserDetails.Id == friendDetails.Id).Count() == 0)
                 {
                     friendsWithDetails.Add(new FriendsViewModel { FriendDetails = friend, UserDetails = friendDetails });
                 }

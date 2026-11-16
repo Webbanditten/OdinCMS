@@ -438,60 +438,42 @@ namespace KeplerCMS.Controllers
         [LoggedInFilter(false)]
         public async Task<IActionResult> Group(string groupname)
         {
-            var enableEditing = false;
-            if (Request.Cookies["editid"] != null)
-            {
-                enableEditing = true;
-            }
-
-
-            var group = (User.Identity.IsAuthenticated) ? 
-            await _homeService.GetHomeByGroupName(groupname, enableEditing, int.Parse(User.Identity.Name)) : 
-            await _homeService.GetHomeByGroupName(groupname, enableEditing);
-            if (group != null)
-            {
-                if (!User.Identity.IsAuthenticated || (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"]))))
-                {
-                    Response.Cookies.Delete("editid");
-                    group.IsEditing = false;
-                }
-
-                return View(group);
-            }
-            return View("~/Views/HabboHome/HomeNotFound.cshtml");
-
+            var group = await _homeService.GetHomeByGroupName(groupname, EditCookie() != null, CurrentUserId());
+            return await ShowGroupHome(group);
         }
 
         [Route("groups/{id}/id")]
         [LoggedInFilter(false)]
         public async Task<IActionResult> GroupById(int id)
         {
-            var enableEditing = false || Request.Cookies["editid"] != null;
-            
-            var group = (User.Identity.IsAuthenticated) ? 
-            await _homeService.GetHomeByGroupId(id, enableEditing, int.Parse(User.Identity.Name)) : 
-            await _homeService.GetHomeByGroupId(id, enableEditing);
-            if (group != null)
-            {
-                if (!User.Identity.IsAuthenticated || (!await _homeService.CanEditHome(group.Home.Id, int.Parse(User.Identity.Name)) || (Request.Cookies["editid"] != null && group.Home.Id != int.Parse(Request.Cookies["editid"]))))
-                {
-                    Response.Cookies.Delete("editid");
-                    group.IsEditing = false;
-                }
-
-                return View("Group", group);
-            }
-            return View("~/Views/HabboHome/HomeNotFound.cshtml");
+            var group = await _homeService.GetHomeByGroupId(id, EditCookie() != null, CurrentUserId());
+            return await ShowGroupHome(group);
         }
 
+        private int? CurrentUserId() => int.TryParse(User.Identity?.Name, out var id) ? id : null;
+
+        private int? EditCookie() => int.TryParse(Request.Cookies["editid"], out var id) ? id : null;
+
+        /// <summary>Edit mode only for someone who can edit this group, with the cookie naming this group.</summary>
+        private async Task<IActionResult> ShowGroupHome(KeplerCMS.Areas.MyHabbo.Models.HomeViewModel group)
+        {
+            if (group == null) return View("~/Views/HabboHome/HomeNotFound.cshtml");
+
+            if (group.IsEditing && (EditCookie() != group.Home.Id || !await _homeService.CanEditHome(group.Home.Id, CurrentUserId())))
+            {
+                Response.Cookies.Delete("editid");
+                group.IsEditing = false;
+                group.Items.ForEach(i => i.EnableEditing = false);
+            }
+            return View("Group", group);
+        }
 
         [Route("groups/edit/{homeId}")]
         [LoggedInFilter]
         public async Task<IActionResult> GroupEdit(int homeId)
         {
-            var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(homeId);
-            if (await _homeService.CanEditHome(home.Id, currentUser.Id))
+            if (home != null && home.Type == "group" && await _homeService.CanEditHome(home.Id, CurrentUserId()))
             {
                 // Set editing mode
                 CookieOptions option = new CookieOptions

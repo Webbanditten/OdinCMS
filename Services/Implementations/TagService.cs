@@ -49,7 +49,8 @@ namespace KeplerCMS.Services.Implementations
 
         public void RemoveTag(Tags tag)
         {
-            var dbTag = _context.Tags.Where(s=>s.Tag.ToLower() == tag.Tag.ToLower() && s.UserId == tag.UserId).FirstOrDefault();
+            // A user's tag or a group's tag, never another group's (group tags all have UserId 0).
+            var dbTag = _context.Tags.Where(s => s.Tag.ToLower() == tag.Tag.ToLower() && s.UserId == tag.UserId && s.GroupId == tag.GroupId).FirstOrDefault();
             if (dbTag != null)
                 _context.Remove(dbTag);
 

@@ -13,9 +13,10 @@ using KeplerCMS.Helpers;
 
 namespace KeplerCMS.Filters
 {
+    // Filter attributes are shared by all requests: request services stay in locals, never in fields
+    // (a field let one request use another request's DbContext: "A second operation was started on this context").
     public class HousekeepingFilter : Attribute, IAsyncActionFilter
     {
-        private IUserService _userService;
         private List<string> _fuses = new List<string>();
         
         public HousekeepingFilter(Fuse fuse)
@@ -33,7 +34,7 @@ namespace KeplerCMS.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _userService = context.HttpContext.RequestServices.GetService<IUserService>();
+            var _userService = context.HttpContext.RequestServices.GetService<IUserService>();
             // _userService get list of fuses for role
 
             if (context.Controller is Controller controller)

@@ -1,35 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KeplerCMS.Filters;
-using KeplerCMS.Models;
-using System.Threading.Tasks;
+﻿using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
     [Area("MyHabbo")]
-    public class WidgetController : Controller
+    public class WidgetController : HomeEditController
     {
-        public readonly IHomeService _homeService;
-        public WidgetController(IHomeService homeService)
+        private const string WidgetView = "~/Areas/MyHabbo/Views/Items/Widget.cshtml";
+
+        public WidgetController(IHomeService homeService) : base(homeService)
         {
-            _homeService = homeService;
         }
 
+        /// <summary>widgetId is the inventory id of the widget to place.</summary>
         [HttpPost]
         [LoggedInFilter]
         public async Task<IActionResult> Add(int widgetId, int zIndex)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            if (await _homeService.CanEditHome(homeId, userId))
-            {
-                var item = await _homeService.PlaceItem(homeId, widgetId, zIndex, userId);
+            if (await EditableHome() is not var (homeId, userId)) return Error();
 
-                Response.Headers.Add("x-json", "[\"" + item.Item.Id + "\"]");
-                return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", item);
-            }
-            return Content("ERROR");
+            var item = await HomeService.PlaceItem(homeId, widgetId, zIndex, userId, "widgets");
+            if (item == null) return Error();
+
+            SetJson("[\"" + item.Item.Id + "\"]");
+            return View(WidgetView, item);
         }
 
         [HttpPost]
@@ -37,152 +34,32 @@ namespace KeplerCMS.Areas.MyHabbo
         [Route("myhabbo/traxplayer/select_song")]
         public async Task<IActionResult> SelectSong(int songId, int widgetId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            if (await _homeService.CanEditHome(homeId, userId))
-            {
-                var item = await _homeService.SelectSong(homeId, widgetId, songId, userId);
+            if (await EditableHome() is not var (homeId, userId)) return Error();
 
-                return View("~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml", item);
-            }
-
-            return Content("ERROR");
+            var item = await HomeService.SelectSong(homeId, widgetId, songId, userId);
+            return item == null ? Error() : View("~/Areas/MyHabbo/Views/TraxPlayer/SelectSong.cshtml", item);
         }
 
         [HttpPost]
         [LoggedInFilter]
         public async Task<IActionResult> Edit(int skinId, int widgetId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            if (await _homeService.CanEditHome(homeId, userId))
-            {
-                var updatedItem = await _homeService.EditItem(homeId, widgetId, skinId, userId);
+            if (await EditableHome() is not var (homeId, userId)) return Error();
 
-                Response.Headers.Add("x-json", "{\"id\":\"" + updatedItem.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(updatedItem.Item.Skin) + "\",\"type\":\"widget\"}");
-                return View("~/Areas/MyHabbo/Views/Items/Widget.cshtml", updatedItem);
-            }
-            return Content("ERROR");
+            var item = await HomeService.EditItem(homeId, widgetId, skinId, userId);
+            if (item == null) return Error();
+
+            SetJson("{\"id\":\"" + item.Item.Id + "\",\"cssClass\":\"" + HttpUtility.UrlEncode(item.Item.Skin) + "\",\"type\":\"widget\"}");
+            return View(WidgetView, item);
         }
+
         [HttpPost]
         [LoggedInFilter]
         public async Task<IActionResult> Delete(int widgetId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            if(await _homeService.CanEditHome(homeId, userId))
-            {
-                await _homeService.RemoveItem(homeId, widgetId, userId);
-                return Content("SUCCESS");
-            }
-            return Content("ERROR");
+            if (await EditableHome() is not var (homeId, userId)) return Error();
+
+            return await HomeService.RemoveItem(homeId, widgetId, userId) == null ? Error() : Content("SUCCESS");
         }
-
     }
-    /////////////////// ADD 
-    // widgetId: 31263, privileged: true, zindex: 240
-
-
-    // Response er det samme som edit 
-
-
-
-
-
-
-
-
-
-
-    // edit
-    /*
-skinId: 3
-widgetId: 31253
-
-     */
-    /*
-
-
-
-
-
-
-
-
-
-<div class="movable widget BadgesWidget" id="widget-31263" style="left: 269px; top: 380px; z-index: 214">
-<div class="w_skin_metalskin">
-   <div class="widget-corner" id="widget-31263-handle">
-	   <div class="widget-headline"><h3>
-
-<img src="https://cdn.classichabbo.com/web-gallery/images/myhabbo/icon_edit.gif" width="19" height="18" class="edit-button" id="widget-31263-edit" />
-<script language="JavaScript" type="text/javascript">
-Event.observe("widget-31263-edit", "click", function(e) { openEditMenu(e, 31263, "widget", "widget-31263-edit"); }, false);
-</script>
-
-	   <span class="header-left">&nbsp;</span><span class="header-middle">Badges & Achievements</span><span class="header-right">&nbsp;</span></h3>
-	   </div>	
-   </div>
-   <div class="widget-body">
-	   <div class="widget-content">
-		   <div id="badgelist-content">	
-	   <ul class="clearfix">
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_TraderPass1.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/Z63.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/DK.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_RoomEntry1.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_Graduate1.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_AllTimeHotelPresence1.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_RegistrationDuration2.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/HC1.gif)"></li>
-
-		   <li style="background-image: url(https://cdn.classichabbo.com/c_images/album1584/ACH_AvatarLooks1.gif)"></li>
-
-	   </ul>
-
-
-   <div id="badge-list-paging">
-	 9 - 1 / 1<br />
-
-
-   First | &lt;&lt; |
-
-
-
-   &gt;&gt; | Last
-
-   <input type="hidden" id="badgeListPageNumber" value="1" />
-   <input type="hidden" id="badgeListTotalPages" value="1" />
- <script type="text/javascript">
-   document.observe('dom:loaded', function() {
-	 window.badgesWidget31263 = new BadgesWidget('7975', '31263');
-   });
- </script>
-   </div>
-   </div>
-	   <div class="clear"></div>
-
-	   </div>
-   </div>
-</div>
-</div>
-
-
-
-	*/
-
-
-
-
-
-    ////////////////// Remove
-    /// widgetId: 31263
 }

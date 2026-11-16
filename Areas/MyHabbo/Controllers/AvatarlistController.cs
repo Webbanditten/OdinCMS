@@ -34,6 +34,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> FriendSearchPaging(int pageNumber, string searchString, int widgetId)
         {
             var item = await _homeService.GetItem(widgetId);
+            if (item == null) return Content("ERROR");
             item.WidgetData = await _homeService.GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
             return View(new AvatarlistViewModel { Widget = item, PageNumber = pageNumber, Search = searchString });
         }
@@ -42,6 +43,7 @@ namespace KeplerCMS.Areas.MyHabbo
         public async Task<IActionResult> MemberSearchPaging(int pageNumber, string searchString, int widgetId)
         {
             var item = await _homeService.GetItem(widgetId);
+            if (item == null) return Content("ERROR");
             item.WidgetData = await _homeService.GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
             return View(new AvatarlistViewModel { Widget = item, PageNumber = pageNumber, Search = searchString });
         }

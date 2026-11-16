@@ -2,12 +2,12 @@
 using KeplerCMS.Areas.MyHabbo.Models;
 using KeplerCMS.Data;
 using KeplerCMS.Data.Models;
-using KeplerCMS.Helpers;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Westwind.Globalization;
 
@@ -15,6 +15,19 @@ namespace KeplerCMS.Services.Implementations
 {
     public class HomeService : IHomeService
     {
+        private const string UserHome = "user";
+        private const string GroupHome = "group";
+        private const string Widgets = "widgets";
+        private const string Notes = "notes";
+        private const string Backgrounds = "backgrounds";
+        private const string DefaultSkin = "w_skin_defaultskin";
+        private const string DefaultBackground = "b_bg_pattern_abstract2";
+        private const int MaxGuestbookLength = 500;
+        private const int MaxNoteLength = 5000;
+
+        // A home is created on the first view; two simultaneous first views used to create two homes.
+        private static readonly SemaphoreSlim HomeCreation = new SemaphoreSlim(1, 1);
+
         private readonly DataContext _context;
         private readonly IUserService _userService;
         private readonly IRoomService _roomService;
@@ -24,761 +37,664 @@ namespace KeplerCMS.Services.Implementations
 
         public HomeService(DataContext context, IUserService userService, IRoomService roomService, ITraxService traxService, IFriendService friendService, ITagService tagService)
         {
-            _userService = userService;
             _context = context;
+            _userService = userService;
             _roomService = roomService;
             _traxService = traxService;
             _friendService = friendService;
             _tagService = tagService;
         }
 
+        // ---------------------------------------------------------------- viewing
 
-        public async Task<HomeViewModel> GetHomeByGroupName(string groupUrl, bool enableEditing, int? currentUserId)
+        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing, int? currentUserId = null)
         {
+            var homeUser = await _userService.GetUserById(userId);
+            if (homeUser == null) return null;
+
+            var home = await InitHome(homeUser.Id);
+            var model = await BuildHomeViewModel(home, enableEditing, currentUserId);
+            model.HomeUser = homeUser;
+            return model;
+        }
+
+        public async Task<HomeViewModel> GetHomeByGroupName(string groupUrl, bool enableEditing, int? currentUserId = null)
+        {
+            if (string.IsNullOrEmpty(groupUrl)) return null;
             groupUrl = groupUrl.ToLower();
-            var group = await _context.Homes.Where(s => s.GroupUrl != null && s.GroupUrl == groupUrl).FirstOrDefaultAsync();
-            if(group != null)
-            {
-                return await GetHomeByGroupId(group.Id, enableEditing, currentUserId);
-            }
-            return null;
+            var group = await _context.Homes.FirstOrDefaultAsync(s => s.Type == GroupHome && s.GroupUrl == groupUrl);
+            return group == null ? null : await BuildHomeViewModel(group, enableEditing, currentUserId);
         }
 
-        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId)
+        public async Task<HomeViewModel> GetHomeByGroupId(int groupId, bool enableEditing, int? currentUserId = null)
         {
-            var home = await _context.Homes.Where(s => s.Id == groupId).FirstOrDefaultAsync();
-            if(home == null) return null;
-            GroupMembers membership = null;
-            bool canEdit = false;
-            if(currentUserId != null) { 
-                membership = await GetMembership(groupId, currentUserId.GetValueOrDefault());
-                canEdit = await CanEditHome(groupId, currentUserId);
-            }
+            var home = await GetHomeDetailsById(groupId);
+            return home == null ? null : await BuildHomeViewModel(home, enableEditing, currentUserId);
+        }
 
-            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = null, IsEditing = enableEditing, Membership = membership, CanEdit = canEdit };
-
+        private async Task<HomeViewModel> BuildHomeViewModel(Homes home, bool enableEditing, int? currentUserId)
+        {
             var widgetData = await GetWidgetData(home.Id, currentUserId);
+            var items = await (from item in _context.HomesItems
+                               join def in _context.HomesItemData on item.ItemId equals def.Id
+                               where item.HomeId == home.Id
+                               select new ItemViewModel { Item = item, Definition = def, EnableEditing = enableEditing })
+                              .ToListAsync();
+            items.ForEach(i => i.WidgetData = widgetData);
 
-            homeViewModel.Items = await (from item in _context.HomesItems
-                                         join def in _context.HomesItemData
-                                         on item.ItemId equals def.Id
-                                         where item.HomeId == home.Id
-                                         select new ItemViewModel
-                                         {
-                                             Item = item,
-                                             EnableEditing = enableEditing,
-                                             Definition = def,
-                                             WidgetData = widgetData
-                                         }).ToListAsync();
-            return homeViewModel;
-        }
-
-
-        public async Task<HomeViewModel> GetHome(int userId, bool enableEditing, int? currentUserId)
-        {
-            // Get home for type user
-            var homeUser = await _userService.GetUserById(userId);
-
-            Homes home = (homeUser != null) ? await InitHome(homeUser.Id) : null;
-            var homeViewModel = new HomeViewModel { Home = home, Items = new List<ItemViewModel>(), HomeUser = homeUser, IsEditing = enableEditing };
-
-            var widgetData = await GetWidgetData(home.Id, currentUserId);
-
-            homeViewModel.Items = await (from item in _context.HomesItems
-                                              join def in _context.HomesItemData
-                                              on item.ItemId equals def.Id
-                                              where item.HomeId == home.Id
-                                              select new ItemViewModel
-                                              {
-                                                  Item = item,
-                                                  EnableEditing = enableEditing,
-                                                  Definition = def,
-                                                  WidgetData = widgetData
-                                              }).ToListAsync();
-
-            return homeViewModel;
-        }
-
-        public async Task<Homes> GetHomeDetailsById(int homeId)
-        {
-            return await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-        }
-
-        public async Task<List<HomesCategories>> GetStoreCategories()
-        {
-            return await _context.HomesCategories.ToListAsync(); 
-        }
-
-        public async Task<List<CatalogItem>> GetCatelogItemsInCategory(int category)
-        {
-            List<CatalogItem> data = await (from item in _context.HomesCatalog
-                                      join def in _context.HomesItemData
-                                      on item.ItemId equals def.Id
-                                      where item.Category == category
-                                      select new CatalogItem
-                                      {
-                                          Details = item,
-                                          Definition = def
-                                      }).ToListAsync();
-            return data;
-        }
-
-        public async Task<List<CatalogItem>> GetStoreCatelog(int categoryId, int subCategoryId)
-        {
-            var categories = await _context.HomesCategories.ToListAsync();
-            var category = categories.Where(s => s.Id == categoryId).FirstOrDefault();
-            var subCategory = categories.Where(s => s.Id == subCategoryId).FirstOrDefault();
-            if(category != null)
+            return new HomeViewModel
             {
-                var items = new List<CatalogItem>();
-
-                if (subCategory != null)
-                {
-                    items.AddRange(await GetCatelogItemsInCategory(subCategory.Id));
-                } else
-                {
-                    // If the category is stickers we might want to see if the category has any children
-                    if (category.Type == "stickers")
-                    {
-                        var firstchild = categories.Where(s => s.ParentId == category.Id).FirstOrDefault();
-                        if(firstchild != null)
-                        {
-                            items.AddRange(await GetCatelogItemsInCategory(firstchild.Id));
-                        } else
-                        {
-                            items.AddRange(await GetCatelogItemsInCategory(category.Id));
-                        }
-                    } else
-                    {
-                        items.AddRange(await GetCatelogItemsInCategory(category.Id));
-                    }
-                }
-                return items;
-            }
-            return null;
+                Home = home,
+                Items = items,
+                IsEditing = enableEditing,
+                CanEdit = widgetData.CanEdit,
+                Membership = currentUserId != null && home.Type == GroupHome ? await GetMembership(home.Id, currentUserId.Value) : null,
+            };
         }
 
-        public async Task<ItemViewModel> PlaceItem(int homeId, int inventoryId, int z, int userId, string data = null)
+        public Task<Homes> GetHomeDetailsById(int homeId)
         {
-            var item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.HomeId == homeId).FirstOrDefaultAsync();
-            if(item == null)
-            {
-                item = await _context.HomesInventory.Where(s => s.Id == inventoryId && s.UserId == userId && s.HomeId == 0).FirstOrDefaultAsync();
-            }
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            HomesItems newItem = null;
-            if(item != null && home != null)
-            {
-                var def = await GetItemDetail(item.ItemId);
-                if(def.Type == "widgets")
-                {
-                    item.Amount = 0;
-                    _context.HomesInventory.Update(item);
-                } else
-                {
-                    if (item.Amount > 1)
-                    {
-                        item.Amount--;
-                        _context.HomesInventory.Update(item);
-                    }
-                    else
-                    {
-                        _context.HomesInventory.Remove(item);
-                    }
-                }
-
-
-                newItem = new HomesItems { HomeId = home.Id, OwnerId = userId, ItemId = item.ItemId, X = 0, Z = z, Y = 0, Skin = "w_skin_defaultskin" };
-                _context.HomesItems.Add(newItem);
-                await _context.SaveChangesAsync();
-            }
-
-            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeId, home.UserId)  };
-        }
-
-        public async Task<HomesInventory> RemoveItem(int homeId, int itemId, int userId)
-        {
-            var currentItem = await _context.HomesItems.Where(s => s.Id == itemId && s.HomeId == homeId).FirstOrDefaultAsync();
-            var itemDef = await GetItemDetail(currentItem.ItemId);
-            var inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId).FirstOrDefaultAsync();
-            if(itemDef.Type == "widgets") {
-                inventoryItem = await _context.HomesInventory.Where(s => s.ItemId == currentItem.ItemId && s.HomeId == homeId).FirstOrDefaultAsync();
-            }
-            HomesInventory newInventoryItem = inventoryItem;
-            if(currentItem != null)
-            {
-                if (inventoryItem != null)
-                {
-                    inventoryItem.Amount++;
-                    _context.HomesInventory.Update(inventoryItem);
-                }
-                else
-                {
-                    newInventoryItem = new HomesInventory { Amount = 1, ItemId = currentItem.ItemId, HomeId = homeId, UserId = userId };
-                    _context.HomesInventory.Add(newInventoryItem);
-                }
-            }
-            _context.HomesItems.Remove(currentItem);
-            await _context.SaveChangesAsync();
-            return newInventoryItem;
-        }
-
-
-        public async Task<bool> Save(int homeId, int userId, SaveModel data)
-        {
-            var user = await _userService.GetUserById(userId);
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            if (user == null || home == null) return false;
-
-            var itemsChanged = new List<HomesItems>();
-            itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.Stickers));
-            itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.Widgets));
-            itemsChanged.AddRange(SaveDataStringConverter.GetItemsFromString(data.StickieNotes));
-            if(data.Background != null)
-            {
-                var bgData = data.Background.Split(":");
-                var bgItemId = bgData[0];
-                var dbItem = await GetInventoryItem(int.Parse(bgItemId), user.Id);
-                // If I plan to make groups work the following line needs to be fixed
-                if(dbItem != null)
-                {
-                    home.Background = dbItem.Definition.CssClass;
-                    _context.Homes.Update(home);
-                }
-            }
-            foreach (var item in itemsChanged)
-            {
-                // Lets see if the user is actually the owner of the items
-                var dbItem = await _context.HomesItems.Where(s=>s.Id == item.Id).FirstOrDefaultAsync();
-                if(dbItem != null)
-                {
-                    dbItem.X = item.X;
-                    dbItem.Y = item.Y;
-                    dbItem.Z = item.Z;
-                    _context.HomesItems.Update(dbItem);
-                }
-
-            }
-            _context.SaveChanges();
-            return true;
-        }
-
-        public async Task<HomesItemData> GetItemDetail(int id)
-        {
-            return await _context.HomesItemData.Where(s => s.Id == id).FirstOrDefaultAsync();
-        }
-
-        public async Task<CatalogItem> GetProduct(int productId)
-        {
-            var product = await _context.HomesCatalog.Where(s => s.Id == productId).FirstOrDefaultAsync();
-            if (product == null) return null;
-
-            var itemDef = await GetItemDetail(product.ItemId);
-            if (itemDef == null) return null;
-
-            return new CatalogItem { Definition = itemDef, Details = product };
-        }
-
-        public async Task<bool> GiveItem(int itemId, int amount, int userId)
-        {
-            var similarProductInInventory = await _context.HomesInventory.Where(s => s.ItemId == itemId).FirstOrDefaultAsync();
-            if(similarProductInInventory != null)
-            {
-                var itemDef = await GetItemDetail(similarProductInInventory.ItemId);
-                if (itemDef == null) return false;
-                if(itemDef.Type == "backgrounds") return false;
-                
-                similarProductInInventory.Amount += similarProductInInventory.Amount;
-                _context.HomesInventory.Update(similarProductInInventory);
-            } else
-            {
-                _context.HomesInventory.Add(new HomesInventory { Amount = amount, UserId = userId, ItemId = itemId });
-            }
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<List<InventoryItem>> GetInventory(int homeId, string type, int userId)
-        {
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            List<InventoryItem> data = new List<InventoryItem>();
-            if (home != null)
-            {
-                if(home.Type == "group" && type == "widgets")
-                {
-                    data = await (from item in _context.HomesInventory
-                                  join def in _context.HomesItemData
-                                  on item.ItemId equals def.Id
-                                  where def.Type == type && item.HomeId == homeId
-                                  select new InventoryItem
-                                  {
-                                      Details = item,
-                                      Definition = def
-                                  }).ToListAsync();
-                } else
-                {
-                    data = await (from item in _context.HomesInventory
-                                                      join def in _context.HomesItemData
-                                                      on item.ItemId equals def.Id
-                                                      where def.Type == type && item.UserId == userId
-                                                      select new InventoryItem
-                                                      {
-                                                          Details = item,
-                                                          Definition = def
-                                                      }).ToListAsync();
-                }
-            }
-
-
-            return data;
-        }
-
-        public async Task<InventoryItem> GetInventoryItem(int inventoryId, int userId)
-        {
-            return await (from item in _context.HomesInventory
-                   join def in _context.HomesItemData
-                   on item.ItemId equals def.Id
-                   where item.Id == inventoryId && item.UserId == userId
-                   select new InventoryItem
-                   {
-                       Details = item,
-                       Definition = def
-                   }).FirstOrDefaultAsync();
-        }
-
-        public async Task<ItemViewModel> EditItem(int homeId, int itemId, int skinId, int userId)
-        {
-            var item = await GetItem(itemId);
-            var homeUser = await _userService.GetUserById(userId);
-            if (item != null && await CanEditHome(homeId, homeUser.Id))
-            {
-                if(item.Definition.Type == "notes")
-                {
-                    item.Item.Skin = SkinIdToString.ConvertNote(skinId);
-                } else
-                {
-                    item.Item.Skin = SkinIdToString.Convert(skinId);
-                }
-                _context.HomesItems.Update(item.Item);
-                await _context.SaveChangesAsync();
-            }
-
-            // Get widget data
-            item.WidgetData =  await GetWidgetData(homeId, homeUser.Id);
-            return item;
-        }
-
-        public async Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId)
-        {
-            var item = await _context.HomesItems.Where(s => s.Id == itemId && s.OwnerId == userId).FirstOrDefaultAsync();
-            var homeUser = await _userService.GetUserById(userId);
-            var song = await _traxService.GetSingleSongById(songId);
-            if (item != null && song != null)
-            {
-                item.Data = song.Id.ToString();
-            } else if(item != null && song == null)
-            {
-                item.Data = null;
-            }
-
-            // Save to db 
-            _context.HomesItems.Update(item);
-            await _context.SaveChangesAsync();
-
-            // Get widget data
-            var dbItem = await GetItem(itemId, true);
-            dbItem.WidgetData = await GetWidgetData(homeId, homeUser.Id);
-            return dbItem;
+            return _context.Homes.FirstOrDefaultAsync(s => s.Id == homeId);
         }
 
         public async Task<ItemViewModel> GetItem(int id, bool enableEditing = false)
         {
-            var item = await _context.HomesItems.Where(s => s.Id == id).FirstOrDefaultAsync();
-            if (item != null)
-            {
-                var itemData = await _context.HomesItemData.Where(s => s.Id == item.ItemId).FirstOrDefaultAsync();
-                if(itemData != null)
-                {
-                    var itemDataWithDefinition = new ItemViewModel { Definition = itemData, Item = item, EnableEditing = enableEditing };
-                    return itemDataWithDefinition;
-                }
+            return await (from item in _context.HomesItems
+                          join def in _context.HomesItemData on item.ItemId equals def.Id
+                          where item.Id == id
+                          select new ItemViewModel { Item = item, Definition = def, EnableEditing = enableEditing })
+                         .FirstOrDefaultAsync();
+        }
 
-            }
-            return null;
+        /// <summary>An item of this home (null for an item of any other home).</summary>
+        private async Task<ItemViewModel> GetHomeItem(int homeId, int itemId, bool enableEditing = true)
+        {
+            var item = await GetItem(itemId, enableEditing);
+            return item != null && item.Item.HomeId == homeId ? item : null;
         }
 
         public async Task<ItemWidgetDataModel> GetWidgetData(int homeId, int? userId)
         {
             var home = await GetHomeDetailsById(homeId);
-            var canEdit = await CanEditHome(homeId, userId);
+            if (home == null) return null;
 
-            if(home.Type == "group") {
-                return new ItemWidgetDataModel
-                {
-                    Home = home,
-                    User = await _userService.GetUserById(home.UserId),
-                    Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
-                    SongList = await _traxService.GetSongsByOwner(home.UserId),
-                    Guestbook = await GetGuestbook(homeId),
-                    GroupMembers = await GetGroupMembers(home),
-                    GroupRoom = await GetGroupRoom(home),
-                    CanEdit = canEdit
-                };
-            }
-            return new ItemWidgetDataModel
+            var canEdit = await CanEditHome(homeId, userId);
+            var data = new ItemWidgetDataModel
             {
                 Home = home,
                 User = await _userService.GetUserById(home.UserId),
-                Tags = (home.Type == "group") ? await _tagService.TagsForGroup(home.Id, canEdit) : await _tagService.TagsForUser(home.UserId, canEdit),
-                Rooms = await _roomService.GetRoomsByOwner(home.UserId),
                 SongList = await _traxService.GetSongsByOwner(home.UserId),
-                Ratings = await GetRatings(home.UserId),
-                Badges = await _context.UsersBadges.Where(s => s.UserId == home.UserId).ToListAsync(),
                 Guestbook = await GetGuestbook(homeId),
-                Friends = await _friendService.GetFriendsWithUserData(home.UserId),
-                Groups = await GetGroupsForUser(home.UserId),
-                CanEdit = canEdit
+                CanEdit = canEdit,
             };
-        }
 
-        public async Task<Rooms> GetGroupRoom(Homes home)
-        {
-            return await _context.Rooms.FirstOrDefaultAsync(s=>s.Id == home.GroupRoom);
-        }
-
-        public async Task<List<GroupViewModel>> GetGroupMembers(Homes home)
-        {
-            var members = new List<GroupViewModel>();
-            var owner = await _userService.GetUserById(home.UserId);
-            members.Add(new GroupViewModel { Home = home, GroupMember = new GroupMembers { Owner= true, User = owner }});
-
-            members.AddRange(await (from member in _context.GroupMembers
-                                              join user in _context.Users
-                                              on member.UserId equals user.Id
-                                              where member.GroupId == home.Id
-                                              orderby member.IRights
-                                              select new GroupViewModel
-                                              {
-                                                  GroupMember = new GroupMembers { 
-                                                      GroupId = member.GroupId,
-                                                      Id = member.Id,
-                                                      Pending = member.Pending,
-                                                      User = user,
-                                                      Rights = member.Rights,
-                                                      UserId = member.UserId                                                      
-                                                  },
-                                                  Home = home
-                                              }).ToListAsync());
-            
-            return members;
-        }
-
-        public async Task<List<GroupMembers>> GetGroupMembers(int groupId)
-        {
-            var members = new List<GroupMembers>();
-
-            members.AddRange(await (from member in _context.GroupMembers
-                                              join user in _context.Users
-                                              on member.UserId equals user.Id
-                                              where member.GroupId == groupId
-                                              orderby member.IRights
-                                              select new GroupMembers { 
-                                                      GroupId = member.GroupId,
-                                                      Id = member.Id,
-                                                      Pending = member.Pending,
-                                                      User = user,
-                                                      Rights = member.Rights,
-                                                      UserId = member.UserId                                                      
-                                                  }).ToListAsync());
-            
-            return members;
-        }
-
-        
-
-        public async Task<ItemViewModel> Rate(int rating, int itemId, int userId)
-        {
-            // Get item to find home id
-            var item = await GetItem(itemId);
-
-            var existingVote = await _context.HomesRating.Where(s => s.HomeId == item.Item.HomeId && s.UserId == userId).FirstOrDefaultAsync();
-            if (item != null && existingVote == null)
+            if (home.Type == GroupHome)
             {
-                if(item.Item.OwnerId != userId)
+                data.Tags = await _tagService.TagsForGroup(home.Id, canEdit);
+                data.GroupMembers = await GetGroupMembers(home);
+                data.GroupRoom = await GetGroupRoom(home);
+            }
+            else
+            {
+                data.Tags = await _tagService.TagsForUser(home.UserId, canEdit);
+                data.Rooms = await _roomService.GetRoomsByOwner(home.UserId);
+                data.Ratings = await GetRatings(home.Id);
+                data.Badges = await _context.UsersBadges.Where(s => s.UserId == home.UserId).ToListAsync();
+                data.Friends = await _friendService.GetFriendsWithUserData(home.UserId);
+                data.Groups = await GetGroupsForUser(home.UserId);
+                // The guestbook widget checks group membership for private guestbooks on every home type.
+                data.GroupMembers = new List<GroupViewModel>();
+            }
+            return data;
+        }
+
+        public async Task<bool> CanEditHome(int homeId, int? userId)
+        {
+            if (userId == null) return false;
+
+            var home = await GetHomeDetailsById(homeId);
+            if (home == null) return false;
+            if (home.UserId == userId) return true;
+
+            return home.Type == GroupHome
+                && await _context.GroupMembers.AnyAsync(s => s.GroupId == homeId && s.UserId == userId && s.IRights == 1 && !s.Pending);
+        }
+
+        // ---------------------------------------------------------------- editing a home
+
+        public async Task<bool> Save(int homeId, int currentUserId, SaveModel data)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            if (home == null || data == null) return false;
+
+            var moves = SaveDataStringConverter.GetItemsFromString(data.Stickers)
+                .Concat(SaveDataStringConverter.GetItemsFromString(data.Widgets))
+                .Concat(SaveDataStringConverter.GetItemsFromString(data.StickieNotes))
+                .GroupBy(m => m.Id)
+                .ToDictionary(g => g.Key, g => g.Last());
+
+            // Only items of this home move, whatever ids the request names.
+            var items = await _context.HomesItems.Where(i => i.HomeId == homeId && moves.Keys.Contains(i.Id)).ToListAsync();
+            foreach (var item in items)
+            {
+                var move = moves[item.Id];
+                item.X = move.X;
+                item.Y = move.Y;
+                item.Z = move.Z;
+            }
+
+            // "background: <inventory id>:<css class>", a background the editor owns.
+            var backgroundId = data.Background?.Split(':')[0];
+            if (int.TryParse(backgroundId, out var inventoryId))
+            {
+                var background = await GetInventoryItem(inventoryId, currentUserId);
+                if (background != null && background.Definition.Type == Backgrounds)
                 {
-                    // Lets add the vote if the user hasnt voted before.
-                    if(_context.HomesRating.Where(s=>s.HomeId == item.Item.HomeId && s.UserId == userId).Count() == 0)
-                    {
-                        _context.HomesRating.Add(new HomesRating { UserId = userId, HomeId = item.Item.HomeId, Rating = rating });
-                        await _context.SaveChangesAsync();
-                    }
+                    home.Background = background.Definition.CssClass;
                 }
             }
 
-            // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(item.Item.HomeId, item.Item.OwnerId);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<ItemViewModel> PlaceItem(int homeId, int inventoryId, int z, int userId, string type)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            if (home == null || (type != Widgets && type != "stickers")) return null;
+
+            var stack = await FindPlaceableStack(home, inventoryId, userId, type);
+            if (stack == null) return null;
+
+            var definition = await GetItemDetail(stack.ItemId);
+            if (definition == null || definition.Type != type) return null;
+
+            TakeOne(stack, definition);
+            var newItem = new HomesItems { HomeId = home.Id, OwnerId = userId, ItemId = stack.ItemId, X = 0, Y = 0, Z = z, Skin = DefaultSkin };
+            _context.HomesItems.Add(newItem);
+            await _context.SaveChangesAsync();
+
+            return new ItemViewModel { Item = newItem, Definition = definition, EnableEditing = true, WidgetData = await GetWidgetData(homeId, userId) };
+        }
+
+        public async Task<ItemViewModel> PlaceNote(int homeId, int skin, string text, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            if (home == null) return null;
+
+            var stack = await (from inv in PersonalInventory(userId)
+                               join def in _context.HomesItemData on inv.ItemId equals def.Id
+                               where def.Type == Notes && inv.Amount > 0
+                               select new InventoryItem { Details = inv, Definition = def })
+                              .FirstOrDefaultAsync();
+            if (stack == null) return null;
+
+            TakeOne(stack.Details, stack.Definition);
+            var note = new HomesItems
+            {
+                HomeId = home.Id,
+                OwnerId = userId,
+                ItemId = stack.Definition.Id,
+                X = 0, Y = 0, Z = 0,
+                Skin = SkinIdToString.ConvertNote(skin),
+                Data = Truncate(text, MaxNoteLength),
+            };
+            _context.HomesItems.Add(note);
+            await _context.SaveChangesAsync();
+
+            return new ItemViewModel { Item = note, Definition = stack.Definition, EnableEditing = true, WidgetData = await GetWidgetData(homeId, userId) };
+        }
+
+        public async Task<HomesInventory> RemoveItem(int homeId, int itemId, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            var item = await GetHomeItem(homeId, itemId);
+            if (home == null || item == null) return null;
+
+            var stack = await ReturnToInventory(item.Item, item.Definition, home);
+            _context.HomesItems.Remove(item.Item);
+            await _context.SaveChangesAsync();
+            return stack;
+        }
+
+        public async Task<ItemViewModel> EditItem(int homeId, int itemId, int skinId, int userId)
+        {
+            var item = await GetHomeItem(homeId, itemId);
+            if (item == null) return null;
+
+            // The Habbo Club skins are for club members, as in the skin menu.
+            if (SkinIdToString.IsClubSkin(skinId) && (await _userService.GetUserById(userId))?.HasHabboClub != true)
+            {
+                return null;
+            }
+
+            item.Item.Skin = item.Definition.Type == Notes ? SkinIdToString.ConvertNote(skinId) : SkinIdToString.Convert(skinId);
+            await _context.SaveChangesAsync();
+
+            item.WidgetData = await GetWidgetData(homeId, userId);
+            return item;
+        }
+
+        public async Task<ItemViewModel> SelectSong(int homeId, int itemId, int songId, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            var item = await GetHomeItem(homeId, itemId);
+            if (home == null || item == null) return null;
+
+            // The player plays one of the home owner's songs, the list the widget offers.
+            var song = await _traxService.GetSingleSongById(songId);
+            item.Item.Data = song != null && song.UserId == home.UserId ? song.Id.ToString() : null;
+            await _context.SaveChangesAsync();
+
+            item.WidgetData = await GetWidgetData(homeId, userId);
+            return item;
+        }
+
+        public async Task<List<InventoryItem>> GetInventory(int homeId, string type, int userId)
+        {
+            var home = await GetHomeDetailsById(homeId);
+            if (home == null) return new List<InventoryItem>();
+
+            var stacks = home.Type == GroupHome && type == Widgets
+                ? _context.HomesInventory.Where(s => s.HomeId == homeId)
+                : PersonalInventory(userId);
+
+            return await (from inv in stacks
+                          join def in _context.HomesItemData on inv.ItemId equals def.Id
+                          where def.Type == type
+                          select new InventoryItem { Details = inv, Definition = def })
+                         .ToListAsync();
+        }
+
+        public async Task<InventoryItem> GetInventoryItem(int inventoryId, int userId)
+        {
+            return await (from inv in PersonalInventory(userId)
+                          join def in _context.HomesItemData on inv.ItemId equals def.Id
+                          where inv.Id == inventoryId
+                          select new InventoryItem { Details = inv, Definition = def })
+                         .FirstOrDefaultAsync();
+        }
+
+        // ---------------------------------------------------------------- inventory
+
+        /// <summary>
+        /// A user's own stacks: home_id 0, or (in data from before this rule) their own user home's id.
+        /// Stacks of a group home belong to that group.
+        /// </summary>
+        private IQueryable<HomesInventory> PersonalInventory(int userId)
+        {
+            return _context.HomesInventory.Where(s => s.UserId == userId
+                && (s.HomeId == 0 || _context.Homes.Any(h => h.Id == s.HomeId && h.Type == UserHome)));
+        }
+
+        /// <summary>
+        /// A stack the user can place from: their own stickers anywhere, their own widgets in their user home and
+        /// the group's widgets in a group home. (A user's profile, badge or friends widget breaks a group page.)
+        /// </summary>
+        private Task<HomesInventory> FindPlaceableStack(Homes home, int inventoryId, int userId, string type)
+        {
+            var stacks = type == Widgets && home.Type == GroupHome
+                ? _context.HomesInventory.Where(s => s.HomeId == home.Id)
+                : PersonalInventory(userId);
+            return stacks.FirstOrDefaultAsync(s => s.Id == inventoryId && s.Amount > 0);
+        }
+
+        /// <summary>Takes one item off a stack. A widget stack stays at 0, so it lists as placed and can't be bought again.</summary>
+        private void TakeOne(HomesInventory stack, HomesItemData definition)
+        {
+            if (definition.Type == Widgets || stack.Amount > 1)
+            {
+                stack.Amount = Math.Max(0, stack.Amount - 1);
+            }
+            else
+            {
+                _context.HomesInventory.Remove(stack);
+            }
+        }
+
+        /// <summary>
+        /// Puts a removed item back: a group's widget into that group's stack, anything else into the stack of the
+        /// user who placed it (not whoever removes it).
+        /// </summary>
+        private async Task<HomesInventory> ReturnToInventory(HomesItems item, HomesItemData definition, Homes home)
+        {
+            var groupWidget = home.Type == GroupHome && definition.Type == Widgets;
+            var stack = groupWidget
+                ? await _context.HomesInventory.FirstOrDefaultAsync(s => s.HomeId == home.Id && s.ItemId == item.ItemId)
+                : await PersonalInventory(item.OwnerId).FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
+
+            if (stack != null)
+            {
+                stack.Amount++;
+                return stack;
+            }
+
+            stack = new HomesInventory
+            {
+                Amount = 1,
+                ItemId = item.ItemId,
+                UserId = groupWidget ? home.UserId : item.OwnerId,
+                HomeId = groupWidget ? home.Id : 0,
+            };
+            _context.HomesInventory.Add(stack);
+            return stack;
+        }
+
+        // ---------------------------------------------------------------- store
+
+        public Task<List<HomesCategories>> GetStoreCategories()
+        {
+            return _context.HomesCategories.Where(c => c.IEnabled == 1).ToListAsync();
+        }
+
+        public Task<List<CatalogItem>> GetCatelogItemsInCategory(int category)
+        {
+            return (from item in _context.HomesCatalog
+                    join def in _context.HomesItemData on item.ItemId equals def.Id
+                    where item.Category == category
+                    select new CatalogItem { Details = item, Definition = def })
+                   .ToListAsync();
+        }
+
+        public async Task<List<CatalogItem>> GetStoreCatelog(int categoryId, int subCategoryId)
+        {
+            var categories = await GetStoreCategories();
+            var category = categories.FirstOrDefault(s => s.Id == categoryId);
+            if (category == null) return new List<CatalogItem>();
+
+            var subCategory = categories.FirstOrDefault(s => s.Id == subCategoryId);
+            // A sticker category without a sub category chosen shows its first child.
+            var shown = subCategory
+                ?? (category.Type == "stickers" ? categories.FirstOrDefault(s => s.ParentId == category.Id) : null)
+                ?? category;
+            return await GetCatelogItemsInCategory(shown.Id);
+        }
+
+        public async Task<CatalogItem> GetProduct(int productId)
+        {
+            return await (from item in _context.HomesCatalog
+                          join def in _context.HomesItemData on item.ItemId equals def.Id
+                          join category in _context.HomesCategories on item.Category equals category.Id
+                          where item.Id == productId && category.IEnabled == 1
+                          select new CatalogItem { Details = item, Definition = def })
+                         .FirstOrDefaultAsync();
+        }
+
+        public Task<HomesItemData> GetItemDetail(int id)
+        {
+            return _context.HomesItemData.FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public Task<HomesItemData> GetItemDataByClass(string className)
+        {
+            return _context.HomesItemData.FirstOrDefaultAsync(s => s.CssClass == className);
+        }
+
+        public async Task<bool> CanReceiveItem(int itemId, int userId)
+        {
+            var definition = await GetItemDetail(itemId);
+            if (definition == null) return false;
+            return definition.Type != Backgrounds || !await PersonalInventory(userId).AnyAsync(s => s.ItemId == itemId);
+        }
+
+        public async Task<bool> GiveItem(int itemId, int amount, int userId)
+        {
+            if (amount < 1 || !await CanReceiveItem(itemId, userId)) return false;
+
+            // Add in one UPDATE: two purchases at once both read the old amount and one of them was lost.
+            var stackId = await PersonalInventory(userId).Where(s => s.ItemId == itemId).OrderBy(s => s.Id).Select(s => (int?)s.Id).FirstOrDefaultAsync();
+            if (stackId != null)
+            {
+                await _context.HomesInventory.Where(s => s.Id == stackId)
+                    .ExecuteUpdateAsync(set => set.SetProperty(s => s.Amount, s => s.Amount + amount));
+            }
+            else
+            {
+                _context.HomesInventory.Add(new HomesInventory { Amount = amount, UserId = userId, ItemId = itemId, HomeId = 0 });
+                await _context.SaveChangesAsync();
+            }
+            return true;
+        }
+
+        // ---------------------------------------------------------------- ratings
+
+        public async Task<ItemViewModel> Rate(int rating, int itemId, int userId)
+        {
+            var item = await GetItem(itemId);
+            if (item == null) return null;
+            var home = await GetHomeDetailsById(item.Item.HomeId);
+            if (home == null) return null;
+
+            var alreadyRated = await _context.HomesRating.AnyAsync(s => s.HomeId == home.Id && s.UserId == userId);
+            if (rating >= 1 && rating <= 5 && home.UserId != userId && !alreadyRated)
+            {
+                _context.HomesRating.Add(new HomesRating { UserId = userId, HomeId = home.Id, Rating = rating });
+                await _context.SaveChangesAsync();
+            }
+
+            item.WidgetData = await GetWidgetData(home.Id, userId);
             return item;
         }
 
         public async Task<ItemViewModel> ResetRating(int homeId, int itemId, int userId)
         {
-            // Get item to find home id
-            var item = await GetItem(itemId);
-            if (item != null)
+            var item = await GetHomeItem(homeId, itemId, false);
+            var home = await GetHomeDetailsById(homeId);
+            if (item == null || home == null) return null;
+
+            if (home.UserId == userId)
             {
-                if (item.Item.OwnerId == userId)
-                {
-                    // Lets add the vote if the user hasnt voted before.
-                    _context.HomesRating.RemoveRange(await _context.HomesRating.Where(s => s.HomeId == item.Item.HomeId).ToListAsync());
-                    await _context.SaveChangesAsync();
-                }
+                _context.HomesRating.RemoveRange(_context.HomesRating.Where(s => s.HomeId == homeId));
+                await _context.SaveChangesAsync();
             }
-            // We gonna need the widget data to display the voting result
-            item.WidgetData = await GetWidgetData(homeId, item.Item.OwnerId);
+
+            item.WidgetData = await GetWidgetData(homeId, userId);
             return item;
         }
 
-        public async Task<List<HomesRating>> GetRatings(int userId)
+        public Task<List<HomesRating>> GetRatings(int homeId)
         {
-            // Lets figure out the home that the userId owns 
-            var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
-            if (home == null) return new List<HomesRating>();
-            return await _context.HomesRating.Where(s=>s.HomeId == home.Id).ToListAsync();
+            return _context.HomesRating.Where(s => s.HomeId == homeId).ToListAsync();
         }
+
+        // ---------------------------------------------------------------- guestbook
 
         public async Task<GuestbookEntry> AddGuestbookEntry(int homeId, string message, int userId)
         {
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
+            var home = await GetHomeDetailsById(homeId);
             var user = await _userService.GetUserById(userId);
-            if(home != null && user != null)
-            {
-                var entry = new HomesGuestbook { UserId = userId, HomeId = homeId, Message = message, Timestamp = DateTime.Now };
-                _context.HomesGuestbook.Add(entry);
-                await _context.SaveChangesAsync();
-                
-                return new GuestbookEntry { Entry = entry, User = user };
-            }
-            return null;
+            message = message?.Trim();
+            if (home == null || user == null || string.IsNullOrEmpty(message)) return null;
+            if (!await CanWriteInGuestbook(home, userId)) return null;
+
+            var entry = new HomesGuestbook { UserId = userId, HomeId = homeId, Message = Truncate(message, MaxGuestbookLength), Timestamp = DateTime.Now };
+            _context.HomesGuestbook.Add(entry);
+            await _context.SaveChangesAsync();
+            return new GuestbookEntry { Entry = entry, User = user };
         }
 
+        /// <summary>A private guestbook takes entries from the owner, editors, friends (user home) and members (group home).</summary>
+        private async Task<bool> CanWriteInGuestbook(Homes home, int userId)
+        {
+            var isPrivate = await (from item in _context.HomesItems
+                                   join def in _context.HomesItemData on item.ItemId equals def.Id
+                                   where item.HomeId == home.Id && def.CssClass == "w_guestbookwidget"
+                                   select item.Data).AnyAsync(d => d == "private");
+            if (!isPrivate || await CanEditHome(home.Id, userId)) return true;
+
+            return home.Type == GroupHome
+                ? await _context.GroupMembers.AnyAsync(m => m.GroupId == home.Id && m.UserId == userId && !m.Pending)
+                : await _friendService.IsFriends(userId, home.UserId);
+        }
+
+        /// <summary>The author or someone who can edit the home removes an entry.</summary>
         public async Task<HomesGuestbook> DeleteGuestbookEntry(int id, int userId)
         {
-            var guestbookEntry = await _context.HomesGuestbook.Where(s=>s.Id == id && s.UserId == userId).FirstOrDefaultAsync(); 
-            if(guestbookEntry != null)
-            {
-                _context.HomesGuestbook.Remove(guestbookEntry);
-                await _context.SaveChangesAsync();
-            }
-            return guestbookEntry;
+            var entry = await _context.HomesGuestbook.FirstOrDefaultAsync(s => s.Id == id);
+            if (entry == null) return null;
+            if (entry.UserId != userId && !await CanEditHome(entry.HomeId, userId)) return null;
+
+            _context.HomesGuestbook.Remove(entry);
+            await _context.SaveChangesAsync();
+            return entry;
         }
 
         public async Task<List<GuestbookEntry>> GetGuestbook(int homeId)
         {
-            var entries = new List<GuestbookEntry>();
-            var dbEntries = await _context.HomesGuestbook.Where(s => s.HomeId == homeId).ToListAsync();
-            foreach(var entry in dbEntries)
-            {
-                var user = await _userService.GetUserById(entry.UserId);
-                if(user != null)
-                {
-                    entries.Add(new GuestbookEntry { Entry = entry, User = user });
-                }
-            }
-            return entries.OrderByDescending(s=>s.Entry.Timestamp).ToList();
+            var entries = await _context.HomesGuestbook.Where(s => s.HomeId == homeId).OrderByDescending(s => s.Timestamp).ToListAsync();
+            var authorIds = entries.Select(e => e.UserId).Distinct().ToList();
+            var authors = await _context.Users.Where(u => authorIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id);
+
+            return entries
+                .Where(e => authors.ContainsKey(e.UserId))
+                .Select(e => new GuestbookEntry { Entry = e, User = authors[e.UserId] })
+                .ToList();
         }
 
-        public async Task<ItemViewModel> ConfigureGuestbook(int widgetId)
+        public async Task<ItemViewModel> ConfigureGuestbook(int widgetId, int userId)
         {
             var item = await GetItem(widgetId);
-            if (item != null)
-            {
-                if(item.Item.Data == "private")
-                {
-                    item.Item.Data = "";
-                } else
-                {
-                    item.Item.Data = "private";
-                }
-                _context.HomesItems.Update(item.Item);
-                await _context.SaveChangesAsync();
-            }
+            if (item == null || !await CanEditHome(item.Item.HomeId, userId)) return null;
+
+            item.Item.Data = item.Item.Data == "private" ? "" : "private";
+            await _context.SaveChangesAsync();
             return item;
         }
 
-
-        public async Task<ItemViewModel> PlaceNote(int homeId, int skin, string text, int userId)
-        {
-            var inventory = (await GetInventory(homeId, "notes", userId)).FirstOrDefault();
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            HomesItems newItem = null;
-            if (inventory != null && inventory.Details.Amount > 0 && home != null)
-            {
-                // Ok we ensured the user has bought notes and have some left
-
-                // Lets remove or take an item for the user
-                if (inventory.Details.Amount > 1)
-                {
-                    inventory.Details.Amount--;
-                    _context.HomesInventory.Update(inventory.Details);
-                }
-                else
-                {
-                    _context.HomesInventory.Remove(inventory.Details);
-                }
-                // Add the new item to view
-                newItem = new HomesItems { HomeId = home.Id, OwnerId = userId, ItemId = inventory.Definition.Id, X = 0, Z = 0, Y = 0, Skin = SkinIdToString.ConvertNote(skin), Data = text };
-                _context.HomesItems.Add(newItem);
-                await _context.SaveChangesAsync();
-                
-            }
-            return new ItemViewModel { Item = newItem, Definition = await GetItemDetail(newItem.ItemId), EnableEditing = true, WidgetData = await GetWidgetData(homeId, userId) };
-        }
+        // ---------------------------------------------------------------- creating homes
 
         public async Task<Homes> InitHome(int userId)
         {
-            var home = await _context.Homes.Where(s => s.UserId == userId).FirstOrDefaultAsync();
-            if(home == null)
+            var home = await FindUserHome(userId);
+            if (home != null) return home;
+
+            await HomeCreation.WaitAsync();
+            try
             {
-                var newHome = new Homes { Created = DateTime.Now, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "user" };
-                _context.Homes.Add(newHome);
+                home = await FindUserHome(userId);
+                if (home != null) return home;
+
+                home = new Homes { Created = DateTime.Now, UserId = userId, AllowDisplay = true, Background = DefaultBackground, Type = UserHome };
+                _context.Homes.Add(home);
                 await _context.SaveChangesAsync();
-                // Default items
 
-                // Default items 
-                var needle = await GetItemDataByClass("s_needle_3");
-                var duck = await GetItemDataByClass("s_sticker_spaceduck");
-                var clip = await GetItemDataByClass("s_paper_clip_1");
-
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = needle.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 106, Y = 31, Z = 564 });
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = duck.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 257, Y = 340, Z = 582 });
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = clip.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 167, Y = 411, Z = 576 });
-
-                // Default notes
-                var noteItem = await GetItemDataByClass("commodity_stickienote");
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_noteitskin", X = 124, Y = 49, Z = 550, Data = DbRes.T("default_note1", "habbohome") });
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_speechbubbleskin", X = 31, Y = 247, Z = 568, Data = DbRes.T("default_note2", "habbohome") });
-                _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = noteItem.Id, OwnerId = userId, Skin = "n_skin_notepadskin", X = 115, Y = 447, Z = 570, Data = DbRes.T("default_note3", "habbohome") });
-
-                // Default Widgets
-                var defaultWidgets = await _context.HomesItemData.Where(s => s.CssClass == "w_roomswidget" ||
-                s.CssClass == "w_roomswidget" ||
-                s.CssClass == "w_ratingwidget" ||
-                s.CssClass == "w_highscoreswidget" ||
-                s.CssClass == "w_guestbookwidget" ||
-                s.CssClass == "w_friendswidget" ||
-                s.CssClass == "w_badgeswidget" ||
-                s.CssClass == "w_traxplayerwidget" ||
-                s.CssClass == "w_profilewidget").ToListAsync();
-
-                foreach(var widget in defaultWidgets)
-                {
-                    if(widget.CssClass == "w_profilewidget")
-                    {
-                        _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 445, Y = 28, Z = 546 });
-                    } else if (widget.CssClass == "w_roomswidget")
-                    {
-                        _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 428, Y = 291, Z = 558 });
-                    } else
-                    {
-                        _context.HomesInventory.Add(new HomesInventory { Amount = 1, ItemId = widget.Id, UserId = userId });
-                    }
-                }
+                await AddItemByClass(home, "s_needle_3", userId, 106, 31, 564);
+                await AddItemByClass(home, "s_sticker_spaceduck", userId, 257, 340, 582);
+                await AddItemByClass(home, "s_paper_clip_1", userId, 167, 411, 576);
+                await AddItemByClass(home, "commodity_stickienote", userId, 124, 49, 550, "n_skin_noteitskin", DbRes.T("default_note1", "habbohome"));
+                await AddItemByClass(home, "commodity_stickienote", userId, 31, 247, 568, "n_skin_speechbubbleskin", DbRes.T("default_note2", "habbohome"));
+                await AddItemByClass(home, "commodity_stickienote", userId, 115, 447, 570, "n_skin_notepadskin", DbRes.T("default_note3", "habbohome"));
+                await AddItemByClass(home, "w_profilewidget", userId, 445, 28, 546);
+                await AddItemByClass(home, "w_roomswidget", userId, 428, 291, 558);
+                await AddWidgetsToInventory(userId, 0, "w_ratingwidget", "w_highscoreswidget", "w_guestbookwidget", "w_friendswidget", "w_badgeswidget", "w_traxplayerwidget");
 
                 await _context.SaveChangesAsync();
-                return newHome;
+                return home;
             }
-            return home;
+            finally
+            {
+                HomeCreation.Release();
+            }
         }
 
-        public async Task<HomesItemData> GetItemDataByClass(string className)
+        private Task<Homes> FindUserHome(int userId)
         {
-            return await _context.HomesItemData.Where(s => s.CssClass == className).FirstOrDefaultAsync();
+            return _context.Homes.Where(s => s.UserId == userId && s.Type == UserHome).OrderBy(s => s.Id).FirstOrDefaultAsync();
         }
 
         public async Task<Homes> InitGroup(string name, string description, int userId)
         {
-            var newHome = new Homes { GroupBadge = "b0503Xs09114s05013s05015", Created = DateTime.Now, GroupName = name, GroupDescription = description, UserId = userId, AllowDisplay = true, Background = "b_bg_pattern_abstract2", Type = "group" };
-            _context.Homes.Add(newHome);
-            await _context.SaveChangesAsync();
-            // Default items
-
-            // Default Widgets
-            var defaultWidgets = await _context.HomesItemData.Where(s => 
-            s.CssClass == "w_guestbookwidget" ||
-            s.CssClass == "w_memberwidget" ||
-            s.CssClass == "w_traxplayerwidget" ||
-            s.CssClass == "w_groupinfowidget").ToListAsync();
-
-            foreach(var widget in defaultWidgets)
+            var group = new Homes
             {
-                if(widget.CssClass == "w_groupinfowidget")
-                {
-                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 445, Y = 28, Z = 546 });
-                } else if (widget.CssClass == "w_memberwidget")
-                {
-                    _context.HomesItems.Add(new HomesItems { HomeId = newHome.Id, ItemId = widget.Id, OwnerId = userId, Skin = "w_skin_defaultskin", X = 428, Y = 291, Z = 558 });
-                } else
-                {
-                    _context.HomesInventory.Add(new HomesInventory { HomeId = newHome.Id, Amount = 1, ItemId = widget.Id, UserId = userId });
-                }
-            }
+                GroupBadge = "b0503Xs09114s05013s05015",
+                Created = DateTime.Now,
+                GroupName = name,
+                GroupDescription = description,
+                UserId = userId,
+                AllowDisplay = true,
+                Background = DefaultBackground,
+                Type = GroupHome,
+            };
+            _context.Homes.Add(group);
+            await _context.SaveChangesAsync();
+
+            await AddItemByClass(group, "w_groupinfowidget", userId, 445, 28, 546);
+            await AddItemByClass(group, "w_memberwidget", userId, 428, 291, 558);
+            await AddWidgetsToInventory(userId, group.Id, "w_guestbookwidget", "w_traxplayerwidget");
 
             await _context.SaveChangesAsync();
-            return newHome;
+            return group;
         }
 
-        public async Task<bool> CanEditHome(int homeId, int? userId)
+        private async Task AddItemByClass(Homes home, string cssClass, int ownerId, int x, int y, int z, string skin = DefaultSkin, string data = null)
         {
-            if(userId == null) return false;
-
-            var home = await _context.Homes.Where(s => s.Id == homeId).FirstOrDefaultAsync();
-            if(home != null)
-            {
-                if (home.UserId == userId) {
-                    return true;
-                } else
-                {
-                    var groupMemberWithRights = await _context.GroupMembers.Where(s => s.GroupId == homeId && s.IRights == 1 && s.UserId == userId).FirstOrDefaultAsync();
-                    if(groupMemberWithRights != null)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            var definition = await GetItemDataByClass(cssClass);
+            if (definition == null) return;
+            _context.HomesItems.Add(new HomesItems { HomeId = home.Id, ItemId = definition.Id, OwnerId = ownerId, X = x, Y = y, Z = z, Skin = skin, Data = data });
         }
+
+        private async Task AddWidgetsToInventory(int userId, int homeId, params string[] cssClasses)
+        {
+            var widgets = await _context.HomesItemData.Where(s => cssClasses.Contains(s.CssClass)).ToListAsync();
+            foreach (var widget in widgets)
+            {
+                _context.HomesInventory.Add(new HomesInventory { Amount = 1, ItemId = widget.Id, UserId = userId, HomeId = homeId });
+            }
+        }
+
+        // ---------------------------------------------------------------- groups
 
         public async Task<List<GroupViewModel>> GetGroupsForUser(int userId)
         {
-            var groups = new List<GroupViewModel>();
+            var groups = (await _context.Homes.Where(s => s.Type == GroupHome && s.UserId == userId).ToListAsync())
+                .Select(home => new GroupViewModel { Home = home, GroupMember = null })
+                .ToList();
 
-            // Own groups
-            
-
-            var ownGroups = await _context.Homes.Where(s => s.Type == "group" && s.UserId == userId).ToListAsync();
-            foreach(Homes home in ownGroups)
-            {
-                groups.Add(new GroupViewModel { Home = home, GroupMember = null});
-            }
-
-            // Member of
-            groups.AddRange(await (from g in _context.GroupMembers
-                                                    join home in _context.Homes
-                                                    on g.GroupId equals home.Id
-                                                    where g.UserId == userId
-                                                    select new GroupViewModel { Home = home, GroupMember = g}).ToListAsync());
-
+            groups.AddRange(await (from member in _context.GroupMembers
+                                   join home in _context.Homes on member.GroupId equals home.Id
+                                   where member.UserId == userId
+                                   select new GroupViewModel { Home = home, GroupMember = member }).ToListAsync());
             return groups;
+        }
+
+        public async Task<List<GroupViewModel>> GetGroupMembers(Homes home)
+        {
+            var members = new List<GroupViewModel>
+            {
+                new GroupViewModel { Home = home, GroupMember = new GroupMembers { Owner = true, User = await _userService.GetUserById(home.UserId) } },
+            };
+            members.AddRange((await GetGroupMembers(home.Id)).Select(m => new GroupViewModel { Home = home, GroupMember = m }));
+            return members;
+        }
+
+        public Task<List<GroupMembers>> GetGroupMembers(int groupId)
+        {
+            return (from member in _context.GroupMembers
+                    join user in _context.Users on member.UserId equals user.Id
+                    where member.GroupId == groupId
+                    orderby member.IRights
+                    select new GroupMembers
+                    {
+                        GroupId = member.GroupId,
+                        Id = member.Id,
+                        Pending = member.Pending,
+                        User = user,
+                        Rights = member.Rights,
+                        UserId = member.UserId,
+                    }).ToListAsync();
+        }
+
+        public Task<Rooms> GetGroupRoom(Homes home)
+        {
+            return _context.Rooms.FirstOrDefaultAsync(s => s.Id == home.GroupRoom);
         }
 
         public async Task<Homes> UpdateGroupBadge(int homeId, string code, int userId)
         {
             var home = await GetHomeDetailsById(homeId);
-            var user = _userService.GetUserById(userId);
-            if(home != null && user != null && await CanEditHome(homeId, userId))
+            if (home != null && !string.IsNullOrEmpty(code) && await CanEditHome(homeId, userId))
             {
                 home.GroupBadge = code;
-                _context.Update(home);
                 await _context.SaveChangesAsync();
             }
             return home;
@@ -786,131 +702,137 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<bool> IsGroupUrlValid(string url)
         {
+            if (string.IsNullOrEmpty(url)) return false;
             url = url.ToLower();
-            var existingUrl = await _context.Homes.FirstOrDefaultAsync(s=>s.GroupUrl == url);
-            return (existingUrl == null);
+            return !await _context.Homes.AnyAsync(s => s.GroupUrl == url);
         }
 
         public async Task<Homes> UpdateGroup(int groupId, string name, string description, string url, int type, int? roomId)
         {
             var group = await GetHomeDetailsById(groupId);
-            if(group != null) {
-                group.GroupName = (string.IsNullOrEmpty(name)) ? group.GroupName : name;
-                group.GroupDescription = description;
-                group.GroupUrl = (string.IsNullOrEmpty(group.GroupUrl) && !string.IsNullOrEmpty(url) && await IsGroupUrlValid(url)) ?  url : group.GroupUrl;
-                group.GroupType = type;
-                group.GroupRoom = roomId;
+            if (group == null) return null;
 
-                _context.Homes.Update(group);
-                await _context.SaveChangesAsync();
+            group.GroupName = string.IsNullOrEmpty(name) ? group.GroupName : name;
+            group.GroupDescription = description;
+            // The URL is set once.
+            if (string.IsNullOrEmpty(group.GroupUrl) && await IsGroupUrlValid(url))
+            {
+                group.GroupUrl = url.ToLower();
             }
+            group.GroupType = type;
+            group.GroupRoom = roomId;
+
+            await _context.SaveChangesAsync();
             return group;
         }
 
-        public async Task<bool> DeleteGroup(int groupId) {
-            // loop users and remove the group id 
-            var users = await _context.Users.Where(user => user.Group == groupId).ToListAsync();
-            users.ForEach(a=>a.Group = 0);
-            
-            
-            // delete group members
-            var members = await _context.GroupMembers.Where(group => group.GroupId == groupId).ToListAsync();
-            _context.GroupMembers.RemoveRange(members);
+        public async Task<bool> DeleteGroup(int groupId)
+        {
+            var group = await GetHomeDetailsById(groupId);
+            if (group == null || group.Type != GroupHome) return false;
+
+            foreach (var user in await _context.Users.Where(u => u.Group == groupId).ToListAsync())
+            {
+                user.Group = 0;
+            }
+            _context.GroupMembers.RemoveRange(_context.GroupMembers.Where(m => m.GroupId == groupId));
+
+            // Stickers and notes go back to the users who placed them; the group's widgets go with the group.
+            var items = await (from item in _context.HomesItems
+                               join def in _context.HomesItemData on item.ItemId equals def.Id
+                               where item.HomeId == groupId
+                               select new { Item = item, Definition = def }).ToListAsync();
+            foreach (var placed in items)
+            {
+                if (placed.Definition.Type != Widgets)
+                {
+                    await ReturnToInventory(placed.Item, placed.Definition, group);
+                }
+                _context.HomesItems.Remove(placed.Item);
+            }
+            _context.HomesInventory.RemoveRange(_context.HomesInventory.Where(s => s.HomeId == groupId));
+            _context.Homes.Remove(group);
+
             await _context.SaveChangesAsync();
-
-            // return habbohome items to their owner
-            var items = await _context.HomesItems.Where(s=>s.HomeId == groupId).ToListAsync();
-            items.ForEach(async (item) => { await RemoveItem(item.HomeId, item.Id, item.OwnerId); });
-
-            // delete habbohome
-            var home = await _context.Homes.FirstOrDefaultAsync(s=>s.Id == groupId);
-            _context.Homes.Remove(home);
-            await _context.SaveChangesAsync();
-
             return true;
         }
 
-        public async Task<GroupMembers> GetMembership(int groupId, int userId)
+        public Task<GroupMembers> GetMembership(int groupId, int userId)
         {
-            return await _context.GroupMembers.FirstOrDefaultAsync(s => s.GroupId == groupId && s.UserId == userId);
+            return _context.GroupMembers.FirstOrDefaultAsync(s => s.GroupId == groupId && s.UserId == userId);
         }
 
-        public async Task<List<GroupMembers>> AcceptMembers(int groupId, int[] targetIds)
+        public Task<List<GroupMembers>> AcceptMembers(int groupId, int[] targetIds)
         {
-            var members = new List<GroupMembers>();
-            foreach(var i in targetIds) {
-                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
-                member.Pending = false;
-                members.Add(member);
-            }
-            await  _context.SaveChangesAsync();
-            return members;
+            return UpdateMembers(groupId, targetIds, member => member.Pending = false);
         }
 
-
-        public async Task<List<GroupMembers>> GiveGroupRights(int groupId, int[] targetIds)
+        public Task<List<GroupMembers>> GiveGroupRights(int groupId, int[] targetIds)
         {
-            var members = new List<GroupMembers>();
-            foreach(var i in targetIds) {
-                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
-                member.IRights = 1;
-                members.Add(member);
-            }
-            await  _context.SaveChangesAsync();
-            return members;
+            return UpdateMembers(groupId, targetIds, member => member.IRights = 1);
         }
 
-        public async Task<List<GroupMembers>> RemoveGroupRights(int groupId, int[] targetIds)
+        public Task<List<GroupMembers>> RemoveGroupRights(int groupId, int[] targetIds)
         {
-            var members = new List<GroupMembers>();
-            foreach(var i in targetIds) {
-                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
-                member.IRights = 0;
-                members.Add(member);
-            }
-            await  _context.SaveChangesAsync();
-            return members;
+            return UpdateMembers(groupId, targetIds, member => member.IRights = 0);
         }
 
         public async Task<List<GroupMembers>> RemoveMembers(int groupId, int[] targetIds)
         {
-            var members = new List<GroupMembers>();
-            foreach(var i in targetIds) {
-                var member = await _context.GroupMembers.FirstOrDefaultAsync(s=>s.GroupId == groupId && s.Id == i);
+            var members = await MembersOf(groupId, targetIds);
+            foreach (var member in members)
+            {
                 _context.GroupMembers.Remove(member);
-                members.Add(member);
-
                 var user = await _userService.GetUserById(member.UserId);
-                if(user != null && user.Group == member.GroupId) {
+                if (user != null && user.Group == groupId)
+                {
                     await _userService.SetGroup(member.UserId, 0);
                 }
             }
-
-            await  _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return members;
         }
 
-        public async Task<List<Homes>> GetRecentGroups()
+        private async Task<List<GroupMembers>> UpdateMembers(int groupId, int[] targetIds, Action<GroupMembers> change)
         {
-            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.Created).ToListAsync();
+            var members = await MembersOf(groupId, targetIds);
+            members.ForEach(change);
+            await _context.SaveChangesAsync();
+            return members;
         }
 
-        public async Task<List<Homes>> GetHotelGroups()
+        private Task<List<GroupMembers>> MembersOf(int groupId, int[] memberIds)
         {
-            return await _context.Homes.Where(s=>s.Type == "group").OrderByDescending(s=>s.GroupName).ToListAsync();
+            memberIds ??= Array.Empty<int>();
+            return _context.GroupMembers.Where(s => s.GroupId == groupId && memberIds.Contains(s.Id)).ToListAsync();
         }
 
-        public async Task<List<Homes>> GetActiveGroups()
+        public async Task<GroupMembers> AddPendingMember(int groupId, int userId)
         {
-            return await _context.Homes.Where(s=>s.Type == "group").OrderBy(s=>s.Created).ToListAsync();
-        }
-
-        public async Task<GroupMembers> AddPendingMember(int groupId, int userId) {
-            var membership = new GroupMembers { GroupId = groupId, Pending = true, UserId = userId};
+            var membership = new GroupMembers { GroupId = groupId, Pending = true, UserId = userId };
             _context.GroupMembers.Add(membership);
             await _context.SaveChangesAsync();
             return membership;
         }
-    }
 
+        public Task<List<Homes>> GetRecentGroups()
+        {
+            return _context.Homes.Where(s => s.Type == GroupHome).OrderByDescending(s => s.Created).ToListAsync();
+        }
+
+        public Task<List<Homes>> GetHotelGroups()
+        {
+            return _context.Homes.Where(s => s.Type == GroupHome).OrderByDescending(s => s.GroupName).ToListAsync();
+        }
+
+        public Task<List<Homes>> GetActiveGroups()
+        {
+            return _context.Homes.Where(s => s.Type == GroupHome).OrderBy(s => s.Created).ToListAsync();
+        }
+
+        private static string Truncate(string text, int length)
+        {
+            return text != null && text.Length > length ? text.Substring(0, length) : text;
+        }
+    }
 }
