@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 //habbo-imaging/avatarimage
 
 using KeplerCMS.Data;
@@ -19,7 +21,22 @@ namespace KeplerCMS.Controllers
     //[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AvatarImageController : Controller
     {
-        private static FiguredataReader figuredataReader;
+        // Loaded once, thread-safely. The old `if (figuredataReader == null)` check published the instance
+        // before it was filled, so concurrent first requests (a page with several avatars right after a
+        // restart) loaded into the same dictionaries at once and corrupted them (IndexOutOfRange in
+        // Dictionary.Add), or rendered from a half-loaded reader.
+        private static readonly Lazy<FiguredataReader> FigureData = new(() =>
+        {
+            var reader = new FiguredataReader();
+            reader.LoadFigurePalettes();
+            reader.loadFigureSetTypes();
+            reader.LoadFigureSets();
+            reader.LoadOldFigureData();
+            FigureExtractor.GetParts();
+            return reader;
+        }, LazyThreadSafetyMode.ExecutionAndPublication);
+
+        private static FiguredataReader figuredataReader => FigureData.Value;
         private IMemoryCache _cache;
         private IUserService _userService;
 
@@ -27,15 +44,7 @@ namespace KeplerCMS.Controllers
         {
             this._userService = userService;
             this._cache = cache;
-            if (figuredataReader == null)
-            {
-                figuredataReader = new FiguredataReader();
-                figuredataReader.LoadFigurePalettes();
-                figuredataReader.loadFigureSetTypes();
-                figuredataReader.LoadFigureSets();
-                figuredataReader.LoadOldFigureData();
-                FigureExtractor.GetParts();
-            }
+            _ = FigureData.Value;
         }
 
 
