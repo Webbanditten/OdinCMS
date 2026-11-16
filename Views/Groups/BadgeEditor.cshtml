@@ -36,13 +36,15 @@
             "autoplay": "auto",
             "defaultFonts": ["Verdana"],
         };
-        window.addEventListener("load", (event) => {
+        // This view is injected into the group page by Ajax.Updater, long after window "load" has fired,
+        // so a load listener alone never ran and the badge editor stayed empty under Ruffle.
+        (function (init) { if (document.readyState === "complete") init(); else window.addEventListener("load", init); })(() => {
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
             const container = document.getElementById("badge-editor-flash");
             container.innerHTML = '';
             container.appendChild(player);
-            player.load({
+            player.ruffle().load({
                 url: '@Url.Content("~/flash/BadgeEditor.swf")',
                 parameters: 'base=@Url.Content("~/flash/")&'+
                             'bgcolor=#FFFFFF&'+
