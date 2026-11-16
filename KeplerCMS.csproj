@@ -55,7 +55,10 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
     <PackageReference Include="Sentry.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Westwind.Globalization.AspnetCore" Version="3.1.8" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
+    <!-- Held at 3.1.12: 3.2+ fails Release builds without a Six Labors license key. Its advisories (crafted
+         TIFF/ICC input) aren't reachable here: ImageSharp only decodes trusted server-side assets
+         (Avatara figure parts, Chroma furni SWFs), never uploads. NU1902/NU1903 for it are expected. -->
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <!-- Not used directly: pins the version Westwind.Globalization pulls in via Microsoft.Data.SqlClient 5.2 (1.10.3 has advisories). -->
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
   </ItemGroup>
