@@ -212,7 +212,7 @@
             const container = document.getElementById("flashcontent");
             container.innerHTML = '';
             container.appendChild(player);
-            player.load({
+            player.ruffle().load({
                 url: '@Url.Content("~/flash/HabboRegistration2.swf")',
                 parameters: {
                     post_url: '/profile/updatefigure?',

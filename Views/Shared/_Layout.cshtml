@@ -38,6 +38,7 @@
         window.name = 'habboMain';
     </script>
 
+    <script language='JavaScript' type='text/javascript' src='~/js/prototype-guard.js' asp-append-version="true"></script>
     <script language='JavaScript' type='text/javascript' src='~/js/prototype.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/habbo.js'></script>
     <script language='JavaScript' type='text/javascript' src='~/js/builder.js'></script>
@@ -360,7 +361,7 @@
         }
     }
     @if(shouldUseRuffle) {
-        <script src="https://cdn.jsdelivr.net/npm/@@ruffle-rs/ruffle@0.1.0-nightly.2024.7.17/ruffle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@@ruffle-rs/ruffle@0.7.1/ruffle.min.js"></script>
     }
 </body>
 </html>
