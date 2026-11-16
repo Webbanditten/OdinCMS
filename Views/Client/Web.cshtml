@@ -1,4 +1,4 @@
-@using Microsoft.Extensions.Configuration
+﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @{
     Layout = null;
@@ -27,6 +27,21 @@
     var forward = (int)ViewData["roomId"] != 0 && (int)ViewData["forwardId"] != 0
         ? $"forward.type={ViewData["forwardId"]};forward.id={ViewData["roomId"]}"
         : null;
+
+    // ?large=1: habbo.dcr's prepareMovie doubles the stage to 1440x1080 when the embed has
+    // dynamicResolution=1 and the screen is at least that big. The toggle link keeps the room forward.
+    // The link is only shown when keplercms:webclient:largeClient is true (off while 2x still has
+    // rendering and hit-detection issues); ?large=1 keeps working for testing.
+    var large = Context.Request.Query["large"] == "1";
+    var offerLarge = string.Equals(web["largeClient"], "true", StringComparison.OrdinalIgnoreCase);
+    string ClientUrl(bool big)
+    {
+        var query = new List<string>();
+        if ((int)ViewData["forwardId"] != 0) query.Add($"forwardId={ViewData["forwardId"]}");
+        if ((int)ViewData["roomId"] != 0) query.Add($"roomId={ViewData["roomId"]}");
+        if (big) query.Add("large=1");
+        return "/client/web" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
+    }
 }
 <!DOCTYPE html>
 <html>
@@ -37,6 +52,8 @@
     <style>
         body#client { margin: 0; }
         #webclient-loading { color: #fff; font: 11px Verdana, Arial, sans-serif; padding: 8px; }
+        #client-stage { display: flex; justify-content: center; }
+        #client-topbar .logout a.webclient-size { text-transform: none; padding-right: 10px; }
     </style>
 
     @* No Prototype here on purpose: it replaces native Array methods and Array.prototype.toJSON, which breaks
@@ -79,6 +96,9 @@
         window.addEventListener('DOMContentLoaded', function () {
             var topbar = document.getElementById('client-topbar');
             if (topbar && screen.height > 600) { topbar.style.display = 'block'; }
+            // The client only goes 2x when the screen fits 1440x1080, so don't offer it otherwise.
+            var bigLink = document.getElementById('webclient-large');
+            if (bigLink && (screen.width < 1440 || screen.height < 1080)) { bigLink.style.display = 'none'; }
             DirPlayer.init();
         });
     </script>
@@ -102,18 +122,29 @@
                 <span class="online-count"></span> @DbRes.T("online_on_habbo", "shared")
             </div>
         </div>
-        <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
+        <div class="logout">
+            @if (large)
+            {
+                <a class="webclient-size" href="@ClientUrl(false)">Normal klient</a>
+            }
+            else if (offerLarge)
+            {
+                <a class="webclient-size" id="webclient-large" href="@ClientUrl(true)">Stor klient</a>
+            }
+            <a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a>
+        </div>
     </div>
-    <div>
-        <embed src='@dcr' bgColor='#000000' width='720' height='540' type='application/x-director'
+    <div id="client-stage">
+        <embed src='@dcr' bgColor='#000000' width='@(large ? 1440 : 720)' height='@(large ? 1080 : 540)' type='application/x-director'
                swStretchStyle='none' swText=''
                sw1='site.url=@url;url.prefix=@url'
                sw2='connection.info.host=@host;connection.info.port=@port'
-               sw3='client.reload.url=@url/client/web;client.allow.cross.domain=1;client.notify.cross.domain=0'
+               sw3='client.reload.url=@url@ClientUrl(large);client.allow.cross.domain=1;client.notify.cross.domain=0'
                sw4='connection.mus.host=@host;connection.mus.port=@musPort'
                sw5='external.variables.txt=@vars;external.texts.txt=@texts'
                sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
-               sw7='@forward' />
+               sw7='@forward'
+               dynamicResolution='@(large ? "1" : null)' />
     </div>
 </body>
 </html>
