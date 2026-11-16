@@ -1,36 +1,43 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KeplerCMS.Filters;
-using KeplerCMS.Models;
-using System.Threading.Tasks;
+﻿using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
     [Area("MyHabbo")]
-    public class RatingController : Controller
+    public class RatingController : HomeEditController
     {
-        public readonly IHomeService _homeService;
-        public RatingController(IHomeService homeService)
+        private const string RateView = "~/Areas/MyHabbo/Views/Rating/Rate.cshtml";
+
+        public RatingController(IHomeService homeService) : base(homeService)
         {
-            _homeService = homeService;
         }
 
+        /// <summary>Rates the home the rating widget is on (1-5, once per visitor, not your own).</summary>
+        [HttpPost]
         [LoggedInFilter]
         public async Task<IActionResult> Rate(int ratingId, int givenRate)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var item = await _homeService.Rate(givenRate, ratingId, userId);
-            return View(item);
+            if (CurrentUserId is not int userId) return Error();
+
+            var item = await HomeService.Rate(givenRate, ratingId, userId);
+            return item == null ? Error() : View(RateView, item);
         }
 
-        [Route("myhabbo/rating/reset_ratings")]
+        /// <summary>The home owner clears the home's ratings.</summary>
+        [HttpPost]
         [LoggedInFilter]
+        [Route("myhabbo/rating/reset_ratings")]
         public async Task<IActionResult> RemoveRating(int ratingId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            var item = await _homeService.ResetRating(homeId, ratingId, userId);
-            return View("~/Areas/MyHabbo/Views/Rating/Rate.cshtml", item);
+            if (CurrentUserId is not int userId) return Error();
+
+            var widget = await HomeService.GetItem(ratingId);
+            if (widget == null) return Error();
+
+            var item = await HomeService.ResetRating(widget.Item.HomeId, ratingId, userId);
+            return item == null ? Error() : View(RateView, item);
         }
     }
 }

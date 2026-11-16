@@ -1,46 +1,20 @@
-﻿using KeplerCMS.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace KeplerCMS.Areas.MyHabbo.Helpers
+﻿namespace KeplerCMS.Areas.MyHabbo.Helpers
 {
-    public class SkinIdToString
+    /// <summary>The skin ids of the home editor's skin menu, as widget (w_skin_*) or note (n_skin_*) classes.</summary>
+    public static class SkinIdToString
     {
-
-        public static string Convert(int skinId)
+        private static readonly string[] Skins =
         {
-            string skin = skinId switch
-            {
-                1 => "w_skin_defaultskin",
-                2 => "w_skin_speechbubbleskin",
-                3 => "w_skin_metalskin",
-                4 => "w_skin_noteitskin",
-                5 => "w_skin_notepadskin",
-                6 => "w_skin_goldenskin",
-                7 => "w_skin_hc_machineskin",
-                8 => "w_skin_hc_pillowskin",
-                _ => "w_skin_defaultskin",
-            };
-            return skin;
-        }
+            null, "defaultskin", "speechbubbleskin", "metalskin", "noteitskin", "notepadskin", "goldenskin", "hc_machineskin", "hc_pillowskin",
+        };
 
-        public static string ConvertNote(int skinId)
-        {
-            string skin = skinId switch
-            {
-                1 => "n_skin_defaultskin",
-                2 => "n_skin_speechbubbleskin",
-                3 => "n_skin_metalskin",
-                4 => "n_skin_noteitskin",
-                5 => "n_skin_notepadskin",
-                6 => "n_skin_goldenskin",
-                7 => "n_skin_hc_machineskin",
-                8 => "n_skin_hc_pillowskin",
-                _ => "n_skin_defaultskin",
-            };
-            return skin;
-        }
+        /// <summary>The Habbo Club skins (the menu offers them to club members only).</summary>
+        public static bool IsClubSkin(int skinId) => skinId == 7 || skinId == 8;
+
+        public static string Convert(int skinId) => "w_skin_" + Name(skinId);
+
+        public static string ConvertNote(int skinId) => "n_skin_" + Name(skinId);
+
+        private static string Name(int skinId) => skinId >= 1 && skinId < Skins.Length ? Skins[skinId] : Skins[1];
     }
 }

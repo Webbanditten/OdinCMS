@@ -1,114 +1,104 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using KeplerCMS.Data.Models;
 using KeplerCMS.Filters;
-using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
+    /// <summary>Tags on a user's own profile and on groups they can edit. Replies the JS knows: invalidtag, taglimit, valid.</summary>
     [Area("MyHabbo")]
-    public class TagController : Controller
+    public class TagController : HomeEditController
     {
+        private const string ListView = "~/Areas/MyHabbo/Views/Tag/List.cshtml";
+        private const int MaxTags = 20;
 
-        private readonly IUserService _userService;
-        private readonly IHomeService _homeService;
         private readonly ITagService _tagService;
-        public TagController(IUserService userService, IHomeService homeService, ITagService tagService)
+
+        public TagController(IHomeService homeService, ITagService tagService) : base(homeService)
         {
-            _userService = userService;
             _tagService = tagService;
-            _homeService = homeService;
         }
+
+        /// <summary>The tag in lower case, or null if it isn't allowed.</summary>
+        private static string CleanTag(string tagName)
+        {
+            var tag = tagName?.Trim().ToLower();
+            return string.IsNullOrEmpty(tag) || tag.Length < 2 || tag.Length > 20 || tag.Contains("fuck") ? null : tag;
+        }
+
+        private static bool CanAdd(List<Tags> existing, string tag) => existing.Count < MaxTags && !existing.Exists(s => s.Tag == tag);
+
         [HttpPost]
+        [LoggedInFilter]
         [Route("myhabbo/tag/add")]
         public async Task<IActionResult> Add(int accountId, string tagName)
         {
-            /*
-               invalidtag, taglimit, valid
-            */
-            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck") || tagName.Length == 0)
-            {
-                return Content("invalidtag");
-            }
+            if (CurrentUserId is not int userId) return Error();
+            var tag = CleanTag(tagName);
+            if (tag == null) return Content("invalidtag");
 
-            var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
-            tagName = tagName.ToLower();
-            if (tags.Count >= 20 || tags.Exists(s => s.Tag == tagName))
-            {
-                return Content("taglimit");
-            }
+            // You tag yourself, so your own tags count towards the limit.
+            if (!CanAdd(await _tagService.TagsForUser(userId, true), tag)) return Content("taglimit");
 
-            var tag = await _tagService.AddTag(new Data.Models.Tags { UserId = userId, Tag = tagName.ToLower() });
-            
+            await _tagService.AddTag(new Tags { UserId = userId, Tag = tag });
             return Content("valid");
         }
 
         [HttpPost]
+        [LoggedInFilter]
         [Route("myhabbo/tag/addgrouptag")]
         public async Task<IActionResult> AddGroupTag(int groupId, string tagName)
         {
-            /*
-               invalidtag, taglimit, valid
-            */
-            if (tagName.Length <= 1 || tagName.Length > 20 || tagName.Contains("fuck") || tagName.Length == 0)
-            {
-                return Content("invalidtag");
-            }
+            if (CurrentUserId is not int userId) return Error();
+            var tag = CleanTag(tagName);
+            if (tag == null || !await HomeService.CanEditHome(groupId, userId)) return Content("invalidtag");
 
-            var userId = int.Parse(User.Identity.Name);
-            var canEdit = await _homeService.CanEditHome(groupId, userId);
-            var tags = await _tagService.TagsForGroup(groupId, canEdit);
-            tagName = tagName.ToLower();
-            if (tags.Count >= 20 || tags.Exists(s=>s.Tag == tagName)) {
-                return Content("taglimit");
-            }
-            if(canEdit) {
-                var tag = await _tagService.AddTag(new Data.Models.Tags { Tag = tagName.ToLower(), GroupId = groupId });
-            }
+            if (!CanAdd(await _tagService.TagsForGroup(groupId, true), tag)) return Content("taglimit");
 
+            await _tagService.AddTag(new Tags { Tag = tag, GroupId = groupId });
             return Content("valid");
         }
 
         [HttpPost]
+        [LoggedInFilter]
         [Route("myhabbo/tag/remove")]
         public async Task<IActionResult> Remove(int accountId, string tagName)
         {
-            var userId = int.Parse(User.Identity.Name);
-            _tagService.RemoveTag(new Data.Models.Tags { UserId = userId, Tag = tagName });
-            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+            if (CurrentUserId is not int userId) return Error();
+
+            if (!string.IsNullOrEmpty(tagName))
+            {
+                _tagService.RemoveTag(new Tags { UserId = userId, Tag = tagName });
+            }
+            return View(ListView, await _tagService.TagsForUser(accountId, accountId == userId));
         }
 
         [HttpPost]
+        [LoggedInFilter]
         [Route("myhabbo/tag/removegrouptag")]
         public async Task<IActionResult> RemoveGroupTag(int groupId, string tagName)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var canEdit = await _homeService.CanEditHome(groupId, userId);
-            if(canEdit) {
-                _tagService.RemoveTag(new Data.Models.Tags { GroupId = groupId, Tag = tagName });
+            var canEdit = await HomeService.CanEditHome(groupId, CurrentUserId);
+            if (canEdit && !string.IsNullOrEmpty(tagName))
+            {
+                _tagService.RemoveTag(new Tags { GroupId = groupId, Tag = tagName });
             }
-            var tags = await _tagService.TagsForGroup(groupId, canEdit);
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+            return View(ListView, await _tagService.TagsForGroup(groupId, canEdit));
         }
 
+        /// <summary>Visitors (logged in or not) see the list; its owner gets the edit controls.</summary>
         [Route("myhabbo/tag/list")]
         public async Task<IActionResult> List(string tagMsgCode, int accountId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var tags = await _tagService.TagsForUser(accountId, (accountId == userId));
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+            return View(ListView, await _tagService.TagsForUser(accountId, accountId == CurrentUserId));
         }
 
         [Route("myhabbo/tag/listgrouptags")]
         public async Task<IActionResult> ListGroupTags(string tagMsgCode, int groupId)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var canEdit = await _homeService.CanEditHome(groupId, userId);
-            var tags = await _tagService.TagsForGroup(groupId, canEdit);
-            return View("~/Areas/MyHabbo/Views/Tag/List.cshtml", tags);
+            return View(ListView, await _tagService.TagsForGroup(groupId, await HomeService.CanEditHome(groupId, CurrentUserId)));
         }
     }
-
 }

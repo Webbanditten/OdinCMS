@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Filters
 {
+    // Filter attributes are shared by all requests: request services stay in locals, never in fields
+    // (a field let one request use another request's DbContext: "A second operation was started on this context").
     public class MaintenanceFilter : Attribute, IAsyncActionFilter
     {
-        private IUserService _userService;
-        private ISettingsService _settingsService;
         public MaintenanceFilter(bool redirect = true)
         {
             
@@ -20,8 +20,8 @@ namespace KeplerCMS.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _userService = context.HttpContext.RequestServices.GetService<IUserService>();
-            _settingsService = context.HttpContext.RequestServices.GetService<ISettingsService>();
+            var _userService = context.HttpContext.RequestServices.GetService<IUserService>();
+            var _settingsService = context.HttpContext.RequestServices.GetService<ISettingsService>();
             var enableMaintenance = await _settingsService.Get("cms.maintenance");
 
             if(enableMaintenance != null && enableMaintenance.Value == "1") {

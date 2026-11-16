@@ -26,31 +26,26 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> Index(string username)
         {
             var habboHomeUser = await _userService.GetUserByUsername(username);
-            var enableEditing = false;
-            if(habboHomeUser != null)
+            if (habboHomeUser == null) return View("HomeNotFound");
+
+            int? currentUserId = int.TryParse(User.Identity?.Name, out var id) ? id : null;
+            int? editId = int.TryParse(Request.Cookies["editid"], out var cookieId) ? cookieId : null;
+
+            var home = await _homeService.GetHome(habboHomeUser.Id, editId != null, currentUserId);
+            if (home == null) return View("HomeNotFound");
+
+            // Edit mode only on your own home, for the home the cookie names.
+            if (home.IsEditing && (currentUserId != habboHomeUser.Id || editId != home.Home.Id))
             {
-                if (Request.Cookies["editid"] != null)
-                {
-                    enableEditing = true;
-                }
-
-                var home = (User.Identity.IsAuthenticated) ? await _homeService.GetHome(habboHomeUser.Id, enableEditing, int.Parse(User.Identity.Name)) : await _homeService.GetHome(habboHomeUser.Id, enableEditing);
-
-                if (home != null)
-                {
-                    if (User.Identity.IsAuthenticated)
-                    {
-                        if (User.Identity.Name != habboHomeUser.Id.ToString() || (Request.Cookies["editid"] != null && home.Home.Id != int.Parse(Request.Cookies["editid"])))
-                        {
-                            Response.Cookies.Delete("editid");
-                            home.IsEditing = false;
-                        }
-                        ViewData["canFriend"] = await _friendService.IsFriends(int.Parse(User.Identity.Name), habboHomeUser.Id);
-                    }
-                    return View(home);
-                }
+                Response.Cookies.Delete("editid");
+                home.IsEditing = false;
+                home.Items.ForEach(i => i.EnableEditing = false);
             }
-            return View("HomeNotFound");
+            if (currentUserId != null)
+            {
+                ViewData["canFriend"] = await _friendService.IsFriends(currentUserId.Value, habboHomeUser.Id);
+            }
+            return View(home);
             
         }
 
@@ -75,7 +70,7 @@ namespace KeplerCMS.Controllers
         {
             var currentUser = await _userService.GetUserById(int.Parse(User.Identity.Name));
             var home = await _homeService.GetHomeDetailsById(homeId);
-            if(home.UserId == currentUser.Id)
+            if (currentUser != null && home != null && home.Type == "user" && home.UserId == currentUser.Id)
             {
                 // Set editing mode
                 CookieOptions option = new CookieOptions
@@ -96,9 +91,9 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> CancelEditing(int homeId)
         {
             var home = await _homeService.GetHomeDetailsById(homeId);
-            var homeUser = await _userService.GetUserById(home.UserId);
+            var homeUser = home == null ? null : await _userService.GetUserById(home.UserId);
             Response.Cookies.Delete("editid");
-            return Redirect("/home/" + homeUser.Username);
+            return Redirect(homeUser == null ? "/home" : "/home/" + homeUser.Username);
         }
 
 

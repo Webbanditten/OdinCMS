@@ -21,23 +21,21 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        /// <summary>
+        /// Takes the credits in one conditional UPDATE, so parallel purchases can't spend the same credits twice
+        /// (reading, subtracting and saving let N simultaneous requests each buy with one price's worth).
+        /// </summary>
         public async Task<bool> Purchase(int credit, int userId)
         {
-            var user = await _context.Users.Where(s => s.Id == userId).FirstOrDefaultAsync();
-            if (user != null)
-            {
-                var newCredits = user.Credits - credit;
-                if(newCredits >= 0)
-                {
-                    user.Credits = newCredits;
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
-                    _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.reduce_credits, new Models.CommandTemplate { UserId = userId, Credits = credit });
+            if (credit < 0) return false;
 
-                    return true;
-                }
-            }
-            return false;
+            var updated = await _context.Users
+                .Where(u => u.Id == userId && u.Credits >= credit)
+                .ExecuteUpdateAsync(set => set.SetProperty(u => u.Credits, u => u.Credits - credit));
+            if (updated == 0) return false;
+
+            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.reduce_credits, new Models.CommandTemplate { UserId = userId, Credits = credit });
+            return true;
         }
 
         public async Task<bool> CanPurchase(int credit, int userId)

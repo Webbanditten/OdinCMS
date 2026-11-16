@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace KeplerCMS.Filters
 {
+    // Filter attributes are shared by all requests: request services stay in locals, never in fields
+    // (a field let one request use another request's DbContext: "A second operation was started on this context").
     public class LoggedInFilter : Attribute, IAsyncActionFilter
     {
         private readonly bool _redirect;
-        private IUserService _userService;
         public LoggedInFilter(bool redirect = true)
         {
             _redirect = redirect;
@@ -18,7 +19,7 @@ namespace KeplerCMS.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _userService = context.HttpContext.RequestServices.GetService<IUserService>();
+            var _userService = context.HttpContext.RequestServices.GetService<IUserService>();
 
             if (context.Controller is Controller controller)
             {

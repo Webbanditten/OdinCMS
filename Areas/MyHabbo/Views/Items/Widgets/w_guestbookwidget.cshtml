@@ -3,26 +3,18 @@
 @model KeplerCMS.Areas.MyHabbo.Models.ItemViewModel;
 @{Layout = null;}
 @{
-    var showAddBtn = false;
+    // Anyone logged in writes in a public guestbook; a private one takes the owner, the home's editors,
+    // friends (user home) and members (group home). HomeService.AddGuestbookEntry applies the same rule.
     var guestbookAccess = (Model.Item.Data == "private") ? "private" : "public";
-    if(User.Identity.IsAuthenticated)
+    var showAddBtn = false;
+    if (User.Identity.IsAuthenticated && int.TryParse(User.Identity.Name, out var userId))
     {
-        if (guestbookAccess == "private")
-        {
-            var userId = int.Parse(User.Identity.Name);
-            if (Model.Item.OwnerId == userId)
-            {
-                showAddBtn = true;
-            } else if (Model.WidgetData.Friends != null && Model.WidgetData.Friends.Any(s => s.FriendDetails.FromId == userId || s.FriendDetails.ToId == userId))
-            {
-                showAddBtn = true;
-            } else if (Model.WidgetData.GroupMembers.Any(g => g.GroupMember.UserId == userId))
-            {
-                showAddBtn = true;
-            }
-        }
+        showAddBtn = guestbookAccess == "public"
+            || Model.Item.OwnerId == userId
+            || Model.WidgetData.CanEdit
+            || (Model.WidgetData.Friends?.Any(s => s.FriendDetails.FromId == userId || s.FriendDetails.ToId == userId) ?? false)
+            || (Model.WidgetData.GroupMembers?.Any(g => g.GroupMember.UserId == userId && !g.GroupMember.Pending) ?? false);
     }
-
 }
 
 
@@ -87,7 +79,7 @@
                 var gb@(Model.Item.Id) = new GuestbookWidget('', '@Model.Item.Id', 500);
                 var editMenuSection = $('guestbook-privacy-options');
                 if (editMenuSection) {
-                    gb@(Model.Item.Id).updateOptionsList('public');
+                    gb@(Model.Item.Id).updateOptionsList('@guestbookAccess');
                 }
             });
         </script>

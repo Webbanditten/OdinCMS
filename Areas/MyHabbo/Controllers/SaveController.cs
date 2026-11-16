@@ -1,50 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using KeplerCMS.Areas.MyHabbo.Models;
 using KeplerCMS.Filters;
-using KeplerCMS.Models;
-using KeplerCMS.Areas.MyHabbo.Models;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
     [Area("MyHabbo")]
-    public class SaveController : Controller
+    public class SaveController : HomeEditController
     {
-        public readonly IHomeService _homeService;
-        public SaveController(IHomeService homeService)
+        public SaveController(IHomeService homeService) : base(homeService)
         {
-            _homeService = homeService;
         }
 
-
+        /// <summary>
+        /// Saves positions and the background. The editor posts e.g.
+        /// stickers=31276:217,60,237/31277:247,74,235/  widgets=31253:486,5,224/  background=31466:b_bg_pattern_bricks
+        /// </summary>
         [HttpPost]
         [LoggedInFilter(false)]
         public async Task<IActionResult> Index(SaveModel input)
         {
-            var userId = int.Parse(User.Identity.Name);
-            var homeId = int.Parse(Request.Cookies["editid"]);
-            if (await _homeService.CanEditHome(homeId, userId))
-            {
-                var result = await _homeService.Save(homeId, userId, input);
-                if(result)
-                {
-                    Response.Cookies.Delete("editid");
-                    return Content("<script>window.location.reload()</script>");
-                }
-            }
-            return Content("ERROR");
+            if (await EditableHome() is not var (homeId, userId)) return Error();
+            if (!await HomeService.Save(homeId, userId, input)) return Error();
+
+            Response.Cookies.Delete("editid");
+            return Content("<script>window.location.reload()</script>");
         }
     }
-
-
-    /* SAVE
-     * 
-     * 
-     * id:x,y,z splitted with slashses?
-     * stickienotes: 31261:352,213,222/31268:169,69,218/
-        widgets: 31253:486,5,224/
-        stickers: 31276:217,60,237/31277:247,74,235/31256:360,817,239/
-        background: 31466:b_bg_pattern_bricks
-     
-     */
 }
