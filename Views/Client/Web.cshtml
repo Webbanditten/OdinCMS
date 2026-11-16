@@ -144,6 +144,10 @@
                sw5='external.variables.txt=@vars;external.texts.txt=@texts'
                sw6='use.sso.ticket=1;sso.ticket=@ViewData["sso"]'
                sw7='@forward'
+               @* Legacy downloaded-client check: Odin sends an "outdated version" popup when this is lower than
+                  the client.version setting, and external_vars has no client.version.id, so the web client sent 0.
+                  swN values are set as variables after external_vars loads. *@
+               sw8='client.version.id=9999'
                dynamicResolution='@(large ? "1" : null)' />
     </div>
 </body>
