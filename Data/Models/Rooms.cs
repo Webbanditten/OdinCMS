@@ -28,6 +28,10 @@ namespace KeplerCMS.Data.Models
         public string Model { get; set; }
         [Column("ccts")]
         public string Casts { get; set; }
+        [Column("visitors_now")]
+        public int VisitorsNow { get; set; }
+        [Column("visitors_max")]
+        public int VisitorsMax { get; set; }
         
         public Users Owner { get; set; }
     }

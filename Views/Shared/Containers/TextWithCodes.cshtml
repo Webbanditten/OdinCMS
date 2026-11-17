@@ -7,6 +7,7 @@
     var position = 0;
     var codes = HighscoreWidget.Code.Matches(text).Select(m => (Match: m, Kind: "highscores"))
         .Concat(BuyFurniWidget.Code.Matches(text).Select(m => (Match: m, Kind: "buy_furni")))
+        .Concat(RoomWidget.Code.Matches(text).Select(m => (Match: m, Kind: "room")))
         .OrderBy(c => c.Match.Index);
 }
 @foreach (var code in codes)
@@ -16,6 +17,10 @@
     if (code.Kind == "highscores")
     {
         <partial name="~/Views/Shared/Containers/Highscores.cshtml" model="HighscoreWidget.FromCode(code.Match)" />
+    }
+    else if (code.Kind == "room")
+    {
+        <partial name="~/Views/Shared/Containers/Room.cshtml" model="int.Parse(code.Match.Groups[1].Value)" />
     }
     else
     {

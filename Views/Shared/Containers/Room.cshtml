@@ -1,0 +1,49 @@
+@model int
+@using Microsoft.EntityFrameworkCore
+@inject KeplerCMS.Data.DataContext Context
+@* A room ({room_ID}, see Models/RoomWidget.cs): photo, name, owner, description, visitors and a "go to room" link
+   (site.js binds .roomForward). *@
+@functions
+{
+    string L(string key, string set, string fallback)
+    {
+        var value = DbRes.T(key, set);
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+@{
+    var room = await Context.Rooms.AsNoTracking().FirstOrDefaultAsync(r => r.Id == Model);
+    if (room == null)
+    {
+        return;
+    }
+    var owner = room.OwnerId > 0 ? await Context.Users.AsNoTracking().Where(u => u.Id == room.OwnerId).Select(u => u.Username).FirstOrDefaultAsync() : null;
+    var takenAt = await Context.RoomPhotos.AsNoTracking().Where(p => p.RoomId == room.Id).Select(p => (DateTime?)p.TakenAt).FirstOrDefaultAsync();
+    var type = room.OwnerId > 0 ? "private" : "public";
+    var forward = room.OwnerId > 0 ? 2 : 1;
+    var href = $"/client?forwardId={forward}&roomId={room.Id}";
+    var icon = room.AccessType == 1 ? "room_icon_locked" : room.AccessType == 2 ? "room_icon_password" : "room_icon_open";
+}
+<div class="room-widget" id="room_@room.Id" style="margin: 6px 0; overflow: hidden;">
+    @if (takenAt != null)
+    {
+        <a class="roomForward" href="@href" target="client" data-type="@type" data-roomid="@room.Id">
+            <img src="/room-photo/@(room.Id).png?v=@takenAt.Value.Ticks" alt="@room.Name" style="display: block; max-width: 100%; height: auto; margin: 0 auto 6px;" />
+        </a>
+    }
+    <div>
+        <img src="~/c_images/myhabbo/rooms/@(icon).gif" alt="" style="vertical-align: middle;" />
+        <strong>@room.Name</strong>
+        @if (owner != null)
+        {
+            @(" " + L("by", "shared", "af") + " ")<a href="/home/@Uri.EscapeDataString(owner)">@owner</a>
+        }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(room.Description))
+    {
+        <div style="margin-top: 2px;">@room.Description</div>
+    }
+    <div style="margin-top: 2px; color: #666;">@room.VisitorsNow / @room.VisitorsMax @L("habbos_in_room", "shared", "Habbos i rummet")</div>
+    <br />
+    <a class="colorlink orange roomForward" href="@href" target="client" data-type="@type" data-roomid="@room.Id"><span class="stay">@L("go_to_room", "shared", "Gå til rummet")</span></a>
+</div>
