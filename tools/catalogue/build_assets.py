@@ -103,6 +103,50 @@ V31_EXTRA = (["tree_basicslot_unselected", "tree_basicslot_selected", "testarrow
              + ["button.%s.%s.active" % (m, side) for m in "abc" for side in ("left", "middle", "right")])
 
 
+def opaque_png(path):
+    """Drop a PNG's alpha channel in place. The cast dump keeps 32-bit members' raw alpha byte, which Director ignores
+    unless the member uses alpha; the tree's arrows have junk there (whole rows at 0), so the bitmaps the v31 page code
+    draws itself are written opaque (they are drawn with ink 36, white = transparent)."""
+    import zlib
+    data = open(path, "rb").read()
+    pos, chunks = 8, []
+    while pos < len(data):
+        length, kind = struct.unpack(">I4s", data[pos:pos + 8])
+        chunks.append((kind, data[pos + 8:pos + 8 + length]))
+        pos += 12 + length
+    header = next(body for kind, body in chunks if kind == b"IHDR")
+    width, height, depth, colour = struct.unpack(">IIBB", header[:10])
+    if depth != 8 or colour != 6:
+        return
+    raw = zlib.decompress(b"".join(body for kind, body in chunks if kind == b"IDAT"))
+    stride, out, prev = width * 4, bytearray(), bytearray(width * 4)
+    for y in range(height):
+        kind, line = raw[y * (stride + 1)], bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        for i in range(stride):
+            a = line[i - 4] if i >= 4 else 0
+            b = prev[i]
+            c = prev[i - 4] if i >= 4 else 0
+            if kind == 1: line[i] = (line[i] + a) & 255
+            elif kind == 2: line[i] = (line[i] + b) & 255
+            elif kind == 3: line[i] = (line[i] + (a + b) // 2) & 255
+            elif kind == 4:
+                pa, pb, pc = abs(b - c), abs(a - c), abs(a + b - 2 * c)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        prev = line
+        out.append(0)
+        for x in range(width):
+            out += line[x * 4:x * 4 + 3]
+
+    def chunk(kind, body):
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body))
+    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)) + \
+        chunk(b"IDAT", zlib.compress(bytes(out), 9)) + chunk(b"IEND", b"")
+    open(path, "wb").write(png)
+
+
+OPAQUE_V31 = re.compile(r"^(testarrow\.|tree_|katalogi_ikoni\.|stripitem\.)")
+
+
 def main_v31(dump, root):
     out = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "wwwroot", "housekeeping", "catalogue", "v31"))
     for sub in ("members", "images"):
@@ -134,6 +178,8 @@ def main_v31(dump, root):
         if path:
             members[member] = safe(member) + ".png"
             shutil.copyfile(path, os.path.join(out, "members", safe(member) + ".png"))
+            if OPAQUE_V31.match(member):
+                opaque_png(os.path.join(out, "members", safe(member) + ".png"))
         else:
             missing.add(member)
     # Members the cast dump can't decode (JPEG-compressed in the cast), saved from the running client.
@@ -143,6 +189,12 @@ def main_v31(dump, root):
             members[name[:-4]] = safe(name[:-4]) + ".png"
             missing.discard(name[:-4])
             shutil.copyfile(os.path.join(overrides, name), os.path.join(out, "members", members[name[:-4]]))
+    # The old build's overrides (e.g. the spaces page's default preview) for the old pages v31 wraps.
+    old_overrides = os.path.join(os.path.dirname(os.path.abspath(__file__)), "overrides")
+    for name in sorted(os.listdir(old_overrides)):
+        if name.endswith(".png") and name[:-4] not in members:
+            members[name[:-4]] = safe(name[:-4]) + ".png"
+            shutil.copyfile(os.path.join(old_overrides, name), os.path.join(out, "members", members[name[:-4]]))
     # Page images: a cast member with the image's name wins over the library (Catalogpage Default Class mergeWindow).
     images = {}
     for folder in [os.path.join(root, "hh_patch_dk"), dump]:
