@@ -16,6 +16,11 @@ namespace KeplerCMS.Data
             modelBuilder.Entity<UsersBadges>()
                 .HasKey(c => new { c.UserId, c.Badge });
 
+            modelBuilder.Entity<RewardPoolItem>()
+                .HasKey(c => new { c.PoolId, c.DefinitionId });
+            modelBuilder.Entity<RewardPool>()
+                .HasMany(p => p.Items).WithOne().HasForeignKey(i => i.PoolId);
+
             modelBuilder.Entity<Friends>()
                 .HasKey(c => new { c.FromId, c.ToId });
 
@@ -119,6 +124,9 @@ namespace KeplerCMS.Data
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<Rewards> Rewards { get; set; }
         public DbSet<RewardsRedeemed> RewardsRedeemed { get; set; }
+        public DbSet<RewardPool> RewardPools { get; set; }
+        public DbSet<RewardPoolItem> RewardPoolItems { get; set; }
+        public DbSet<RewardTemplate> RewardTemplates { get; set; }
         public DbSet<RankBadges> RankBadges { get; set; }
         public DbSet<UsersBans> UsersBans { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }

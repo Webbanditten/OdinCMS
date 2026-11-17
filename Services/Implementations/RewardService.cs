@@ -111,53 +111,5 @@ namespace KeplerCMS.Services.Implementations
 
             return rewards.OrderBy(s=>s.AvailableFrom).ToList();
         }
-
-        public async Task<List<Rewards>> GetPreviousRewards()
-        {
-            var today = DateTime.Now;
-            var year = today.Year;
-            var month = today.Month;
-            var day = today.Day;
-            return (await GetRewardsBetweenDates(DateTime.Now.AddYears(-100), new DateTime(year, month, day, 00,00,00))).OrderByDescending(s=>s.AvailableFrom).ToList();
-        }
-
-        public async Task<List<Rewards>> GetCurrentRewards()
-        {
-            var today = DateTime.Now;
-            var year = today.Year;
-            var month = today.Month;
-            var day = today.Day;
-            return (await GetRewardsBetweenDates(new DateTime(year, month, day, 00,00,00), DateTime.Now.AddYears(100))).OrderByDescending(s=>s.AvailableFrom).ToList();
-        }
-
-        public async Task<Rewards> CreateReward(Rewards reward)
-        {
-            _context.Rewards.Add(reward);
-            await _context.SaveChangesAsync();
-            
-            return reward;
-        }
-
-        public async Task<Rewards> UpdateReward(Rewards reward)
-        {
-            _context.Rewards.Update(reward);
-            await _context.SaveChangesAsync();
-            return reward;
-        }
-
-        public async Task<Rewards> DeleteReward(int id)
-        {
-            _context.Rewards.Remove(new Rewards { Id = id });
-            await _context.SaveChangesAsync();
-            return null;
-        }
-
-        public async Task<List<Rewards>> GetRewards()
-        {
-            return await _context.Rewards.ToListAsync();
-        }
-        
-        
-        
     }
 }

@@ -1,0 +1,53 @@
+@{
+    ViewBag.Title = "New reward calendar";
+}
+<h1>New reward calendar</h1>
+<p class="rewards-intro">
+    Describe the calendar once, preview it, change any day, then create all its rewards in one go.
+    Save it as a template to make the same calendar next year with one click.
+    <a href="@Url.Action("Index")">Back to the rewards</a>
+</p>
+
+<div class="rewards-panel">
+    <div class="rewards-row">
+        <label>Template
+            <select id="template-select"><option value="">Start from scratch</option></select>
+        </label>
+        <button type="button" id="template-delete" disabled>Delete template</button>
+    </div>
+    <div class="rewards-row">
+        <label>First day <input type="text" id="plan-start" class="rewards-date" autocomplete="off"></label>
+        <label>Days <input type="number" id="plan-days" min="1" max="62" value="24"></label>
+        <label>Label <input type="text" id="plan-label" placeholder="e.g. Julekalender 2026" autocomplete="off"></label>
+    </div>
+    <label class="rewards-block">Gift note (the card in every present)
+        <textarea id="plan-note" rows="3"></textarea>
+    </label>
+</div>
+
+<div class="rewards-panel">
+    <h3>What each day gets</h3>
+    <p>Every line adds furni to the days it applies to. "In order" follows the pool's order (set it on the pool page);
+       "Alternate" goes round the list again and again; "Random" gives a different furni each time.</p>
+    <div id="plan-slots"></div>
+    <button type="button" id="slot-add">+ Add a line</button>
+</div>
+
+<div class="rewards-actions">
+    <button type="button" id="plan-preview" class="rewards-primary">Preview</button>
+    <button type="button" id="plan-save-template">Save as template</button>
+</div>
+
+<div id="plan-result" hidden>
+    <h3 id="plan-result-title"></h3>
+    <p class="rewards-hint">Click a day to change it. Preview again to reshuffle the random picks (your changes to days are then lost).</p>
+    <div id="plan-days-grid" class="reward-plan-grid"></div>
+    <div class="rewards-actions">
+        <button type="button" id="plan-create" class="rewards-primary"></button>
+    </div>
+</div>
+
+@section scripts {
+    <partial name="_RewardScripts" />
+    <script>Rewards.initBuilder();</script>
+}
