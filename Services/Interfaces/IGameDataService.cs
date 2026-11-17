@@ -8,6 +8,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<Dictionary<string, string>> GetTexts(IEnumerable<string> keys);
         Task<string> GetVariable(string key, string fallback);
         Task<string> GetImageLibraryUrl();
-        Task<List<string>> GetLibraryImages(string folder, string language);
+        Task<List<string>> GetLibraryImages(string folder, string language, IEnumerable<string> names);
     }
 }

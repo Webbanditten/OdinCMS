@@ -40,7 +40,7 @@ namespace KeplerCMS.Areas.Housekeeping
         /// library (c_images), the catalogue images there in that language, and the fuses pages use.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GameData(string keys)
+        public async Task<IActionResult> GameData(string keys, string extraImages)
         {
             var language = await _gameData.GetVariable("language", "en");
             // Where the client downloads a furni's graphics (dynamic.download.url + name template), over https.
@@ -55,7 +55,9 @@ namespace KeplerCMS.Areas.Housekeeping
                 texts = await _gameData.GetTexts((keys ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries)),
                 language,
                 imageLibraryUrl = await _gameData.GetImageLibraryUrl(),
-                libraryImages = await _gameData.GetLibraryImages("catalogue", language),
+                // Images the pages use that come from the image library (the cast ones are in images.json).
+                libraryImages = await _gameData.GetLibraryImages("catalogue", language,
+                    pages.SelectMany(p => p.Teasers.Append(p.Headline)).Concat((extraImages ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))),
                 fuses,
                 furniCastUrl,
                 behaviours = CatalogueFurniOptions.Behaviours,

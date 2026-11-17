@@ -189,11 +189,17 @@ var CatalogueEditor = (function () {
         var input = textInput(value, function (v) { onChange(v); thumb(); });
         var img = h('img', { class: 'cated-thumb', alt: '' });
         function thumb() {
-            var src = CatalogueView.pageImageUrl(input.value.trim(), gameData);
-            img.src = src ? src.url : '';
-            img.style.visibility = src ? '' : 'hidden';
-            input.title = input.value && !src ? 'The game has no image with this name' : '';
-            input.style.borderColor = input.value && !src ? '#CC0000' : '';
+            var name = input.value.trim();
+            var src = CatalogueView.pageImageUrl(name, gameData);
+            var mark = function (ok) {
+                img.style.visibility = ok ? '' : 'hidden';
+                input.title = name && !ok ? 'The game has no image with this name: not in its casts, nor ' + (gameData.imageLibraryUrl || '') + 'catalogue/' + name + '_' + (gameData.language || '') + '.gif' : '';
+                input.style.borderColor = name && !ok ? '#CC0000' : '';
+            };
+            if (!src) { img.removeAttribute('src'); mark(!name); return; }
+            img.onload = function () { mark(true); };
+            img.onerror = function () { mark(false); };
+            img.src = src.url;
         }
         thumb();
         return h('div', { class: 'cated-image-field' }, [

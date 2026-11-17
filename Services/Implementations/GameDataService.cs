@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
@@ -29,9 +28,33 @@ namespace KeplerCMS.Services.Implementations
             _cache = cache;
         }
 
+        /// <summary>
+        /// The URL to fetch server-side. keplercms:gameDataInternal maps public origins to internal ones
+        /// ("https://images.habbo-danmark.com=http://images-habbo"): on prod the CMS container can't reach the asset host
+        /// through its public address. Browsers keep the public URLs.
+        /// </summary>
+        private string Internal(string url)
+        {
+            var map = _configuration.GetSection("keplercms")["gameDataInternal"];
+            if (string.IsNullOrWhiteSpace(map) || string.IsNullOrEmpty(url)) return url;
+            foreach (var pair in map.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var parts = pair.Split('=', 2);
+                if (parts.Length != 2) continue;
+                var from = parts[0].Trim().TrimEnd('/');
+                var to = parts[1].Trim().TrimEnd('/');
+                foreach (var scheme in new[] { "https://", "http://" })
+                {
+                    var publicOrigin = scheme + from.Replace("https://", "").Replace("http://", "");
+                    if (url.StartsWith(publicOrigin + "/", StringComparison.OrdinalIgnoreCase)) return to + url[publicOrigin.Length..];
+                }
+            }
+            return url;
+        }
+
         private async Task<Dictionary<string, string>> Load(string configKey)
         {
-            var url = _configuration.GetSection("keplercms")[configKey];
+            var url = Internal(_configuration.GetSection("keplercms")[configKey]);
             if (string.IsNullOrEmpty(url)) return new Dictionary<string, string>();
 
             return await _cache.GetOrCreateAsync("gamedata:" + configKey, async entry =>
@@ -77,29 +100,45 @@ namespace KeplerCMS.Services.Implementations
             return url.EndsWith("/") ? url : url + "/";
         }
 
-        /// <summary>The image names in the library folder that end in _&lt;language&gt; (the suffix removed).</summary>
-        public async Task<List<string>> GetLibraryImages(string folder, string language)
+        /// <summary>
+        /// Which of these images exist in the library folder in the given language (&lt;name&gt;_&lt;language&gt;.gif), checked
+        /// with HEAD requests and cached. The folder has no live directory listing (c_images/catalogue/ is a mirrored
+        /// page from 2009), so the names to check come from the caller.
+        /// </summary>
+        public async Task<List<string>> GetLibraryImages(string folder, string language, IEnumerable<string> names)
         {
-            var url = await GetImageLibraryUrl() + folder.Trim('/') + "/";
-            return await _cache.GetOrCreateAsync("gamedata:library:" + url + language, async entry =>
+            var baseUrl = await GetImageLibraryUrl() + folder.Trim('/') + "/";
+            var found = new List<string>();
+            var unknown = new List<string>();
+            foreach (var name in names.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()).Distinct())
             {
-                entry.AbsoluteExpirationRelativeToNow = CacheFor;
+                if (_cache.TryGetValue("gamedata:image:" + baseUrl + name + "_" + language, out bool exists)) { if (exists) found.Add(name); }
+                else unknown.Add(name);
+            }
+            using var limit = new System.Threading.SemaphoreSlim(8);
+            var checks = unknown.Select(async name =>
+            {
+                await limit.WaitAsync();
                 try
                 {
-                    var html = await Http.GetStringAsync(url);
-                    var suffix = "_" + language + ".gif";
-                    return Regex.Matches(html, "href=\"([^\"?/]+)\"")
-                        .Select(m => Uri.UnescapeDataString(m.Groups[1].Value))
-                        .Where(n => n.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                        .Select(n => n[..^suffix.Length])
-                        .Distinct().OrderBy(n => n).ToList();
+                    var url = Internal(baseUrl + Uri.EscapeDataString(name) + "_" + language + ".gif");
+                    using var request = new HttpRequestMessage(HttpMethod.Head, url);
+                    using var response = await Http.SendAsync(request);
+                    var exists = response.IsSuccessStatusCode;
+                    _cache.Set("gamedata:image:" + baseUrl + name + "_" + language, exists, exists ? CacheFor : TimeSpan.FromMinutes(2));
+                    return exists ? name : null;
                 }
                 catch (Exception)
                 {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30);
-                    return new List<string>();
+                    return null;
+                }
+                finally
+                {
+                    limit.Release();
                 }
             });
+            found.AddRange((await Task.WhenAll(checks)).Where(n => n != null));
+            return found.OrderBy(n => n).ToList();
         }
     }
 }
