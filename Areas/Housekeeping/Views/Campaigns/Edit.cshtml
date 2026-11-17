@@ -173,7 +173,6 @@
                         <div class="form-group">
                             <label class="label-control">Body</label>
                             <textarea id="news-text" class="form-control" rows="5" placeholder="Full article HTML"></textarea>
-                            <partial name="_ContentCodes" model='new ContentCodesPanel("news-text", false)' />
                         </div>
                         <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('CreateNews')">Add Action</button>
                     </div>
@@ -345,9 +344,7 @@
     <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" asp-append-version="true" />
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
     <script src="~/lib/select2/js/select2.min.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor-images.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>
+    <partial name="_EditorScripts" />
     <script>
         // Renders a furni image preview next to each search result (mirrors the Rewards picker).
         function formatState(state) {

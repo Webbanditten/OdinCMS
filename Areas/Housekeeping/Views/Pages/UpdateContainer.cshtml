@@ -17,7 +17,6 @@
                 <label asp-for="Text" class="label-control"></label>
                 <textarea id="editor" asp-for="Text" class="form-control"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
-                <partial name="_ContentCodes" model='new ContentCodesPanel("editor", true)' />
             </div>
             <div class="form-group">
                 <label asp-for="Type" class="label-control"></label>
@@ -92,15 +91,13 @@
 @section scripts {
     <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
-    <script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor-images.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>
+    <partial name="_EditorScripts" />
     <script>
         $(document).ready(function () {
             var datetimeSettings = { format: 'Y-m-d H:i:s' };
             $("#startDatepicker").datetimepicker(datetimeSettings);
             $("#endDatepicker").datetimepicker(datetimeSettings);
-            initHabboEditor('#editor');
+            initHabboEditor('#editor', { boxCodes: true });
         });
     </script>
 }

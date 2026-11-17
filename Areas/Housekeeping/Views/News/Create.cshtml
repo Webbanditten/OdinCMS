@@ -35,7 +35,6 @@
                 <label asp-for="Text" class="label-control"></label>
                 <textarea id="editor" asp-for="Text" class="form-control"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
-                <partial name="_ContentCodes" model='new ContentCodesPanel("editor", false)' />
             </div>
 
             <div class="form-group">
@@ -48,9 +47,7 @@
 
 @section scripts {
     <link rel="stylesheet" href="~/housekeeping/css/jquery-ui.min.css" asp-append-version="true">
-    <script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor-images.js" asp-append-version="true"></script>
-    <script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>
+    <partial name="_EditorScripts" />
     <script src="~/housekeeping/js/jquery-ui.min.js" asp-append-version="true"></script>
     <script>
         $(document).ready(function () {

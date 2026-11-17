@@ -1,0 +1,9 @@
+@* Everything a housekeeping editor page needs: TinyMCE 8 (self-hosted under the GPL), the Habbo plugins and
+   wwwroot/housekeeping/js/editor.js. Then call initHabboEditor('#textarea-id'), with { boxCodes: true } for page boxes.
+   - editor-images.js: the Furni and Habbo buttons (image URLs: the habbo-*-url meta tags in _Housekeeping.cshtml).
+   - editor-codes.js: the Codes button (codes: habbo-content-codes below, from Models/ContentCodes.cs). *@
+<script type="application/json" id="habbo-content-codes">@Html.Raw(ContentCodes.EditorJson())</script>
+<script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
+<script src="~/housekeeping/js/editor-images.js" asp-append-version="true"></script>
+<script src="~/housekeeping/js/editor-codes.js" asp-append-version="true"></script>
+<script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>
