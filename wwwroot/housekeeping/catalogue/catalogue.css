@@ -124,6 +124,10 @@ img.ctlg-el { object-fit: fill; }
 .cated-check { flex-direction: row !important; align-items: center; gap: 4px !important; font-weight: normal !important; }
 .cated-image-field { display: flex; gap: 6px; align-items: center; }
 .cated-image-field input { flex: 1; }
+/* A row of controls in one field (badge style + text, length × width): selects as wide as their content. */
+.cated-field .cated-inline { display: flex; gap: 6px; align-items: center; }
+.cated-field .cated-inline select { width: auto; flex: none; }
+.cated-field .cated-inline input { flex: 1; min-width: 0; width: auto; }
 .cated-image-field .cated-thumb { width: 48px; height: 32px; object-fit: contain; background: #fff; border: 1px solid #ccc; image-rendering: pixelated; }
 .cated-unused { opacity: .55; }
 

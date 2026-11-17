@@ -286,7 +286,7 @@ var CatalogueEditor = (function () {
         var specialType = special.length > 1 ? special[0] : '1';
         var specialText = special.length > 1 ? special.slice(1).join(':') : (draft.labelExtraS || '');
         var setSpecial = function () { draft.labelExtraS = specialText ? specialType + ':' + specialText : ''; pageChanged(); };
-        add(info.special, field('Badge', h('div', { class: 'cated-image-field' }, [
+        add(info.special, field('Badge', h('div', { class: 'cated-inline' }, [
             h('select', { onchange: function (e) { specialType = e.target.value; setSpecial(); } }, [
                 h('option', { value: '1', text: 'Style 1', selected: specialType === '1' ? 'selected' : null }),
                 h('option', { value: '2', text: 'Style 2', selected: specialType === '2' ? 'selected' : null })
@@ -748,7 +748,7 @@ var CatalogueEditor = (function () {
                 field('Interaction', h('select', { onchange: function (e) { f.interactor = e.target.value; } }, (gameData.interactors || ['default']).map(function (i) {
                     return h('option', { value: i, text: i, selected: i === f.interactor ? 'selected' : null });
                 }))),
-                field('Size (length × width)', h('div', { class: 'cated-image-field' }, [
+                field('Size (length × width)', h('div', { class: 'cated-inline' }, [
                     h('input', { type: 'number', min: 0, value: f.length, oninput: function (e) { f.length = +e.target.value; } }), '×',
                     h('input', { type: 'number', min: 0, value: f.width, oninput: function (e) { f.width = +e.target.value; } })
                 ]), 'tiles'),
