@@ -56,7 +56,7 @@
         <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage-1, letter=@Model.Letter })">Previous Page</a>
     }
     
-    if (Model.CurrentPage != Model.TotalPages && Model.TotalPages != 0)
+    if (Model.CurrentPage < Model.TotalPages)
     {
         <a href="@Url.Action("Index", "Users", new { search=@Model.Search, currentPage=@Model.CurrentPage+1, letter=@Model.Letter })" style="float:right">Next Page</a>
     }

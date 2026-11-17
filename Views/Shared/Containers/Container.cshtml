@@ -102,20 +102,6 @@
         }
     }
 
-    async Task CreditContent()
-    {
-
-        <div class="@GenerateClassBasedOnTheme(Model.Theme)">
-            <div class="headline"><h3>@Model.Title</h3></div>
-            <div class="border"><div></div></div>
-            <div class="body">
-                @{ await RenderBody(Model.Text); }
-                <div class="clear"></div>
-            </div>
-            <div class="bottom"><div></div></div>
-        </div>
-    }
-
     async Task  V2Box()
     {
 
@@ -167,6 +153,46 @@
         </div>
     }
 
+    // The 2007 site's gold "scaling portlet" (e.g. the Habbo Club page): styles/boxes.css div.portlet-scale.gold.
+    async Task PortletScale()
+    {
+        <div class="portlet-scale gold">
+            <div class="portlet-scale-header"><h3>@Model.Title</h3></div>
+            <div class="portlet-scale-body">
+                <div class="portlet-scale-content">
+                    @{ await RenderBody(Model.Text); }
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="portlet-scale-bottom">
+                <div class="portlet-scale-bottom-body"></div>
+            </div>
+        </div>
+    }
+
+    // The plain white rounded box (e.g. the staff favourite furni page): styles/boxes.css div.content-white. It has no
+    // headline bar; a title shows as the h3 the stylesheet sets for it.
+    async Task ContentWhite()
+    {
+        <div class="content-white-outer">
+            <div class="content-white">
+                <div class="content-white-body">
+                    <div class="content-white-content">
+                        @if (!string.IsNullOrWhiteSpace(Model.Title))
+                        {
+                            <h3>@Model.Title</h3>
+                        }
+                        @{ await RenderBody(Model.Text); }
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="content-white-bottom">
+                <div class="content-white-bottom-body"></div>
+            </div>
+        </div>
+    }
+
     async Task  NoBox()
     {
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
@@ -205,6 +231,14 @@
     else if (Model.Theme.Contains("nobox"))
     {
         await NoBox();
+    }
+    else if (Model.Theme == "portlet-scale")
+    {
+        await PortletScale();
+    }
+    else if (Model.Theme == "content-white-outer")
+    {
+        await ContentWhite();
     }
     else
     {

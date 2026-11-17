@@ -54,7 +54,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 Rooms = searchResult.Rooms,
                 Search = search,
                 CurrentPage = currentPage,
-                TotalPages = searchResult.TotalResults / pageSize
+                TotalPages = (searchResult.TotalResults + pageSize - 1) / pageSize
             };
             return View(model);
         }

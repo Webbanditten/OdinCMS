@@ -14,8 +14,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Text { get; set; }
         [Required]
         public int PageId { get; set; }
-        [Required]
-        public string Type { get; set; }
+        /// <summary>Not used by the site (the editors no longer ask for it); kept for the column.</summary>
+        public string Type { get; set; } = "container";
         [Required]
         public int Column { get; set; }
         [Required]
@@ -34,8 +34,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public string Title { get; set; }
         [Required]
         public string Text { get; set; }
-        [Required]
-        public string Type { get; set; }
+        /// <summary>Not used by the site (the editors no longer ask for it); kept for the column.</summary>
+        public string Type { get; set; } = "container";
         [Required]
         public string Theme { get; set; }
 

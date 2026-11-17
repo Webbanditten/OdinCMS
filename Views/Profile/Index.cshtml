@@ -6,6 +6,18 @@
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
     var figureDataUrl = (userData.HasHabboClub) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
     bool isOldFigure = new Regex(@"^\d+").IsMatch(userData.Figure);
+    // Set by ProfileController after saving a tab: which tab to show and the message to show above it.
+    var profileTab = TempData["profile_tab"] as string ?? Context.Request.Query["tab"].ToString();
+    var profileOk = TempData["profile_ok"] as string;
+    var profileError = TempData["profile_error"] as string;
+}
+@functions
+{
+    string L(string key, string set, string fallback)
+    {
+        var value = DbRes.T(key, set);
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
 }
 
 <!--
@@ -40,6 +52,20 @@
                                 <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_email", "habbohome")" id="email" class="process-button" style="height:23px">
                                 <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_password", "habbohome")" id="password" class="process-button" style="height:23px">
                             </div>
+                            @if (profileOk != null)
+                            {
+                                <div class="content-ok" style="display:block">
+                                    <div class="content-ok-body">@profileOk<div class="clear"></div></div>
+                                </div>
+                                <div class="content-ok-bottom"><div class="content-ok-bottom-body"></div></div>
+                            }
+                            @if (profileError != null)
+                            {
+                                <div class="content-red" style="display:block">
+                                    <div class="content-red-body">@profileError<div class="clear"></div></div>
+                                </div>
+                                <div class="content-red-bottom"><div class="content-red-bottom-body"></div></div>
+                            }
                             <div id="registration-errors" style="display:none">
                                 <div class="content-red" style="display:block">
                                     <div class="content-red-body" id="registration-errors-content">
@@ -148,14 +174,37 @@
 	                                                    swfobj.write("flashcontent");
                                                     </script>
                                                 </div>
-                                                <div class="content-white-content" id="habbo-mission" style="display:none;width:406px;height:329px">
-                                                    mission
+                                                <div class="content-white-content profile-tab" id="habbo-mission" style="display:none;width:406px;height:329px">
+                                                    <form method="post" action="/profile/updatemission" id="mission-form">
+                                                        <p>@L("mission_intro", "profile", "Din mission står under din Habbo i hotellet og på din Habbo Home. Fortæl de andre, hvad du er ude på!")</p>
+                                                        <label for="mission-text">@L("mission_label", "profile", "Din mission:")</label>
+                                                        <input type="text" name="mission" id="mission-text" class="profile-text" maxlength="@KeplerCMS.Controllers.ProfileController.MissionMaxLength" value="@userData.Motto" />
+                                                        <input type="submit" style="display: none;" />
+                                                        <a onclick="document.getElementById('mission-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+                                                    </form>
                                                 </div>
-                                                <div class="content-white-content" id="habbo-email" style="display:none;width:406px;height:329px">
-                                                    email
+                                                <div class="content-white-content profile-tab" id="habbo-email" style="display:none;width:406px;height:329px">
+                                                    <form method="post" action="/profile/updateemail" id="email-form" autocomplete="off">
+                                                        <p>@L("email_current", "profile", "Din nuværende email:") <strong>@userData.Email</strong></p>
+                                                        <label for="email-new">@L("email_new", "profile", "Ny email:")</label>
+                                                        <input type="text" name="email" id="email-new" class="profile-text" maxlength="256" />
+                                                        <label for="email-password">@L("email_password", "profile", "Din adgangskode (for at være sikker på, at det er dig):")</label>
+                                                        <input type="password" name="password" id="email-password" class="profile-text" maxlength="32" autocomplete="current-password" />
+                                                        <input type="submit" style="display: none;" />
+                                                        <a onclick="document.getElementById('email-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+                                                    </form>
                                                 </div>
-                                                <div class="content-white-content" id="habbo-password" style="display:none;width:406px;height:329px">
-                                                    password
+                                                <div class="content-white-content profile-tab" id="habbo-password" style="display:none;width:406px;height:329px">
+                                                    <form method="post" action="/profile/updatepassword" id="password-form" autocomplete="off">
+                                                        <label for="password-current">@L("password_current", "profile", "Nuværende adgangskode:")</label>
+                                                        <input type="password" name="currentPassword" id="password-current" class="profile-text" maxlength="32" autocomplete="current-password" />
+                                                        <label for="password-new">@L("password_new", "profile", "Ny adgangskode (mindst 6 tegn):")</label>
+                                                        <input type="password" name="newPassword" id="password-new" class="profile-text" maxlength="32" autocomplete="new-password" />
+                                                        <label for="password-repeat">@L("password_repeat", "profile", "Gentag ny adgangskode:")</label>
+                                                        <input type="password" name="retypePassword" id="password-repeat" class="profile-text" maxlength="32" autocomplete="new-password" />
+                                                        <input type="submit" style="display: none;" />
+                                                        <a onclick="document.getElementById('password-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
+                                                    </form>
                                                 </div>
                                             }
                                         }
@@ -183,6 +232,16 @@
     </tbody>
 </table>
 
+
+@section Styles {
+    <style>
+        .profile-tab form { padding: 4px 6px; }
+        .profile-tab p { margin: 0 0 12px; }
+        .profile-tab label { display: block; margin: 0 0 3px; font-weight: bold; }
+        .profile-tab .profile-text { display: block; width: 300px; margin: 0 0 12px; padding: 2px; border: 1px solid #a5a5a5; font: 11px Verdana, Arial, sans-serif; }
+        .profile-tab .colorlink { margin-top: 4px; }
+    </style>
+}
 
 @section Scripts {
     <script src="~/js/myhabbo/visual.js" type="text/javascript"></script>
@@ -258,6 +317,10 @@
             elements[index].style.display = 'none';
         }
     }
+    (function () {
+        var tab = "@(profileTab is "mission" or "email" or "password" ? profileTab : "")";
+        if (tab) window.addEventListener("DOMContentLoaded", function () { profileNav(document.getElementById(tab)); });
+    })();
     function show (elements) {
         elements = elements.length ? elements : [elements];
         for (var index = 0; index < elements.length; index++) {

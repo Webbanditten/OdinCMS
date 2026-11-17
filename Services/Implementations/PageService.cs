@@ -92,7 +92,7 @@ namespace KeplerCMS.Services.Implementations
                 Title = model.Title,
                 Text = model.Text,
                 PageId = model.PageId,
-                Type = model.Type,
+                Type = model.Type ?? "container",
                 Column = model.Column,
                 Theme = model.Theme,
                 Order = 0,
@@ -147,7 +147,7 @@ namespace KeplerCMS.Services.Implementations
             {
                 item.Title = model.Title;
                 item.Text = model.Text;
-                item.Type = model.Type;
+                item.Type = model.Type ?? item.Type;
                 item.Theme = model.Theme;
                 item.Hidden = model.Hidden;
                 item.StartDate = model.StartDate;
