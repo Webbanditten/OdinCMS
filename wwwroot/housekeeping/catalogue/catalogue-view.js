@@ -94,13 +94,16 @@
     }
 
     // Where the client finds a page image: a cast member first, else the image library in the client's language.
+    // known = the image is a cast member or was found in the library; otherwise the library URL is still tried, as the
+    // client does (an image uploaded a moment ago shows up without waiting for the server's cache).
     function pageImageUrl(name, gameData) {
         if (!name) return null;
-        if (assets.images[name]) return { url: BASE + 'images/' + assets.images[name].file, remote: false };
-        if (gameData && (gameData.libraryImages || []).indexOf(name) >= 0) {
-            return { url: gameData.imageLibraryUrl + 'catalogue/' + name + '_' + gameData.language + '.gif', remote: true };
-        }
-        return null;
+        if (assets.images[name]) return { url: BASE + 'images/' + assets.images[name].file, remote: false, known: true };
+        if (!gameData || !gameData.imageLibraryUrl) return null;
+        return {
+            url: gameData.imageLibraryUrl + 'catalogue/' + encodeURIComponent(name) + '_' + gameData.language + '.gif',
+            remote: true, known: (gameData.libraryImages || []).indexOf(name) >= 0
+        };
     }
 
     function furniUrl(sprite, extra) {
