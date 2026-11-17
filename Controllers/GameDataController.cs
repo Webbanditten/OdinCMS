@@ -72,18 +72,21 @@ namespace KeplerCMS.Controllers
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
                 var items = await _context.CatalogueItems.AsNoTracking().ToListAsync();
                 var definitions = await _context.ItemsDefinitions.AsNoTracking().ToDictionaryAsync(d => d.Id);
-                // [product code (= sale code, the offer name Odin sends), name, description, special text], named as
-                // Odin names them: packages and special-sprite items use their own texts.
-                var seen = new HashSet<string>(StringComparer.Ordinal);
+                // [product code (= the offer name Odin sends), name, description, special text], named as Odin names
+                // them: packages and special-sprite items use their own texts. The offer name is the sale code, or
+                // "<sale code>_<item id>" when several items share it (Odin's CatalogueManager.getV31OfferName: the
+                // client groups offers by name, so all wallpapers would otherwise be one product).
+                var shared = items.GroupBy(i => i.SaleCode ?? "").Where(g => g.Count() > 1).Select(g => g.Key).ToHashSet(StringComparer.Ordinal);
                 var entries = new List<string>();
                 foreach (var item in items.OrderBy(i => i.Order).ThenBy(i => i.Id))
                 {
-                    if (string.IsNullOrEmpty(item.SaleCode) || !seen.Add(item.SaleCode)) continue;
+                    if (string.IsNullOrEmpty(item.SaleCode)) continue;
+                    var code = shared.Contains(item.SaleCode) ? item.SaleCode + "_" + item.Id : item.SaleCode;
                     definitions.TryGetValue(item.DefinitionId, out var d);
                     var own = item.IsPackage || item.ItemSpecialSpriteId > 0;
                     var name = item.IsPackage ? item.PackageName : own ? item.Name : d?.Name;
                     var description = item.IsPackage ? item.PackageDescription : own ? item.Description : d?.Description;
-                    entries.Add("[" + string.Join(",", S(item.SaleCode), S(name), S(description), S("")) + "]");
+                    entries.Add("[" + string.Join(",", S(code), S(name), S(description), S("")) + "]");
                 }
                 return Lines(entries);
             });
