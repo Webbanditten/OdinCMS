@@ -68,14 +68,6 @@ img.ctlg-el { object-fit: fill; }
     position: absolute; left: 10px; top: 15px; width: 20px; text-align: center; color: #FFFFCC !important;
     font-family: 'CtlgVolterBold', 'CtlgVolter', monospace !important;
 }
-.ctlg-count-badge { position: absolute; left: 2px; top: 0; display: flex; height: 11px; }
-.ctlg-count-badge img { display: block; }
-.ctlg-count-mid { display: flex; gap: 1px; padding: 3px 1px 0 0; background-repeat: repeat-x; height: 11px; margin-left: -4px; }
-.ctlg-count-mid img { height: 5px; }
-
-/* A package's contents in the preview area (Deal Preview Class) */
-.ctlg-deal-preview { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: center; width: 100%; height: 100%; }
-.ctlg-deal-preview .ctlg-deal-part { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 
 /* Edit mode: what can be clicked to edit */
 .ctlg-edit .ctlg-editable { cursor: pointer; outline: 1px dashed transparent; }

@@ -129,6 +129,12 @@
         img.src = url;
         if (!tint) return;
         var key = url + '|' + tint;
+        tinted(url, tint).then(function (dataUrl) { if (dataUrl && img.getAttribute('data-src') === key) img.src = dataUrl; });
+        img.setAttribute('data-src', key);
+    }
+
+    function tinted(url, tint) {
+        var key = url + '|' + tint;
         tintCache[key] = tintCache[key] || new Promise(function (resolve) {
             var source = new Image();
             source.crossOrigin = 'anonymous';
@@ -152,8 +158,144 @@
             source.onerror = function () { resolve(null); };
             source.src = url;
         });
-        tintCache[key].then(function (dataUrl) { if (dataUrl && img.getAttribute('data-src') === key) img.src = dataUrl; });
-        img.setAttribute('data-src', key);
+        return tintCache[key];
+    }
+
+    // ---- Package pictures (hh_cat_code "Deal Preview Class"), drawn on canvases like the client's image objects ----
+
+    function loadImage(src) {
+        return new Promise(function (resolve) {
+            if (!src) { resolve(null); return; }
+            var img = new Image();
+            if (/^https?:/.test(src) && src.indexOf(location.origin) !== 0) img.crossOrigin = 'anonymous';
+            img.onload = function () { resolve(img); };
+            img.onerror = function () { resolve(null); };
+            img.src = src;
+        });
+    }
+
+    function canvasOf(width, height) {
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, width); canvas.height = Math.max(1, height);
+        return canvas;
+    }
+
+    // Ink 36 on the way out: white becomes see-through.
+    function whiteToAlpha(canvas) {
+        var ctx = canvas.getContext('2d'), data = ctx.getImageData(0, 0, canvas.width, canvas.height), px = data.data;
+        for (var i = 0; i < px.length; i += 4) if (px[i] === 255 && px[i + 1] === 255 && px[i + 2] === 255) px[i + 3] = 0;
+        ctx.putImageData(data, 0, 0);
+        return canvas;
+    }
+
+    // image.trimWhiteSpace(): crop to what isn't white (or see-through).
+    function trimmed(canvas) {
+        var ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, px = ctx.getImageData(0, 0, w, h).data;
+        var x0 = w, y0 = h, x1 = -1, y1 = -1;
+        for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+            var i = (y * w + x) * 4;
+            if (!px[i + 3] || (px[i] === 255 && px[i + 1] === 255 && px[i + 2] === 255)) continue;
+            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+        if (x1 < 0) return canvasOf(1, 1);
+        var out = canvasOf(x1 - x0 + 1, y1 - y0 + 1);
+        out.getContext('2d').drawImage(canvas, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+        return out;
+    }
+
+    // Lingo integer division (truncates towards zero).
+    function idiv(a, b) { return Math.trunc(a / b); }
+
+    // The furni's small icon in its part colours (Preview_renderer), or no_icon_small without graphics; white see-through.
+    function furniIcon(sprite, colours) {
+        var url = furniUrl(sprite, '&icon=true'), tint = tintColour(colours);
+        return (tint ? tinted(url, tint).then(function (d) { return d || url; }) : Promise.resolve(url))
+            .then(loadImage)
+            .then(function (img) { return img || loadImage(memberUrl('no_icon_small')); })
+            .then(function (img) {
+                if (!img) return null;
+                var canvas = canvasOf(img.naturalWidth, img.naturalHeight);
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                return whiteToAlpha(canvas);
+            });
+    }
+
+    // getNumberImage: ctlg_dyndeal_button_left + _center (stretched) + _right, digits from ctlg_dyndeal_N at (2, 3)
+    // (leading zero dropped), trimmed; white is see-through where it is drawn (ink 36).
+    var badgeCache = {};
+    function countBadge(count) {
+        if (badgeCache[count]) return badgeCache[count];
+        var names = ['ctlg_dyndeal_button_left', 'ctlg_dyndeal_button_center', 'ctlg_dyndeal_button_right'];
+        for (var d = 0; d < 10; d++) names.push('ctlg_dyndeal_' + d);
+        badgeCache[count] = Promise.all(names.map(function (n) { return loadImage(memberUrl(n)); })).then(function (imgs) {
+            var left = imgs[0], center = imgs[1], right = imgs[2], digitImg = function (d) { return d >= 0 ? imgs[3 + d] : null; };
+            var digits = [count % 10, idiv(count, 10) % 10]; // [ones, tens]
+            var width = 0;
+            for (var i = 1; i >= 0; i--) {
+                if (digits[i] === 0) { digits[i] = -1; continue; }
+                width += i;
+                break;
+            }
+            digits.forEach(function (d) { if (digitImg(d)) width += digitImg(d).naturalWidth; });
+            var canvas = canvasOf(80, 20), ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 80, 20);
+            var start = 0;
+            if (left) { ctx.drawImage(left, 0, 0); start = left.naturalWidth; }
+            if (center) for (var x = start; x <= start + width; x++) ctx.drawImage(center, x, 0);
+            if (right) ctx.drawImage(right, start + width + 1, 0);
+            for (var k = 1; k >= 0; k--) {
+                var img = digitImg(digits[k]);
+                if (!img) continue;
+                var digit = canvasOf(img.naturalWidth, img.naturalHeight);
+                digit.getContext('2d').drawImage(img, 0, 0);
+                ctx.drawImage(whiteToAlpha(digit), start + 2, 3);
+                start += img.naturalWidth + 1;
+            }
+            return whiteToAlpha(trimmed(canvas));
+        });
+        return badgeCache[count];
+    }
+
+    // renderDealPreviewImage for one kind of furni: its icon (centred, at most 8 px down) with the count badge at
+    // (2, 0), trimmed; the slot then centres it.
+    function dealSlotPicture(part, slotWidth, slotHeight) {
+        return Promise.all([furniIcon(part.sprite, part.colour), countBadge(part.amount || 1)]).then(function (r) {
+            var icon = r[0], badge = r[1];
+            var canvas = canvasOf(slotWidth, slotHeight), ctx = canvas.getContext('2d');
+            if (icon) ctx.drawImage(icon, idiv(slotWidth - icon.width, 2), Math.min(8, slotHeight - icon.height));
+            if (badge) ctx.drawImage(badge, 2, 0);
+            var picture = trimmed(canvas);
+            var slot = canvasOf(slotWidth, slotHeight);
+            slot.getContext('2d').drawImage(picture, idiv(slotWidth - picture.width, 2), idiv(slotHeight - picture.height, 2));
+            return slot.toDataURL();
+        });
+    }
+
+    // getPicture: the package's furni (at most 3 x 2) in 39 px cells on ctlg_dyndeal_background, counts above 1
+    // right-aligned at (41, 28) of the cell (catalogue.deal.* variables), white see-through, trimmed and centred.
+    var DEAL = { cell: 39, columns: 3, rows: 2, left: 11, right: 15, top: 80, bottom: 20, numberX: 41, numberY: 28 };
+    function dealPreviewPicture(parts, width, height) {
+        var shown = parts.slice(0, DEAL.columns * DEAL.rows);
+        return Promise.all([loadImage(memberUrl('ctlg_dyndeal_background'))]
+            .concat(shown.map(function (p) { return furniIcon(p.sprite, p.colour); }))
+            .concat(shown.map(function (p) { return (p.amount || 1) > 1 ? countBadge(p.amount) : null; })))
+            .then(function (r) {
+                var background = r[0], icons = r.slice(1, 1 + shown.length), badges = r.slice(1 + shown.length);
+                var canvas = canvasOf(DEAL.columns * DEAL.cell + 1 + DEAL.left + DEAL.right, DEAL.rows * DEAL.cell + 1 + DEAL.top + DEAL.bottom);
+                var ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (background) ctx.drawImage(background, 0, 0);
+                for (var i = shown.length; i >= 1; i--) {
+                    var x = ((i - 1) % DEAL.columns) * DEAL.cell + DEAL.left, y = idiv(i - 1, DEAL.columns) * DEAL.cell + DEAL.top;
+                    var icon = icons[i - 1], badge = badges[i - 1];
+                    if (icon) ctx.drawImage(icon, x + idiv(DEAL.cell - icon.width, 2), y + idiv(DEAL.cell - icon.height, 2));
+                    if (badge) ctx.drawImage(badge, x + DEAL.numberX - badge.width, y + DEAL.numberY - idiv(badge.height, 2));
+                }
+                var picture = trimmed(whiteToAlpha(canvas));
+                var out = canvasOf(width, height);
+                out.getContext('2d').drawImage(picture, idiv(width - picture.width, 2), idiv(height - picture.height, 2));
+                return out.toDataURL();
+            });
     }
 
     function fillCentered(node, src, ink, remote) {
@@ -544,21 +686,9 @@
             return wrap;
         }
         var part = parts[0] || { sprite: product.sprite, colour: product.colour, amount: 1 };
-        var icon = el('img', 'ctlg-centered'); icon.alt = '';
-        furniImage(icon, part.sprite, part.colour, '&icon=true');
-        wrap.appendChild(icon);
-        if ((part.amount || 1) > 1) {
-            var badge = el('span', 'ctlg-count-badge');
-            badge.appendChild(Object.assign(el('img'), { src: memberUrl('ctlg_dyndeal_button_left'), alt: '' }));
-            var mid = el('span', 'ctlg-count-mid');
-            mid.style.backgroundImage = 'url(' + memberUrl('ctlg_dyndeal_button_center') + ')';
-            String(part.amount).split('').forEach(function (d) {
-                mid.appendChild(Object.assign(el('img'), { src: memberUrl('ctlg_dyndeal_' + d), alt: d }));
-            });
-            badge.appendChild(mid);
-            badge.appendChild(Object.assign(el('img'), { src: memberUrl('ctlg_dyndeal_button_right'), alt: '' }));
-            wrap.appendChild(badge);
-        }
+        var picture = el('img', 'ctlg-centered'); picture.alt = '';
+        dealSlotPicture(part, 32, 32).then(function (url) { picture.src = url; });
+        wrap.appendChild(picture);
         return wrap;
     };
 
@@ -644,15 +774,11 @@
             preview.onclick = null;
             preview.classList.remove('ctlg-editable');
             if (product.isPackage && (product.packages || []).length) {
-                // Deal Preview Class: the package's furni side by side, each with its count.
                 preview.textContent = '';
-                var grid = el('div', 'ctlg-deal-preview');
-                product.packages.forEach(function (part) {
-                    var cell = el('div', 'ctlg-deal-part');
-                    cell.appendChild(this.dealIcon({ packages: [part] }, 0));
-                    grid.appendChild(cell);
-                }, this);
-                preview.appendChild(grid);
+                var deal = el('img', 'ctlg-centered'); deal.alt = '';
+                var size = [parseInt(preview.style.width, 10) || 162, parseInt(preview.style.height, 10) || 162];
+                dealPreviewPicture(product.packages, size[0], size[1]).then(function (url) { deal.src = url; });
+                preview.appendChild(deal);
             } else {
                 preview.textContent = '';
                 var big = el('img', 'ctlg-centered'); big.alt = '';
