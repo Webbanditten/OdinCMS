@@ -10,21 +10,35 @@
 //   state.page     { layout, headline, teasers[], body, labelPick, labelExtraS, texts{n: text}, links[] }
 //   state.products [{ name, description, price, sprite, colour, isPackage, packages: [{ sprite, amount }] }]
 //   state.purse    credits shown in the purse line
-// options: gameData (from CatalogueController.GameData), onSelectPage(id), onField(field), editMode
+// options: gameData (from CatalogueController.GameData), onSelectPage(id), onField(field), editMode,
+//   v31: draw the web client's catalogue (hh_cat_new) instead: its window and tree (state.index entries also carry
+//   parentId, icon, colour, folder), the page through its v31 layout, products in the product strip. Its assets are
+//   v31/layouts.json + v31/members/ (tools/catalogue/build_assets.py --v31).
 (function () {
     'use strict';
 
     var BASE = '/housekeeping/catalogue/';
+    var V31_BASE = BASE + 'v31/';
+    // The asset set being drawn: the old catalogue's (hh_cat_gfx_all) or the v31 one. render() switches it.
+    var sets = { old: null, v31: null };
     var assets = null;
     var inkCache = {};
 
-    function loadAssets() {
-        if (assets) return Promise.resolve(assets);
+    function loadSet(base) {
         return Promise.all([
-            fetch(BASE + 'layouts.json').then(function (r) { return r.json(); }),
-            fetch(BASE + 'images.json').then(function (r) { return r.json(); })
+            fetch(base + 'layouts.json').then(function (r) { return r.json(); }),
+            fetch(base + 'images.json').then(function (r) { return r.json(); })
         ]).then(function (results) {
-            assets = { windows: results[0].windows, members: results[0].members, images: results[1] };
+            return { base: base, windows: results[0].windows, members: results[0].members, sizes: results[0].sizes || {}, images: results[1] };
+        });
+    }
+
+    function loadAssets() {
+        if (sets.old) return Promise.resolve(sets.old);
+        return Promise.all([loadSet(BASE), loadSet(V31_BASE).catch(function () { return null; })]).then(function (results) {
+            sets.old = results[0];
+            sets.v31 = results[1];
+            assets = sets.old;
             return assets;
         });
     }
@@ -90,7 +104,7 @@
 
     function memberUrl(member) {
         var file = assets.members[(member || '').trim()];
-        return file ? BASE + 'members/' + file : null;
+        return file ? assets.base + 'members/' + file : null;
     }
 
     // Where the client finds a page image: a cast member first, else the image library in the client's language.
@@ -98,7 +112,7 @@
     // client does (an image uploaded a moment ago shows up without waiting for the server's cache).
     function pageImageUrl(name, gameData) {
         if (!name) return null;
-        if (assets.images[name]) return { url: BASE + 'images/' + assets.images[name].file, remote: false, known: true };
+        if (assets.images[name]) return { url: assets.base + 'images/' + assets.images[name].file, remote: false, known: true };
         if (!gameData || !gameData.imageLibraryUrl) return null;
         return {
             url: gameData.imageLibraryUrl + 'catalogue/' + encodeURIComponent(name) + '_' + gameData.language + '.gif',
@@ -342,12 +356,13 @@
     CatalogueView.prototype.load = function () { return loadAssets(); };
 
     CatalogueView.layouts = function () {
-        return Object.keys(assets.windows).filter(function (k) { return /^ctlg_/.test(k) && k !== 'ctlg_loading' && k !== 'ctlg_recycler_open'; }).sort();
+        return Object.keys(sets.old.windows).filter(function (k) { return /^ctlg_/.test(k) && k !== 'ctlg_loading' && k !== 'ctlg_recycler_open'; }).sort();
     };
 
     // What a layout can show, for the editor: texts slots, teaser slots, product icons, and so on.
-    CatalogueView.layoutInfo = function (layout) {
-        var window = assets.windows[layout === 'ctlg_recycler' && assets.windows.ctlg_recycler_open ? 'ctlg_recycler_open' : layout];
+    CatalogueView.layoutInfo = function (layout, set) {
+        set = set || sets.old;
+        var window = set.windows[layout === 'ctlg_recycler' && set.windows.ctlg_recycler_open ? 'ctlg_recycler_open' : layout];
         var info = { header: false, headerText: false, teasers: 0, texts: [], description: false, special: false, icons: 0, productSlots: 0, productName: false };
         if (!window) return info;
         window.elements.forEach(function (e) {
@@ -370,18 +385,29 @@
     CatalogueView.textKeys = function () {
         var keys = ['catalog_coins_amount', 'catalog_get_credits_link', 'credits', 'credit', 'catalog_selectproduct', 'catalog_select_product', 'catalog_page', 'buy', 'play_preview'];
         for (var pet = 0; pet < 10; pet++) keys.push('pet_race_' + pet + '_000');
-        keys.push('recycler_info_open');
-        Object.keys(assets.windows).forEach(function (k) {
-            assets.windows[k].elements.forEach(function (e) { if (e.key) keys.push(e.key); });
+        keys.push('recycler_info_open', 'pixels');
+        [sets.old, sets.v31].filter(Boolean).forEach(function (set) {
+            Object.keys(set.windows).forEach(function (k) {
+                set.windows[k].elements.forEach(function (e) { if (e.key) keys.push(e.key); });
+            });
         });
         return keys.filter(function (k, i, a) { return k && a.indexOf(k) === i; });
     };
 
-    CatalogueView.pageImageUrl = function (name, gameData) { return pageImageUrl(name, gameData); };
-    CatalogueView.castImages = function () { return assets.images; };
-    CatalogueView.windowElements = function (layout) { return (assets.windows[layout] || { elements: [] }).elements; };
+    CatalogueView.pageImageUrl = function (name, gameData) {
+        var active = assets;
+        assets = sets.old;
+        try { return pageImageUrl(name, gameData); } finally { assets = active; }
+    };
+    CatalogueView.castImages = function () { return sets.old.images; };
+    CatalogueView.windowElements = function (layout) { return (sets.old.windows[layout] || { elements: [] }).elements; };
+    CatalogueView.hasV31 = function () { return !!sets.v31; };
 
     CatalogueView.prototype.render = function (state) {
+        assets = (this.options.v31 && sets.v31) || sets.old;
+        var wasV31 = this.v31;
+        this.v31 = assets === sets.v31;
+        if (wasV31 !== this.v31) this.state = null;
         var keepProduct = this.state && state && this.state.pageId === state.pageId && this.state.page && state.page && this.state.page.layout === state.page.layout;
         if (!keepProduct) { this.productOffset = 0; this.selected = -1; }
         this.state = state;
@@ -394,6 +420,7 @@
         frame.style.height = main.height + 'px';
         this.frame = frame;
         this.drawWindow(main, [0, 0]);
+        if (this.v31) { this.renderV31(state); return; }
         var layout = state.page && assets.windows[state.page.layout];
         // The recycler page shows hh_recycler's "open" window in place of its layout (Recycler Interface Class).
         if (layout && state.page.layout === 'ctlg_recycler' && assets.windows.ctlg_recycler_open) layout = assets.windows.ctlg_recycler_open;
@@ -511,7 +538,7 @@
         var gameData = this.options.gameData || {};
 
         // The page index (renderPageList): 21 px rows, bold text 6 px in, #DDDDDD with #AAAAAA lines, selected #EEEEEE.
-        var pages = this.get('ctlg_pages');
+        var pages = this.v31 ? null : this.get('ctlg_pages');
         if (pages) {
             pages.classList.add('ctlg-pages');
             var list = el('div', 'ctlg-pages-list');
@@ -542,15 +569,25 @@
         }
 
         // The purse line.
+        if (!this.v31) this.purseLine();
+
+        if (!state.page) return;
+        var layout = page.layout;
+        var info = CatalogueView.layoutInfo(layout, assets);
+        this.fillPageContent(page, layout, info, gameData);
+    };
+
+    CatalogueView.prototype.purseLine = function () {
+        var gameData = this.options.gameData || {}, state = this.state;
         var amount = state.purse === undefined ? '-' : String(state.purse);
         this.setText('catalog_credits_bottom', (textOf(gameData, 'catalog_coins_amount') || '%amount%').replace('%amount%', amount));
         this.setText('catalog_get_credits_bottom', textOf(gameData, 'catalog_get_credits_link'));
         var link = this.get('catalog_get_credits_bottom');
         if (link) link.classList.add('ctlg-link');
+    };
 
-        if (!state.page) return;
-        var layout = page.layout;
-        var info = CatalogueView.layoutInfo(layout);
+    CatalogueView.prototype.fillPageContent = function (page, layout, info, gameData) {
+        var self = this, state = this.state;
 
         // Header image and text, text slots, teasers (feedPageData).
         var header = this.get('ctlg_header_img');
@@ -616,7 +653,7 @@
         var position = chain ? chain.indexOf(page.nameIndex) : -1;
         if (!chain || position < 0) {
             this.hide('ctlg_nextpage_button'); this.hide('ctlg_prevpage_button'); this.hide('ctlg_subpage_counter');
-            if (!(CatalogueView.layoutInfo(page.layout).icons > 0)) this.hide('ctlg_page_text');
+            if (!(CatalogueView.layoutInfo(page.layout, assets).icons > 0)) this.hide('ctlg_page_text');
             return;
         }
         this.setText('ctlg_subpage_counter', (position + 1) + '/' + chain.length);
@@ -768,7 +805,7 @@
         if (!product) return;
         this.selected = index;
         if (this.classSelect) { this.classSelect(index, quiet); return; }
-        var info = CatalogueView.layoutInfo(this.state.page.layout);
+        var info = CatalogueView.layoutInfo(this.state.page.layout, assets);
         if (info.icons > 0) this.showIcons(info.icons);
         var preview = this.get('ctlg_teaserimg_1');
         if (preview && info.productName) {
