@@ -116,8 +116,16 @@ var CatalogueEditor = (function () {
     function renderPreview() {
         if (!view) return;
         var showHidden = $('#cated-show-hidden').checked;
-        var index = pages.filter(function (p) { return showHidden || p.indexVisible || (current && p.id === current.id); })
-            .map(function (p) { return { id: p.id, name: p.id === (draft && draft.id) ? draft.name : p.name, hidden: !p.indexVisible }; });
+        var v31 = !!view.options.v31;
+        var index = pages.filter(function (p) {
+            var open = current && p.id === current.id;
+            // The old catalogue's index leaves folders out (they only exist in the v31 tree).
+            if (!v31 && p.isFolder && !open) return false;
+            return showHidden || p.indexVisible || open;
+        }).map(function (p) {
+            var src = draft && p.id === draft.id ? draft : p;
+            return { id: p.id, name: src.name, hidden: !p.indexVisible, parentId: src.parentId, icon: src.icon, colour: src.colour, folder: p.isFolder };
+        });
         var visible = viewProducts();
         view.render({ index: index, pageId: draft ? draft.id : 0, page: draft, products: visible, purse: 500, linkChain: linkChain() });
         var visibleIndex = selectedProduct >= 0 ? visibleIndexOf(selectedProduct) : -1;
@@ -860,6 +868,12 @@ var CatalogueEditor = (function () {
         $('#cated-zoom').onchange = function (e) { $('#cated-stage').classList.toggle('is-2x', e.target.checked); try { localStorage.setItem('cated-zoom', e.target.checked ? '1' : ''); } catch (x) { } };
         try { if (localStorage.getItem('cated-zoom')) { $('#cated-zoom').checked = true; $('#cated-stage').classList.add('is-2x'); } } catch (x) { }
         $('#cated-show-hidden').onchange = renderPreview;
+        try { if (localStorage.getItem('cated-v31')) $('#cated-v31').checked = true; } catch (x) { }
+        $('#cated-v31').onchange = function () {
+            view.options.v31 = this.checked;
+            try { if (this.checked) localStorage.setItem('cated-v31', '1'); else localStorage.removeItem('cated-v31'); } catch (x) { }
+            renderPreview();
+        };
         $('#cated-publish').onclick = publish;
         $('#cated-new-page').onclick = function () { newPage(false); };
         $('#cated-new-folder').onclick = function () { newPage(true); };
@@ -868,6 +882,7 @@ var CatalogueEditor = (function () {
 
         view = new CatalogueView($('#cated-stage'), {
             editMode: true,
+            v31: $('#cated-v31').checked,
             onSelectPage: function (id) { selectPage(id); },
             onSelectPageByName: function (nameIndex) {
                 var target = pages.filter(function (p) { return p.nameIndex === nameIndex; })[0];
