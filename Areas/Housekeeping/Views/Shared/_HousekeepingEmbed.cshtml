@@ -1,13 +1,24 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @* Housekeeping pages opened with ?embed=1: the site's edit mode (wwwroot/js/cms-edit.js) shows the editors in a side
    panel, without the housekeeping menu. Forms keep embed=1 when they post back (e.g. a validation error). *@
+@functions {
+    // A title for pages that set none: "Pages · Update container" from the controller and action.
+    string PageTitle()
+    {
+        if (!string.IsNullOrWhiteSpace(ViewBag.Title as string)) return ViewBag.Title;
+        static string Words(string s) => System.Text.RegularExpressions.Regex.Replace(s ?? "", "(?<=[a-z])(?=[A-Z])", " ");
+        var controller = Words(ViewContext.RouteData.Values["controller"]?.ToString());
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+        return string.IsNullOrEmpty(action) || action == "Index" ? controller : controller + " · " + Words(action).ToLowerInvariant();
+    }
+}
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="habbo-furni-url" content="@(Configuration["keplercms:furniUrl"] ?? "/habbo-imaging/furni")">
     <meta name="habbo-avatar-url" content="@(Configuration["keplercms:figureUrl"] ?? "/habbo-imaging/avatarimage")">
-    <title>Housekeeping ~ @ViewBag.Title</title>
+    <title>Housekeeping ~ @PageTitle()</title>
     <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css" asp-append-version="true">
     <link rel="stylesheet" href="~/housekeeping/css/sweetalert2.min.css" asp-append-version="true">
 </head>

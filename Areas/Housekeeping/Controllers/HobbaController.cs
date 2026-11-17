@@ -120,7 +120,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 Search = search,
                 Letter = letter,
                 CurrentPage = currentPage,
-                TotalPages = searchResult.TotalResults / pageSize
+                TotalPages = (searchResult.TotalResults + pageSize - 1) / pageSize
             };
             return View(model);
         }

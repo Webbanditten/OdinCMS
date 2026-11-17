@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
@@ -37,8 +38,8 @@ namespace KeplerCMS.Controllers
                var file = await _uploadService.GetByCategoryAndName(category, fileName);
                if(file != null)
                 {
-                    // TODO PERHAPS ADD EXPIRATION FOR FILES SO WE DONT RUN OUT OF RAM ;)
-                    _cache.Set<byte[]>(key, file.Blob);
+                    // Kept in memory while it is being asked for; an image nobody requested for an hour is dropped.
+                    _cache.Set<byte[]>(key, file.Blob, new MemoryCacheEntryOptions { SlidingExpiration = TimeSpan.FromHours(1) });
                     return File(file.Blob, file.ContentType);
                 } else
                 {

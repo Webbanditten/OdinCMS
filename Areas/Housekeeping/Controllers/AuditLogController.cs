@@ -30,7 +30,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 AuditLogs = searchResult.AuditLogs,
                 Action = a,
                 CurrentPage = currentPage,
-                TotalPages =  1 + (searchResult.TotalResults / pageSize),
+                TotalPages = (searchResult.TotalResults + pageSize - 1) / pageSize,
                 Actions = await _auditLogService.GetActions()
             };
             return View(model);
