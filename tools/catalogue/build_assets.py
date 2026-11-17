@@ -125,7 +125,7 @@ def main():
     for member in ["ctlg.pagelist.left", "ctlg.pagelist.left.active", "catalog_special_txtbg1", "catalog_special_txtbg2",
                    "ctlg_small_active_bg", "ctlg_small_active2_bg", "purse_coins_small", "no_icon_small",
                    # deal (package) icons: Deal Preview Class
-                   "ctlg_pic_deal_icon_narrow", "ctlg_dyndeal_button_left", "ctlg_dyndeal_button_center",
+                   "ctlg_pic_deal_icon_narrow", "ctlg_dyndeal_background", "ctlg_dyndeal_button_left", "ctlg_dyndeal_button_center",
                    "ctlg_dyndeal_button_right"] + ["ctlg_dyndeal_%d" % d for d in range(10)] + [
                    # the page index scrollbar (hh_interface scrollbarv1.element)
                    "button.scroll.up.active", "scrollbar.vertical.active", "button.scroll.lift.active",
