@@ -1,0 +1,46 @@
+@model int
+@inject KeplerCMS.Services.Interfaces.IFurniShopService Shop
+@* A furni for sale ({buy_furni_ID}, see Models/BuyFurniWidget.cs): picture, name, price and a one-click buy button
+   (site.js binds .buy-btn). Furni players can't buy in the game's catalogue show without the button. *@
+@functions
+{
+    string L(string key, string set, string fallback)
+    {
+        var value = DbRes.T(key, set);
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+@{
+    var furni = await Shop.Get(Model);
+    if (furni == null)
+    {
+        return;
+    }
+    var forSale = Shop.WhyNotForSale(furni) == null;
+    var definition = furni.FirstDefinition;
+    var sprite = definition?.Sprite ?? "";
+    var parts = sprite.Split('*');
+    var image = Url.Content("~/habbo-imaging/furni") + "?direction=2&sprite=" + Uri.EscapeDataString(parts[0]) + (parts.Length > 1 ? "&color=" + Uri.EscapeDataString(parts[1]) : "");
+}
+<div class="buy-furni" id="buy_furni_@furni.Id" style="overflow: hidden; margin: 6px 0;">
+    @if (sprite.Length > 0)
+    {
+        <img src="@image" alt="" style="float: left; margin: 0 10px 4px 0; max-width: 120px;" />
+    }
+    <div style="overflow: hidden;">
+        <strong>@furni.Name</strong><br />
+        @if (!string.IsNullOrWhiteSpace(furni.Description) && furni.Description != furni.Name)
+        {
+            @furni.Description<br />
+        }
+        @if (forSale)
+        {
+            @(furni.Price + " " + L("coins", "credits", "Habbo Mønter"))<br /><br />
+            <a class="colorlink orange buy-btn" href="#" data-product="@furni.Id"><span class="stay">@L("buy", "shared", "Køb")</span></a>
+        }
+        else
+        {
+            <em>@L("furni_not_for_sale_short", "shared", "Kan ikke købes lige nu.")</em>
+        }
+    </div>
+</div>

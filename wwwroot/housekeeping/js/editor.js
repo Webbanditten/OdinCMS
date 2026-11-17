@@ -1,6 +1,6 @@
 // Shared TinyMCE setup for housekeeping (news, pages, campaign news action). Pages load it through
 // Areas/Housekeeping/Views/Shared/_EditorScripts.cshtml, after TinyMCE 8 (self-hosted under the GPL) and the Habbo
-// plugins: Furni and Habbo (editor-images.js) and Codes (editor-codes.js).
+// plugins: Furni and Habbo (editor-images.js), Buy furni (editor-shop.js) and Codes (editor-codes.js).
 //
 // initHabboEditor(selector, settings)
 //   settings.boxCodes: the Codes dialog also offers box widgets such as {staff} and {credits}. Page boxes render
@@ -8,7 +8,7 @@
 (function () {
     // TinyMCE's default toolbar (for the plugins loaded below); the Habbo buttons go after it.
     var defaultToolbar = 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | outdent indent';
-    var habboPlugins = ['habbofurni', 'habboavatar', 'habbocodes'];
+    var habboPlugins = ['habbofurni', 'habboavatar', 'habboshop', 'habbocodes'];
 
     window.initHabboEditor = function (selector, settings) {
         var habbo = habboPlugins.filter(function (name) { return !!tinymce.PluginManager.get(name); });
