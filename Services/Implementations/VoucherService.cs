@@ -25,139 +25,26 @@ namespace KeplerCMS.Services.Implementations
     public class VoucherService : IVoucherService
     {
         private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        private const string RoomDimmerDefault = "1,1,1,#000000,255"; // Odin Item.DEFAULT_ROOMDIMMER_CUSTOM_DATA
         public const int MaxCodes = 500;
         public const int MaxItems = 100;
         private static readonly Regex CodePattern = new Regex("^[A-Za-z0-9_-]{3,100}$");
 
         private readonly DataContext _context;
+        private readonly ContextSql _sql;
+        private readonly ICatalogueFurniService _catalogue;
         private readonly ICommandQueueService _commandQueue;
         private readonly ILogger<VoucherService> _logger;
 
-        public VoucherService(DataContext context, ICommandQueueService commandQueue, ILogger<VoucherService> logger)
+        public VoucherService(DataContext context, ICatalogueFurniService catalogue, ICommandQueueService commandQueue, ILogger<VoucherService> logger)
         {
             _context = context;
+            _sql = new ContextSql(context);
+            _catalogue = catalogue;
             _commandQueue = commandQueue;
             _logger = logger;
         }
 
-        // ---- What a sale code gives ----
-
-        /// <summary>One furni a catalogue item gives (packages give several).</summary>
-        private class Part
-        {
-            public Data.Models.ItemsDefinitions Definition;
-            public int SpecialSpriteId;
-            public int Amount;
-        }
-
-        private class CatalogueEntry
-        {
-            public string SaleCode;
-            public string Name;
-            public int Price;
-            public bool IsPackage;
-            public bool IsHidden;
-            public List<Part> Parts = new List<Part>();
-            public string NotAllowed;
-        }
-
-        private static bool HasBehaviour(Data.Models.ItemsDefinitions definition, string behaviour) =>
-            (definition?.Behavior ?? "").Split(',').Any(b => b.Trim().Equals(behaviour, StringComparison.OrdinalIgnoreCase));
-
-        /// <summary>
-        /// Every sale code in the catalogue with the furni it gives. Like Odin's CatalogueManager.getVoucherItem, a visible
-        /// item wins over a hidden one, and hidden items (not for sale) can be given too.
-        /// </summary>
-        private async Task<Dictionary<string, CatalogueEntry>> LoadCatalogue()
-        {
-            var items = await _context.CatalogueItems.AsNoTracking().OrderBy(i => i.Order).ThenBy(i => i.Id).ToListAsync();
-            var definitions = await _context.ItemsDefinitions.AsNoTracking().ToDictionaryAsync(d => d.Id);
-            var packages = (await _context.CataloguePackages.AsNoTracking().OrderBy(p => p.Id).ToListAsync())
-                .GroupBy(p => p.SaleCode ?? "", StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.ToList(), StringComparer.Ordinal);
-            var entries = new Dictionary<string, CatalogueEntry>(StringComparer.Ordinal);
-
-            foreach (var group in items.Where(i => !string.IsNullOrEmpty(i.SaleCode)).GroupBy(i => i.SaleCode, StringComparer.Ordinal))
-            {
-                var item = group.FirstOrDefault(i => !i.IsHidden) ?? group.First();
-                var entry = new CatalogueEntry
-                {
-                    SaleCode = item.SaleCode,
-                    Price = item.Price,
-                    IsPackage = item.IsPackage,
-                    IsHidden = group.All(i => i.IsHidden),
-                };
-
-                if (item.IsPackage)
-                {
-                    foreach (var part in packages.GetValueOrDefault(item.SaleCode) ?? new List<Data.Models.CataloguePackages>())
-                    {
-                        entry.Parts.Add(new Part { Definition = definitions.GetValueOrDefault(part.DefId ?? 0), SpecialSpriteId = part.SpriteId ?? 0, Amount = Math.Max(1, part.Amount ?? 1) });
-                    }
-                    entry.Name = string.IsNullOrWhiteSpace(item.PackageName) ? item.SaleCode : item.PackageName;
-                }
-                else
-                {
-                    var definition = definitions.GetValueOrDefault(item.DefinitionId);
-                    entry.Parts.Add(new Part { Definition = definition, SpecialSpriteId = item.ItemSpecialSpriteId, Amount = 1 });
-                    entry.Name = !string.IsNullOrWhiteSpace(item.Name) && item.ItemSpecialSpriteId > 0 ? item.Name : definition?.Name ?? item.SaleCode;
-                }
-
-                if (string.IsNullOrWhiteSpace(entry.Name)) entry.Name = item.SaleCode; // e.g. film has no name
-
-                if (group.Select(i => (i.IsPackage, i.DefinitionId, i.ItemSpecialSpriteId)).Distinct().Count() > 1)
-                    entry.NotAllowed = "Several different catalogue items use this sale code";
-                else if (entry.Parts.Count == 0 || entry.Parts.Any(p => p.Definition == null))
-                    entry.NotAllowed = "Its furni definition is missing";
-                else if (entry.Parts.Any(p => HasBehaviour(p.Definition, "decoration")))
-                    entry.NotAllowed = "Wallpaper, floors and landscapes need a pattern picked in the catalogue";
-                else if (entry.Parts.Any(p => string.Equals(p.Definition.Interactor, "pet_nest", StringComparison.OrdinalIgnoreCase)))
-                    entry.NotAllowed = "Pets need a name and race picked in the catalogue";
-
-                entries[entry.SaleCode] = entry;
-            }
-
-            return entries;
-        }
-
-        // ---- SQL helpers (on EF's connection, inside its transaction when there is one) ----
-
-        private DbCommand Command(string sql, params (string Name, object Value)[] parameters)
-        {
-            var command = _context.Database.GetDbConnection().CreateCommand();
-            command.CommandText = sql;
-            command.Transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
-            foreach (var (name, value) in parameters)
-            {
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = name;
-                parameter.Value = value ?? DBNull.Value;
-                command.Parameters.Add(parameter);
-            }
-            return command;
-        }
-
-        private async Task<int> Execute(string sql, params (string, object)[] parameters)
-        {
-            await using var command = Command(sql, parameters);
-            return await command.ExecuteNonQueryAsync();
-        }
-
-        private async Task<List<T>> Query<T>(string sql, Func<DbDataReader, T> read, params (string, object)[] parameters)
-        {
-            var rows = new List<T>();
-            await using var command = Command(sql, parameters);
-            await using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync()) rows.Add(read(reader));
-            return rows;
-        }
-
-        private async Task<T> InConnection<T>(Func<Task<T>> work)
-        {
-            await _context.Database.OpenConnectionAsync();
-            try { return await work(); }
-            finally { await _context.Database.CloseConnectionAsync(); }
-        }
+        private async Task<Dictionary<string, CatalogueFurniEntry>> LoadCatalogue() => (await _catalogue.Load()).BySaleCode;
 
         // ---- Housekeeping ----
 
@@ -168,10 +55,10 @@ namespace KeplerCMS.Services.Implementations
         private async Task<List<VoucherView>> LoadVouchers(string code)
         {
             var catalogue = await LoadCatalogue();
-            return await InConnection(async () =>
+            return await _sql.InConnection(async () =>
             {
                 var filter = code == null ? "" : " WHERE voucher_code = @code";
-                var vouchers = await Query("SELECT voucher_code, credits, expiry_date, is_single_use FROM vouchers" + filter + " ORDER BY voucher_code",
+                var vouchers = await _sql.Query("SELECT voucher_code, credits, expiry_date, is_single_use FROM vouchers" + filter + " ORDER BY voucher_code",
                     r => new VoucherView
                     {
                         Code = r.GetString(0),
@@ -179,9 +66,9 @@ namespace KeplerCMS.Services.Implementations
                         ExpiryDate = r.IsDBNull(2) ? null : r.GetDateTime(2),
                         IsSingleUse = Convert.ToInt32(r.GetValue(3)) == 1,
                     }, ("@code", code));
-                var items = await Query("SELECT voucher_code, catalogue_sale_code FROM vouchers_items" + filter,
+                var items = await _sql.Query("SELECT voucher_code, catalogue_sale_code FROM vouchers_items" + filter,
                     r => (Code: r.GetString(0), SaleCode: r.GetString(1)), ("@code", code));
-                var counts = await Query("SELECT voucher_code, COUNT(*) FROM vouchers_history" + filter + " GROUP BY voucher_code",
+                var counts = await _sql.Query("SELECT voucher_code, COUNT(*) FROM vouchers_history" + filter + " GROUP BY voucher_code",
                     r => (Code: r.GetString(0), Count: Convert.ToInt32(r.GetValue(1))), ("@code", code));
                 var byCode = vouchers.ToDictionary(v => v.Code, StringComparer.OrdinalIgnoreCase);
 
@@ -216,7 +103,7 @@ namespace KeplerCMS.Services.Implementations
             var catalogue = await LoadCatalogue();
             return catalogue.Values
                 .Where(e => e.SaleCode.Contains(query, StringComparison.OrdinalIgnoreCase) || (e.Name ?? "").Contains(query, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(e => e.NotAllowed != null).ThenBy(e => e.IsHidden).ThenBy(e => e.Name)
+                .OrderBy(e => e.NotGivable != null).ThenBy(e => e.IsHidden).ThenBy(e => e.Name)
                 .Take(60)
                 .Select(e => new VoucherFurni
                 {
@@ -227,7 +114,7 @@ namespace KeplerCMS.Services.Implementations
                     Price = e.Price,
                     IsPackage = e.IsPackage,
                     IsHidden = e.IsHidden,
-                    NotAllowed = e.NotAllowed,
+                    NotAllowed = e.NotGivable,
                 })
                 .ToList();
         }
@@ -256,7 +143,7 @@ namespace KeplerCMS.Services.Implementations
             foreach (var line in furni)
             {
                 if (!catalogue.TryGetValue(line.SaleCode, out var entry)) return fail($"No catalogue item has the sale code \"{line.SaleCode}\".");
-                if (entry.NotAllowed != null) return fail($"\"{entry.Name}\" can't be given by a voucher: {entry.NotAllowed.ToLowerInvariant()}.");
+                if (entry.NotGivable != null) return fail($"\"{entry.Name}\" can't be given by a voucher: {entry.NotGivable.ToLowerInvariant()}.");
             }
 
             DateTime? expiry = null;
@@ -281,27 +168,27 @@ namespace KeplerCMS.Services.Implementations
                 }
             }
 
-            return await InConnection(async () =>
+            return await _sql.InConnection(async () =>
             {
                 await using var transaction = await _context.Database.BeginTransactionAsync();
                 if (existingCode != null)
                 {
-                    var updated = await Execute("UPDATE vouchers SET credits = @credits, expiry_date = @expiry, is_single_use = @single WHERE voucher_code = @code",
+                    var updated = await _sql.Execute("UPDATE vouchers SET credits = @credits, expiry_date = @expiry, is_single_use = @single WHERE voucher_code = @code",
                         ("@credits", request.Credits), ("@expiry", expiry), ("@single", request.SingleUse ? 1 : 0), ("@code", existingCode));
                     if (updated == 0)
                     {
                         // MariaDB reports 0 for an UPDATE that changes nothing: tell that apart from a missing voucher.
-                        var exists = await Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", existingCode));
+                        var exists = await _sql.Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", existingCode));
                         if (exists.Count == 0) return fail("That voucher doesn't exist any more (redeemed or deleted).");
                     }
-                    await Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", existingCode));
+                    await _sql.Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", existingCode));
                     codes.Add(existingCode);
                 }
                 else
                 {
                     if (codes.Count == 1)
                     {
-                        var taken = await Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", codes[0]));
+                        var taken = await _sql.Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", codes[0]));
                         if (taken.Count > 0) return fail($"The code \"{codes[0]}\" already exists.");
                     }
                     else
@@ -312,14 +199,14 @@ namespace KeplerCMS.Services.Implementations
                         {
                             var candidate = NewCode();
                             if (codes.Contains(candidate)) continue;
-                            var taken = await Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", candidate));
+                            var taken = await _sql.Query("SELECT 1 FROM vouchers WHERE voucher_code = @code", r => 1, ("@code", candidate));
                             if (taken.Count == 0) codes.Add(candidate);
                         }
                     }
 
                     foreach (var code in codes)
                     {
-                        await Execute("INSERT INTO vouchers (voucher_code, credits, expiry_date, is_single_use) VALUES (@code, @credits, @expiry, @single)",
+                        await _sql.Execute("INSERT INTO vouchers (voucher_code, credits, expiry_date, is_single_use) VALUES (@code, @credits, @expiry, @single)",
                             ("@code", code), ("@credits", request.Credits), ("@expiry", expiry), ("@single", request.SingleUse ? 1 : 0));
                     }
                 }
@@ -330,7 +217,7 @@ namespace KeplerCMS.Services.Implementations
                     {
                         for (var i = 0; i < line.Amount; i++)
                         {
-                            await Execute("INSERT INTO vouchers_items (voucher_code, catalogue_sale_code) VALUES (@code, @sale)", ("@code", code), ("@sale", line.SaleCode));
+                            await _sql.Execute("INSERT INTO vouchers_items (voucher_code, catalogue_sale_code) VALUES (@code, @sale)", ("@code", code), ("@sale", line.SaleCode));
                         }
                     }
                 }
@@ -342,11 +229,11 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<bool> Delete(string code)
         {
-            return await InConnection(async () =>
+            return await _sql.InConnection(async () =>
             {
                 await using var transaction = await _context.Database.BeginTransactionAsync();
-                var deleted = await Execute("DELETE FROM vouchers WHERE voucher_code = @code", ("@code", code));
-                await Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", code));
+                var deleted = await _sql.Execute("DELETE FROM vouchers WHERE voucher_code = @code", ("@code", code));
+                await _sql.Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", code));
                 await transaction.CommitAsync();
                 return deleted > 0;
             });
@@ -354,7 +241,7 @@ namespace KeplerCMS.Services.Implementations
 
         public async Task<List<VoucherHistoryView>> GetHistory(string code = null, int limit = 200)
         {
-            return await InConnection(() => Query(
+            return await _sql.InConnection(() => _sql.Query(
                 "SELECT h.voucher_code, h.user_id, u.username, h.used_at, h.credits_redeemed, h.items_redeemed FROM vouchers_history h " +
                 "LEFT JOIN users u ON u.id = h.user_id" + (code == null ? "" : " WHERE h.voucher_code = @code") + " ORDER BY h.used_at DESC LIMIT @limit",
                 r => new VoucherHistoryView
@@ -377,12 +264,12 @@ namespace KeplerCMS.Services.Implementations
             if (code.Length == 0 || code.Length > 100) return result;
             var catalogue = await LoadCatalogue();
 
-            var redeemed = await InConnection(async () =>
+            var redeemed = await _sql.InConnection(async () =>
             {
                 await using var transaction = await _context.Database.BeginTransactionAsync();
 
                 // The same claim as Odin's PurseDao.redeemVoucher: lock the voucher row, check, delete or log, commit.
-                var vouchers = await Query("SELECT voucher_code, credits, is_single_use FROM vouchers WHERE voucher_code = @code " +
+                var vouchers = await _sql.Query("SELECT voucher_code, credits, is_single_use FROM vouchers WHERE voucher_code = @code " +
                     "AND (expiry_date IS NULL OR expiry_date > NOW()) FOR UPDATE",
                     r => (Code: r.GetString(0), Credits: r.GetInt32(1), SingleUse: Convert.ToInt32(r.GetValue(2)) == 1), ("@code", code));
                 if (vouchers.Count == 0) return false;
@@ -390,39 +277,39 @@ namespace KeplerCMS.Services.Implementations
 
                 if (!voucher.SingleUse)
                 {
-                    var used = await Query("SELECT 1 FROM vouchers_history WHERE voucher_code = @code AND user_id = @user LIMIT 1", r => 1, ("@code", voucher.Code), ("@user", userId));
+                    var used = await _sql.Query("SELECT 1 FROM vouchers_history WHERE voucher_code = @code AND user_id = @user LIMIT 1", r => 1, ("@code", voucher.Code), ("@user", userId));
                     if (used.Count > 0) return false;
                 }
 
-                var saleCodes = await Query("SELECT catalogue_sale_code FROM vouchers_items WHERE voucher_code = @code", r => r.GetString(0), ("@code", voucher.Code));
-                var username = (await Query("SELECT username FROM users WHERE id = @user", r => r.GetString(0), ("@user", userId))).FirstOrDefault();
+                var saleCodes = await _sql.Query("SELECT catalogue_sale_code FROM vouchers_items WHERE voucher_code = @code", r => r.GetString(0), ("@code", voucher.Code));
+                var username = (await _sql.Query("SELECT username FROM users WHERE id = @user", r => r.GetString(0), ("@user", userId))).FirstOrDefault();
                 if (username == null) return false;
 
                 if (voucher.SingleUse)
                 {
-                    await Execute("DELETE FROM vouchers WHERE voucher_code = @code", ("@code", voucher.Code));
-                    await Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", voucher.Code));
+                    await _sql.Execute("DELETE FROM vouchers WHERE voucher_code = @code", ("@code", voucher.Code));
+                    await _sql.Execute("DELETE FROM vouchers_items WHERE voucher_code = @code", ("@code", voucher.Code));
                 }
 
                 if (voucher.Credits > 0)
                 {
-                    await Execute("UPDATE users SET credits = credits + @credits WHERE id = @user", ("@credits", voucher.Credits), ("@user", userId));
+                    await _sql.Execute("UPDATE users SET credits = credits + @credits WHERE id = @user", ("@credits", voucher.Credits), ("@user", userId));
                     result.Credits = voucher.Credits;
                 }
 
                 var film = 0;
                 foreach (var saleCode in saleCodes)
                 {
-                    if (!catalogue.TryGetValue(saleCode, out var entry) || entry.NotAllowed != null)
+                    if (!catalogue.TryGetValue(saleCode, out var entry) || entry.NotGivable != null)
                     {
-                        _logger.LogError("Voucher {Code}: can't give sale code {SaleCode} ({Reason})", voucher.Code, saleCode, entry?.NotAllowed ?? "no such catalogue item");
+                        _logger.LogError("Voucher {Code}: can't give sale code {SaleCode} ({Reason})", voucher.Code, saleCode, entry?.NotGivable ?? "no such catalogue item");
                         continue;
                     }
                     foreach (var part in entry.Parts)
                     {
                         for (var i = 0; i < part.Amount; i++)
                         {
-                            film += await GiveFurni(userId, username, part);
+                            film += await _catalogue.Give(userId, username, part);
                         }
                     }
                     result.Furni.Add(entry.Name);
@@ -430,11 +317,11 @@ namespace KeplerCMS.Services.Implementations
 
                 if (film > 0)
                 {
-                    await Execute("UPDATE users SET film = film + @film WHERE id = @user", ("@film", film), ("@user", userId));
+                    await _sql.Execute("UPDATE users SET film = film + @film WHERE id = @user", ("@film", film), ("@user", userId));
                 }
 
                 var counts = saleCodes.GroupBy(s => s, StringComparer.Ordinal).Select(g => g.Count() + "," + g.Key).ToList();
-                await Execute("INSERT INTO vouchers_history (voucher_code, user_id, credits_redeemed, items_redeemed) VALUES (@code, @user, @credits, @items)",
+                await _sql.Execute("INSERT INTO vouchers_history (voucher_code, user_id, credits_redeemed, items_redeemed) VALUES (@code, @user, @credits, @items)",
                     ("@code", voucher.Code), ("@user", userId), ("@credits", voucher.Credits > 0 ? voucher.Credits : null),
                     ("@items", counts.Count > 0 ? string.Join("|", counts) : null));
 
@@ -451,40 +338,6 @@ namespace KeplerCMS.Services.Implementations
             if (result.Furni.Count > 0)
                 _commandQueue.QueueCommand(CommandQueueType.reload_inventory, new CommandTemplate { UserId = userId });
             return result;
-        }
-
-        /// <summary>
-        /// Puts one furni in the user's hand the way Odin's CatalogueManager.purchase does for a voucher (no extra data):
-        /// the special sprite (posters), post-it pads, trophies engraved with the user's name and the date, the room
-        /// dimmer's default, teleporters as a linked pair. Returns film to add (camera 2, a film item 5 and no furni).
-        /// </summary>
-        private async Task<int> GiveFurni(int userId, string username, Part part)
-        {
-            var definition = part.Definition;
-            if (definition.Sprite == "film") return 5;
-
-            var customData = "";
-            if (!HasBehaviour(definition, "decoration") && part.SpecialSpriteId > 0) customData = part.SpecialSpriteId.ToString();
-            if (HasBehaviour(definition, "post_it")) customData = "20";
-            if (HasBehaviour(definition, "prize_trophy")) customData += username + "\t" + DateTime.Now.ToString("dd-MM-yyyy") + "\t";
-            if (HasBehaviour(definition, "roomdimmer")) customData = RoomDimmerDefault;
-
-            var itemId = await InsertItem(userId, definition.Id, customData);
-            if (HasBehaviour(definition, "teleporter"))
-            {
-                var linkedId = await InsertItem(userId, definition.Id, customData);
-                await Execute("INSERT INTO items_teleporter_links (item_id, linked_id) VALUES (@a, @b), (@b, @a)", ("@a", itemId), ("@b", linkedId));
-            }
-
-            return definition.Sprite == "camera" ? 2 : 0;
-        }
-
-        private async Task<long> InsertItem(int userId, int definitionId, string customData)
-        {
-            await Execute("INSERT INTO items (user_id, definition_id, custom_data, owned_since) VALUES (@user, @definition, @data, @since)",
-                ("@user", userId), ("@definition", definitionId), ("@data", customData), ("@since", DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
-            await using var command = Command("SELECT LAST_INSERT_ID()");
-            return Convert.ToInt64(await command.ExecuteScalarAsync());
         }
     }
 }

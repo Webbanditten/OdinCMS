@@ -69,29 +69,6 @@ namespace KeplerCMS.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Items> PurchaseFurni(int catalogId, int userId)
-        {
-            var catalogItem = await _context.CatalogueItems.Where(s => s.Id == catalogId).FirstOrDefaultAsync();
-            if(catalogItem != null)
-            {
-                var catalogPage = _context.CataloguePages.Where(s => s.Id == int.Parse(catalogItem.PageId)).FirstOrDefault();
-                if(catalogPage != null)
-                {
-                    if(await Purchase(catalogItem.Price, userId))
-                    {
-                        var newItem = new Items { DefinitionId = catalogItem.DefinitionId, UserId = userId, CustomData = "" };
-                        _context.Items.Add(newItem);
-                        await _context.SaveChangesAsync();
-                        _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.purchase_furni, new Models.CommandTemplate { UserId = userId, DefinitionId = catalogItem.DefinitionId });
-                        var definitionName = await _context.ItemsDefinitions.Where(d => d.Id == catalogItem.DefinitionId).Select(d => d.Name).FirstOrDefaultAsync();
-                        await LogPurchase(userId, PurchaseLog.WebFurni, definitionName ?? catalogItem.SaleCode, catalogItem.Price, catalogItem.DefinitionId, catalogItem.Id, catalogPage.Fuse);
-                        return newItem;
-                    }
-                }
-            }
-
-            return null;
-        }
     }
 
 }

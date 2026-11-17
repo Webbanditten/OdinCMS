@@ -1,14 +1,26 @@
 @using KeplerCMS.Models
 @model string
-@* Stored page/news HTML with the widget codes in it replaced in place (see HighscoreWidget for the codes). *@
+@* Stored page/news HTML with the widget codes in it replaced in place: highscore tables (HighscoreWidget) and furni
+   for sale (BuyFurniWidget). *@
 @{
     var text = Model ?? string.Empty;
     var position = 0;
+    var codes = HighscoreWidget.Code.Matches(text).Select(m => (Match: m, Kind: "highscores"))
+        .Concat(BuyFurniWidget.Code.Matches(text).Select(m => (Match: m, Kind: "buy_furni")))
+        .OrderBy(c => c.Match.Index);
 }
-@foreach (System.Text.RegularExpressions.Match match in HighscoreWidget.Code.Matches(text))
+@foreach (var code in codes)
 {
-    @Html.Raw(text.Substring(position, match.Index - position))
-    <partial name="~/Views/Shared/Containers/Highscores.cshtml" model="HighscoreWidget.FromCode(match)" />
-    position = match.Index + match.Length;
+    if (code.Match.Index < position) continue;
+    @Html.Raw(text.Substring(position, code.Match.Index - position))
+    if (code.Kind == "highscores")
+    {
+        <partial name="~/Views/Shared/Containers/Highscores.cshtml" model="HighscoreWidget.FromCode(code.Match)" />
+    }
+    else
+    {
+        <partial name="~/Views/Shared/Containers/BuyFurni.cshtml" model="int.Parse(code.Match.Groups[1].Value)" />
+    }
+    position = code.Match.Index + code.Match.Length;
 }
 @Html.Raw(text.Substring(position))

@@ -1021,3 +1021,11 @@ button:disabled { opacity: .5; cursor: default; }
 .reward-pool-item-actions { display: flex; gap: 3px; }
 .reward-pool-item-actions button { padding: 1px 6px; }
 .reward-pool-item-info .reward-check-tag { align-self: flex-start; }
+
+/* Buy furni dialog (editor-shop.js) */
+.tox .habbo-picker-result.is-not-for-sale { opacity: .45; }
+.tox .habbo-shop-preview { display: flex; gap: 12px; align-items: flex-start; text-align: left; }
+.tox .habbo-shop-preview img { max-width: 120px; max-height: 120px; image-rendering: pixelated; }
+.tox .habbo-shop-text { display: flex; flex-direction: column; gap: 4px; }
+.tox .habbo-shop-button { align-self: flex-start; margin-top: 6px; padding: 2px 12px; background: #f60; color: #fff; font-weight: bold; border-radius: 3px; }
+.tox .habbo-shop-reason { color: #b00; }
