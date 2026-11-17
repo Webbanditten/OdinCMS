@@ -400,8 +400,7 @@
         if (layout) this.drawWindow(layout, layout.offset);
         else if (state.page) {
             var missing = el('div', 'ctlg-missing', { left: '20px', top: '60px' });
-            missing.textContent = state.page.layout ? 'The client has no layout "' + state.page.layout + '".'
-                : 'A folder: in the v31 catalogue it groups pages in the tree. The old catalogue doesn\'t show it.';
+            missing.textContent = 'The client has no layout "' + state.page.layout + '".';
             frame.appendChild(missing);
         }
         this.fillPage();

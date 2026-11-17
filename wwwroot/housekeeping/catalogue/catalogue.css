@@ -186,7 +186,3 @@ img.ctlg-el { object-fit: fill; }
 .cated-behaviours label { font-weight: normal; display: flex; gap: 4px; align-items: center; font-size: 11px; }
 .cated-furni-preview { display: flex; gap: 10px; align-items: center; min-height: 70px; }
 .cated-furni-preview img { image-rendering: pixelated; max-height: 120px; }
-
-/* v31 tree node look: the colour bar and icon the v31 index draws */
-.cated-v31-colour { width: 8px; height: 18px; object-fit: cover; object-position: left; image-rendering: pixelated; flex: none; }
-.cated-v31-icon { height: 16px; image-rendering: pixelated; flex: none; }
