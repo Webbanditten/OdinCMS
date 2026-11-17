@@ -30,5 +30,7 @@ namespace KeplerCMS.Areas.MyHabbo.Models
         public List<GroupViewModel> GroupMembers { get; set; }
         public Rooms GroupRoom { get; set; }
         public bool CanEdit { get; internal set; }
+        /// <summary>The owner's Wobble Squabble points (all highscores rows; the lobby games keep running totals on the user).</summary>
+        public int WobbleSquabblePoints { get; set; }
     }
 }

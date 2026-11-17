@@ -75,8 +75,10 @@
         });
     }
 
+    // A table in a sideways-scrolling wrapper, so a column per game still fits narrow windows.
     function table(headers, rows) {
-        var node = el('table', 'habbo-codes-table');
+        var wrapper = el('div', 'habbo-codes-scroll');
+        var node = wrapper.appendChild(el('table', 'habbo-codes-table'));
         var head = el('tr');
         headers.forEach(function (h) { head.appendChild(el('th', null, h)); });
         node.appendChild(el('thead')).appendChild(head);
@@ -89,7 +91,7 @@
                 else td.appendChild(cell);
             });
         });
-        return node;
+        return wrapper;
     }
 
     function open(editor, codes, withBoxes) {
@@ -131,7 +133,8 @@
 
         dialog = editor.windowManager.open({
             title: 'Codes',
-            size: 'medium',
+            // Large: the highscore table has a column per game (three since Wobble Squabble).
+            size: 'large',
             body: {
                 type: 'panel',
                 items: [

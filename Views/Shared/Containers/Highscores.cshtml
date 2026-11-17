@@ -13,7 +13,8 @@
 }
 @{
     var entries = await HighscoreService.GetTop(Model.GameType, Model.Period, Model.Limit);
-    var perGame = Model.Period != HighscorePeriod.AllTime;
+    // Games and wins come from the highscores rows; Battle Ball / SnowStorm all-time lists read running totals without them.
+    var perGame = Model.Period != HighscorePeriod.AllTime || entries.Any(e => e.Games > 0);
     var columns = perGame ? 5 : 3;
 }
 <div class="highscores-widget">

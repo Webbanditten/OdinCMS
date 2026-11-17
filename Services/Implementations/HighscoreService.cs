@@ -18,9 +18,12 @@ namespace KeplerCMS.Services.Implementations
             _context = context;
         }
 
+        /// <summary>The games with a running total on the user (users.battleball_points / snowstorm_points).</summary>
+        private static bool HasRunningTotal(string gameType) => gameType == "battleball" || gameType == "snowstorm";
+
         public async Task<List<HighscoreEntry>> GetTop(string gameType, HighscorePeriod period, int limit)
         {
-            if (period == HighscorePeriod.AllTime)
+            if (period == HighscorePeriod.AllTime && HasRunningTotal(gameType))
             {
                 var users = gameType == "battleball"
                     ? _context.Users.Where(u => u.BattleballPoints > 0).OrderByDescending(u => u.BattleballPoints)
@@ -37,10 +40,14 @@ namespace KeplerCMS.Services.Implementations
                     .ToListAsync();
             }
 
+            // Games without a running total (Wobble Squabble) add up all their highscores rows for all time.
             var today = DateTime.Today;
-            var from = period == HighscorePeriod.Month
-                ? new DateTime(today.Year, today.Month, 1)
-                : today.AddDays(-(((int)today.DayOfWeek + 6) % 7)); // Monday
+            var from = period switch
+            {
+                HighscorePeriod.Month => new DateTime(today.Year, today.Month, 1),
+                HighscorePeriod.AllTime => DateTime.MinValue,
+                _ => today.AddDays(-(((int)today.DayOfWeek + 6) % 7)), // Monday
+            };
 
             var totals = await _context.Highscores
                 .Where(h => h.GameType == gameType && h.Date >= from)

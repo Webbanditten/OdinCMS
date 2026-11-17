@@ -24,25 +24,25 @@
         <table>
             <tbody>
                 @{
-                    if (Model.WidgetData.User.BattleballPoints > 0)
+                    // Each game the owner has points in; "no highscores" only when there are none at all.
+                    var games = new[]
+                    {
+                        (Name: "Battle Ball", Link: "/games/battle_ball/", Points: Model.WidgetData.User.BattleballPoints),
+                        (Name: "Snow Storm", Link: "/games/snowstorm/", Points: Model.WidgetData.User.SnowStormPoints),
+                        (Name: "Wobble Squabble", Link: (string)null, Points: Model.WidgetData.WobbleSquabblePoints),
+                    }.Where(g => g.Points > 0).ToList();
+
+                    foreach (var game in games)
                     {
                         <tr colspan="2">
-                            <th><a href="/games/battle_ball/">Battle Ball</a></th>
+                            <th>@if (game.Link != null) { <a href="@game.Link">@game.Name</a> } else { @game.Name }</th>
                         </tr>
                         <tr>
                             <td>@DbRes.T("totalscore", "habbohome")</td>
-                            <td>@Model.WidgetData.User.BattleballPoints</td>
-                        </tr>
-                    } if(Model.WidgetData.User.SnowStormPoints > 0) {
-                        <tr colspan="2">
-                            <th><a href="/games/snowstorm/">Snow Storm</a></th>
-                        </tr>
-                        <tr>
-                            <td>@DbRes.T("totalscore", "habbohome")</td>
-                            <td>@Model.WidgetData.User.SnowStormPoints</td>
+                            <td>@game.Points</td>
                         </tr>
                     }
-                    else
+                    if (games.Count == 0)
                     {
                         <tr>
                             <td>@DbRes.T("nohighscores", "habbohome")</td>

@@ -142,6 +142,9 @@ namespace KeplerCMS.Services.Implementations
                 data.Badges = await _context.UsersBadges.Where(s => s.UserId == home.UserId).ToListAsync();
                 data.Friends = await _friendService.GetFriendsWithUserData(home.UserId);
                 data.Groups = await GetGroupsForUser(home.UserId);
+                data.WobbleSquabblePoints = await _context.Highscores
+                    .Where(h => h.UserId == home.UserId && h.GameType == "wobblesquabble")
+                    .SumAsync(h => (int?)h.Score) ?? 0;
                 // The guestbook widget checks group membership for private guestbooks on every home type.
                 data.GroupMembers = new List<GroupViewModel>();
             }

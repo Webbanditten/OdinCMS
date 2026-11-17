@@ -40,6 +40,7 @@ namespace KeplerCMS.Models
         {
             new Game("battleball", "Battle Ball"),
             new Game("snowstorm", "SnowStorm"),
+            new Game("wobblesquabble", "Wobble Squabble"),
         };
 
         /// <summary>The ready-made highscore lists; "{0}" is the game id. Any period and row count can be written out.</summary>

@@ -802,6 +802,9 @@ form.basic textarea {
     margin: 2px 0 4px;
     color: #555;
 }
+.tox .habbo-codes .habbo-codes-scroll {
+    overflow-x: auto;
+}
 .tox .habbo-codes-table {
     width: 100%;
     border-collapse: collapse;
