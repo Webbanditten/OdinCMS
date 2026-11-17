@@ -26,7 +26,7 @@ namespace KeplerCMS.Data.Models
         [Column("width")]
         public int Width { get; set; }
         [Column("top_height")]
-        public int TopHeight { get; set; }
+        public double TopHeight { get; set; }
         [Column("max_status")]
         public string MaxStatus { get; set; }
         [Column("behaviour")]

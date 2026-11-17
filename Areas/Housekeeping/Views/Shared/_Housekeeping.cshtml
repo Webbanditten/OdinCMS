@@ -60,7 +60,7 @@
 </head>
 
 <body>
-<div class="wrapper">
+<div class="wrapper@(ViewBag.WideContent == true ? " wrapper-wide" : "")">
     <div class="top">
         <div class="loggedin">Logged in as @userData.Username <a href="/account/logout">Log out</a></div>
         <ul class="menu">

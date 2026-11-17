@@ -35,8 +35,16 @@ namespace KeplerCMS.Data.Models
         public string PackageName { get; set; }
         [Column("package_description")]
         public string PackageDescription { get; set; }
-        [Column("sprite")]
+        /// <summary>Not a column (catalogue_items has none): loading the entity used to fail on it.</summary>
+        [NotMapped]
         public string Sprite { get; set; }
+
+        /// <summary>Used by Odin for packages and special-sprite items (posters); others take the definition's.</summary>
+        [Column("name")]
+        public string Name { get; set; } = "";
+
+        [Column("description")]
+        public string Description { get; set; } = "";
         
         [NotMapped]
         public bool IsHidden

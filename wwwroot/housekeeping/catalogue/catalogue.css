@@ -1,0 +1,192 @@
+/* The in-game catalogue (catalogue-view.js) and its housekeeping editor (catalogue-editor.js). */
+
+@font-face { font-family: 'CtlgVolter'; src: url('../css/fonts/Volter__28Goldfish_29.ttf'); }
+@font-face { font-family: 'CtlgVolterBold'; src: url('/habbowood/styles/volter.woff') format('woff'), url('/habbowood/styles/volter.ttf'); }
+
+/* ---- The game window ---- */
+.ctlg-stage { display: inline-block; transform-origin: 0 0; }
+.ctlg-stage.is-2x { zoom: 2; }
+.ctlg-window {
+    position: relative; overflow: hidden; background: transparent;
+    image-rendering: pixelated; -webkit-font-smoothing: none; font-smooth: never;
+}
+.ctlg-window, .ctlg-window * { font-family: 'CtlgVolter', monospace; font-size: 9px; line-height: 10px; color: #000; box-sizing: border-box; }
+.ctlg-window img { image-rendering: pixelated; }
+.ctlg-el { position: absolute; margin: 0; padding: 0; border: 0; display: block; }
+img.ctlg-el { object-fit: fill; }
+.ctlg-text { white-space: pre-wrap; overflow: hidden; word-wrap: break-word; }
+.ctlg-window .ctlg-bold, .ctlg-window .ctlg-bold * { font-family: 'CtlgVolterBold', 'CtlgVolter', monospace; }
+.ctlg-image { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ctlg-image img.ctlg-centered { max-width: none; flex: none; }
+.ctlg-link { cursor: pointer; }
+.ctlg-missing { position: absolute; color: #900; width: 260px; }
+.ctlg-missing-member { background: repeating-linear-gradient(45deg, #ddd 0 4px, #eee 4px 8px); }
+
+/* Buttons (button<model>.element): caps + stretched middle, bold text with the model's margins. */
+.ctlg-button-wrap { display: flex; align-items: flex-start; }
+.ctlg-button { display: inline-flex; height: 18px; cursor: pointer; }
+.ctlg-button img { display: block; height: 18px; }
+.ctlg-button-label {
+    display: block; height: 18px; padding: 4px 3px 0; background-repeat: repeat-x; white-space: nowrap;
+    font-family: 'CtlgVolterBold', 'CtlgVolter', monospace !important;
+}
+
+/* The page index (renderPageList): 21 px per page, #DDDDDD, #AAAAAA lines, bold text 6 px in, selected #EEEEEE. The game
+   draws it into an 8-bit image, so the lines and the selection come out as the system palette's (160,160,164) and
+   (240,240,240). */
+.ctlg-pages { overflow: hidden; display: block; }
+.ctlg-pages-list {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 103px; overflow-y: scroll; scrollbar-width: none;
+    background: #DDDDDD; border-top: 1px solid #A0A0A4;
+}
+.ctlg-pages-list::-webkit-scrollbar { display: none; }
+.ctlg-page-row {
+    position: relative; height: 21px; border-bottom: 1px solid #A0A0A4; padding: 4px 0 0 6px; cursor: pointer;
+    white-space: nowrap; overflow: hidden;
+}
+.ctlg-page-row .ctlg-page-name { font-family: 'CtlgVolterBold', 'CtlgVolter', monospace; }
+.ctlg-page-left { position: absolute; left: 0; top: 0; width: 2px; height: 20px; }
+.ctlg-page-row.is-active { background: #F0F0F0; }
+.ctlg-page-row:hover:not(.is-active) { background: #E6E6E6; }
+.ctlg-page-row.is-hidden .ctlg-page-name { color: #888; font-style: normal; }
+.ctlg-page-row.is-hidden::after { content: ''; position: absolute; right: 14px; top: 6px; width: 7px; height: 7px; background: #888; border-radius: 50%; }
+
+/* Fuse scrollbar (scrollbarv1) */
+.ctlg-scrollbar { overflow: hidden; }
+.ctlg-scrollbar img { position: absolute; left: 0; display: block; cursor: pointer; }
+.ctlg-scroll-bar { top: 0; height: 100%; width: 15px; }
+.ctlg-scroll-up { top: 0; }
+.ctlg-scroll-down { bottom: 0; }
+.ctlg-scroll-lift { cursor: grab; }
+
+/* Product icons */
+.ctlg-clickable { cursor: pointer; }
+.ctlg-image.is-selected { background: url('members/ctlg_small_active_bg.png') center no-repeat; }
+.ctlg-deal { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.ctlg-deal-box { position: relative; width: 30px; height: 30px; }
+.ctlg-deal-number {
+    position: absolute; left: 10px; top: 15px; width: 20px; text-align: center; color: #FFFFCC !important;
+    font-family: 'CtlgVolterBold', 'CtlgVolter', monospace !important;
+}
+.ctlg-count-badge { position: absolute; left: 2px; top: 0; display: flex; height: 11px; }
+.ctlg-count-badge img { display: block; }
+.ctlg-count-mid { display: flex; gap: 1px; padding: 3px 1px 0 0; background-repeat: repeat-x; height: 11px; margin-left: -4px; }
+.ctlg-count-mid img { height: 5px; }
+
+/* A package's contents in the preview area (Deal Preview Class) */
+.ctlg-deal-preview { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: center; width: 100%; height: 100%; }
+.ctlg-deal-preview .ctlg-deal-part { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+
+/* Edit mode: what can be clicked to edit */
+.ctlg-edit .ctlg-editable { cursor: pointer; outline: 1px dashed transparent; }
+.ctlg-edit .ctlg-editable:hover { outline-color: #2996cc; background-color: rgba(41, 150, 204, .08); }
+.ctlg-edit .ctlg-editable.is-focus { outline: 1px solid #2996cc; }
+.ctlg-edit .ctlg-editable:empty:hover::before { content: attr(data-hint); color: #2996cc; }
+
+/* ---- Housekeeping editor ---- */
+.cated { display: flex; gap: 16px; align-items: flex-start; }
+.cated-preview { flex: none; position: sticky; top: 8px; }
+.cated-preview-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 6px; flex-wrap: wrap; }
+.cated-preview-bar .cated-note { color: #666; font-size: 11px; }
+.cated-room { padding: 12px; background: #2E6E8E; border-radius: 4px; display: inline-block; }
+.cated-panel { flex: 1; min-width: 0; }
+.cated-tabs { display: flex; gap: 2px; border-bottom: 1px solid #000; margin-bottom: 8px; }
+.cated-tabs button {
+    padding: 5px 12px; border: 1px solid #000; border-bottom: none; border-radius: 5px 5px 0 0; background: #eee; cursor: pointer;
+}
+.cated-tabs button.is-active { background: #FFCC00; font-weight: bold; }
+.cated-toolbar { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; flex-wrap: wrap; }
+.cated-toolbar .cated-grow { flex: 1; }
+.cated button, .cated-modal button {
+    padding: 4px 10px; border: 1px solid #996600; border-radius: 4px; background: #FFF8DC; cursor: pointer; color: #000;
+}
+.cated button:hover, .cated-modal button:hover { background: #FFCC00; }
+.cated .cated-primary, .cated-modal .cated-primary { background: #FFCC00; font-weight: bold; }
+.cated .cated-danger, .cated-modal .cated-danger { border-color: #CC0000; color: #900; }
+.cated .cated-tabs button { border-color: #000; }
+.cated-status { color: #666; font-size: 11px; }
+.cated-status.is-dirty { color: #996600; font-weight: bold; }
+.cated-status.is-error { color: #CC0000; font-weight: bold; }
+.cated-section { border: 1px solid #000; border-radius: 5px; background: #FFF8DC; padding: 8px 10px; margin: 0 0 10px; }
+.cated-section h3 { margin: 0 0 6px; font-size: 13px; }
+.cated-section .cated-hint { color: #666; font-weight: normal; font-size: 11px; }
+.cated-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.cated-grid .cated-wide { grid-column: 1 / -1; }
+.cated-field { display: flex; flex-direction: column; gap: 2px; font-weight: bold; }
+.cated-field > span:first-child { display: flex; justify-content: space-between; gap: 6px; }
+.cated-field input[type=text], .cated-field input[type=number], .cated-field textarea, .cated-field select, .cated-modal input[type=text],
+.cated-modal input[type=number], .cated-modal textarea, .cated-modal select {
+    padding: 4px 6px; border: 1px solid #999; border-radius: 4px; font-weight: normal; width: 100%; box-sizing: border-box;
+    font-family: inherit;
+}
+.cated-field textarea { min-height: 54px; resize: vertical; }
+.cated-field.is-focus input, .cated-field.is-focus textarea, .cated-field.is-focus select { border-color: #2996cc; box-shadow: 0 0 0 2px rgba(41, 150, 204, .25); }
+.cated-check { flex-direction: row !important; align-items: center; gap: 4px !important; font-weight: normal !important; }
+.cated-image-field { display: flex; gap: 6px; align-items: center; }
+.cated-image-field input { flex: 1; }
+.cated-image-field .cated-thumb { width: 48px; height: 32px; object-fit: contain; background: #fff; border: 1px solid #ccc; image-rendering: pixelated; }
+.cated-unused { opacity: .55; }
+
+/* Page list (Index tab) */
+.cated-pages { list-style: none; margin: 0; padding: 0; border: 1px solid #000; border-radius: 5px; overflow: hidden; background: #fff; }
+.cated-pages li { display: flex; gap: 8px; align-items: center; padding: 3px 8px; border-top: 1px solid #ddd; cursor: grab; }
+.cated-pages li:first-child { border-top: none; }
+.cated-pages li.is-active { background: #FFF1B8; }
+.cated-pages li.is-dragging { opacity: .4; }
+.cated-pages li.is-drop-before { box-shadow: inset 0 2px 0 #2996cc; }
+.cated-pages li .cated-page-name { flex: 1; font-weight: bold; }
+.cated-pages li .cated-page-meta { color: #666; font-size: 11px; }
+.cated-tag { display: inline-block; padding: 0 5px; border-radius: 3px; font-size: 10px; font-weight: bold; background: #ddd; color: #333; }
+.cated-tag.is-club { background: #FFCC00; }
+.cated-tag.is-hidden { background: #666; color: #fff; }
+.cated-tag.is-staff { background: #CC0000; color: #fff; }
+
+/* Products tab */
+.cated-products { list-style: none; margin: 0; padding: 0; border: 1px solid #000; border-radius: 5px; overflow: hidden; background: #fff; }
+.cated-products > li { border-top: 1px solid #ddd; }
+.cated-products > li:first-child { border-top: none; }
+.cated-product-row { display: flex; gap: 8px; align-items: center; padding: 3px 8px; cursor: pointer; }
+.cated-product-row .cated-drag { cursor: grab; color: #999; }
+.cated-product-row img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+.cated-product-row .cated-product-name { flex: 1; min-width: 0; }
+.cated-product-row .cated-product-name b { display: block; }
+.cated-product-row .cated-product-name small { color: #666; }
+.cated-product-row .cated-price { font-weight: bold; white-space: nowrap; }
+.cated-products > li.is-selected > .cated-product-row { background: #FFF1B8; }
+.cated-products > li.is-hidden .cated-product-row { opacity: .55; }
+.cated-products > li.is-dragging { opacity: .4; }
+.cated-products > li.is-drop-before { box-shadow: inset 0 2px 0 #2996cc; }
+.cated-product-edit { padding: 8px 10px 10px 48px; background: #FFF8DC; border-top: 1px dashed #ccc; }
+.cated-parts { display: flex; flex-direction: column; gap: 4px; margin: 4px 0; }
+.cated-part { display: flex; gap: 6px; align-items: center; }
+.cated-part img { width: 32px; height: 32px; object-fit: contain; }
+.cated-part .cated-grow { flex: 1; }
+.cated-part input[type=number] { width: 64px !important; }
+.cated-warning { color: #996600; font-weight: bold; }
+
+/* Furni search results */
+.cated-furni-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; max-height: 360px; overflow: auto; margin: 6px 0; }
+.cated-furni-card { display: flex; gap: 6px; align-items: center; padding: 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; }
+.cated-furni-card img { width: 32px; height: 32px; object-fit: contain; flex: none; }
+.cated-furni-card div { min-width: 0; }
+.cated-furni-card b, .cated-furni-card small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cated-furni-card small { color: #666; }
+.cated-furni-card.is-picked { border-color: #2996cc; background: #E5F3FA; box-shadow: 0 0 0 1px #2996cc; }
+
+/* Modals */
+.cated-modal-back { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 1000; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px 0; }
+.cated-modal { background: #fff; border: 1px solid #000; border-radius: 6px; width: 760px; max-width: calc(100vw - 32px); box-shadow: 0 6px 24px rgba(0, 0, 0, .35); }
+.cated-modal-head { background: #FFCC00; padding: 6px 10px; font-weight: bold; border-bottom: 1px solid #000; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; }
+.cated-modal-head button { padding: 0 6px !important; }
+.cated-modal-body { padding: 10px; }
+.cated-modal-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 8px 10px; border-top: 1px solid #ddd; }
+.cated-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; max-height: 440px; overflow: auto; margin-top: 6px; }
+.cated-image-grid figure { margin: 0; border: 1px solid #ccc; border-radius: 4px; padding: 4px; cursor: pointer; background: #fff; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cated-image-grid figure:hover { border-color: #2996cc; }
+.cated-image-grid img { max-width: 130px; max-height: 80px; image-rendering: pixelated; }
+.cated-image-grid figcaption { font-size: 10px; color: #333; word-break: break-all; text-align: center; }
+.cated-image-grid figcaption small { color: #888; }
+.cated-behaviours { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 8px; max-height: 160px; overflow: auto; border: 1px solid #ccc; border-radius: 4px; padding: 4px 6px; background: #fff; }
+.cated-behaviours label { font-weight: normal; display: flex; gap: 4px; align-items: center; font-size: 11px; }
+.cated-furni-preview { display: flex; gap: 10px; align-items: center; min-height: 70px; }
+.cated-furni-preview img { image-rendering: pixelated; max-height: 120px; }

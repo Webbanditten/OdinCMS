@@ -14,13 +14,14 @@ namespace KeplerCMS.Data.Models
         [Column("salecode")]
         public string SaleCode { get; set; }
 
+        // All three are nullable in the table (special_sprite_id is NULL on most rows; Odin reads NULL as 0).
         [Column("definition_id")]
-        public int DefId { get; set; }
+        public int? DefId { get; set; }
 
         [Column("special_sprite_id")]
-        public int SpriteId { get; set; }
+        public int? SpriteId { get; set; }
 
         [Column("amount")]
-        public int Amount { get; set; }
+        public int? Amount { get; set; }
     }
 }
