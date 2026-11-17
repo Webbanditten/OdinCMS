@@ -1,4 +1,5 @@
 ﻿@using KeplerCMS.Data.Models
+@using KeplerCMS.Models
 @model Containers
 
 @functions
@@ -11,7 +12,7 @@
 
     async Task RenderBody(string text)
     {
-        if (text.Contains("{credits}"))
+        if (text.Contains(ContentCodes.Credits))
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -79,19 +80,19 @@
                     <div class="bottom"><div></div></div>
                 </div>
             }
-        } else if(text.Contains("{xmas2006}"))
+        } else if(text.Contains(ContentCodes.Xmas2006))
         {
             <partial name="~/Views/Shared/Containers/Xmas2006_Calendar.cshtml" model=Model />
-        } else if(text.Contains("{rewards}"))
+        } else if(text.Contains(ContentCodes.Rewards))
         {
             <partial name="~/Views/Shared/Containers/Rewards.cshtml" model=Model />
-        } else if(text.Contains("{lastonline}"))
+        } else if(text.Contains(ContentCodes.LastOnline))
         {
             <partial name="~/Views/Shared/Containers/LastOnline.cshtml" model=Model />
-        } else if(text.Contains("{staff}"))
+        } else if(text.Contains(ContentCodes.Staff))
         {
             <partial name="~/Views/Shared/Containers/Staff.cshtml" model=Model />
-        } else if(text.Contains("{popular_furni}"))
+        } else if(text.Contains(ContentCodes.PopularFurni))
         {
             <partial name="~/Views/Shared/Containers/PopularFurni.cshtml" model=Model />
         }
