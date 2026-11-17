@@ -837,3 +837,82 @@ form.basic textarea {
 .content-codes-warning[hidden] {
     display: none;
 }
+
+/* Furni image dialog (wwwroot/housekeeping/js/furni-plugin.js). Scoped under .tox: TinyMCE's skin resets borders, backgrounds and sizes of everything in its dialogs. */
+.tox .habbo-furni-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 4px;
+    height: 216px;
+    overflow-y: auto;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fafafa;
+    align-content: start;
+}
+.tox .habbo-furni-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    height: 70px;
+    padding: 4px 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+}
+.tox .habbo-furni-result:hover,
+.tox .habbo-furni-result:focus {
+    border-color: #996600;
+    background: #FFF8DC;
+}
+.tox .habbo-furni-result.is-selected {
+    border: 2px solid #207ab7;
+    background: #E6F2FB;
+}
+.tox .habbo-furni-result img {
+    max-width: 48px;
+    max-height: 36px;
+    flex: 0 0 auto;
+}
+.tox .habbo-furni-result .habbo-furni-name {
+    font-size: 11px;
+    line-height: 13px;
+    max-height: 26px;
+    overflow: hidden;
+    text-align: center;
+    word-break: break-word;
+}
+.tox .habbo-furni-noimage {
+    color: #999;
+    height: 36px;
+    line-height: 36px;
+}
+.tox .habbo-furni-hint {
+    color: #666;
+}
+.tox .habbo-furni-more {
+    grid-column: 1 / -1;
+    padding: 4px;
+}
+.tox .habbo-furni-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 150px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff repeating-conic-gradient(#f2f2f2 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+}
+.tox .habbo-furni-preview img {
+    max-width: 100%;
+}
+.tox .habbo-furni-caption {
+    color: #444;
+}
