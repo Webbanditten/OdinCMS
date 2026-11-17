@@ -1,0 +1,63 @@
+@model ContentCodesPanel
+@* The codes this editor understands. A click on a code inserts it into the editor (wwwroot/housekeeping/js/editor.js,
+   which also builds the editor's "Codes" toolbar menu from these buttons). The list itself is Models/ContentCodes.cs. *@
+<div class="content-codes" data-editor="@Model.EditorId">
+    <div class="content-codes-head">
+        <strong>Codes</strong>
+        <span>Click a code to insert it at the cursor. The same codes are in the editor's <em>Codes</em> menu.</span>
+    </div>
+
+    @if (Model.BoxCodes)
+    {
+        <p class="content-codes-intro"><strong>Box widgets.</strong> The box shows only the widget; its title and theme stay, other text in the box is not shown.</p>
+        <p class="content-codes-warning" hidden></p>
+        <table class="habboTable content-codes-table">
+            <thead><tr><th>Code</th><th>Widget</th><th>Shows</th></tr></thead>
+            <tbody>
+                @foreach (var code in ContentCodes.BoxCodes)
+                {
+                    <tr>
+                        <td><button type="button" class="content-code" data-code="@code.Value" data-box="true" data-group="Box widgets" data-label="@code.Name">@code.Value</button></td>
+                        <td>@code.Name</td>
+                        <td>@code.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="content-codes-intro"><strong>Highscore tables.</strong> Anywhere in the text, as many as you like.</p>
+    <table class="habboTable content-codes-table">
+        <thead>
+            <tr>
+                <th>List</th>
+                @foreach (var game in ContentCodes.Games)
+                {
+                    <th>@game.Name</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var list in ContentCodes.HighscoreLists)
+            {
+                <tr>
+                    <td>@list.Name</td>
+                    @foreach (var game in ContentCodes.Games)
+                    {
+                        var code = string.Format(list.Format, game.Id);
+                        <td><button type="button" class="content-code" data-code="@code" data-group="@game.Name" data-label="@list.Name">@code</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="content-codes-intro">
+        <button type="button" class="content-codes-custom" data-games="@System.Text.Json.JsonSerializer.Serialize(ContentCodes.Games)">Other period or row count…</button>
+        Or write it out: <code>_week</code>, <code>_month</code> or <code>_all</code>, then a row count of 1–50, e.g. <code>{highscores_snowstorm_month_5}</code>.
+    </p>
+
+    @if (!Model.BoxCodes)
+    {
+        <p class="content-codes-intro">Box widgets such as <code>{staff}</code> and <code>{credits}</code> only work in page boxes, not in news.</p>
+    }
+</div>

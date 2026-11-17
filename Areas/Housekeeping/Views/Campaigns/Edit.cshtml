@@ -173,6 +173,7 @@
                         <div class="form-group">
                             <label class="label-control">Body</label>
                             <textarea id="news-text" class="form-control" rows="5" placeholder="Full article HTML"></textarea>
+                            <partial name="_ContentCodes" model='new ContentCodesPanel("news-text", false)' />
                         </div>
                         <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('CreateNews')">Add Action</button>
                     </div>

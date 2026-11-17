@@ -6,6 +6,9 @@
     var furni = await FurniService.GetPopularFurni();
     if(furni == null)
     {
+        // Nothing bought in the last 30 days (or purchase_log is new): say so instead of an empty box.
+        var none = DbRes.T("purchase_none", "containers");
+        <p>@(string.IsNullOrWhiteSpace(none) || none == "purchase_none" ? "Ingen har købt møbler i kataloget den sidste måned." : none)</p>
         return;
     }
     var rawSprite = furni.Sprite;

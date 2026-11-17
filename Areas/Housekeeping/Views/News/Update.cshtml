@@ -37,6 +37,7 @@
                 <label asp-for="Text" class="label-control"></label>
                 <textarea id="editor" asp-for="Text" class="form-control"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
+                <partial name="_ContentCodes" model='new ContentCodesPanel("editor", false)' />
             </div>
 
             <div class="form-group">

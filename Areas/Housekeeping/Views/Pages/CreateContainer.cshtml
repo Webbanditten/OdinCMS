@@ -17,7 +17,7 @@
                 <label asp-for="Text" class="label-control"></label>
                 <textarea id="editor" asp-for="Text" class="form-control"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
-                <small class="text-muted d-block">Codes: <code>{credits}</code> <code>{rewards}</code> <code>{lastonline}</code> <code>{staff}</code> <code>{popular_furni}</code> replace the whole box. Highscore tables go anywhere in the text: <code>{highscores_battleball}</code> / <code>{highscores_snowstorm}</code> (top 10 this week), add <code>_month</code> or <code>_all</code> for this month or all time, <code>{champions_battleball}</code> (top 3 this month); a row count at the end, e.g. <code>{highscores_snowstorm_month_5}</code>.</small>
+                <partial name="_ContentCodes" model='new ContentCodesPanel("editor", true)' />
             </div>
             <div class="form-group">
                 <label asp-for="Type" class="label-control"></label>

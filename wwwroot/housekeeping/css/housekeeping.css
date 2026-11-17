@@ -787,3 +787,53 @@ form.basic textarea {
 #ui-datepicker-div {
     z-index: 10 !important;
 }
+
+/* Codes overview under the editors (Areas/Housekeeping/Views/Shared/_ContentCodes.cshtml). */
+.content-codes {
+    margin-top: 8px;
+    padding: 6px 8px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    background: #FFF8DC;
+}
+.content-codes-head span,
+.content-codes-intro {
+    color: #444;
+}
+.content-codes-head span {
+    margin-left: 6px;
+}
+.content-codes-intro {
+    margin: 8px 0 2px;
+}
+.content-codes-table td {
+    vertical-align: middle;
+}
+.content-codes button.content-code {
+    font-family: Consolas, Menlo, monospace;
+    padding: 1px 6px;
+    border: 1px solid #996600;
+    border-radius: 4px;
+    background: #FFF;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.content-codes button.content-code:hover,
+.content-codes button.content-code:focus {
+    background: #FFCC00;
+}
+.content-codes .content-codes-custom {
+    cursor: pointer;
+    margin-right: 6px;
+}
+.content-codes-warning {
+    margin: 6px 0 2px;
+    padding: 4px 6px;
+    border: 1px solid #CC0000;
+    border-radius: 4px;
+    background: #FFE0E0;
+    color: #900;
+}
+.content-codes-warning[hidden] {
+    display: none;
+}
