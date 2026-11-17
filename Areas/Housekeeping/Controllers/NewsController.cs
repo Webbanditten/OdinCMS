@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Services.Interfaces;
@@ -30,7 +31,7 @@ namespace KeplerCMS.Areas.Housekeeping
         [HousekeepingFilter(Fuse.housekeeping_news)]
         public IActionResult Create()
         {
-            return View();
+            return View(new News { PublishDate = DateTime.Now });
         }
 
         [HousekeepingFilter(Fuse.housekeeping_news)]

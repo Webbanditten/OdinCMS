@@ -9,7 +9,7 @@
 
 <form method="get" style="margin-bottom: 10px;">
     <label for="date">Filter by date:</label>
-    <input type="date" id="date" name="date" value="@filterDate.ToString("yyyy-MM-dd")" />
+    <input type="text" id="date" name="date" value="@filterDate.ToString("yyyy-MM-dd")" autocomplete="off" />
     <button type="submit">Filter</button>
 </form>
 
@@ -149,3 +149,18 @@ else
         cursor: help;
     }
 </style>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script>
+        $(document).ready(function () {
+            // The same picker as the other housekeeping pages, as a date only; picking a day filters straight away.
+            $("#date").datetimepicker({
+                timepicker: false,
+                format: 'Y-m-d',
+                onSelectDate: function (current, $input) { $input.closest('form').trigger('submit'); }
+            });
+        });
+    </script>
+}

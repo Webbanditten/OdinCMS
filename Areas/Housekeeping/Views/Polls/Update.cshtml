@@ -42,13 +42,13 @@
             <div class="form-group">
                 <label class="label-control">Active From</label>
                 <input type="text" id="timeFrom" class="form-control datetimepicker" placeholder="Leave empty for no start restriction" autocomplete="off"
-                       value="@(Model.TriggerTimeFrom.HasValue && Model.TriggerTimeFrom.Value > 0 ? DateTimeOffset.FromUnixTimeSeconds(Model.TriggerTimeFrom.Value).LocalDateTime.ToString("yyyy-MM-dd HH:mm") : "")" />
+                       data-unix="@(Model.TriggerTimeFrom ?? 0)" />
                 <input type="hidden" name="TriggerTimeFrom" id="timeFromUnix" value="@(Model.TriggerTimeFrom ?? 0)" />
             </div>
             <div class="form-group">
                 <label class="label-control">Active Until</label>
                 <input type="text" id="timeTo" class="form-control datetimepicker" placeholder="Leave empty for no end restriction" autocomplete="off"
-                       value="@(Model.TriggerTimeTo.HasValue && Model.TriggerTimeTo.Value > 0 ? DateTimeOffset.FromUnixTimeSeconds(Model.TriggerTimeTo.Value).LocalDateTime.ToString("yyyy-MM-dd HH:mm") : "")" />
+                       data-unix="@(Model.TriggerTimeTo ?? 0)" />
                 <input type="hidden" name="TriggerTimeTo" id="timeToUnix" value="@(Model.TriggerTimeTo ?? 0)" />
             </div>
 
@@ -90,6 +90,17 @@
                         })
                     };
                 }
+            }
+        });
+
+        // Fill the pickers from the stored unix times in the browser's time, the same way the submit handler
+        // below reads them back (server-side formatting gave da-DK's "14.00", which neither could parse).
+        $('.datetimepicker[data-unix]').each(function () {
+            var unix = parseInt($(this).data('unix'), 10);
+            if (unix > 0) {
+                var d = new Date(unix * 1000);
+                var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+                this.value = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
             }
         });
 

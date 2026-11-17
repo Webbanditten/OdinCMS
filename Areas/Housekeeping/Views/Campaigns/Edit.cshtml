@@ -40,14 +40,14 @@
                             <div class="form-group">
                                 <label class="label-control">Start Date</label>
                                 <input name="StartDate" id="startDatepicker" type="text" class="form-control"
-                                       value="@(campaign.StartDate?.ToString("yyyy-MM-dd HH:mm:ss"))" @(isActive ? "disabled" : "") />
+                                       value="@(campaign.StartDate.ForPicker())" @(isActive ? "disabled" : "") />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="label-control">End Date</label>
                                 <input name="EndDate" id="endDatepicker" type="text" class="form-control"
-                                       value="@(campaign.EndDate?.ToString("yyyy-MM-dd HH:mm:ss"))" @(isActive ? "disabled" : "") />
+                                       value="@(campaign.EndDate.ForPicker())" @(isActive ? "disabled" : "") />
                             </div>
                         </div>
                     </div>
