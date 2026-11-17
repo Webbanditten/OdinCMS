@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @using KeplerCMS.Data.Models
 @{
@@ -18,6 +18,19 @@
 
 <html xmlns="XHTML namespace">
 <head>
+    @if (webClientEnabled)
+    {
+        @* Browsers lost Shockwave years ago: go to the browser client (/client/web) before this page renders anything,
+           unless a Shockwave plugin is really there. *@
+        <script>
+            (function () {
+                var mime = navigator.mimeTypes && navigator.mimeTypes['application/x-director'];
+                if (mime && mime.enabledPlugin) return;
+                try { if (new ActiveXObject('SWCtl.SWCtl')) return; } catch (e) { }
+                location.replace('/client/web' + location.search);
+            })();
+        </script>
+    }
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <title>Habbo ~ Client</title>
     <link href='~/styles/style.css' type='text/css' rel='stylesheet' />
@@ -57,25 +70,10 @@
                     @:return;
                 }
                 j("#habbo").hide();
-                j("#noshockwave").show();
+                j("#client-unavailable").addClass("is-shown");
             }
         })
     </script>
-    <style>
-        #noshockwave {
-            border-radius:4px;
-            background:#fff;
-            padding:16px;
-            font-size:16px;
-            margin:48px;
-            color:#000;
-
-        }
-
-        #noshockwave li {
-            text-align:left;
-        }
-    </style>
 
 
     <!--[if IE]>
@@ -95,9 +93,7 @@
         </div>
         <div class="logout"><a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a></div>
     </div>
-    <div id="noshockwave">
-        @Html.Raw(DbRes.T("noshockwave", "shared"))
-    </div>
+    <partial name="_ClientUnavailable" model='"noshockwave"' />
     <div>
         <object classid='clsid:166B1BCA-3F9C-11CF-8075-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab#version=11,10,8,5,1,0' id='habbo' width='720' height='540'>
             <param name='src' value='@Configuration.GetSection("keplercms")["dcr"]'>
