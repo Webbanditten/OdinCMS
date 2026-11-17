@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 
 namespace KeplerCMS.Models
 {
     /// <summary>
-    /// The codes housekeeping can write into page boxes and news text. The editors list them (the "Codes" menu and the
-    /// overview under each editor, Areas/Housekeeping/Views/Shared/_ContentCodes.cshtml).
+    /// The codes housekeeping can write into page boxes and news text. The editors' Codes button lists them
+    /// (wwwroot/housekeeping/js/editor-codes.js, which reads <see cref="EditorJson"/>).
     /// Box codes are rendered by Views/Shared/Containers/Container.cshtml, highscore codes by <see cref="HighscoreWidget"/>.
     /// </summary>
     public static class ContentCodes
@@ -50,8 +52,16 @@ namespace KeplerCMS.Models
             new HighscoreList("{{highscores_{0}_all}}", "Top 10 all time"),
             new HighscoreList("{{champions_{0}}}", "Champions: top 3 this month"),
         };
-    }
 
-    /// <summary>The overview under an editor: the textarea's id, and whether box codes apply (page boxes, not news).</summary>
-    public record ContentCodesPanel(string EditorId, bool BoxCodes);
+        /// <summary>
+        /// The codes for the editors' Codes dialog: box widgets, games, and per highscore list one code per game (in the
+        /// order of games). JSON with HTML-sensitive characters escaped, so it can sit inside a script element.
+        /// </summary>
+        public static string EditorJson() => JsonSerializer.Serialize(new
+        {
+            boxes = BoxCodes.Select(c => new { code = c.Value, name = c.Name, description = c.Description }),
+            games = Games.Select(g => new { id = g.Id, name = g.Name }),
+            highscores = HighscoreLists.Select(l => new { name = l.Name, codes = Games.Select(g => string.Format(l.Format, g.Id)) }),
+        });
+    }
 }
