@@ -26,7 +26,7 @@ namespace KeplerCMS.Services.Implementations
             _promoService = promoService;
         }
 
-        public async Task<Page> GetPageBySlug(string slug)
+        public async Task<Page> GetPageBySlug(string slug, bool includeHidden = false)
         {
             var pageDetails = await _context.Pages.Where(p => p.Slug == slug && p.IHidden == 0).FirstOrDefaultAsync();
             if(pageDetails == null)
@@ -34,9 +34,9 @@ namespace KeplerCMS.Services.Implementations
                 return null;
             }
             var now = DateTime.Now;
-            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id && c.IHidden == 0
+            var containers = await _context.Containers.Where(c => c.PageId == pageDetails.Id && (includeHidden || (c.IHidden == 0
                 && (c.StartDate == null || c.StartDate <= now)
-                && (c.EndDate == null || c.EndDate >= now)).ToListAsync();
+                && (c.EndDate == null || c.EndDate >= now)))).ToListAsync();
             var news = await _newsService.GetNews(0, 5);
             var promos = await _promoService.GetPromos(pageDetails.Id);
             return new Page { Details = pageDetails, Containers = containers, News = news, Promos = promos };

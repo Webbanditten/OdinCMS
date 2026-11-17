@@ -180,6 +180,16 @@
 }
 
 @{
+    // Edit mode (wwwroot/js/cms-edit.js): every box is wrapped with what the edit tools need; hidden and
+    // out-of-schedule boxes are shown dimmed.
+    var cmsEdit = ViewData["cmsEdit"] as bool? == true;
+    if (cmsEdit)
+    {
+        var state = Model.Hidden ? "hidden" : !Model.IsScheduledVisible ? "scheduled" : "";
+        @:<div class="cms-box @(state.Length > 0 ? "cms-box-" + state : "")" data-cms-box="@Model.Id" data-cms-column="@Model.Column" data-cms-state="@state" data-cms-title="@Model.Title">
+    }
+}
+@{
     if (Model.Theme.Contains("v2"))
     {
         await V2Box();
@@ -200,4 +210,8 @@
     {
         <strong>Whups Theme not implemented</strong>
     }
+}
+@if (ViewData["cmsEdit"] as bool? == true)
+{
+    @:</div>
 }

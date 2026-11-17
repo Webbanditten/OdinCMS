@@ -1,3 +1,4 @@
-﻿@{
-    Layout = "_Housekeeping";
+@{
+    // ?embed=1: the editors inside the site's edit mode panel (Shared/_HousekeepingEmbed.cshtml).
+    Layout = Context.Request.Query["embed"] == "1" ? "_HousekeepingEmbed" : "_Housekeeping";
 }
