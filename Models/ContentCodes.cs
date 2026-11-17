@@ -8,7 +8,8 @@ namespace KeplerCMS.Models
     /// The codes housekeeping can write into page boxes and news text. The editors' Codes button lists them
     /// (wwwroot/housekeeping/js/editor-codes.js, which reads <see cref="EditorJson"/>).
     /// Box codes are rendered by Views/Shared/Containers/Container.cshtml, highscore codes by <see cref="HighscoreWidget"/>,
-    /// furni for sale ({buy_furni_ID}, inserted with the editors' Buy furni button) by <see cref="BuyFurniWidget"/>.
+    /// furni for sale ({buy_furni_ID}, inserted with the editors' Buy furni button) by <see cref="BuyFurniWidget"/>, rooms
+    /// ({room_ID}, the editors' Room button) by <see cref="RoomWidget"/>.
     /// </summary>
     public static class ContentCodes
     {

@@ -16,6 +16,16 @@
                 <label asp-for="Img" class="label-control"></label>
                 <input asp-for="Img" class="form-control" />
                 <span asp-validation-for="Img" class="text-danger"></span>
+                <div class="promo-picture-tools">
+                    @if (!string.IsNullOrEmpty(Model?.Img))
+                    {
+                        <img src="@Model.Img" alt="" />
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "PromoPicture", new { pageId = ViewData["PageId"] })">Build a picture from a room photo</a>
+                    }
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="Link1Text" class="label-control"></label>

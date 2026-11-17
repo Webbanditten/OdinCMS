@@ -17,6 +17,23 @@
                 <label asp-for="Img" class="label-control"></label>
                 <input asp-for="Img" class="form-control" />
                 <span asp-validation-for="Img" class="text-danger"></span>
+                @{
+                    var pictureMatch = System.Text.RegularExpressions.Regex.Match(Model?.Img ?? "", @"^/promo-picture/(\d+)\.png");
+                }
+                <div class="promo-picture-tools">
+                    @if (!string.IsNullOrEmpty(Model?.Img))
+                    {
+                        <img src="@Model.Img" alt="" />
+                    }
+                    @if (pictureMatch.Success)
+                    {
+                        <a href="@Url.Action("Index", "PromoPicture", new { id = pictureMatch.Groups[1].Value, promoId = Model.Id })">Edit picture</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "PromoPicture", new { promoId = Model?.Id })">Build a picture from a room photo</a>
+                    }
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="Link1Text" class="label-control"></label>
