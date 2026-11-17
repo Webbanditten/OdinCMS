@@ -1,44 +1,60 @@
-﻿@{
+﻿@model KeplerCMS.Models.VoucherRedeemResult
+@{
     Layout = null;
-    bool success = (bool)ViewData["success"];
+    // A text from cms_localizations, or the fallback while the key isn't there (DbRes returns the key).
+    string Text(string key, string fallback)
+    {
+        var value = DbRes.T(key, "credits");
+        return string.IsNullOrEmpty(value) || value == key ? fallback : value;
+    }
 }
 
-@{
-    if (success)
-    {
-        <div class="redeem_dialog" style="height:115px;">
-            <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
-            <p><strong>@DbRes.T("success_code_header", "credits")</strong></p>
+@if (Model.Success)
+{
+    <div class="redeem_dialog" style="min-height:115px;">
+        <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
+        <p><strong>@DbRes.T("success_code_header", "credits")</strong></p>
+        @if (Model.Credits > 0)
+        {
+            <p>@Text("success_code_credits", "Du fik %credits% Habbo Mønter.").Replace("%credits%", Model.Credits.ToString())</p>
+        }
+        @if (Model.Furni.Count > 0)
+        {
+            <p>@Text("success_code_furni", "Du fik disse ting. De ligger i din hånd på hotellet:")</p>
+            <ul style="margin: 0 0 6px 18px; padding: 0;">
+                @foreach (var furni in Model.Furni.GroupBy(f => f))
+                {
+                    <li>@(furni.Count() > 1 ? furni.Count() + " × " : "")@furni.Key</li>
+                }
+            </ul>
+        }
+        @if (Model.Credits == 0 && Model.Furni.Count == 0)
+        {
             <p>@DbRes.T("success_code_body", "credits")</p>
-            <br>
-            <p>
-            </p>
-            <table align="right">
-                <tbody>
-                    <tr>
-                        <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="redeem_dialog" style="height:100px;">
-            <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
-            <p><strong>@DbRes.T("wrong_code_header", "credits")</strong></p>
-            <p>@DbRes.T("wrong_code_body", "credits")</p>
-            <br>
-            <p>
-            </p>
-            <table align="right">
-                <tbody>
-                    <tr>
-                        <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-    }
+        }
+        <table align="right">
+            <tbody>
+                <tr>
+                    <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="clear: both;"></div>
+    </div>
+}
+else
+{
+    <div class="redeem_dialog" style="height:100px;">
+        <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
+        <p><strong>@DbRes.T("wrong_code_header", "credits")</strong></p>
+        <p>@DbRes.T("wrong_code_body", "credits")</p>
+        <br>
+        <table align="right">
+            <tbody>
+                <tr>
+                    <td><a href="#" class="colorlink arrow" onclick="closePurseRedeem(); return false;" style="margin-left: 5px;"><span>@DbRes.T("close", "dialogs")</span></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 }

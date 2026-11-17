@@ -21,6 +21,7 @@ namespace KeplerCMS.Models.Enums
         update_infobus,
         reset_bots,
         reload_catalogue,
-        reload_navigator
+        reload_navigator,
+        reload_inventory
     }
 }
