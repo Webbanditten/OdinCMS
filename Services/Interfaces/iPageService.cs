@@ -8,7 +8,8 @@ namespace KeplerCMS.Services.Interfaces
 {
     public interface IPageService
     {
-        Task<Page> GetPageBySlug(string slug);
+        /// <param name="includeHidden">Also hidden and out-of-schedule boxes (the site's edit mode).</param>
+        Task<Page> GetPageBySlug(string slug, bool includeHidden = false);
 
         Task<Page> GetPageObjById(int slug);
 

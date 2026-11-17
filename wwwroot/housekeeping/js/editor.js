@@ -10,8 +10,40 @@
     var defaultToolbar = 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | outdent indent';
     var habboPlugins = ['habbofurni', 'habboavatar', 'habboshop', 'habboroom', 'habbocodes'];
 
+    // The media library (media-library.js), when loaded: an "Image" button that inserts a picked image, the image
+    // dialog's browse button, and pasted or dropped images uploaded to it instead of staying in the text as data.
+    if (window.HabboMedia && !tinymce.PluginManager.get('habboimage')) {
+        tinymce.PluginManager.add('habboimage', function (editor) {
+            editor.ui.registry.addButton('habboimage', {
+                text: 'Image',
+                icon: 'image',
+                tooltip: 'Insert an image from the media library (or upload one)',
+                onAction: function () {
+                    HabboMedia.open({
+                        title: 'Insert an image',
+                        onSelect: function (item) {
+                            editor.insertContent('<img src="' + editor.dom.encode(item.url) + '" alt="" />');
+                        }
+                    });
+                }
+            });
+            return { getMetadata: function () { return { name: 'Image library' }; } };
+        });
+    }
+
     window.initHabboEditor = function (selector, settings) {
-        var habbo = habboPlugins.filter(function (name) { return !!tinymce.PluginManager.get(name); });
+        var habbo = ['habboimage'].concat(habboPlugins).filter(function (name) { return !!tinymce.PluginManager.get(name); });
+        var media = window.HabboMedia ? {
+            file_picker_types: 'image',
+            file_picker_callback: function (callback, value) {
+                HabboMedia.open({ title: 'Choose an image', current: value, onSelect: function (item) { callback(item.url, { alt: '' }); } });
+            },
+            automatic_uploads: true,
+            images_upload_handler: function (blobInfo) {
+                return HabboMedia.upload([new File([blobInfo.blob()], blobInfo.filename(), { type: blobInfo.blob().type })], 'content')
+                    .then(function (data) { return data.items[0].url; });
+            }
+        } : {};
         return tinymce.init({
             selector: selector,
             license_key: 'gpl',
@@ -29,7 +61,8 @@
             toolbar: defaultToolbar + (habbo.length ? ' | ' + habbo.join(' ') : ''),
             // Wrap instead of hiding buttons behind "...", so the Habbo buttons stay visible in narrow editors.
             toolbar_mode: 'wrap',
-            habbo_box_codes: !!(settings && settings.boxCodes)
+            habbo_box_codes: !!(settings && settings.boxCodes),
+            ...media
         });
     };
 })();

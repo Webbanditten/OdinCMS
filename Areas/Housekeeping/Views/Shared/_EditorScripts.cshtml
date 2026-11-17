@@ -3,11 +3,13 @@
    - editor-images.js: the Furni and Habbo buttons (image URLs: the habbo-*-url meta tags in _Housekeeping.cshtml).
    - editor-shop.js: the Buy furni button ({buy_furni_ID}: a furni with a one-click buy button on the site).
    - editor-rooms.js: the Room button ({room_ID}: a room's photo, details and a "go to room" link on the site).
+   - media-library.js: the Image button, the image dialog's browse button and uploads of pasted images.
    - editor-codes.js: the Codes button (codes: habbo-content-codes below, from Models/ContentCodes.cs). *@
 <script type="application/json" id="habbo-content-codes">@Html.Raw(ContentCodes.EditorJson())</script>
 <script src="~/housekeeping/js/tinymce/tinymce.min.js" asp-append-version="true"></script>
 <script src="~/housekeeping/js/editor-images.js" asp-append-version="true"></script>
 <script src="~/housekeeping/js/editor-shop.js" asp-append-version="true"></script>
 <script src="~/housekeeping/js/editor-rooms.js" asp-append-version="true"></script>
+<script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
 <script src="~/housekeeping/js/editor-codes.js" asp-append-version="true"></script>
 <script src="~/housekeeping/js/editor.js" asp-append-version="true"></script>

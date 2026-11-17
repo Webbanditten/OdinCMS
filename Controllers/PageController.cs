@@ -2,6 +2,7 @@
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace KeplerCMS.Controllers
@@ -30,7 +31,14 @@ namespace KeplerCMS.Controllers
             {
                 dbSlug = slug + "/" + subSlug;
             }
-            var page = await _pageService.GetPageBySlug(dbSlug);
+            // The edit mode (wwwroot/js/cms-edit.js): staff who may edit pages get the edit button; with the cms_edit
+            // cookie set they see every box, hidden and scheduled ones too, with tools to edit, move, hide and add.
+            var user = ViewData["user"] as KeplerCMS.Data.Models.Users;
+            var canEdit = user?.Fuses?.Any(f => f.FuseName == nameof(KeplerCMS.Models.Fuse.housekeeping_pages)) == true;
+            var editing = canEdit && Request.Cookies["cms_edit"] == "1";
+            ViewData["cmsCanEdit"] = canEdit;
+            ViewData["cmsEdit"] = editing;
+            var page = await _pageService.GetPageBySlug(dbSlug, editing);
 
             if (page == null)
             {

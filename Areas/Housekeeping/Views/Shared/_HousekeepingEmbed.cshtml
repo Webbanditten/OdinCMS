@@ -1,0 +1,33 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@* Housekeeping pages opened with ?embed=1: the site's edit mode (wwwroot/js/cms-edit.js) shows the editors in a side
+   panel, without the housekeeping menu. Forms keep embed=1 when they post back (e.g. a validation error). *@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="habbo-furni-url" content="@(Configuration["keplercms:furniUrl"] ?? "/habbo-imaging/furni")">
+    <meta name="habbo-avatar-url" content="@(Configuration["keplercms:figureUrl"] ?? "/habbo-imaging/avatarimage")">
+    <title>Housekeeping ~ @ViewBag.Title</title>
+    <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/housekeeping/css/sweetalert2.min.css" asp-append-version="true">
+</head>
+<body class="hk-embed">
+<div class="main-content">
+    @RenderBody()
+</div>
+<script src="~/housekeeping/js/jquery.js" asp-append-version="true" type="text/javascript"></script>
+<script src="~/housekeeping/js/polyfill.min.js" type="text/javascript"></script>
+<script src="~/housekeeping/js/sweetalert2.min.js" asp-append-version="true" type="text/javascript"></script>
+<script>
+    // Stay in the embed layout: forms that post back and links to other housekeeping pages keep embed=1.
+    function embedUrl(url) { return /[?&]embed=1/.test(url) ? url : url + (url.indexOf('?') >= 0 ? '&' : '?') + 'embed=1'; }
+    document.querySelectorAll('form').forEach(function (form) {
+        form.setAttribute('action', embedUrl(form.getAttribute('action') || location.pathname + location.search));
+    });
+    document.querySelectorAll('a[href^="/housekeeping"]').forEach(function (a) {
+        if (a.target !== '_blank') a.setAttribute('href', embedUrl(a.getAttribute('href')));
+    });
+</script>
+@await RenderSectionAsync("scripts", false)
+</body>
+</html>

@@ -28,6 +28,10 @@
     <link href='~/styles/ads.css' type='text/css' rel='stylesheet'/>
     <link href='~/styles/boxes.css' type='text/css' rel='stylesheet'/>
     @RenderSection("Styles", required: false)
+    @if (ViewData["cmsCanEdit"] as bool? == true)
+    {
+        <link href="~/css/cms-edit.css" asp-append-version="true" type="text/css" rel="stylesheet" />
+    }
 
     <script type='text/javascript'>
         var habboReqPath = window.location.protocol.replace(/:/g, '') + '://@baseUrl';
@@ -353,6 +357,12 @@
     <script src="~/api/JavaScriptLocalizationResources?ResourceSet=shared&VarName=resources&localeId=auto&ResourceMode=ResDb"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+    @if (ViewData["cmsCanEdit"] as bool? == true && ViewData["page"] is KeplerCMS.Models.Page cmsPage)
+    {
+        @* Staff edit mode for CMS pages (wwwroot/js/cms-edit.js, PageController). *@
+        <script>window.cmsEditConfig = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new { editing = ViewData["cmsEdit"] as bool? == true, pageId = cmsPage.Details.Id, pageName = cmsPage.Details.Name }));</script>
+        <script src="~/js/cms-edit.js" asp-append-version="true"></script>
+    }
     @{
         var shouldUseRuffle = false;
         var ruffleSetting = (settings != null) ? settings.FirstOrDefault(s=>s.Setting == "cms.use_ruffle") : null; 

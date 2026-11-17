@@ -1057,3 +1057,9 @@ button:disabled { opacity: .5; cursor: default; }
 #promo-small { width: 425px; max-width: 100%; height: auto; border: 1px solid #ccc; }
 .promo-picture-tools { margin-top: 4px; }
 .promo-picture-tools img { display: block; max-width: 425px; margin-bottom: 4px; border: 1px solid #ccc; }
+
+/* Housekeeping editors inside the site's edit mode panel (Shared/_HousekeepingEmbed.cshtml). */
+body.hk-embed { background: #fff; margin: 0; }
+body.hk-embed .main-content { padding: 10px 14px; margin: 0; width: auto; float: none; }
+body.hk-embed .card { border: 0; box-shadow: none; margin: 0; }
+body.hk-embed .card-header { display: none; }

@@ -138,7 +138,9 @@
                     <div id="form-ChangeBackground" class="action-form" style="display:none;">
                         <div class="form-group">
                             <label class="label-control">Background Value</label>
-                            <input id="bg-value" class="form-control" placeholder="e.g. christmas_bg" />
+                            <input id="bg-value" class="form-control" placeholder="e.g. /images/bg_patterns/habbo.gif" />
+                            <img data-media-preview-for="bg-value" alt="" style="max-width: 200px; max-height: 80px; margin-top: 4px;" />
+                            <button type="button" class="btn btn-sm btn-secondary" data-media-for="bg-value" data-media-category="site:images/bg_patterns" data-media-title="Site background">Choose image</button>
                         </div>
                         <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('ChangeBackground')">Add Action</button>
                     </div>
@@ -147,7 +149,9 @@
                     <div id="form-ChangeBanner" class="action-form" style="display:none;">
                         <div class="form-group">
                             <label class="label-control">Banner Value</label>
-                            <input id="banner-value" class="form-control" placeholder="e.g. christmas_banner" />
+                            <input id="banner-value" class="form-control" placeholder="e.g. /c_images/hotelviews/web_view_bg_dk.gif" />
+                            <img data-media-preview-for="banner-value" alt="" style="max-width: 100%; max-height: 80px; margin-top: 4px;" />
+                            <button type="button" class="btn btn-sm btn-secondary" data-media-for="banner-value" data-media-category="site:c_images/hotelviews" data-media-title="Hotel banner (top of every page)">Choose image</button>
                         </div>
                         <button class="btn btn-sm btn-success action-submit-btn" onclick="submitAction('ChangeBanner')">Add Action</button>
                     </div>
@@ -344,6 +348,8 @@
     <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" asp-append-version="true" />
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
     <script src="~/lib/select2/js/select2.min.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/media-fields.js" asp-append-version="true"></script>
     <partial name="_EditorScripts" />
     <script>
         // Renders a furni image preview next to each search result (mirrors the Rewards picker).

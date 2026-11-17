@@ -16,7 +16,7 @@
 <tr>
     <td colspan="3" style="padding-bottom: 3px;">
 
-        <div id="promoarea">
+        <div id="promoarea"@if (ViewData["cmsEdit"] as bool? == true) {<text> data-cms-page="@Model.Details.Id" data-cms-promos="@string.Join(",", promos.Select(p => p.Id))"</text>}>
             <!-- NEWS ITEMS INCLUDE -->
 
             <script type="text/javascript">

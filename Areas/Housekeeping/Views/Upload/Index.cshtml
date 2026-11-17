@@ -8,11 +8,12 @@
         @ViewData["message"]
     </div>
 }
-<a href="@Url.Action("Create")">Add</a>
+<a href="@Url.Action("Create")">Add</a> · <a href="#" id="open-media-library">Media library (drop or paste images to upload)</a>
 
 <table class="blueTable">
     <thead>
         <tr>
+            <th></th>
             <th>Name</th>
             <th>Category</th>
             <th>Path</th>
@@ -27,6 +28,7 @@
                 {
                     var imgPath = "/images/" + item.Category + "/" + item.Name;
                 <tr>
+                    <td style="width: 72px; text-align: center;">@if ((item.ContentType ?? "").StartsWith("image/")) {<a target="_blank" href="@imgPath"><img src="@imgPath" alt="" loading="lazy" style="max-width: 64px; max-height: 40px;" /></a>}</td>
                     <td><a target="_blank" href="@imgPath">@item.Name</a></td>
                     <td>@item.Category</td>
                     <td><input type="text" style="width:90%" value="@imgPath" /></td>
@@ -64,5 +66,17 @@
                 }
             })
         }
+    </script>
+    <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('open-media-library').addEventListener('click', function (e) {
+            e.preventDefault();
+            HabboMedia.open({ title: 'Media library', onSelect: function (item) { window.open(item.url.replace(/\?v=\d+$/, ''), '_blank'); } });
+            // Uploads made in the library show up in this list after a reload.
+            var overlay = document.querySelector('.hm-overlay');
+            new MutationObserver(function (changes, observer) {
+                if (!document.body.contains(overlay)) { observer.disconnect(); location.reload(); }
+            }).observe(document.body, { childList: true });
+        });
     </script>
 }

@@ -21,10 +21,9 @@
                     var pictureMatch = System.Text.RegularExpressions.Regex.Match(Model?.Img ?? "", @"^/promo-picture/(\d+)\.png");
                 }
                 <div class="promo-picture-tools">
-                    @if (!string.IsNullOrEmpty(Model?.Img))
-                    {
-                        <img src="@Model.Img" alt="" />
-                    }
+                    <img data-media-preview-for="Img" alt="" />
+                    <button type="button" class="btn btn-sm btn-secondary" data-media-for="Img" data-media-category="promo" data-media-title="Promo image (425 x 178)">Choose image</button>
+                    ·
                     @if (pictureMatch.Success)
                     {
                         <a href="@Url.Action("Index", "PromoPicture", new { id = pictureMatch.Groups[1].Value, promoId = Model.Id })">Edit picture</a>
@@ -82,6 +81,8 @@
 @section scripts {
     <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/media-fields.js" asp-append-version="true"></script>
     <script>
         $(document).ready(function () {
             var datetimeSettings = { format: 'Y-m-d H:i:s' };

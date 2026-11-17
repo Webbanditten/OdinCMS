@@ -17,14 +17,9 @@
                 <input asp-for="Img" class="form-control" />
                 <span asp-validation-for="Img" class="text-danger"></span>
                 <div class="promo-picture-tools">
-                    @if (!string.IsNullOrEmpty(Model?.Img))
-                    {
-                        <img src="@Model.Img" alt="" />
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Index", "PromoPicture", new { pageId = ViewData["PageId"] })">Build a picture from a room photo</a>
-                    }
+                    <img data-media-preview-for="Img" alt="" />
+                    <button type="button" class="btn btn-sm btn-secondary" data-media-for="Img" data-media-category="promo" data-media-title="Promo image (425 x 178)">Choose image</button>
+                    · <a href="@Url.Action("Index", "PromoPicture", new { pageId = ViewData["PageId"] })">Build a picture from a room photo</a>
                 </div>
             </div>
             <div class="form-group">
@@ -74,6 +69,8 @@
 @section scripts {
     <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+    <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/media-fields.js" asp-append-version="true"></script>
     <script>
         $(document).ready(function () {
             var datetimeSettings = { format: 'Y-m-d H:i:s' };
