@@ -4,6 +4,7 @@
 // Codes: when the page has a codes overview for the editor (Areas/Housekeeping/Views/Shared/_ContentCodes.cshtml,
 // matched by the textarea id), a click on a code there inserts it, the toolbar gets a "Codes" menu with the same
 // codes, and the overview warns when a box widget code would hide the rest of the text.
+// Furni images: pages that load furni-plugin.js before this file get the Furni button (the habbofurni plugin).
 (function () {
     // TinyMCE's default toolbar (for the plugins loaded below), so adding the Codes menu keeps the usual buttons.
     var defaultToolbar = 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | outdent indent';
@@ -164,6 +165,8 @@
 
     window.initHabboEditor = function (selector) {
         var panel = panelFor(selector);
+        var furni = !!tinymce.PluginManager.get('habbofurni');
+        var toolbar = defaultToolbar + ' |' + (furni ? ' habbofurni' : '') + (panel ? ' habbocodes' : '');
         return tinymce.init({
             selector: selector,
             license_key: 'gpl',
@@ -177,8 +180,10 @@
             forced_root_block: 'div',
             newline_behavior: 'linebreak',
             // TinyMCE 5's print, paste and imagetools plugins no longer exist (paste is core now).
-            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table wordcount',
-            toolbar: panel ? defaultToolbar + ' | habbocodes' : defaultToolbar,
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table wordcount' + (furni ? ' habbofurni' : ''),
+            toolbar: toolbar,
+            // Wrap instead of hiding buttons behind "...", so Furni and Codes stay visible in narrow editors.
+            toolbar_mode: 'wrap',
             setup: function (editor) {
                 if (!panel) return;
                 editor.ui.registry.addMenuButton('habbocodes', {

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Html
 @using KeplerCMS.Areas.Housekeeping.Models.Views
 @inject KeplerCMS.Services.Interfaces.ISettingsService SettingsService
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     var userData = (Users)ViewData["user"];
     var path = Context.Request.Path;
@@ -47,6 +48,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    @* Where the editors' furni images come from (wwwroot/housekeeping/js/furni-plugin.js). *@
+    <meta name="habbo-furni-url" content="@(Configuration["keplercms:furniUrl"] ?? "/habbo-imaging/furni")">
 
     <title>Housekeeping ~ @ViewBag.Title</title>
 
