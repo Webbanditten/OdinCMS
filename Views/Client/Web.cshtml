@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @{
     Layout = null;
@@ -91,9 +91,9 @@
         window.alert = function (message) { console.error('[DirPlayer]', message); };
     </script>
 
-    <script src='@web["polyfill"]' data-manual-init></script>
+    <script src='@web["polyfill"]' data-manual-init onerror="window.dirplayerFailed = true"></script>
     <script type="text/javascript">
-        DirPlayer.configureFlash({
+        if (window.DirPlayer) DirPlayer.configureFlash({
             disableFlash: true,
             // The client is told to connect to host:port over TCP (sw2/sw4); map both to Odin's WebSocket listener.
             socketProxy: [
@@ -124,7 +124,13 @@
             var bigLink = document.getElementById('webclient-large');
             if (bigLink && (screen.width < 1440 || screen.height < 1080)) { bigLink.style.display = 'none'; }
             fitWindowToClient(topbar);
-            DirPlayer.init();
+            // Without WebAssembly (an old browser), or when DirPlayer didn't load, say so instead of a black screen.
+            var unavailable = function () {
+                document.getElementById('client-stage').style.display = 'none';
+                document.getElementById('client-unavailable').className = 'is-shown';
+            };
+            if (typeof WebAssembly !== 'object' || !window.DirPlayer || window.dirplayerFailed) { unavailable(); return; }
+            try { DirPlayer.init(); } catch (e) { console.error('[DirPlayer]', e); unavailable(); }
         });
     </script>
     <script src='~/js/jquery.min.js' asp-append-version="true"></script>
@@ -159,6 +165,7 @@
             <a href="/account/logout?origin=popup">@DbRes.T("signoff", "topbar")</a>
         </div>
     </div>
+    <partial name="_ClientUnavailable" model='"webclient_unsupported"' />
     <div id="client-stage">
         <embed src='@dcr' bgColor='#000000' width='@(large ? 1440 : 720)' height='@(large ? 1080 : 540)' type='application/x-director'
                swStretchStyle='none' swText=''

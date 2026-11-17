@@ -1,0 +1,40 @@
+@model string
+@* The message the client pages show when the hotel can't start in this browser, with the way out: the downloadable
+   client. Model = the localization key (shared set): "noshockwave" on /client (no Shockwave and the browser client is
+   switched off), "webclient_unsupported" on /client/web (no WebAssembly, or DirPlayer failed to load). Hidden until a
+   page shows it (#client-unavailable). Texts: sql/migrations/2026-11-17_client_fallback_texts.sql; the fallbacks below
+   are the same. *@
+@functions
+{
+    string L(string key, string fallback)
+    {
+        var value = DbRes.T(key, "shared");
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+@{
+    var fallback = Model == "noshockwave"
+        ? "<h3>Øv! Hotellet kan ikke starte i din browser lige nu</h3><p>Din browser kan ikke køre Shockwave, og browserversionen af Habbo er ikke tilgængelig i øjeblikket.</p><p>Du kan stadig spille med den downloadbare Habbo-klient til Windows og Mac.</p>"
+        : "<h3>Øv! Hotellet kunne ikke starte i din browser</h3><p>Prøv at genindlæse siden. Virker det stadig ikke, så er din browser måske for gammel: prøv en nyere udgave af Chrome, Firefox, Edge eller Safari.</p><p>Du kan også spille med den downloadbare Habbo-klient til Windows og Mac.</p>";
+}
+<style>
+    #client-unavailable { display: none; text-align: left; max-width: 520px; margin: 48px auto; padding: 18px 20px; background: #fff; color: #000; border: 1px solid #000; border-radius: 6px; font: 12px/1.6 Verdana, Arial, sans-serif; overflow: hidden; }
+    #client-unavailable.is-shown { display: block; }
+    #client-unavailable img.frank { float: right; margin: 0 0 8px 12px; }
+    #client-unavailable h3 { margin: 0 0 10px; font-size: 14px; }
+    #client-unavailable p { margin: 0 0 10px; }
+    #client-unavailable .client-unavailable-actions { clear: both; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    #client-unavailable .client-unavailable-actions a { display: inline-block; padding: 5px 14px; border: 1px solid #000; border-radius: 4px; background: #f07d12; color: #fff; font-weight: bold; text-decoration: none; }
+    #client-unavailable .client-unavailable-actions a.secondary { background: #fff; color: #000; }
+</style>
+<div id="client-unavailable" role="alert">
+    <img class="frank" src="~/images/frank_19.gif" alt="" />
+    @Html.Raw(L(Model, fallback))
+    <div class="client-unavailable-actions">
+        <a href="/hotel/download" target="habboMain">@L("client_download", "Hent Habbo Hotel")</a>
+        @if (Model == "webclient_unsupported")
+        {
+            <a class="secondary" href="javascript:location.reload()">@L("client_reload", "Prøv igen")</a>
+        }
+    </div>
+</div>
