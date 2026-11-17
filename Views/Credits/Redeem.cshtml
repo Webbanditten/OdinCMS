@@ -13,6 +13,8 @@
 {
     <div class="redeem_dialog" style="min-height:115px;">
         <img src="~/c_images/content/purse_big.gif" alt="" align="left" style="margin:10px;">
+        @* Its own block beside the image, so long furni lists stay in the text column instead of wrapping under it. *@
+        <div style="overflow: hidden;">
         <p><strong>@DbRes.T("success_code_header", "credits")</strong></p>
         @if (Model.Credits > 0)
         {
@@ -21,7 +23,7 @@
         @if (Model.Furni.Count > 0)
         {
             <p>@Text("success_code_furni", "Du fik disse ting. De ligger i din hånd på hotellet:")</p>
-            <ul style="margin: 0 0 6px 18px; padding: 0;">
+            <ul style="margin: 0 0 6px 16px; padding: 0;">
                 @foreach (var furni in Model.Furni.GroupBy(f => f))
                 {
                     <li>@(furni.Count() > 1 ? furni.Count() + " × " : "")@furni.Key</li>
@@ -32,6 +34,7 @@
         {
             <p>@DbRes.T("success_code_body", "credits")</p>
         }
+        </div>
         <table align="right">
             <tbody>
                 <tr>
