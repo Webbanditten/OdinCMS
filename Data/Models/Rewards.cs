@@ -28,6 +28,10 @@ namespace KeplerCMS.Data.Models
         [Column("badge")]
         public string Badge { get; set; }
 
+        /// <summary>The calendar this reward was made by ("Julekalender 2026"), or null for single rewards.</summary>
+        [Column("label")]
+        public string Label { get; set; }
+
         [NotMapped]
         public List<ItemsDefinitions> ItemsDefinitions { get; set; }
     }

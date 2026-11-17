@@ -1,0 +1,9 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@* Shared by the reward pages: the date picker, select2 (furni search) and wwwroot/housekeeping/js/rewards.js. *@
+<link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css">
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" asp-append-version="true" />
+<script src="~/lib/datetimepicker/jquery.datetimepicker.full.js"></script>
+<script src="~/lib/select2/js/select2.min.js" asp-append-version="true"></script>
+<script>window.rewardsBadgeUrl = @Json.Serialize(Configuration["keplercms:badgeUrl"] ?? "");</script>
+<script src="~/housekeeping/js/rewards.js" asp-append-version="true"></script>

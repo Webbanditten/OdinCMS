@@ -1,0 +1,35 @@
+@{
+    ViewBag.Title = "Furni pools";
+}
+<h1>Furni pools</h1>
+<p class="rewards-intro">
+    Calendars pick furni from pools. The seasonal pools were filled automatically from the furni names and catalogue
+    pages; the ones marked <span class="reward-check-tag">check</span> are guesses: keep them with &#10003; or remove them.
+    <a href="@Url.Action("Index")">Back to the rewards</a>
+</p>
+
+<div class="reward-pools">
+    <div class="reward-pool-list">
+        <ul id="pool-list"></ul>
+        <button type="button" id="pool-new">+ New pool</button>
+    </div>
+    <div class="reward-pool-detail" id="pool-detail" hidden>
+        <div class="rewards-row">
+            <label>Name <input type="text" id="pool-name" autocomplete="off"></label>
+            <label class="rewards-grow">Description <input type="text" id="pool-description" autocomplete="off"></label>
+            <button type="button" id="pool-save">Save</button>
+            <button type="button" id="pool-delete">Delete pool</button>
+        </div>
+        <div class="rewards-row">
+            <select id="pool-add" class="furni-searcher" multiple></select>
+            <button type="button" id="pool-add-run">Add furni</button>
+            <label class="rewards-check"><input type="checkbox" id="pool-only-check"> Only show furni to check</label>
+        </div>
+        <div id="pool-items" class="reward-pool-items"></div>
+    </div>
+</div>
+
+@section scripts {
+    <partial name="_RewardScripts" />
+    <script>Rewards.initPools();</script>
+}
