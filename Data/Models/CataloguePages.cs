@@ -12,11 +12,12 @@ namespace KeplerCMS.Data.Models
         [Column("id")]
         public int Id { get; set; }
 
+        /// <summary>Deprecated: Odin ignores it (access is the page's fuse).</summary>
         [Column("min_role")]
-        public int MinRole { get; set; }
+        public int? MinRole { get; set; }
 
         [Column("order_id")]
-        public int OrderId { get; set; }
+        public int? OrderId { get; set; }
         [Column("index_visible")]
         public int IndexVisible { get; set; }
         [Column("is_club_only")]

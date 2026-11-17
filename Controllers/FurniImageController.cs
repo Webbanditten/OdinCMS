@@ -197,6 +197,8 @@ namespace KeplerCMS.Controllers
                 if (System.IO.File.Exists("furni_export/" + sprite + "/export/" + hashedUniqueName + ".png"))
                 {
                     Response.Headers.Add("Cache-Control", "public, max-age=31536000");
+                    // Public images; the housekeeping catalogue tints them in a canvas (part colours), also from other hosts.
+                    Response.Headers["Access-Control-Allow-Origin"] = "*";
                     return File(System.IO.File.ReadAllBytes("furni_export/" + sprite + "/export/" + hashedUniqueName + ".png"), "image/png");
                 }
             }

@@ -122,6 +122,6 @@ namespace KeplerCMS.Services.CampaignActions
         public int IndexVisible { get; set; }
         public int ClubOnly { get; set; }
         public string Fuse { get; set; }
-        public int OrderId { get; set; }
+        public int? OrderId { get; set; }
     }
 }

@@ -78,6 +78,10 @@
     width: 708px;
 }
 
+/* Wide pages (ViewBag.WideContent = true, e.g. the catalogue editor): the 920 px column becomes the window width. */
+.wrapper.wrapper-wide { width: auto; min-width: 1180px; margin: 0 8px; }
+.wrapper-wide .main-content { width: calc(100vw - 300px); min-width: 960px; }
+
 .sidebar {
     width: 200px;
     margin-right: 12px;
