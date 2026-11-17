@@ -1,0 +1,174 @@
+@model List<KeplerCMS.Models.VoucherView>
+@{
+    ViewBag.Title = "Vouchers";
+    var history = (List<KeplerCMS.Models.VoucherHistoryView>)ViewData["history"];
+}
+
+<h1>Vouchers</h1>
+<p class="vch-intro">
+    A voucher code gives credits, furni or both. Players redeem it in the hotel (the purse: <em>Indløs kode</em>) or on the
+    website's credits page. Furni can be any catalogue item, also hidden ones (rares, prizes); a package gives all its furni.
+</p>
+
+<div class="vch-panel" id="vch-form">
+    <h2 id="vch-form-title">New voucher</h2>
+    <div class="vch-grid">
+        <label for="vch-code">Code</label>
+        <div>
+            <input type="text" id="vch-code" maxlength="100" placeholder="Leave empty for a random code" autocomplete="off" />
+            <span class="vch-hint" id="vch-code-hint">Letters, digits, - and _. Players type it in any case.</span>
+        </div>
+
+        <label for="vch-count" class="vch-create-only">Number of codes</label>
+        <div class="vch-create-only">
+            <input type="number" id="vch-count" min="1" max="500" value="1" />
+            <span class="vch-hint">More than one makes that many random codes with the same contents (e.g. for a competition).</span>
+        </div>
+
+        <label for="vch-credits">Credits</label>
+        <div><input type="number" id="vch-credits" min="0" max="1000000" value="0" /></div>
+
+        <label for="vch-use">Who can use it</label>
+        <div>
+            <select id="vch-use">
+                <option value="single">One player: the code is used up</option>
+                <option value="multi">Every player, once each</option>
+            </select>
+        </div>
+
+        <label for="vch-expiry">Expires</label>
+        <div>
+            <input type="text" id="vch-expiry" class="datetimepicker" placeholder="Never" autocomplete="off" />
+            <a href="#" id="vch-expiry-clear" class="vch-hint">no expiry</a>
+        </div>
+
+        <label for="vch-search">Furni</label>
+        <div>
+            <div class="vch-search">
+                <input type="text" id="vch-search" placeholder="Search the catalogue: name or sale code" autocomplete="off" />
+                <div class="vch-results" id="vch-results" hidden></div>
+            </div>
+            <ul class="vch-chosen" id="vch-chosen"></ul>
+            <span class="vch-hint" id="vch-furni-empty">No furni: the voucher gives credits only.</span>
+        </div>
+    </div>
+    <div class="vch-actions">
+        <button type="button" class="vch-primary" id="vch-save">Create voucher</button>
+        <button type="button" id="vch-cancel" hidden>Cancel editing</button>
+        <span class="vch-error" id="vch-error"></span>
+    </div>
+    <div class="vch-created" id="vch-created" hidden>
+        <strong>Created:</strong>
+        <textarea id="vch-created-codes" readonly rows="4"></textarea>
+        <button type="button" id="vch-copy">Copy codes</button>
+    </div>
+</div>
+
+<h2>Vouchers (@Model.Count)</h2>
+<table class="blueTable vch-table">
+    <thead>
+        <tr><th>Code</th><th>Gives</th><th>Use</th><th>Expires</th><th>Redeemed</th><th></th></tr>
+    </thead>
+    <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="6">No vouchers yet.</td></tr>
+        }
+        @foreach (var voucher in Model)
+        {
+            <tr class="@(voucher.IsExpired ? "vch-expired" : "")">
+                <td><code>@voucher.Code</code></td>
+                <td>
+                    @if (voucher.Credits > 0)
+                    {
+                        <div>@voucher.Credits credits</div>
+                    }
+                    @foreach (var furni in voucher.Furni)
+                    {
+                        <div class="vch-line@(furni.Missing ? " vch-missing" : "")" title="@furni.SaleCode">
+                            <img class="vch-icon" data-sprite="@furni.Sprite" alt="" />
+                            @(furni.Amount > 1 ? furni.Amount + " × " : "")@furni.Name
+                            @if (furni.Missing)
+                            {
+                                <em>(no catalogue item has this sale code)</em>
+                            }
+                        </div>
+                    }
+                </td>
+                <td>@(voucher.IsSingleUse ? "One player" : "Everyone, once")</td>
+                <td>@(voucher.ExpiryDate == null ? "Never" : voucher.ExpiryDate.Value.ToString("yyyy-MM-dd HH:mm"))@(voucher.IsExpired ? " (expired)" : "")</td>
+                <td>@voucher.Redemptions</td>
+                <td class="vch-row-actions">
+                    <a href="#" data-edit="@voucher.Code">Edit</a> -
+                    <a href="#" data-delete="@voucher.Code">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Recent redemptions</h2>
+<p class="vch-hint">Single-use vouchers disappear from the list above when redeemed; their redemption stays here.</p>
+<table class="blueTable vch-table">
+    <thead>
+        <tr><th>When</th><th>Code</th><th>Player</th><th>Credits</th><th>Furni</th></tr>
+    </thead>
+    <tbody>
+        @if (history.Count == 0)
+        {
+            <tr><td colspan="5">Nothing redeemed yet.</td></tr>
+        }
+        @foreach (var row in history)
+        {
+            <tr>
+                <td>@row.UsedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td><code>@row.Code</code></td>
+                <td>@(row.Username ?? "#" + row.UserId)</td>
+                <td>@(row.Credits?.ToString() ?? "")</td>
+                <td>@(string.Join(", ", (row.Items ?? "").Split('|', StringSplitOptions.RemoveEmptyEntries).Select(i => i.Contains(',') ? i.Substring(i.IndexOf(',') + 1) + (i.StartsWith("1,") ? "" : " ×" + i.Substring(0, i.IndexOf(','))) : i)))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<style>
+    .vch-intro { max-width: 760px; }
+    .vch-panel { border: 1px solid #b8c7d6; background: #f4f8fb; padding: 10px 14px; margin: 10px 0 18px; max-width: 760px; }
+    .vch-panel h2 { margin-top: 0; }
+    .vch-grid { display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; align-items: start; }
+    .vch-grid > label { font-weight: bold; padding-top: 4px; }
+    .vch-grid input[type=text], .vch-grid input[type=number], .vch-grid select { padding: 3px 5px; }
+    .vch-grid #vch-code, .vch-grid #vch-search { width: 320px; }
+    .vch-grid #vch-count, .vch-grid #vch-credits { width: 110px; }
+    .vch-hint { color: #667; font-size: 11px; margin-left: 6px; }
+    .vch-search { position: relative; display: inline-block; }
+    .vch-results { position: absolute; z-index: 20; left: 0; top: 100%; width: 460px; max-height: 320px; overflow-y: auto; background: #fff; border: 1px solid #8aa; box-shadow: 0 3px 8px rgba(0,0,0,.2); }
+    .vch-result { display: flex; align-items: center; gap: 8px; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid #eef; }
+    .vch-result:hover { background: #e8f1fb; }
+    .vch-result.is-disabled { cursor: not-allowed; color: #999; }
+    .vch-result small { color: #667; }
+    .vch-tag { font-size: 10px; padding: 0 4px; border-radius: 3px; background: #ddd; color: #333; margin-left: 4px; }
+    .vch-tag.is-hidden { background: #666; color: #fff; }
+    .vch-icon { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; vertical-align: middle; }
+    .vch-chosen { list-style: none; margin: 6px 0 0; padding: 0; }
+    .vch-chosen li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+    .vch-chosen input { width: 60px; }
+    .vch-actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+    .vch-primary { font-weight: bold; }
+    .vch-error { color: #b00; }
+    .vch-created { margin-top: 10px; }
+    .vch-created textarea { width: 100%; font-family: monospace; margin: 4px 0; }
+    .vch-table { margin-bottom: 18px; }
+    .vch-table code { font-size: 12px; }
+    .vch-line { display: flex; align-items: center; gap: 6px; }
+    .vch-line .vch-icon { width: 24px; height: 24px; }
+    .vch-missing { color: #b00; }
+    .vch-expired td { color: #999; }
+    .vch-row-actions { white-space: nowrap; }
+</style>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css" />
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+    <script src="~/housekeeping/js/vouchers.js" asp-append-version="true" type="text/javascript"></script>
+}

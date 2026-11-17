@@ -25,6 +25,9 @@ namespace KeplerCMS.Models
         file_upload,
         create_poll,
         edit_poll,
-        delete_poll
+        delete_poll,
+        create_voucher,
+        edit_voucher,
+        delete_voucher
     }
 }

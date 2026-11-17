@@ -9,12 +9,12 @@ namespace KeplerCMS.Controllers
     public class CreditsController : Controller
     {
         private readonly IUserService _userService;
-        private readonly ICreditService _creditService;
+        private readonly IVoucherService _voucherService;
 
-        public CreditsController(IUserService userService, ICreditService creditService)
+        public CreditsController(IUserService userService, IVoucherService voucherService)
         {
             _userService = userService;
-            _creditService = creditService;
+            _voucherService = voucherService;
         }
 
         [LoggedInFilter]
@@ -22,8 +22,7 @@ namespace KeplerCMS.Controllers
         public async Task<IActionResult> Redeem(string code)
         {
             var user = await _userService.GetUserById(int.Parse(User.Identity.Name));
-            ViewData["success"] = await _creditService.RedeemCode(code, user.Id);
-            return View();
+            return View(await _voucherService.Redeem(code, user.Id));
         }
     }
 }

@@ -105,6 +105,7 @@ namespace KeplerCMS
             services.AddScoped<IFuseService, FuseService>();
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ICreditService, CreditService>();
+            services.AddScoped<IVoucherService, VoucherService>();
             services.AddScoped<INewsService, NewsService>();
             services.AddScoped<IPromoService, PromoService>();
             services.AddScoped<IHomeService, HomeService>();
