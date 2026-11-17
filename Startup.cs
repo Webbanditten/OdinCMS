@@ -166,6 +166,9 @@ namespace KeplerCMS
             
             services.AddHostedService<HabboActivityBackgroundService>();
             services.AddHostedService<CampaignSchedulerService>();
+            services.AddSingleton<RoomPhotographer>();
+            services.AddSingleton<IRoomPhotographer>(sp => sp.GetRequiredService<RoomPhotographer>());
+            services.AddHostedService(sp => sp.GetRequiredService<RoomPhotographer>());
             
             services.AddSignalR();
         }

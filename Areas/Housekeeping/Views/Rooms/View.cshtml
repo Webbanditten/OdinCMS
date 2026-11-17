@@ -5,6 +5,19 @@
     
 }
 <style>
+    .room-photo-frame {
+        display: inline-block;
+        max-width: 100%;
+        padding: 6px;
+        border: 1px solid #ccc;
+        /* Checkerboard so the transparent background shows */
+        background: repeating-conic-gradient(#e8e8e8 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+    }
+    .room-photo-frame img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
     /* Fixed table widths */
     .chatlog thead tr th:nth-child(1) {
         width: 20%;
@@ -81,6 +94,33 @@
     </tbody>
 </table>
 
+@{
+    var photo = ViewBag.Photo as KeplerCMS.Data.Models.RoomPhoto;
+    var photographerEnabled = ViewBag.PhotographerEnabled == true;
+}
+<h3>Room photo</h3>
+<p>A picture of the room without Habbos, pets, chat bubbles or interface, for featured rooms, news and page boxes. Its address
+    stays the same when you take a new one. Taking it takes 15-30 seconds; nobody in the room notices.</p>
+<div class="room-photo">
+    <div class="room-photo-frame" id="room-photo-frame" style="@(photo == null ? "display:none" : "")">
+        <img id="room-photo-img" alt="Room photo" src="@(photo == null ? "" : $"/room-photo/{Model.Id}.png?v={photo.TakenAt.Ticks}")" />
+    </div>
+    <p id="room-photo-none" style="@(photo == null ? "" : "display:none")"><em>No photo yet.</em></p>
+    <p id="room-photo-info" style="@(photo == null ? "display:none" : "")">
+        Taken <span id="room-photo-taken">@photo?.TakenAt.ToString("dd-MM-yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture)</span>,
+        <span id="room-photo-size">@photo?.Width x @photo?.Height</span> px.
+        Address: <input type="text" readonly value="/room-photo/@(Model.Id).png" onclick="this.select()" style="width: 220px" />
+    </p>
+    @if (photographerEnabled)
+    {
+        <p><button type="button" id="room-photo-take">Take photo</button> <span id="room-photo-status"></span></p>
+    }
+    else
+    {
+        <p><em>The room photographer isn't set up (keplercms:photographer).</em></p>
+    }
+</div>
+
 <h3>Chat log</h3>
 <p>Here you can see the chat log of the room, historic logs are delayed by a minute.</p>
 <strong>Live</strong>
@@ -145,6 +185,38 @@
                 );
                 
                 $("#live_chat").prepend(msg);
+            });
+
+            $("#room-photo-take").on("click", function () {
+                const button = $(this);
+                const status = $("#room-photo-status");
+                button.prop("disabled", true);
+                status.text("Waiting for the photographer...");
+                const fail = (error) => {
+                    button.prop("disabled", false);
+                    status.text("");
+                    Swal.fire({ title: "No photo", text: error || "The photo failed", icon: "error" });
+                };
+                const poll = (id) => $.getJSON(`@Url.Action("PhotoStatus")?id=${id}`).done(function (data) {
+                    if (data.status === "done") {
+                        $("#room-photo-img").attr("src", data.url);
+                        $("#room-photo-taken").text(data.takenAt);
+                        $("#room-photo-size").text(`${data.width} x ${data.height}`);
+                        $("#room-photo-frame, #room-photo-info").show();
+                        $("#room-photo-none").hide();
+                        button.prop("disabled", false);
+                        status.text("Done.");
+                    } else if (data.status === "failed") {
+                        fail(data.error);
+                    } else {
+                        status.text(data.status === "running" ? "Taking the photo..." : "Waiting for the photographer...");
+                        setTimeout(() => poll(id), 2000);
+                    }
+                }).fail(() => fail("The CMS didn't answer"));
+                $.post(`@Url.Action("TakePhoto", new { id = Model.Id })`).done(function (data) {
+                    if (data.status === "failed") return fail(data.error);
+                    setTimeout(() => poll(data.id), 2000);
+                }).fail(() => fail("The CMS didn't answer"));
             });
 
             connection.start().catch(function (err) {
