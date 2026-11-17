@@ -23,15 +23,12 @@ namespace KeplerCMS.Areas.Housekeeping
         private readonly ICommandQueueService _commandQueueService;
         private readonly ICatalogueService _catalogue;
         private readonly IGameDataService _gameData;
-        private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache;
 
-        public CatalogueController(ICommandQueueService commandQueueService, ICatalogueService catalogue, IGameDataService gameData,
-            Microsoft.Extensions.Caching.Memory.IMemoryCache cache)
+        public CatalogueController(ICommandQueueService commandQueueService, ICatalogueService catalogue, IGameDataService gameData)
         {
             _commandQueueService = commandQueueService;
             _catalogue = catalogue;
             _gameData = gameData;
-            _cache = cache;
         }
 
         public IActionResult Index() => View();
@@ -86,9 +83,7 @@ namespace KeplerCMS.Areas.Housekeeping
         public async Task<IActionResult> SavePage([FromBody] CataloguePageEdit page)
         {
             if (page == null || string.IsNullOrWhiteSpace(page.Name)) return BadRequest("Give the page a name.");
-            // No layout = a folder in the v31 catalogue's tree (the old catalogue leaves it out).
-            if (!string.IsNullOrWhiteSpace(page.Layout) && !Regex.IsMatch(page.Layout, "^ctlg_[a-z0-9]+$")) return BadRequest("Pick a layout.");
-            if (!string.IsNullOrWhiteSpace(page.LayoutV31) && !Regex.IsMatch(page.LayoutV31.Trim(), "^[a-z0-9_]+$")) return BadRequest("The v31 layout is a name like default_3x3.");
+            if (string.IsNullOrWhiteSpace(page.Layout) || !Regex.IsMatch(page.Layout, "^ctlg_[a-z0-9]+$")) return BadRequest("Pick a layout.");
             return Json(new { id = await _catalogue.SavePage(page) });
         }
 
@@ -181,18 +176,10 @@ namespace KeplerCMS.Areas.Housekeeping
 
         /// <summary>Make the hotel reload the catalogue (pages, products, packages and furni definitions) from the database.</summary>
         [HttpPost]
-        public async Task<IActionResult> Publish()
+        public IActionResult Publish()
         {
-            // The v31 catalogue downloads library images as name_language: tell Odin which page images those are.
-            var pages = await _catalogue.GetPages();
-            var language = await _gameData.GetVariable("language", "en");
-            var images = pages.SelectMany(p => p.Teasers.Append(p.Headline)).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
-            var library = await _gameData.GetLibraryImages("catalogue", language, images);
-            await _catalogue.SetLibraryImages(library);
-            _cache.Remove(Controllers.GameDataController.FurniDataCacheKey);
-            _cache.Remove(Controllers.GameDataController.ProductDataCacheKey);
             _commandQueueService.QueueCommand(CommandQueueType.reload_catalogue, new CommandTemplate());
-            return Json(new { libraryImages = library.Count });
+            return Ok();
         }
     }
 }

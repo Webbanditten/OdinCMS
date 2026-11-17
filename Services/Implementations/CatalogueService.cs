@@ -70,7 +70,6 @@ namespace KeplerCMS.Services.Implementations
             Links = (p.LinkList ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList(),
             IndexVisible = p.IndexVisible == 1, ClubOnly = p.ClubOnly == 1, Fuse = string.IsNullOrEmpty(p.Fuse) ? "DEFAULT" : p.Fuse,
             ProductCount = productCount,
-            ParentId = p.ParentId, Icon = p.Icon, Colour = p.Colour, LayoutV31 = p.LayoutV31 ?? "",
         };
 
         private static string Nullable(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -107,11 +106,7 @@ namespace KeplerCMS.Services.Implementations
             }
             page.Name = edit.Name.Trim();
             page.NameIndex = string.IsNullOrWhiteSpace(edit.NameIndex) ? page.Name : edit.NameIndex.Trim();
-            page.Layout = (edit.Layout ?? "").Trim();
-            page.ParentId = edit.ParentId > 0 && edit.ParentId != page.Id ? edit.ParentId : -1;
-            page.Icon = Math.Clamp(edit.Icon, 0, 99);
-            page.Colour = Math.Clamp(edit.Colour, 0, 11);
-            page.LayoutV31 = Nullable(edit.LayoutV31);
+            page.Layout = edit.Layout.Trim();
             // Odin always sends the headline (g) and fails on NULL: no image is an empty string.
             page.ImageHeadline = (edit.Headline ?? "").Trim();
             var teasers = (edit.Teasers ?? new()).Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()).ToList();
@@ -142,23 +137,8 @@ namespace KeplerCMS.Services.Implementations
                 if (pages.Count == 0) _context.CatalogueItems.Remove(item);
                 else item.PageId = FormatPages(pages);
             }
-            // Children of a deleted folder move to its parent.
-            foreach (var child in await _context.CataloguePages.Where(p => p.ParentId == id).ToListAsync()) child.ParentId = page.ParentId;
             _context.CataloguePages.Remove(page);
             await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Which page images come from the image library rather than a cast (images.json lists the cast ones), for
-        /// Odin to send to the v31 catalogue as name_language. Replaces catalogue_library_images.
-        /// </summary>
-        public async Task<int> SetLibraryImages(IEnumerable<string> names)
-        {
-            var list = names.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()).Distinct().ToList();
-            _context.CatalogueLibraryImages.RemoveRange(await _context.CatalogueLibraryImages.ToListAsync());
-            _context.CatalogueLibraryImages.AddRange(list.Select(n => new CatalogueLibraryImage { Name = n }));
-            await _context.SaveChangesAsync();
-            return list.Count;
         }
 
         public async Task ReorderPages(List<int> ids)
