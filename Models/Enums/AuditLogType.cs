@@ -29,6 +29,7 @@ namespace KeplerCMS.Models
         create_voucher,
         edit_voucher,
         delete_voucher,
-        take_room_photo
+        take_room_photo,
+        save_promo_picture
     }
 }

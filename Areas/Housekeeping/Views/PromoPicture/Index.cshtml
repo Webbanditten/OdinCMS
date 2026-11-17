@@ -1,0 +1,85 @@
+@using System.Text.Json
+@using KeplerCMS.Areas.Housekeeping
+@{
+    ViewBag.Title = "Promo picture";
+    var picture = ViewBag.Picture as KeplerCMS.Data.Models.PromoPicture;
+    var promo = ViewBag.Promo as KeplerCMS.Data.Models.Promo;
+    var pages = ViewBag.Pages as List<KeplerCMS.Data.Models.Pages>;
+    var config = JsonSerializer.Serialize(new
+    {
+        width = PromoPictureController.Width,
+        height = PromoPictureController.Height,
+        picture = picture == null ? null : new { id = picture.Id, zoom = picture.Zoom, offsetX = picture.OffsetX, offsetY = picture.OffsetY, background = picture.Background, banner = picture.Banner, url = PromoPictureController.Url(picture) },
+        roomId = (int?)ViewBag.RoomId,
+        promoId = promo?.Id,
+        banners = PromoPictureController.Banners.Select(b => new { id = b.Id, name = b.Name, file = Url.Content("~" + b.File) }),
+    });
+}
+<h1>@ViewBag.Title</h1>
+<p>A @PromoPictureController.Width x @PromoPictureController.Height picture for the site's promos, cut from a room photo
+    (housekeeping → room → Take photo). Drag the picture to move the room, or use the arrow keys (Shift: 10 px).</p>
+
+<div id="promo-builder" class="promo-builder" data-config="@config">
+    <div class="promo-builder-room">
+        <label for="promo-room-search"><strong>Room</strong></label>
+        <span id="promo-room-current" class="promo-room-current"><em>None picked</em></span>
+        <input type="text" id="promo-room-search" placeholder="Search: room name, owner or id" autocomplete="off" />
+        <div id="promo-room-results" class="promo-room-results"></div>
+    </div>
+
+    <div class="promo-builder-stage">
+        <canvas id="promo-canvas" width="@PromoPictureController.Width" height="@PromoPictureController.Height" tabindex="0" aria-label="Promo picture: drag to move the room"></canvas>
+        <p id="promo-canvas-hint" class="promo-canvas-hint">Pick a room with a photo.</p>
+    </div>
+
+    <div class="promo-builder-controls">
+        <span>Zoom
+            <button type="button" class="promo-zoom" data-zoom="1">1x</button>
+            <button type="button" class="promo-zoom" data-zoom="2">2x</button>
+            <button type="button" class="promo-zoom" data-zoom="3">3x</button>
+        </span>
+        <button type="button" id="promo-centre">Centre</button>
+        <label>Banner
+            <select id="promo-banner">
+                @foreach (var banner in PromoPictureController.Banners)
+                {
+                    <option value="@banner.Id">@banner.Name</option>
+                }
+                <option value="">No banner</option>
+            </select>
+        </label>
+        <label>Background <input type="color" id="promo-background" value="#000000" /></label>
+    </div>
+    <p class="promo-builder-preview">As on the site: <canvas id="promo-small" width="@PromoPictureController.Width" height="@PromoPictureController.Height"></canvas></p>
+
+    <p>
+        <button type="button" id="promo-save" disabled>@(picture == null ? "Save picture" : "Save changes")</button>
+        <span id="promo-status"></span>
+    </p>
+
+    <div id="promo-saved" class="promo-saved" style="display:none">
+        <p>Address: <input type="text" id="promo-url" readonly onclick="this.select()" style="width: 260px" /></p>
+        @if (promo != null)
+        {
+            <p>Promo "@promo.Teaser" now shows this picture. <a href="@Url.Action("Update", "Promo", new { id = promo.Id })">Back to the promo</a></p>
+        }
+        else
+        {
+            <p>
+                Make a promo with it on
+                <select id="promo-page">
+                    @foreach (var sitePage in pages)
+                    {
+                        <option value="@sitePage.Id" selected="@(sitePage.Id == (int?)ViewBag.PageId)">@sitePage.Name (/@sitePage.Slug)</option>
+                    }
+                </select>
+                <a id="promo-create" href="#">Create promo</a>
+                <small class="text-muted">(teaser and "Tag et kig" link filled in, you can change them)</small>
+            </p>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/housekeeping/js/promo-picture.js" asp-append-version="true"></script>
+}

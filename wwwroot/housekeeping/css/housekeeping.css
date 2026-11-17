@@ -1029,3 +1029,31 @@ button:disabled { opacity: .5; cursor: default; }
 .tox .habbo-shop-text { display: flex; flex-direction: column; gap: 4px; }
 .tox .habbo-shop-button { align-self: flex-start; margin-top: 6px; padding: 2px 12px; background: #f60; color: #fff; font-weight: bold; border-radius: 3px; }
 .tox .habbo-shop-reason { color: #b00; }
+/* Room dialog (wwwroot/housekeeping/js/editor-rooms.js): photo thumbnails, preview with the photo above the details. */
+.tox .habbo-room-result img { max-width: 80px; max-height: 44px; object-fit: contain; }
+.tox .habbo-room-result.is-without-photo { opacity: 0.75; }
+.tox .habbo-room-preview { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; text-align: left; }
+.tox .habbo-room-preview img { max-width: 100%; max-height: 220px; }
+.tox .habbo-room-text { display: flex; flex-direction: column; gap: 3px; }
+
+/* Promo picture builder (Areas/Housekeeping/Views/PromoPicture/Index.cshtml, wwwroot/housekeeping/js/promo-picture.js). */
+.promo-builder-room { margin-bottom: 10px; }
+.promo-builder-room input[type=text] { width: 260px; margin-left: 8px; }
+.promo-room-current { margin-left: 6px; }
+.promo-room-results { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; max-height: 190px; overflow-y: auto; }
+.promo-room-result { display: flex; flex-direction: column; align-items: center; width: 120px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 11px; }
+.promo-room-result:hover { border-color: #996600; background: #FFF8DC; }
+.promo-room-result img { max-width: 110px; max-height: 60px; object-fit: contain; }
+.promo-room-result.is-without-photo { opacity: 0.7; }
+.promo-room-nophoto { height: 60px; line-height: 60px; color: #999; }
+.promo-builder-stage { position: relative; display: inline-block; max-width: 100%; }
+#promo-canvas { display: block; width: 850px; max-width: 100%; height: auto; image-rendering: pixelated; border: 1px solid #333; cursor: grab; touch-action: none; }
+#promo-canvas:active { cursor: grabbing; }
+#promo-canvas:focus { outline: 2px solid #FFCC00; }
+.promo-canvas-hint { position: absolute; left: 0; right: 0; top: 40%; text-align: center; color: #fff; pointer-events: none; }
+.promo-builder-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin: 10px 0; }
+.promo-zoom.is-active { font-weight: bold; background: #FFCC00; }
+.promo-builder-preview { display: inline-flex; align-items: center; gap: 6px; }
+#promo-small { width: 425px; max-width: 100%; height: auto; border: 1px solid #ccc; }
+.promo-picture-tools { margin-top: 4px; }
+.promo-picture-tools img { display: block; max-width: 425px; margin-bottom: 4px; border: 1px solid #ccc; }

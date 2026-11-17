@@ -96,6 +96,7 @@ namespace KeplerCMS.Data
         public DbSet<HomesGuestbook> HomesGuestbook { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
         public DbSet<RoomPhoto> RoomPhotos { get; set; }
+        public DbSet<PromoPicture> PromoPictures { get; set; }
         public DbSet<RoomChatlogs> RoomChatlogs { get; set; }
         public DbSet<SoundMachineSongs> SoundMachineSongs { get; set; }
         public DbSet<UsersBadges> UsersBadges { get; set; }

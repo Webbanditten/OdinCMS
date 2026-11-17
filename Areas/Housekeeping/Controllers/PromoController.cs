@@ -36,9 +36,14 @@ namespace KeplerCMS.Areas.Housekeeping
 
 
         [HousekeepingFilter(Fuse.housekeeping_pages)]
-        public IActionResult Create(int pageId)
+        public IActionResult Create(int pageId, string img = null, string teaser = null, string link1Text = null, string link1Href = null)
         {
             ViewData["PageId"] = pageId;
+            // Filled in by the promo picture builder ("Create promo").
+            if (img != null || teaser != null)
+            {
+                return View(new Promo { PageId = pageId, Img = img, Teaser = teaser, Link1Text = link1Text, Link1Href = link1Href });
+            }
             return View();
         }
 

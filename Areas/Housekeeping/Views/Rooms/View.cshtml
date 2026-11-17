@@ -110,6 +110,7 @@
         Taken <span id="room-photo-taken">@photo?.TakenAt.ToString("dd-MM-yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture)</span>,
         <span id="room-photo-size">@photo?.Width x @photo?.Height</span> px.
         Address: <input type="text" readonly value="/room-photo/@(Model.Id).png" onclick="this.select()" style="width: 220px" />
+        · <a href="@Url.Action("Index", "PromoPicture", new { roomId = Model.Id })">Make promo picture</a>
     </p>
     @if (photographerEnabled)
     {
