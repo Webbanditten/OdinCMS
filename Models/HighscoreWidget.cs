@@ -18,15 +18,16 @@ namespace KeplerCMS.Models
     ///   {highscores_battleball_all}        top 10 all time (the players' running totals)
     ///   {champions_battleball}             top 3 this month
     ///   {highscores_snowstorm_week_5}      any of the above with a row count (1-50)
+    ///   {highscores_wobblesquabble}        Wobble Squabble (Odin scores each hit and the win, see update.1.38.sql)
     /// "snowball" is accepted for SnowStorm.
     /// </summary>
     public class HighscoreWidget
     {
         public static readonly Regex Code = new Regex(
-            @"\{(highscores|champions)_(battleball|snowstorm|snowball)(?:_(week|month|all|alltime))?(?:_(\d{1,2}))?\}",
+            @"\{(highscores|champions)_(battleball|snowstorm|snowball|wobblesquabble)(?:_(week|month|all|alltime))?(?:_(\d{1,2}))?\}",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        /// <summary>"battleball" or "snowstorm", as Odin stores it.</summary>
+        /// <summary>"battleball", "snowstorm" or "wobblesquabble", as Odin stores it in highscores.gametype.</summary>
         public string GameType { get; set; }
         public HighscorePeriod Period { get; set; }
         public int Limit { get; set; }
@@ -34,7 +35,12 @@ namespace KeplerCMS.Models
         public static HighscoreWidget FromCode(Match match)
         {
             var champions = match.Groups[1].Value.Equals("champions", StringComparison.OrdinalIgnoreCase);
-            var game = match.Groups[2].Value.ToLowerInvariant() == "battleball" ? "battleball" : "snowstorm";
+            var game = match.Groups[2].Value.ToLowerInvariant() switch
+            {
+                "battleball" => "battleball",
+                "wobblesquabble" => "wobblesquabble",
+                _ => "snowstorm",
+            };
             var period = match.Groups[3].Value.ToLowerInvariant() switch
             {
                 "month" => HighscorePeriod.Month,
@@ -53,7 +59,7 @@ namespace KeplerCMS.Models
         public string Username { get; set; }
         public string Figure { get; set; }
         public int Score { get; set; }
-        /// <summary>Games counted in the period (0 for the all-time list, which reads the running totals).</summary>
+        /// <summary>Games counted in the period (0 for the Battle Ball / SnowStorm all-time lists, which read the running totals).</summary>
         public int Games { get; set; }
         public int Wins { get; set; }
     }
