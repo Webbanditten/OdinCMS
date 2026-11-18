@@ -20,5 +20,13 @@ namespace KeplerCMS.Services.Interfaces
         Task<Movies> GetMovieBySession(string key);
 
         Task<List<TopMovie>> GetTopMovies();
+
+        /// <summary>
+        /// Published movies for the site's Habbowood boxes ({habbowood_top}, {habbowood_new}): "top" = best average rating
+        /// first (more votes first between equals; unrated last), "new" = newest first.
+        /// </summary>
+        Task<List<HabbowoodListMovie>> GetMovieList(string kind, int take);
     }
+
+    public record HabbowoodListMovie(int Id, string Name, string Director, double Rating, int Votes);
 }

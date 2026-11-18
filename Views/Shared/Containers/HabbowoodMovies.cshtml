@@ -1,0 +1,64 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@inject KeplerCMS.Services.Interfaces.IHabbowoodService HabbowoodService
+@*
+    {habbowood_top} / {habbowood_new}: published Habbowood movies in a film box (Container.cshtml picks the list with
+    ViewData["habbowoodList"]). Styles: styles/habbowood.css (the 2007 habbomovie list); stars images/habbomovies/stars.
+*@
+@functions {
+    string T(string key, string fallback)
+    {
+        var value = DbRes.T(key, "habbowood");
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+@{
+    var kind = ViewData["habbowoodList"] as string ?? "top";
+    var movies = await HabbowoodService.GetMovieList(kind, 5);
+}
+@if (movies.Count == 0)
+{
+    <p>@T("no_movies", "Der er ingen færdige film endnu. Lav den første i Habbowood-studiet!")</p>
+    return;
+}
+<div class="habbomovie-scrollable-component">
+    <table border="0" cellpadding="2" cellspacing="0" width="95%">
+        <tbody>
+            @foreach (var movie in movies)
+            {
+                var stars = (int)Math.Round(movie.Rating);
+                <tr>
+                    <td valign="top" class="list-movie-item"><img class="genre-image" src="~/c_images/navi_icons/habbowood_icon.gif" alt="" /></td>
+                    <td valign="top" class="list-movie-name"><a href="/habbowood/watch/@movie.Id">@movie.Name</a></td>
+                </tr>
+                <tr>
+                    <td valign="top" class="list-movie-item"><span>@T("director", "Instruktør:")</span></td>
+                    <td valign="middle" class="list-movie-creatorname">
+                        @if (movie.Director != null)
+                        {
+                            <a href="/home/@movie.Director">@movie.Director</a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="top" class="list-movie-item"><span>@T("rating", "Bedømmelse:")</span></td>
+                    <td valign="middle">
+                        <ul class="rater-list">
+                            @for (var i = 0; i < 5; i++)
+                            {
+                                <li class="rater-list-item"><img src="~/images/habbomovies/stars/icon_star_@(stars > i ? "color" : "grey").gif" alt="" /></li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="top" class="list-movie-item"><span>@T("votes", "Stemmer:")</span></td>
+                    <td valign="middle">@movie.Votes</td>
+                </tr>
+                <tr>
+                    <td valign="top" style="height: 15px;" colspan="2" class="habbomovies-component-divider"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

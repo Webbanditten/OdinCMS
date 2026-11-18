@@ -1,14 +1,7 @@
 ﻿@model KeplerCMS.Models.Page;
 @{
-    var columns = 2;
-    switch (Model.Details.Design)
-    {
-        case "two_small_one_wide":
-            columns = 3;
-            break;
-        default:
-            break;
-    }
+    // Same as PageEditController.Columns (habbowood: 1 wide, 2 menu, 3 and 4 the halves under 1).
+    var columns = KeplerCMS.Areas.Housekeeping.PageEditController.Columns(Model.Details.Design);
 }
 
 <h1>Page Management</h1>

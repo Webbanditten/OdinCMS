@@ -1,0 +1,72 @@
+/* Habbowood pages (page design "habbowood", Views/Shared/PageDesigns/habbowood.cshtml): the 2007 habbo.com Habbowood
+   look. The box themes portlet-film / -goldenfilm / -filmgold / -director are in boxes.css. */
+
+div.habbomovies-custom-bg {
+    background-image: url(../images/habbomovies/habbomoviesbg.gif);
+    width: 918px;
+    margin: 0 auto;
+    padding-top: 8px;
+}
+
+div.hwood-filmstrip {
+    color: #fff;
+    width: 918px;
+    height: 29px;
+    margin: 0 auto;
+    background-image: url(../images/habbomovies/filmstrip.gif);
+    background-repeat: no-repeat;
+    font-size: 11px;
+}
+
+div.hwood-filmstrip a {
+    color: #fff;
+    line-height: 29px;
+    margin-left: 4px;
+    margin-right: 6px;
+}
+
+div.hwood-filmstrip a.selected {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div.habbomovie-scrollable-component {
+    height: 250px;
+    width: 100%;
+    overflow: auto;
+}
+
+div.habbomovie-scrollable-component td {
+    font-size: 11px;
+}
+
+div.habbomovie-scrollable-component a {
+    color: #000;
+}
+
+td.list-movie-name a {
+    font-weight: bold;
+}
+
+ul.rater-list {
+    list-style: none;
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+li.rater-list-item {
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+td.habbomovies-component-divider {
+    background-image: url(../images/habbomovies/component_divider.gif);
+    background-repeat: repeat-x;
+    background-position: left center;
+}
+
+div.habbowood-intro {
+    text-align: center;
+}

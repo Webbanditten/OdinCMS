@@ -1,0 +1,34 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@*
+    {habbowood_intro}: the 2007 Habbowood intro (c_images/album2045/frontpageloop_04_05.swf, 534x325) with its three buttons.
+    Their texts are in xml/habbowood_intro.xml; the links go to the studio and this page's lists. A plain <object>, which
+    Ruffle (loaded by the layout at the end of the page) plays; SWFObject would check for a Flash plugin first and write
+    nothing.
+*@
+@{
+    var swf = Url.Content("~/c_images/album2045/frontpageloop_04_05.swf");
+    var vars = string.Join("&amp;", new[]
+    {
+        "localization_url=" + Uri.EscapeDataString(Url.Content("~/xml/habbowood_intro.xml")),
+        "shoot_movie_url=" + Uri.EscapeDataString("/habbowood"),
+        "watch_movie_url=" + Uri.EscapeDataString("/entertainment/habbowood#film"),
+        "meet_filmmakers_url=" + Uri.EscapeDataString("/entertainment/habbowood#film"),
+        "competition_url=" + Uri.EscapeDataString("/entertainment/habbowood"),
+    });
+}
+<script>
+    // This page's Flash is the silent-start intro loop: play it straight away (Ruffle reads this when the layout loads it).
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = Object.assign({}, window.RufflePlayer.config, { autoplay: "on", unmuteOverlay: "hidden" });
+</script>
+<div class="habbowood-intro">
+    <object type="application/x-shockwave-flash" data="@swf" width="534" height="325">
+        <param name="movie" value="@swf" />
+        <param name="flashvars" value="@Html.Raw(vars)" />
+        <param name="base" value="@Url.Content("~/c_images/album2045/")" />
+        <param name="allowScriptAccess" value="always" />
+        <param name="menu" value="false" />
+        <param name="wmode" value="transparent" />
+    </object>
+</div>

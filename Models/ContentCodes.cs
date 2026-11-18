@@ -23,6 +23,9 @@ namespace KeplerCMS.Models
         public const string Staff = "{staff}";
         public const string PopularFurni = "{popular_furni}";
         public const string Xmas2006 = "{xmas2006}";
+        public const string HabbowoodIntro = "{habbowood_intro}";
+        public const string HabbowoodTop = "{habbowood_top}";
+        public const string HabbowoodNew = "{habbowood_new}";
 
         public record Code(string Value, string Name, string Description);
 
@@ -39,6 +42,9 @@ namespace KeplerCMS.Models
             new Code(LastOnline, "Last online", "The 30 Habbos who logged in most recently."),
             new Code(Staff, "Staff", "Every rank with members, with their avatars."),
             new Code(PopularFurni, "Popular furni", "The furni players bought most in the last 30 days."),
+            new Code(HabbowoodIntro, "Habbowood intro", "The Habbowood intro animation (534×325) with its Shoot a movie / Watch movies / Meet the filmmakers buttons."),
+            new Code(HabbowoodTop, "Habbowood: best rated", "The published Habbowood movies with the best rating (players' 1-5 stars), with their director and votes."),
+            new Code(HabbowoodNew, "Habbowood: newest", "The latest published Habbowood movies."),
         };
 
         /// <summary>{rewards}, {rewards_month} or {rewards_YYYY-MM-DD_YYYY-MM-DD}.</summary>

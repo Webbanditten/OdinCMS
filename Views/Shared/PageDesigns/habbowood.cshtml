@@ -1,0 +1,67 @@
+@model KeplerCMS.Models.Page
+@*
+    The 2007 habbo.com Habbowood page (styles/habbowood.css): a film strip menu over the Habbowood background, a wide column
+    (1, e.g. {habbowood_intro}) above two half columns (3 and 4, e.g. {habbowood_top} and {habbowood_new} in portlet-film
+    boxes), a menu column on the right (2, e.g. a portlet-goldenfilm box) and the ad sidebar.
+*@
+@functions {
+    string T(string key, string fallback)
+    {
+        var value = DbRes.T(key, "habbowood");
+        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
+    }
+}
+<link rel="stylesheet" href="~/styles/habbowood.css" asp-append-version="true" />
+<div class="hwood-filmstrip">
+    <a href="/@Model.Details.Slug" class="selected">@T("menu_main", "Habbowood")</a> |
+    <a href="/habbowood">@T("menu_shoot", "Lav en film")</a> |
+    <a href="/@Model.Details.Slug#film">@T("menu_watch", "Se film")</a>
+</div>
+<div class="habbomovies-custom-bg">
+    @* One outer row, so the tall ad column doesn't stretch the space between the wide column and the halves. *@
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td style="width: 4px;">&nbsp;</td>
+                <td valign="top" style="width: 553px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tbody>
+                            <tr>
+                                <td colspan="3" valign="top" class="habboPage-col" data-cms-column="1">
+                                    @foreach (var container in Model.Containers.Where(c => c.Column == 1).OrderBy(c => c.Order))
+                                    {
+                                        <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" style="width: 274px;" class="habboPage-col" data-cms-column="3" id="film">
+                                    @foreach (var container in Model.Containers.Where(c => c.Column == 3).OrderBy(c => c.Order))
+                                    {
+                                        <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                                    }
+                                </td>
+                                <td style="width: 4px;">&nbsp;</td>
+                                <td valign="top" style="width: 275px;" class="habboPage-col" data-cms-column="4">
+                                    @foreach (var container in Model.Containers.Where(c => c.Column == 4).OrderBy(c => c.Order))
+                                    {
+                                        <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td style="width: 4px;">&nbsp;</td>
+                <td valign="top" style="width: 177px;" class="habboPage-col rightmost" data-cms-column="2">
+                    @foreach (var container in Model.Containers.Where(c => c.Column == 2).OrderBy(c => c.Order))
+                    {
+                        <partial name="~/Views/Shared/Containers/Container.cshtml" model=container />
+                    }
+                </td>
+                <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br style="clear: both;" />

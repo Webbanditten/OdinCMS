@@ -64,6 +64,28 @@ namespace KeplerCMS.Services.Implementations
            return movies;
         }
 
+        public async Task<List<HabbowoodListMovie>> GetMovieList(string kind, int take)
+        {
+            var movies = await _context.Movies.AsNoTracking().Where(m => m.IPublished == 1)
+                .Select(m => new { m.Id, m.Name, m.UserId }).ToListAsync();
+            var ids = movies.Select(m => m.Id).ToList();
+            var votes = await _context.MovieVotes.AsNoTracking().Where(v => ids.Contains(v.MovieId))
+                .GroupBy(v => v.MovieId).Select(g => new { MovieId = g.Key, Average = g.Average(v => (double)v.Rating), Count = g.Count() }).ToListAsync();
+            var userIds = movies.Select(m => m.UserId).Distinct().ToList();
+            var names = await _context.Users.AsNoTracking().Where(u => userIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.Username);
+
+            var list = movies.Select(m =>
+            {
+                var v = votes.FirstOrDefault(x => x.MovieId == m.Id);
+                return new HabbowoodListMovie(m.Id, string.IsNullOrWhiteSpace(m.Name) ? "#" + m.Id : m.Name,
+                    names.GetValueOrDefault(m.UserId), v?.Average ?? 0, v?.Count ?? 0);
+            });
+            list = kind == "top"
+                ? list.OrderByDescending(m => m.Votes > 0).ThenByDescending(m => m.Rating).ThenByDescending(m => m.Votes).ThenByDescending(m => m.Id)
+                : list.OrderByDescending(m => m.Id);
+            return list.Take(take).ToList();
+        }
+
         public async Task<List<Movies>> GetUsersMovies(int userId)
         {
             return await _context.Movies.Where(s => s.UserId == userId).ToListAsync();
