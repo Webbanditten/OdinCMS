@@ -22,7 +22,7 @@ namespace KeplerCMS.Services.Implementations
         public async Task<List<Rewards>> GetRewardsBetweenDates(DateTime from, DateTime to)
         {
             var rewards = await _context.Rewards
-                .Where(s => (s.AvailableFrom <= to && s.AvailableTo >= from) || s.AvailableFrom > to)
+                .Where(s => s.AvailableFrom >= from && s.AvailableFrom <= to) // the period only (it also returned every later reward)
                 .ToListAsync();
 
             var itemDefinitionIds = rewards
@@ -53,13 +53,13 @@ namespace KeplerCMS.Services.Implementations
                 }
             }
 
-            return rewards;
+            return rewards.OrderBy(r => r.AvailableFrom).ToList();
         }
 
         public async Task<List<RewardsViewModel>> GetRewardsBetweenDates(DateTime from, DateTime to, int userId)
         {
             
-            var rewards = await _context.Rewards.Where(s => s.AvailableFrom >= from && s.AvailableTo <= to).Select(reward => new RewardsViewModel
+            var rewards = await _context.Rewards.Where(s => s.AvailableFrom >= from && s.AvailableFrom <= to).Select(reward => new RewardsViewModel
             {
                 Id = reward.Id,
                 RequiredStreak = reward.RequiredStreak,

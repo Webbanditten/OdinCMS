@@ -29,7 +29,8 @@ namespace KeplerCMS.Services.Implementations
     public class RoomPhotographer : BackgroundService, IRoomPhotographer
     {
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
-        private static readonly TimeSpan JobTimeout = TimeSpan.FromMinutes(3);
+        // A photo takes 15-60 s; prod's CPU once needed 3 min 18 s for a room (the photo was then thrown away).
+        private static readonly TimeSpan JobTimeout = TimeSpan.FromMinutes(6);
         private static readonly TimeSpan KeepFinished = TimeSpan.FromHours(1);
 
         private readonly IServiceProvider _services;
