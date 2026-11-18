@@ -65,10 +65,11 @@
     else
     {
         <p>@T("home_gift_text", "Pynt op til jul! Hent klistermærker og en julebaggrund til dit Habbo Home – helt GRATIS.")</p>
-        <form method="post" action="/xmas/home-gift">
+        <form method="post" action="/xmas/home-gift" class="xmas-home-gift-form">
             @Html.AntiForgeryToken()
             <input type="hidden" name="returnUrl" value="@returnUrl" />
-            <button type="submit" class="xmas-home-gift-button">@T("home_gift_button", "Hent julepynt")</button>
+            @* The site's orange-arrow button (like Køb); one click only. *@
+            <a class="colorlink orange" href="#" onclick="if (!this.sent) { this.sent = true; this.parentNode.submit(); } return false;"><span class="stay">@T("home_gift_button", "Hent julepynt")</span></a>
         </form>
     }
 </div>
@@ -78,5 +79,5 @@
     span.xmas-home-gift-item.is-background span { display: block; width: 60px; height: 60px; border: 1px solid #c9b48a; background-position: center; }
     p.xmas-home-gift-done { color: #2e6b1f; font-weight: bold; }
     p.xmas-home-gift-error { color: #b2001f; font-weight: bold; }
-    button.xmas-home-gift-button { font-weight: bold; padding: 3px 12px; cursor: pointer; }
+    form.xmas-home-gift-form { margin: 0; overflow: hidden; }
 </style>
