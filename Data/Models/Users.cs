@@ -25,6 +25,9 @@ namespace KeplerCMS.Data.Models
         public double ClubExpiration { get; set; }
         [Column("club_gift_due")]
         public double ClubGiftDue { get; set; }
+        /// <summary>Unix time until which the user may not trade (0 = no trade ban). Odin checks it on every trade.</summary>
+        [Column("trade_banned_until")]
+        public long TradeBannedUntil { get; set; }
         [Column("created_at")]
         public DateTime CreateAt { get; set; }
         [Column("last_online")]

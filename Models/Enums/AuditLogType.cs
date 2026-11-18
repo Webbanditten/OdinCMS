@@ -30,6 +30,8 @@ namespace KeplerCMS.Models
         edit_voucher,
         delete_voucher,
         take_room_photo,
-        save_promo_picture
+        save_promo_picture,
+        trade_ban,
+        trade_unban
     }
 }
