@@ -42,6 +42,8 @@
 
     function syncPlacement() {
         $('.ad-billboard').toggle(isBillboard());
+        $('.ad-loading').toggle(placement() === 'room_loading');
+        $('.ad-pool').toggle(placement() === 'pool_screen');
         $('#ad-click').closest('div').prev('label').addBack().toggle(placement() !== 'pool_screen');
         var o = option();
         $('#ad-placement-hint').text(o.data('size') + '. ' + o.data('where'));
@@ -82,6 +84,21 @@
         };
         probe.onerror = function () { $('#ad-image-info').text('The picture could not be loaded.'); preview(); };
         probe.src = src;
+    }
+
+    // ---- Room IDs (room loading ad) ----
+
+    var roomTimer = null;
+    function roomIds() {
+        return $('#ad-room-ids').val().split(/[\s,;]+/).map(function (x) { return parseInt(x, 10); }).filter(function (x) { return x > 0; });
+    }
+
+    function lookupRooms() {
+        var ids = roomIds();
+        if (!ids.length) { $('#ad-room-names').text(''); return; }
+        api('GET', 'Rooms?ids=' + ids.join(',')).then(function (rooms) {
+            $('#ad-room-names').text(rooms.map(function (r) { return r.name ? r.name + ' (' + r.id + (r.ownerId ? ', private' : '') + ')' : r.id + ': no such room'; }).join(' · '));
+        }).catch(function () { $('#ad-room-names').text(''); });
     }
 
     // ---- Preview ----
@@ -144,7 +161,9 @@
         $('#ad-ends').val(ad && ad.endsAt ? ad.endsAt.replace('T', ' ').substring(0, 16) : '');
         $('#ad-weight').val(ad ? ad.weight : 1);
         $('#ad-enabled').prop('checked', ad ? ad.enabled : true);
-        $('#ad-rooms input').each(function () { this.checked = !!rooms && rooms.indexOf(+this.value) >= 0; });
+        $('#ad-rooms input, .ad-pool input').each(function () { this.checked = !!rooms && rooms.indexOf(+this.value) >= 0; });
+        $('#ad-room-ids').val(ad && ad.placement === 'room_loading' && rooms ? rooms.join(', ') : '');
+        lookupRooms();
         $('#ad-error').text('');
         $('#ad-form').prop('hidden', false);
         syncPlacement();
@@ -169,7 +188,9 @@
             endsAt: date($('#ad-ends').val()),
             enabled: $('#ad-enabled').prop('checked'),
             weight: parseInt($('#ad-weight').val(), 10) || 1,
-            rooms: isBillboard() ? $('#ad-rooms input:checked').map(function () { return +this.value; }).get() : []
+            rooms: isBillboard() ? $('#ad-rooms input:checked').map(function () { return +this.value; }).get()
+                : placement() === 'pool_screen' ? $('.ad-pool input:checked').map(function () { return +this.value; }).get()
+                : placement() === 'room_loading' ? roomIds() : []
         };
         $('#ad-save').prop('disabled', true);
         $('#ad-error').text('');
@@ -197,6 +218,7 @@
         $('#ad-placement').on('change', function () { syncPlacement(); imageInfo(); });
         $('#ad-fit').on('change', function () { syncRooms(); preview(); });
         $('#ad-image').on('change', imageInfo);
+        $('#ad-room-ids').on('input', function () { clearTimeout(roomTimer); roomTimer = setTimeout(lookupRooms, 300); });
         $('#ad-new').on('click', function () { open(null, null); });
         $('#ad-cancel').on('click', function () { $('#ad-form').prop('hidden', true); });
         $('#ad-save').on('click', save);

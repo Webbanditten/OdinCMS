@@ -19,15 +19,18 @@ namespace KeplerCMS.Models
         public static readonly IReadOnlyList<Placement> All = new[]
         {
             new Placement(RoomBillboard, "Room billboard", "160×140 / 200×180 (slanted)", "The frame on the wall of 46 public rooms. One ad per room visit; pick rooms or leave it for all.", true),
-            new Placement(RoomLoading, "Room loading", "up to 620×360", "The window shown while a room loads, for 4 seconds: on every ads.loading.every-th room entry (setting), at most 5 times per visit to the hotel.", true),
+            new Placement(RoomLoading, "Room loading", "up to 620×360", "The window shown while a room loads, for 4 seconds, at most 5 times per visit to the hotel. Without rooms: on every ads.loading.every-th room entry (setting). Limited to rooms: on every entry into them (browser client).", true),
             new Placement(Purse, "Purse", "200×60", "The purse's transaction list (Vis transaktioner) in the browser client. One ad per visit to the hotel.", true),
-            new Placement(PoolScreen, "Pool screen", "108×102", "The big screen in Habbo Poolen II and on Tagterassen, for 12 seconds every ads.pool.every-th camera turn (setting). It can't be clicked.", true),
+            new Placement(PoolScreen, "Pool screen", "108×102", "The big screen in Habbo Poolen II and on Tagterassen (or one of them), for 12 seconds every ads.pool.every-th camera turn (setting). It can't be clicked.", true),
             new Placement(WebsiteTop, "Website top banner", "728×90", "The top of every page on the website. One ad per page view.", false),
             new Placement(WebsiteSide, "Website right column", "160×600", "The right column of most pages. One ad per page view.", false),
             new Placement(WebsitePartner, "Website partner box", "168×120", "The small box above the right column. One ad per page view.", false),
         };
 
         public static Placement Get(string id) => All.FirstOrDefault(p => p.Id == id);
+
+        /// <summary>The room models whose room class has the big pool screen ("cam1").</summary>
+        public static readonly string[] PoolScreenModels = { "pool_b", "md_a" };
 
         /// <summary>The image size an ad of this placement is shown at (billboards: the small left frame).</summary>
         public static (int Width, int Height) MaxSize(string id) => id switch
