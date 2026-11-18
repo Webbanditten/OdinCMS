@@ -1,0 +1,21 @@
+<texts>
+	<start1>Glædelig jul!</start1>
+	<start2>Skriv din julehilsen her</start2>
+	<mod1_txt1>Dit Habbo-navn</mod1_txt1>
+	<mod1_txt2>Find din egen Habbo, eller brug en andens.</mod1_txt2>
+	<mod1_e1>Den Habbo findes ikke</mod1_e1>
+	<mod1_go>Søg</mod1_go>
+	<mod2_txt1>Find en baggrund</mod2_txt1>
+	<mod3_txt1>Overskrift</mod3_txt1>
+	<mod3_txt2>Besked</mod3_txt2>
+	<mod4_txt1>Din vens navn</mod4_txt1>
+	<mod4_txt2>Din vens Habbo-navn</mod4_txt2>
+	<mod4_txt3>Dit navn</mod4_txt3>
+	<sendown>Lav dit eget</sendown>
+	<send>Send</send>
+	<sendnew>Lav et nyt</sendnew>
+	<box_msg>box_msg</box_msg>
+	<box>Dit julekort er klar! Du finder linket til kortet under kortet. Giv det til din ven.</box>
+	<box_err>Kortet kunne ikke sendes. Vent lidt og send det igen.</box_err>
+	<hotelurl>https://habbo-danmark.com</hotelurl>
+</texts>

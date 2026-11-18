@@ -1,0 +1,100 @@
+@model KeplerCMS.Controllers.EcardController.EcardPage
+@*
+    The 2006 Christmas e-card (EcardController): the card (flash/xmas06/ecard.swf, 732x473, through Ruffle) and, for a
+    logged-in sender, the cards they sent with the links to share (refreshed after sending).
+*@
+@{
+    ViewData["Title"] = "Julekort";
+    var host = Context.Request.Host.Host;
+    var scheme = host is "localhost" or "127.0.0.1" ? Context.Request.Scheme : "https";
+    var siteUrl = scheme + "://" + Context.Request.Host.Value;
+    var swf = Url.Content("~/flash/xmas06/ecard.swf");
+    var vars = new List<string> { "lang=da", "siteurl=" + Uri.EscapeDataString(siteUrl), "base=" + Uri.EscapeDataString(Url.Content("~/flash/xmas06")), "token=1" };
+    if (Model.Card != null) vars.Add("cardid=" + Uri.EscapeDataString(Model.Card));
+    // A new card starts with the sender's own Habbo (the card's default is "0", which isn't a Habbo).
+    var me = ViewData["user"] as KeplerCMS.Data.Models.Users;
+    if (Model.Card == null && me != null) vars.Add("habboname=" + Uri.EscapeDataString(me.Username));
+    string T(string key, string fallback) { var v = DbRes.T(key, "ecard"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+}
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tbody>
+        <tr>
+            <td style="width: 8px;"></td>
+            <td valign="top" style="width: 741px;" class="habboPage-col rightmost">
+                <div class="nobox">
+                    <div class="nobox-content">
+                        <div style="text-align: center;">
+                            <script>
+                                window.RufflePlayer = window.RufflePlayer || {};
+                                window.RufflePlayer.config = Object.assign({}, window.RufflePlayer.config, { autoplay: "on", unmuteOverlay: "hidden" });
+                            </script>
+                            <object type="application/x-shockwave-flash" data="@swf" width="732" height="473">
+                                <param name="movie" value="@swf" />
+                                <param name="flashvars" value="@Html.Raw(string.Join("&amp;", vars))" />
+                                <param name="base" value="@Url.Content("~/flash/xmas06/")" />
+                                <param name="allowScriptAccess" value="always" />
+                                <param name="quality" value="high" />
+                                <param name="bgcolor" value="#ffffff" />
+                                <param name="menu" value="false" />
+                            </object>
+                        </div>
+                    </div>
+                </div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="v2box blue light">
+                        <div class="headline"><h3>@T("mine_title", "Dine julekort")</h3></div>
+                        <div class="border"><div></div></div>
+                        <div class="body">
+                            <p>@T("mine_text", "Når du har sendt et kort, kommer det her. Giv linket til din ven, så kan de se kortet.")</p>
+                            <ul id="ecard-mine" class="ecard-mine" data-empty="@T("mine_none", "Du har ikke sendt nogen kort endnu.")">
+                                @if (Model.Sent.Count == 0)
+                                {
+                                    <li class="ecard-empty">@T("mine_none", "Du har ikke sendt nogen kort endnu.")</li>
+                                }
+                                @foreach (var card in Model.Sent)
+                                {
+                                    <li><strong>@(card.Headline ?? "Julekort")</strong>@(card.ToName != null ? " " + T("to", "til") + " " + card.ToName : "") <input type="text" readonly value="@siteUrl/xmas/ecard?card=@card.Code" onclick="this.select()" /></li>
+                                }
+                            </ul>
+                            <div class="clear"></div>
+                        </div>
+                        <div class="bottom"><div></div></div>
+                    </div>
+                }
+            </td>
+            <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+        </tr>
+    </tbody>
+</table>
+<style>
+    ul.ecard-mine { list-style: none; margin: 4px 0 0; padding: 0; }
+    ul.ecard-mine li { margin: 3px 0; }
+    ul.ecard-mine input { width: 330px; margin-left: 6px; font-size: 11px; }
+</style>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <script>
+        // After sending, the card lands here: refresh the list now and then while the page is open.
+        (function () {
+            var list = document.getElementById('ecard-mine'), last = list.querySelectorAll('input').length;
+            setInterval(function () {
+                fetch('/xmas/ecard/mine', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (cards) {
+                    if (cards.length === last) return;
+                    last = cards.length;
+                    list.innerHTML = '';
+                    cards.forEach(function (c) {
+                        var li = document.createElement('li'), strong = document.createElement('strong'), input = document.createElement('input');
+                        strong.textContent = c.headline || 'Julekort';
+                        li.appendChild(strong);
+                        if (c.toName) li.appendChild(document.createTextNode(' @T("to", "til") ' + c.toName));
+                        input.type = 'text'; input.readOnly = true; input.value = '@siteUrl/xmas/ecard?card=' + c.code;
+                        input.onclick = function () { this.select(); };
+                        li.appendChild(input);
+                        list.appendChild(li);
+                    });
+                }).catch(function () {});
+            }, 5000);
+        })();
+    </script>
+}

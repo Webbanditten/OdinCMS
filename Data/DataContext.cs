@@ -91,6 +91,7 @@ namespace KeplerCMS.Data
         public DbSet<VoucherHistory> VoucherHistory { get; set; }
         public DbSet<Settings> Settings { get; set; }
         public DbSet<Ad> Ads { get; set; }
+        public DbSet<ECard> ECards { get; set; }
         public DbSet<AdRoom> AdRooms { get; set; }
         public DbSet<BillboardFrame> BillboardFrames { get; set; }
 
