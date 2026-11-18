@@ -20,6 +20,21 @@
                     // Image settings get the media library (site background, hotel banner).
                     var imageFolder = Model.Setting switch { "cms.background" => "site:images/bg_patterns", "cms.hotel_banner" => "site:c_images/hotelviews", _ => null };
                 }
+                @{
+                    // What the game server's Habbo Club settings do (Odin, game/club/ClubSubscription.java).
+                    var help = Model.Setting switch
+                    {
+                        "club.gold.months" => "Months as Habbo Club member before the gold HC badge. Only membership time counts, breaks don't. 12 = from the first day of the 13th month, as on Habbo. 0 = no gold badge. Applies straight away, also to players who are online.",
+                        "club.gift.interval" => "How much membership time earns one Habbo Club gift, in the unit of club.gift.timeunit (Habbo: 31 days). Changing it only changes when the next gift comes.",
+                        "club.gift.timeunit" => "The unit of club.gift.interval: DAYS, HOURS or MINUTES.",
+                        "club.gift.present.label" => "The text on the Habbo Club gift present.",
+                        _ => null
+                    };
+                }
+                @if (help != null)
+                {
+                    <small class="form-text text-muted">@help</small>
+                }
                 @if (imageFolder != null)
                 {
                     <img data-media-preview-for="Value" alt="" style="display: block; max-width: 100%; max-height: 100px; margin: 4px 0;" />
