@@ -1,5 +1,5 @@
 @model KeplerCMS.Controllers.IotController.IotForm
-@{ ViewData["Title"] = "Habbo Hjælp"; }
+@{ ViewData["Title"] = "Habbo Hjælpeværktøj"; }
 <form method="post" action="/iot/go">
     <input type="hidden" name="Sid" value="58" />
     @Html.AntiForgeryToken()
@@ -14,6 +14,8 @@
                         <b><label><input type="radio" name="Event" value="Not member" /> Nej, jeg har ikke en Habbo</label></b>
                         <br /><br />
                         <div style="padding-left: 10px;"><partial name="_Button" model='"Næste"' /></div>
+                        <br />
+                        Har du glemt din adgangskode? <a href="/account/forgot">Få en ny med det samme</a>.
                     </div>
                 </td>
             </tr>
