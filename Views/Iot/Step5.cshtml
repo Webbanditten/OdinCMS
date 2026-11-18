@@ -1,6 +1,6 @@
 @model KeplerCMS.Controllers.IotController.IotForm
 @{
-    ViewData["Title"] = "Habbo Hjælp";
+    ViewData["Title"] = "Habbo Hjælpeværktøj";
     ViewData["noFaq"] = true;
     var link = Model.Ticket == null ? null : $"{Context.Request.Scheme}://{Context.Request.Host}/iot/ticket?id={Model.Ticket.Id}&token={Model.Ticket.Token}";
 }

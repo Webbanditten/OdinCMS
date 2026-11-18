@@ -1,10 +1,11 @@
 @model KeplerCMS.Controllers.IotController.IotForm
-@{ ViewData["Title"] = "Habbo Hjælp"; }
+@{ ViewData["Title"] = "Habbo Hjælpeværktøj"; }
 <form method="post" action="/iot/go">
     <input type="hidden" name="Sid" value="76" />
     <partial name="_Carry" model="Model" />
-    <partial name="_Head" model='(3, "Hvad handler din henvendelse om?")' />
+    <partial name="_Head" model='(3, "Hvad har du brug for hjælp med?")' />
     <partial name="_Error" model="Model.Error" />
+    <p>Vælg den kategori, der passer bedst. Så kommer din henvendelse hurtigere til den, der kan hjælpe dig.</p>
     <table border="0" cellspacing="0" cellpadding="0" class="content-table">
         <tbody>
             <tr>
