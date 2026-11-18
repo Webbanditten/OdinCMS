@@ -1,0 +1,88 @@
+@model KeplerCMS.Areas.Housekeeping.PublicRoomsController.PageView
+@{
+    ViewBag.Title = "Public rooms";
+}
+
+<h1>Public rooms</h1>
+<p class="pr-intro">
+    The hotel navigator's public rooms, as players see them: each category lists its rooms first, then its categories.
+    Drag a room by <span class="pr-grip">⠿</span> to move it up or down or into another category, or use its <em>Move to</em> list.
+    Drag a category the same way to change the order of the categories. <strong>Shown / Hidden</strong> takes a room out of the
+    navigator; it can still be entered by following a friend, through a walkway or by a link. Nothing changes in the hotel until you
+    save; players then see it the next time they open the navigator (it keeps a list it has seen for up to 30 seconds).
+</p>
+
+<div class="pr-options">
+    <label><input type="checkbox" id="pr-busiest" @(Model.BusiestFirst ? "checked" : "") /> Busiest first</label>
+    <span class="pr-hint">Rooms and categories with more visitors move up; between ones with as many visitors (often all of them),
+        the order here decides. Off: always the order here.</span>
+</div>
+
+<div class="pr-columns">
+    <div id="pr-tree"></div>
+    <div id="pr-outside-column"></div>
+</div>
+
+<div class="pr-savebar" id="pr-savebar" hidden>
+    <span>You have unsaved changes.</span>
+    <button type="button" class="pr-primary" id="pr-save">Save to the hotel</button>
+    <button type="button" id="pr-discard">Discard</button>
+    <span class="pr-error" id="pr-error"></span>
+</div>
+
+<style>
+    .pr-intro { max-width: 860px; }
+    .pr-grip { color: #889; }
+    .pr-options { margin: 10px 0 14px; }
+    .pr-options label { font-weight: bold; margin-right: 8px; }
+    .pr-hint { color: #667; font-size: 11px; }
+    .pr-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; padding-bottom: 60px; }
+    @@media (max-width: 1100px) { .pr-columns { grid-template-columns: minmax(0, 1fr); } }
+    .pr-cat { border: 1px solid #b8c7d6; background: #f4f8fb; margin-bottom: 10px; }
+    .pr-cat > header { display: flex; align-items: center; gap: 6px; padding: 5px 8px; background: #dfe9f3; border-bottom: 1px solid #b8c7d6; }
+    .pr-cat > header .pr-cat-name { font-weight: bold; }
+    .pr-cat > header small { color: #667; }
+    .pr-cat > header .pr-spacer { flex: 1; }
+    .pr-cat > header input { font-weight: bold; padding: 1px 4px; width: 220px; }
+    .pr-cat.is-new > header { background: #e3f1e3; }
+    .pr-root > header { background: #2b4a6a; color: #fff; }
+    .pr-root > header small, .pr-root > header .pr-link { color: #cde; }
+    .pr-subs { padding: 4px 8px 2px 18px; }
+    .pr-subs-title { display: flex; align-items: center; gap: 8px; padding: 6px 8px 0 18px; color: #556; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .pr-rooms { list-style: none; margin: 0; padding: 3px 4px; min-height: 26px; }
+    .pr-rooms:empty::before { content: attr(data-empty); display: block; color: #99a; font-size: 11px; padding: 5px 6px; font-style: italic; }
+    .pr-room { display: flex; align-items: center; gap: 6px; padding: 3px 6px; margin: 1px 0; background: #fff; border: 1px solid #e0e6ee; border-radius: 2px; }
+    .pr-room:hover { border-color: #9fb6cc; }
+    .pr-room .pr-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pr-room .pr-name a { color: inherit; text-decoration: none; }
+    .pr-room .pr-name a:hover { text-decoration: underline; }
+    .pr-room small { color: #889; }
+    .pr-room .pr-parts { color: #889; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+    .pr-room .pr-reason { color: #a65; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+    .pr-room .pr-visitors { color: #667; font-size: 11px; white-space: nowrap; }
+    .pr-room select { font-size: 11px; max-width: 120px; }
+    .pr-room.is-hidden { background: #f1f1f1; }
+    .pr-room.is-hidden .pr-name { color: #999; text-decoration: line-through; }
+    .pr-room.is-moved { border-left: 3px solid #2e7d32; }
+    .pr-handle { cursor: grab; color: #889; user-select: none; padding: 0 2px; }
+    .pr-eye { font-size: 11px; border: 1px solid #2e7d32; background: #e8f5e9; color: #2e7d32; border-radius: 10px; padding: 0 8px; cursor: pointer; white-space: nowrap; }
+    .pr-room.is-hidden .pr-eye { border-color: #999; background: #fff; color: #777; }
+    .pr-tag { font-size: 10px; padding: 0 5px; border-radius: 3px; background: #f0d060; color: #533; font-weight: normal; }
+    .pr-placeholder { height: 24px; margin: 1px 0; border: 1px dashed #4a7ab0; background: #e8f0f8; list-style: none; }
+    .pr-cat-placeholder { height: 40px; margin-bottom: 10px; border: 1px dashed #4a7ab0; background: #e8f0f8; }
+    .pr-outside { border: 1px solid #d8c8b0; background: #fbf7f1; }
+    .pr-outside > header { background: #efe3d0; border-bottom-color: #d8c8b0; }
+    .pr-outside .pr-hint { display: block; padding: 4px 8px 0; }
+    .pr-savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: 10px; padding: 8px 20px; background: #fff8d6; border-top: 2px solid #e0c040; box-shadow: 0 -2px 6px rgba(0,0,0,0.1); }
+    .pr-savebar[hidden] { display: none; }
+    .pr-primary { font-weight: bold; }
+    .pr-error { color: #b00; }
+    .pr-small-button { font-size: 11px; }
+    .ui-sortable-helper { box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+</style>
+
+@section scripts {
+    <script src="~/housekeeping/js/jquery-ui.min.js" type="text/javascript"></script>
+    <script>window.publicRoomsData = @Json.Serialize(Model);</script>
+    <script src="~/housekeeping/js/public-rooms.js" asp-append-version="true" type="text/javascript"></script>
+}
