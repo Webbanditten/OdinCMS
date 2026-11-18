@@ -108,38 +108,56 @@
         img.src = room.photo;
     }
 
-    // Room search
+    // Room list: before anything is typed, the rooms that have a photo (newest first); typing searches every room by
+    // name, owner or id.
     var search = document.getElementById('promo-room-search');
     var results = document.getElementById('promo-room-results');
+    var heading = document.getElementById('promo-room-heading');
     var timer = null, searchId = 0;
+
+    function showRooms(rooms, title) {
+        results.textContent = '';
+        heading.textContent = title;
+        rooms.forEach(function (room) {
+            var b = el('button', 'promo-room-result' + (room.photo ? '' : ' is-without-photo') + (state.room && state.room.id === room.id ? ' is-current' : ''));
+            b.type = 'button';
+            b.title = room.name + (room.owner ? ' af ' + room.owner : '') + ' · id ' + room.id + (room.photo ? '' : '\nNo photo yet');
+            if (room.photo) { var t = el('img'); t.src = room.photo; t.alt = ''; t.loading = 'lazy'; b.appendChild(t); }
+            else b.appendChild(el('span', 'promo-room-nophoto', 'no photo'));
+            b.appendChild(el('span', null, room.name));
+            b.addEventListener('click', function () {
+                search.value = '';
+                setRoom(room, false);
+                changed();
+                listRooms();
+            });
+            results.appendChild(b);
+        });
+    }
+
+    function listRooms() {
+        var query = search.value.trim();
+        var id = ++searchId;
+        if (!query) {
+            fetchJson('/housekeeping/editor/rooms/photographed').then(function (rooms) {
+                if (id !== searchId) return;
+                showRooms(rooms, rooms.length ? 'Rooms with a photo, newest first. Search to find any other room.'
+                    : 'No room has a photo yet: search for a room, then take its photo on the room page.');
+            }).catch(function () { if (id === searchId) heading.textContent = 'The rooms could not be loaded.'; });
+            return;
+        }
+        if (query.length < 2 && !/^\d+$/.test(query)) { heading.textContent = 'Type one more letter.'; return; }
+        fetchJson('/housekeeping/editor/rooms?query=' + encodeURIComponent(query)).then(function (rooms) {
+            if (id !== searchId) return;
+            showRooms(rooms, rooms.length ? (rooms.length >= 40 ? 'The first 40 rooms. Type more to narrow it down.' : '') : 'No room matches.');
+        }).catch(function () { if (id === searchId) heading.textContent = 'The search failed.'; });
+    }
+
     search.addEventListener('input', function () {
         clearTimeout(timer);
-        var query = search.value.trim();
-        if (query.length < 2 && !/^\d+$/.test(query)) { results.textContent = ''; return; }
-        timer = setTimeout(function () {
-            var id = ++searchId;
-            fetchJson('/housekeeping/editor/rooms?query=' + encodeURIComponent(query)).then(function (rooms) {
-                if (id !== searchId) return;
-                results.textContent = '';
-                if (!rooms.length) results.appendChild(el('em', null, 'No room matches.'));
-                rooms.forEach(function (room) {
-                    var b = el('button', 'promo-room-result' + (room.photo ? '' : ' is-without-photo'));
-                    b.type = 'button';
-                    b.title = room.name + (room.owner ? ' af ' + room.owner : '') + ' · id ' + room.id + (room.photo ? '' : '\nNo photo yet');
-                    if (room.photo) { var t = el('img'); t.src = room.photo; t.alt = ''; t.loading = 'lazy'; b.appendChild(t); }
-                    else b.appendChild(el('span', 'promo-room-nophoto', 'no photo'));
-                    b.appendChild(el('span', null, room.name));
-                    b.addEventListener('click', function () {
-                        results.textContent = '';
-                        search.value = '';
-                        setRoom(room, false);
-                        changed();
-                    });
-                    results.appendChild(b);
-                });
-            }).catch(function () { results.textContent = 'The search failed.'; });
-        }, 250);
+        timer = setTimeout(listRooms, 250);
     });
+    listRooms();
 
     // Moving the room: drag (in picture pixels, whatever size the canvas is shown at) or arrow keys.
     var drag = null;
@@ -238,7 +256,7 @@
 
     draw();
     if (cfg.roomId) {
-        fetchJson('/housekeeping/editor/rooms/' + cfg.roomId).then(function (room) { setRoom(room, !!cfg.picture); }).catch(function () {
+        fetchJson('/housekeeping/editor/rooms/' + cfg.roomId).then(function (room) { setRoom(room, !!cfg.picture); listRooms(); }).catch(function () {
             hint.textContent = 'Room ' + cfg.roomId + ' was not found.';
         });
     }
