@@ -4,6 +4,7 @@
     ViewBag.Title = "Ads";
     var frames = (List<KeplerCMS.Areas.Housekeeping.AdsController.FrameRoom>)ViewData["frames"];
     var poolRooms = (List<KeplerCMS.Areas.Housekeeping.AdsController.FrameRoom>)ViewData["poolRooms"];
+    var publicRooms = (List<KeplerCMS.Areas.Housekeeping.AdsController.FrameRoom>)ViewData["publicRooms"];
     var roomNames = (Dictionary<int, string>)ViewData["roomNames"];
     string RoomName(int id) => roomNames.TryGetValue(id, out var n) ? n + " (" + id + ")" : "#" + id;
     var now = DateTime.Now;
@@ -67,12 +68,20 @@
             </div>
         </div>
 
-        <label class="ad-loading" for="ad-room-ids">Rooms</label>
+        <label class="ad-loading" for="ad-room-search">Rooms</label>
         <div class="ad-loading">
-            <input type="text" id="ad-room-ids" placeholder="Room IDs, e.g. 3, 1018" autocomplete="off" />
-            <div class="ad-hint" id="ad-room-names" style="margin-left: 0"></div>
-            <div class="ad-hint" style="margin-left: 0">Empty: shown in every room, on every few room entries. With rooms (public or private, the ID from
-                Housekeeping > Rooms): shown each time someone enters one of them, and only there. Needs the browser client.</div>
+            <div class="ad-picked" id="ad-picked"></div>
+            <input type="search" id="ad-room-search" placeholder="Find a room: name, owner or ID" autocomplete="off" />
+            <div class="ad-hint" id="ad-room-heading" style="margin-left: 0"></div>
+            <div class="ad-rooms ad-room-list" id="ad-room-public">
+                @foreach (var room in publicRooms)
+                {
+                    <button type="button" class="ad-room-pick" data-id="@room.RoomId" data-name="@room.Name">@room.Name <small>@room.RoomId</small></button>
+                }
+            </div>
+            <div class="ad-rooms ad-room-list" id="ad-room-results" hidden></div>
+            <div class="ad-hint" style="margin-left: 0">None chosen: shown in every room, on every few room entries. With rooms (public or private):
+                shown each time someone enters one of them, and only there. Needs the browser client.</div>
         </div>
 
         <label class="ad-pool">Rooms</label>
@@ -178,7 +187,19 @@
     .ad-grid { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; align-items: start; }
     .ad-grid > label { font-weight: bold; padding-top: 4px; }
     .ad-grid input[type=text], .ad-grid input[type=number], .ad-grid select { padding: 3px 5px; }
-    #ad-name, #ad-image, #ad-click, #ad-room-ids { width: 420px; }
+    #ad-name, #ad-image, #ad-click, #ad-room-search { width: 420px; }
+    .ad-picked { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .ad-picked:empty { display: none; }
+    .ad-chip { display: inline-flex; align-items: center; gap: 4px; background: #dfe9f3; border: 1px solid #9fb6cc; border-radius: 3px; padding: 1px 2px 1px 6px; font-size: 11px; }
+    .ad-chip small { color: #667; }
+    .ad-chip button { border: 0; background: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0 3px; color: #456; }
+    .ad-chip button:hover { color: #b00; }
+    .ad-room-list[hidden] { display: none; }
+    .ad-room-pick { text-align: left; border: 0; background: none; padding: 1px 4px; cursor: pointer; font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 2px; }
+    .ad-room-pick:hover { background: #e8f0f8; }
+    .ad-room-pick.is-picked { background: #2e7d32; color: #fff; }
+    .ad-room-pick.is-picked small { color: #dfd; }
+    .ad-room-pick small { color: #889; }
     .ad-pool .ad-room { display: block; }
     #ad-weight { width: 70px; }
     #ad-starts, #ad-ends { width: 150px; }

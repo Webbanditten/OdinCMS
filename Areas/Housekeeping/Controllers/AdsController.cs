@@ -58,6 +58,8 @@ namespace KeplerCMS.Areas.Housekeeping
             var rooms = await _context.AdRooms.AsNoTracking().ToListAsync();
             ViewData["frames"] = await BillboardRooms();
             ViewData["poolRooms"] = await PoolScreenRooms();
+            ViewData["publicRooms"] = await _context.Rooms.AsNoTracking().Where(r => r.OwnerId == 0).OrderBy(r => r.Name).ThenBy(r => r.Id)
+                .Select(r => new FrameRoom { RoomId = r.Id, Name = r.Name }).ToListAsync();
             var ids = rooms.Select(r => r.RoomId).Distinct().ToList();
             ViewData["roomNames"] = await _context.Rooms.AsNoTracking().Where(r => ids.Contains(r.Id)).ToDictionaryAsync(r => r.Id, r => r.Name);
             return View(ads.Select(a => new AdRow { Ad = a, Rooms = rooms.Where(r => r.AdId == a.Id).Select(r => r.RoomId).ToList() }).ToList());
@@ -68,13 +70,23 @@ namespace KeplerCMS.Areas.Housekeeping
             await _context.Rooms.AsNoTracking().Where(r => AdPlacements.PoolScreenModels.Contains(r.Model))
                 .OrderBy(r => r.Id).Select(r => new FrameRoom { RoomId = r.Id, Name = r.Name, Format = r.Model }).ToListAsync();
 
-        /// <summary>Room names for the room loading ad's room IDs (any room, public or private).</summary>
+        /// <summary>
+        /// The room loading ad's chosen rooms (any room, public or private) with their names and owners, for the picker
+        /// when an ad is opened. The picker searches with the editors' room search (EditorController.Rooms).
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Rooms(string ids)
         {
             var list = ParseIds(ids);
-            var rooms = await _context.Rooms.AsNoTracking().Where(r => list.Contains(r.Id)).Select(r => new { id = r.Id, name = r.Name, ownerId = r.OwnerId }).ToListAsync();
-            return Json(list.Select(id => rooms.FirstOrDefault(r => r.id == id) ?? (object)new { id, name = (string)null, ownerId = 0 }));
+            var rooms = await _context.Rooms.AsNoTracking().Where(r => list.Contains(r.Id)).Select(r => new { r.Id, r.Name, r.OwnerId }).ToListAsync();
+            var ownerIds = rooms.Select(r => r.OwnerId).Where(o => o > 0).Distinct().ToList();
+            var owners = await _context.Users.AsNoTracking().Where(u => ownerIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.Username);
+            return Json(list.Select(id =>
+            {
+                var r = rooms.FirstOrDefault(x => x.Id == id);
+                return r == null ? new { id, name = (string)null, owner = (string)null }
+                    : new { id, name = r.Name, owner = r.OwnerId > 0 ? owners.GetValueOrDefault(r.OwnerId) ?? "#" + r.OwnerId : null };
+            }));
         }
 
         private static List<int> ParseIds(string ids) =>

@@ -1,5 +1,6 @@
 // Housekeeping > Ads (Areas/Housekeeping/Views/Ads/Index): create and edit ads for every ad place.
-// Talks JSON to AdsController: Ad?id= (one ad), Save, Toggle, Delete; Preview?image=&format= draws a slanted billboard.
+// Talks JSON to AdsController: Ad?id= (one ad), Save, Toggle, Delete; Preview?image=&format= draws a slanted billboard;
+// Rooms?ids= names the room loading ad's rooms. The room picker searches with the editors' /housekeeping/editor/rooms?query=.
 (function ($) {
     'use strict';
 
@@ -86,19 +87,78 @@
         probe.src = src;
     }
 
-    // ---- Room IDs (room loading ad) ----
+    // ---- Room picker (room loading ad) ----
+    // Public rooms are listed up front (rendered by the page); typing searches every room by name, owner or ID.
+    // A click adds a room, a second click (or the chip's ×) takes it off again.
 
-    var roomTimer = null;
-    function roomIds() {
-        return $('#ad-room-ids').val().split(/[\s,;]+/).map(function (x) { return parseInt(x, 10); }).filter(function (x) { return x > 0; });
+    var picked = [];       // [{ id, name, owner }] in the order they were added; owner null = public room
+    var searchTimer = null, searchId = 0;
+
+    function isPicked(id) { return picked.some(function (r) { return r.id === id; }); }
+
+    function renderPicked() {
+        var box = document.getElementById('ad-picked');
+        box.innerHTML = '';
+        picked.forEach(function (room) {
+            var chip = el('span', { 'class': 'ad-chip' });
+            chip.appendChild(document.createTextNode(room.name || 'No room ' + room.id));
+            chip.appendChild(el('small', {}, room.name ? (room.owner ? room.owner + ', ' : '') + room.id : 'deleted'));
+            var x = el('button', { type: 'button', title: 'Take it off', 'data-unpick': room.id }, '×');
+            chip.appendChild(x);
+            box.appendChild(chip);
+        });
+        $('.ad-room-pick').each(function () { this.classList.toggle('is-picked', isPicked(+this.dataset.id)); });
     }
 
-    function lookupRooms() {
-        var ids = roomIds();
-        if (!ids.length) { $('#ad-room-names').text(''); return; }
+    function toggleRoom(room) {
+        if (isPicked(room.id)) picked = picked.filter(function (r) { return r.id !== room.id; });
+        else picked.push(room);
+        renderPicked();
+    }
+
+    function pickButton(room) {
+        var label = room.name + (room.owner ? ' · ' + room.owner : '');
+        var button = el('button', { type: 'button', 'class': 'ad-room-pick', 'data-id': room.id, 'data-name': room.name, 'data-owner': room.owner || '', title: label + ' (' + room.id + ')' }, label + ' ');
+        button.appendChild(el('small', {}, room.owner ? String(room.id) : 'public, ' + room.id));
+        return button;
+    }
+
+    function searchRooms() {
+        var query = $('#ad-room-search').val().trim();
+        var mine = ++searchId;
+        var showPublic = function (heading) {
+            $('#ad-room-public').prop('hidden', false);
+            $('#ad-room-results').prop('hidden', true);
+            $('#ad-room-heading').text(heading);
+        };
+        if (!query) { showPublic('Public rooms. Search to find private rooms.'); return Promise.resolve(); }
+        if (query.length < 2 && !/^\d+$/.test(query)) { showPublic('Type one more letter.'); return Promise.resolve(); }
+        return fetch('/housekeeping/editor/rooms?query=' + encodeURIComponent(query), { credentials: 'same-origin' })
+            .then(function (r) { if (!r.ok) throw new Error(r.statusText); return r.json(); })
+            .then(function (rooms) {
+                if (mine !== searchId) return;
+                var list = document.getElementById('ad-room-results');
+                list.innerHTML = '';
+                rooms.forEach(function (room) { list.appendChild(pickButton(room)); });
+                list.hidden = false;
+                $('#ad-room-public').prop('hidden', true);
+                $('#ad-room-heading').text(rooms.length ? (rooms.length >= 40 ? 'The first 40 rooms. Type more to narrow it down.' : rooms.length + (rooms.length === 1 ? ' room.' : ' rooms.')) : 'No room matches.');
+                renderPicked();
+            })
+            .catch(function () { if (mine === searchId) $('#ad-room-heading').text('The search failed.'); });
+    }
+
+    function loadPicked(ids) {
+        picked = [];
+        renderPicked();
+        if (!ids || !ids.length) return;
         api('GET', 'Rooms?ids=' + ids.join(',')).then(function (rooms) {
-            $('#ad-room-names').text(rooms.map(function (r) { return r.name ? r.name + ' (' + r.id + (r.ownerId ? ', private' : '') + ')' : r.id + ': no such room'; }).join(' · '));
-        }).catch(function () { $('#ad-room-names').text(''); });
+            picked = rooms.map(function (r) { return { id: r.id, name: r.name, owner: r.owner }; });
+            renderPicked();
+        }).catch(function () {
+            picked = ids.map(function (id) { return { id: id, name: '#' + id, owner: null }; });
+            renderPicked();
+        });
     }
 
     // ---- Preview ----
@@ -162,8 +222,9 @@
         $('#ad-weight').val(ad ? ad.weight : 1);
         $('#ad-enabled').prop('checked', ad ? ad.enabled : true);
         $('#ad-rooms input, .ad-pool input').each(function () { this.checked = !!rooms && rooms.indexOf(+this.value) >= 0; });
-        $('#ad-room-ids').val(ad && ad.placement === 'room_loading' && rooms ? rooms.join(', ') : '');
-        lookupRooms();
+        loadPicked(ad && ad.placement === 'room_loading' ? rooms : null);
+        $('#ad-room-search').val('');
+        searchRooms();
         $('#ad-error').text('');
         $('#ad-form').prop('hidden', false);
         syncPlacement();
@@ -190,7 +251,7 @@
             weight: parseInt($('#ad-weight').val(), 10) || 1,
             rooms: isBillboard() ? $('#ad-rooms input:checked').map(function () { return +this.value; }).get()
                 : placement() === 'pool_screen' ? $('.ad-pool input:checked').map(function () { return +this.value; }).get()
-                : placement() === 'room_loading' ? roomIds() : []
+                : placement() === 'room_loading' ? picked.map(function (r) { return r.id; }) : []
         };
         $('#ad-save').prop('disabled', true);
         $('#ad-error').text('');
@@ -218,7 +279,27 @@
         $('#ad-placement').on('change', function () { syncPlacement(); imageInfo(); });
         $('#ad-fit').on('change', function () { syncRooms(); preview(); });
         $('#ad-image').on('change', imageInfo);
-        $('#ad-room-ids').on('input', function () { clearTimeout(roomTimer); roomTimer = setTimeout(lookupRooms, 300); });
+        $('#ad-room-search').on('input', function () { clearTimeout(searchTimer); searchTimer = setTimeout(searchRooms, 250); });
+        $('#ad-room-search').on('keydown', function (e) {
+            // Enter takes the first room found, so "1018 ⏎" adds a room by its ID.
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            clearTimeout(searchTimer);
+            searchRooms().then(function () {
+                var first = $('#ad-room-results:not([hidden]) .ad-room-pick').first();
+                if (first.length && !first.hasClass('is-picked')) first.trigger('click');
+            });
+        });
+        $(document).on('click', '.ad-room-pick', function (e) {
+            e.preventDefault();
+            toggleRoom({ id: +this.dataset.id, name: this.dataset.name, owner: this.dataset.owner || null });
+        });
+        $(document).on('click', '[data-unpick]', function (e) {
+            e.preventDefault();
+            var id = +this.dataset.unpick;
+            picked = picked.filter(function (r) { return r.id !== id; });
+            renderPicked();
+        });
         $('#ad-new').on('click', function () { open(null, null); });
         $('#ad-cancel').on('click', function () { $('#ad-form').prop('hidden', true); });
         $('#ad-save').on('click', save);
