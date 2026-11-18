@@ -33,6 +33,21 @@ namespace KeplerCMS.Models
         /// </summary>
         public bool IsPublic { get; set; }
         public ItemsDefinitions FirstDefinition => Parts.FirstOrDefault()?.Definition;
+
+        /// <summary>
+        /// The sprite for the furni imager (/habbo-imaging/furni?sprite=...): the definition's sprite ("name*colour"), except
+        /// posters, which all share the sprite "poster" and are told apart by the catalogue item's number (hof_furni has
+        /// poster20.swf, poster1001.swf, ...).
+        /// </summary>
+        public string ImageSprite
+        {
+            get
+            {
+                var part = Parts.FirstOrDefault();
+                var sprite = part?.Definition?.Sprite;
+                return sprite == "poster" && part.SpecialSpriteId > 0 ? "poster" + part.SpecialSpriteId : sprite;
+            }
+        }
     }
 
     public class CatalogueFurniCatalogue

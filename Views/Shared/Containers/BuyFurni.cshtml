@@ -17,8 +17,7 @@
         return;
     }
     var forSale = Shop.WhyNotForSale(furni) == null;
-    var definition = furni.FirstDefinition;
-    var sprite = definition?.Sprite ?? "";
+    var sprite = furni.ImageSprite ?? "";
     var parts = sprite.Split('*');
     var image = Url.Content("~/habbo-imaging/furni") + "?direction=2&sprite=" + Uri.EscapeDataString(parts[0]) + (parts.Length > 1 ? "&color=" + Uri.EscapeDataString(parts[1]) : "");
 }

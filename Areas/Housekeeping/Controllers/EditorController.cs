@@ -44,7 +44,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 name = e.Name,
                 description = e.Description,
                 saleCode = e.SaleCode,
-                sprite = e.FirstDefinition?.Sprite,
+                sprite = e.ImageSprite,
                 price = e.Price,
                 isPackage = e.IsPackage,
                 notForSale = _shop.WhyNotForSale(e),
@@ -59,7 +59,7 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             var e = await _shop.Get(id);
             if (e == null) return NotFound();
-            return Json(new { id = e.Id, name = e.Name, description = e.Description, saleCode = e.SaleCode, sprite = e.FirstDefinition?.Sprite, price = e.Price, isPackage = e.IsPackage, notForSale = _shop.WhyNotForSale(e) });
+            return Json(new { id = e.Id, name = e.Name, description = e.Description, saleCode = e.SaleCode, sprite = e.ImageSprite, price = e.Price, isPackage = e.IsPackage, notForSale = _shop.WhyNotForSale(e) });
         }
 
         /// <summary>
