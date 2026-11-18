@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging;
 namespace KeplerCMS.Controllers
 {
     /// <summary>
-    /// Furni pictures. With keplercms:furniRenderer:url set they come from the furni renderer (habbo-vibe-playground
+    /// Furni pictures (anim=1: animated, when the furni moves). With keplercms:furniRenderer:url set they come from the furni renderer (habbo-vibe-playground
     /// tools/furni-renderer: the game's own Shockwave furni casts, drawn like the client draws them, with the item
     /// definition's part colours). Whatever it can't draw, or with ?renderer=flash, comes from the Flash files
     /// (swfs/hof_furni, ChromaFurniture) as before.
@@ -64,16 +64,17 @@ namespace KeplerCMS.Controllers
         }
 
         /// <summary>The picture from the furni renderer, cached on disk; null = use the Flash renderer.</summary>
-        private async Task<IActionResult> FromCasts(string sprite, int? color, int state, int direction, bool shadows, bool small, bool icon)
+        private async Task<IActionResult> FromCasts(string sprite, int? color, int? state, int direction, bool shadows, bool small, bool icon, bool anim)
         {
             var url = _configuration["keplercms:furniRenderer:url"];
             if (string.IsNullOrEmpty(url) || Request.Query["renderer"] == "flash") return null;
             if (sprite.Length > 100 || !Regex.IsMatch(sprite, @"^[A-Za-z0-9_.* -]+$")) return null;
 
             var (definition, colours) = Regex.IsMatch(sprite, @"^poster ?\d+$") ? (sprite, (string)null) : await Definition(sprite, color);
-            var query = "sprite=" + Uri.EscapeDataString(definition) + "&direction=" + direction + "&state=" + state
+            // anim=1: an animated PNG if the furni moves; without a state the renderer picks the one it moves in (a lamp lit).
+            var query = "sprite=" + Uri.EscapeDataString(definition) + "&direction=" + direction + (state != null ? "&state=" + state : "")
                 + (string.IsNullOrEmpty(colours) ? "" : "&colors=" + Uri.EscapeDataString(colours))
-                + (shadows ? "&shadow=1" : "") + (small ? "&small=1" : "") + (icon ? "&icon=1" : "");
+                + (shadows ? "&shadow=1" : "") + (small ? "&small=1" : "") + (icon ? "&icon=1" : "") + (anim ? "&anim=1" : "");
             // Kept a day, then drawn again, so renderer fixes reach every picture by themselves; while the renderer is
             // unreachable the old file stays in use.
             var path = "furni_export/_casts/" + Hash("casts1|" + query) + ".png";
@@ -261,7 +262,9 @@ namespace KeplerCMS.Controllers
             if (sprite != null && sprite.Length > 0)
             {
                 var hasColor = Request.Query.ContainsKey("color") || Request.Query.ContainsKey("colour");
-                var fromCasts = await FromCasts(sprite.Trim(), hasColor ? color : null, renderState, renderDirection, renderShadows, isSmallFurni, renderIcon);
+                var anim = Request.Query["anim"] == "1" || Request.Query["anim"] == "true";
+                var fromCasts = await FromCasts(sprite.Trim(), hasColor ? color : null, Request.Query.ContainsKey("state") ? renderState : null,
+                    renderDirection, renderShadows, isSmallFurni, renderIcon, anim);
                 if (fromCasts != null) return fromCasts;
 
                 string fileNameUnique = string.Concat(sprite, isSmallFurni, renderState, renderDirection, color, renderShadows, renderBackground, renderCanvasColour, cropImage, renderIcon);
