@@ -26,7 +26,7 @@ namespace KeplerCMS.Areas.Housekeeping
         }
 
         /// <summary>Columns of a page design (Views/Shared/PageDesigns).</summary>
-        public static int Columns(string design) => design == "two_small_one_wide" ? 3 : 2;
+        public static int Columns(string design) => design switch { "two_small_one_wide" => 3, "habbowood" => 4, _ => 2 };
 
         /// <param name="direction">up, down, left or right.</param>
         [HttpPost]

@@ -1,0 +1,155 @@
+@model WatchViewModel
+@*
+    A movie in the site page: the 2007 player (habbowood/flash/movie_player_skin.swf, 537x360) in a film box, the movie's
+    details and rating box (1-5 stars, one vote per player, MovieController.Vote) and the best rated movies.
+*@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Habbowood: " + Model.Movie.Name;
+    ViewData["hwoodTab"] = "watch";
+    var movie = Model.Movie;
+    var stars = (int)Math.Round(Model.Rating);
+    var player = new FlashEmbed
+    {
+        Id = "MoviePlayer", Swf = Url.Content("~/habbowood/flash/movie_player_skin.swf"), Base = Url.Content("~/habbowood/flash/"), Width = 537, Height = 360, Background = "#000000",
+        Variables = new()
+        {
+            new("figuredata_url", Url.Content("~/habbowood/xml/figure_data_xml_hc.xml")),
+            new("movie_data_url", Url.Action("Movie", "Movie", new { area = "Habbowood", movie_id = movie.Id })),
+            new("localization_url", Url.Content("~/habbowood/xml/locale.xml")),
+            new("movie_id", movie.Id.ToString()),
+            new("shoot_movie_url", "/habbowood"),
+            new("share_this_movie", "/habbowood/watch/" + movie.Id),
+            new("meet_filmmakers_url", "/entertainment/habbowood"),
+            new("competition_url", "/entertainment/habbowood"),
+            new("end_page_url", "/entertainment/habbowood"),
+        },
+    };
+}
+@section Styles {
+    <link rel="stylesheet" href="~/styles/habbowood.css" asp-append-version="true" />
+}
+<partial name="~/Views/Shared/Habbowood/_FilmStrip.cshtml" />
+<div class="habbomovies-custom-bg">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td style="width: 4px;"></td>
+                <td valign="top" style="width: 553px;">
+                    <div class="portlet-film film">
+                        <div class="portlet-film-header"><h3>@movie.Name</h3></div>
+                        <div class="portlet-film-header-b"></div>
+                        <div class="portlet-film-body">
+                            <div class="portlet-film-content">
+                                <div class="hwood-stage" style="width: 537px; height: 360px;"><partial name="~/Views/Shared/Habbowood/_Flash.cshtml" model="player" /></div>
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="portlet-film-bottom"><div class="portlet-film-bottom-body"></div></div>
+                    </div>
+                    <div class="portlet-film film">
+                        <div class="portlet-film-header"><h3>@HabbowoodText.T("watch_top", "Bedst bedømte film")</h3></div>
+                        <div class="portlet-film-header-b"></div>
+                        <div class="portlet-film-body">
+                            <div class="portlet-film-content">
+                                <table class="hwood-movies">
+                                    <tbody>
+                                        @foreach (var top in Model.Top)
+                                        {
+                                            var topStars = (int)Math.Round(top.Rating);
+                                            <tr>
+                                                <td style="width: 20px;"><img src="~/c_images/navi_icons/habbowood_icon.gif" alt="" /></td>
+                                                <td class="hwood-title"><a href="/habbowood/watch/@top.Id"><strong>@top.Name</strong></a><br />@HabbowoodText.T("director", "Instruktør:") @top.Director</td>
+                                                <td style="width: 90px;">
+                                                    <ul class="rater-list">
+                                                        @for (var i = 0; i < 5; i++)
+                                                        {
+                                                            <li class="rater-list-item"><img src="~/images/habbomovies/stars/icon_star_@(topStars > i ? "color" : "grey").gif" alt="" /></li>
+                                                        }
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="portlet-film-bottom"><div class="portlet-film-bottom-body"></div></div>
+                    </div>
+                </td>
+                <td style="width: 4px;"></td>
+                <td valign="top" style="width: 177px;">
+                    <div class="portlet-goldenfilm goldenfilm">
+                        <div class="portlet-goldenfilm-header"><h3>@HabbowoodText.T("watch_about", "Om filmen")</h3></div>
+                        <div class="portlet-goldenfilm-header-b"></div>
+                        <div class="portlet-goldenfilm-body">
+                            <div class="portlet-goldenfilm-content">
+                                <p><strong>@movie.Name</strong>@if (!string.IsNullOrWhiteSpace(Model.Subtitle)) {<br />@Model.Subtitle}</p>
+                                <p>@HabbowoodText.T("director", "Instruktør:") @if (Model.Director != null) {<a href="/home/@Model.Director">@Model.Director</a>}</p>
+                                @if (movie.Published)
+                                {
+                                    <p>@HabbowoodText.T("rating", "Bedømmelse:")</p>
+                                    <ul class="rater-list">
+                                        @for (var i = 0; i < 5; i++)
+                                        {
+                                            <li class="rater-list-item"><img src="~/images/habbomovies/stars/icon_star_@(stars > i ? "color" : "grey").gif" alt="" /></li>
+                                        }
+                                    </ul>
+                                    <div class="clear"></div>
+                                    <p>@HabbowoodText.T("votes", "Stemmer:") @Model.Votes</p>
+                                    @if (Model.CanVote)
+                                    {
+                                        <p><strong>@HabbowoodText.T("watch_rate", "Giv filmen stjerner:")</strong></p>
+                                        <ul class="hwood-rate" id="hwood-rate">
+                                            @for (var n = 1; n <= 5; n++)
+                                            {
+                                                <li><a href="#" class="r@(n)" data-rating="@n" title="@n">@n</a></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else if (!Model.LoggedIn)
+                                    {
+                                        <p>@HabbowoodText.T("watch_login", "Log ind for at give filmen stjerner.")</p>
+                                    }
+                                    else if (!Model.IsOwner)
+                                    {
+                                        <p>@HabbowoodText.T("watch_voted", "Du har givet filmen stjerner. Tak!")</p>
+                                    }
+                                }
+                                else
+                                {
+                                    <p>@HabbowoodText.T("watch_preview", "Filmen er ikke udgivet endnu, så det er kun dig, der kan se den.")</p>
+                                    <form method="post" action="/habbowood/publish">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="movieId" value="@movie.Id" />
+                                        <input type="submit" class="submit" value="@HabbowoodText.T("end_publish", "Udgiv filmen")" />
+                                    </form>
+                                    <p><a href="/habbowood?movie=@movie.Id">@HabbowoodText.T("end_edit", "Ret i filmen")</a></p>
+                                }
+                                <p><img src="~/c_images/album2201/golden_star.gif" width="15" height="15" alt="" /> <a href="/habbowood">@HabbowoodText.T("end_new", "Lav en ny film")</a></p>
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="portlet-goldenfilm-bottom"><div class="portlet-goldenfilm-bottom-body"></div></div>
+                    </div>
+                </td>
+                <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br style="clear: both;" />
+@if (Model.CanVote)
+{
+    <script type="text/javascript">
+        document.querySelectorAll('#hwood-rate a').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                var body = new URLSearchParams({ movieId: '@movie.Id', rating: link.dataset.rating });
+                fetch('@Url.Action("Vote", "Movie", new { area = "Habbowood" })', { method: 'POST', credentials: 'same-origin', body: body })
+                    .then(function () { location.reload(); });
+            });
+        });
+    </script>
+}

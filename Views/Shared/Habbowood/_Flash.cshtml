@@ -1,0 +1,23 @@
+@model KeplerCMS.Areas.Habbowood.FlashEmbed
+@*
+    A Habbowood Flash movie (editor or player) as a plain <object>, which Ruffle (loaded at the end of the layout) plays.
+    habbowood/js/flashobject.js isn't used here: it forces a 770 px minimum height for the old full-window studio.
+    Ruffle starts it at once; where the browser blocks sound it shows its click-to-unmute overlay.
+*@
+@{
+    var vars = string.Join("&amp;", Model.Variables.Select(v => Uri.EscapeDataString(v.Key) + "=" + Uri.EscapeDataString(v.Value ?? "")));
+}
+<script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = Object.assign({}, window.RufflePlayer.config, { autoplay: "on" });
+</script>
+<object type="application/x-shockwave-flash" data="@Model.Swf" width="@Model.Width" height="@Model.Height" id="@Model.Id">
+    <param name="movie" value="@Model.Swf" />
+    <param name="flashvars" value="@Html.Raw(vars)" />
+    <param name="base" value="@Model.Base" />
+    <param name="allowScriptAccess" value="always" />
+    <param name="menu" value="false" />
+    <param name="quality" value="high" />
+    <param name="scale" value="noscale" />
+    <param name="bgcolor" value="@Model.Background" />
+</object>

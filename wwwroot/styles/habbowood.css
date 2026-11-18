@@ -1,0 +1,196 @@
+/* Habbowood pages (page design "habbowood", Views/Shared/PageDesigns/habbowood.cshtml): the 2007 habbo.com Habbowood
+   look. The box themes portlet-film / -goldenfilm / -filmgold / -director are in boxes.css. */
+
+div.habbomovies-custom-bg {
+    background-image: url(../images/habbomovies/habbomoviesbg.gif);
+    width: 918px;
+    margin: 0 auto;
+    padding-top: 8px;
+}
+
+div.hwood-filmstrip {
+    color: #fff;
+    width: 918px;
+    height: 29px;
+    margin: 0 auto;
+    background-image: url(../images/habbomovies/filmstrip.gif);
+    background-repeat: no-repeat;
+    font-size: 11px;
+}
+
+div.hwood-filmstrip a {
+    color: #fff;
+    line-height: 29px;
+    margin-left: 4px;
+    margin-right: 6px;
+}
+
+div.hwood-filmstrip a.selected {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div.habbomovie-scrollable-component {
+    height: 250px;
+    width: 100%;
+    overflow: auto;
+}
+
+div.habbomovie-scrollable-component td {
+    font-size: 11px;
+}
+
+div.habbomovie-scrollable-component a {
+    color: #000;
+}
+
+td.list-movie-name a {
+    font-weight: bold;
+}
+
+ul.rater-list {
+    list-style: none;
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+li.rater-list-item {
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+td.habbomovies-component-divider {
+    background-image: url(../images/habbomovies/component_divider.gif);
+    background-repeat: repeat-x;
+    background-position: left center;
+}
+
+div.habbowood-intro {
+    text-align: center;
+}
+
+/* The studio and the watch page: the Flash stage in the middle of the background. */
+div.hwood-stage {
+    margin: 0 auto 8px;
+    position: relative;
+}
+
+div.hwood-editor {
+    width: 913px;
+    height: 642px;
+    background: #292929;
+}
+
+div.hwood-noflash {
+    padding: 40px;
+    color: #fff;
+}
+
+div.hwood-noflash h3 {
+    color: #fff;
+}
+
+/* Mine film and the end page: the 2007 movie rows and tool buttons. */
+table.hwood-movies {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.hwood-movies td {
+    padding: 5px 4px;
+    vertical-align: top;
+    font-size: 11px;
+}
+
+table.hwood-movies tr.odd td {
+    background: #f1f1f1;
+}
+
+table.hwood-movies td.hwood-title strong {
+    font-size: 12px;
+}
+
+span.hwood-state {
+    display: inline-block;
+    padding: 0 5px;
+    font-size: 10px;
+    border-radius: 2px;
+    background: #ddd;
+    color: #333;
+}
+
+span.hwood-state.published {
+    background: #f6c33d;
+    color: #000;
+}
+
+.hwood-actions form {
+    display: inline;
+}
+
+.hwood-actions a, .hwood-actions button {
+    font-size: 11px;
+}
+
+.hwood-actions button {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: #c00;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* The rating box on the watch page (images/habbomovies/stars/icon_star.gif: grey, coloured, hover). */
+ul.hwood-rate {
+    list-style: none;
+    margin: 4px 0 8px;
+    padding: 0;
+    height: 16px;
+    width: 85px;
+    position: relative;
+    background: url(../images/habbomovies/stars/icon_star.gif) top left repeat-x;
+}
+
+ul.hwood-rate li {
+    float: left;
+}
+
+ul.hwood-rate li.hwood-rate-current {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 16px;
+    background: url(../images/habbomovies/stars/icon_star.gif) left center repeat-x;
+}
+
+ul.hwood-rate li a {
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 17px;
+    height: 16px;
+    z-index: 2;
+    text-indent: -9999px;
+    overflow: hidden;
+}
+
+ul.hwood-rate li a:hover {
+    background: url(../images/habbomovies/stars/icon_star.gif) left bottom repeat-x;
+    left: 0 !important;
+    z-index: 1;
+}
+
+ul.hwood-rate li a.r1 { left: 0px; }
+ul.hwood-rate li a.r1:hover { width: 17px; }
+ul.hwood-rate li a.r2 { left: 17px; }
+ul.hwood-rate li a.r2:hover { width: 34px; }
+ul.hwood-rate li a.r3 { left: 34px; }
+ul.hwood-rate li a.r3:hover { width: 51px; }
+ul.hwood-rate li a.r4 { left: 51px; }
+ul.hwood-rate li a.r4:hover { width: 68px; }
+ul.hwood-rate li a.r5 { left: 68px; }
+ul.hwood-rate li a.r5:hover { width: 85px; }

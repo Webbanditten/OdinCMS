@@ -94,6 +94,13 @@
         } else if(text.Contains(ContentCodes.Staff))
         {
             <partial name="~/Views/Shared/Containers/Staff.cshtml" model=Model />
+        } else if(text.Contains(ContentCodes.HabbowoodIntro))
+        {
+            <partial name="~/Views/Shared/Containers/HabbowoodIntro.cshtml" model=Model />
+        } else if(text.Contains(ContentCodes.HabbowoodTop) || text.Contains(ContentCodes.HabbowoodNew))
+        {
+            ViewData["habbowoodList"] = text.Contains(ContentCodes.HabbowoodTop) ? "top" : "new";
+            <partial name="~/Views/Shared/Containers/HabbowoodMovies.cshtml" model=Model view-data="ViewData" />
         } else if(text.Contains(ContentCodes.PopularFurni))
         {
             <partial name="~/Views/Shared/Containers/PopularFurni.cshtml" model=Model />
@@ -195,6 +202,29 @@
         </div>
     }
 
+    // The Habbowood boxes (styles/boxes.css, images/box-scale/habbomovies_*): film = film strip, goldenfilm = golden film
+    // strip, filmgold = gold without the strip, director = the clapperboard. They share one structure; film and goldenfilm
+    // have a strip (-header-b) under the headline.
+    async Task FilmBox(string kind)
+    {
+        <div class="portlet-@kind @kind">
+            <div class="portlet-@kind-header"><h3>@Model.Title</h3></div>
+            @if (kind == "film" || kind == "goldenfilm")
+            {
+                <div class="portlet-@kind-header-b"></div>
+            }
+            <div class="portlet-@kind-body">
+                <div class="portlet-@kind-content">
+                    @{ await RenderBody(Model.Text); }
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="portlet-@kind-bottom">
+                <div class="portlet-@kind-bottom-body"></div>
+            </div>
+        </div>
+    }
+
     async Task  NoBox()
     {
         <div class="@GenerateClassBasedOnTheme(Model.Theme)">
@@ -241,6 +271,10 @@
     else if (Model.Theme == "content-white-outer")
     {
         await ContentWhite();
+    }
+    else if (Model.Theme is "portlet-film" or "portlet-goldenfilm" or "portlet-filmgold" or "portlet-director")
+    {
+        await FilmBox(Model.Theme.Substring("portlet-".Length));
     }
     else
     {
