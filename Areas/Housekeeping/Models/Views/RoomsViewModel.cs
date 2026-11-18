@@ -29,6 +29,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
             public string Description { get; set; }
             public int AccessType { get; set; }
             public int ShowOwner { get; set; }
+            public int QueueMax { get; set; }
+            public int SpectatorsMax { get; set; }
         }
         
 }

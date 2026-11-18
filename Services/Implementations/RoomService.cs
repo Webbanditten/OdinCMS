@@ -83,6 +83,8 @@ namespace KeplerCMS.Services.Implementations
             };
         }
 
+        public const int MaxQueue = 500, MaxSpectators = 500;
+
         public async Task<string> UpdateRoom(RoomsUpdateModel model)
         {
             try
@@ -93,16 +95,21 @@ namespace KeplerCMS.Services.Implementations
                 room.Description = model.Description;
                 room.ShowOwner = model.ShowOwner;
                 room.AccessType = model.AccessType;
+                room.QueueMax = Math.Clamp(model.QueueMax, 0, MaxQueue);
+                room.SpectatorsMax = Math.Clamp(model.SpectatorsMax, 0, MaxSpectators);
             
                 await _context.SaveChangesAsync();
                 
+                // Odin updates the room as loaded in the game too, so a queue or spectator seats apply at once.
                 _commandQueueService.QueueCommand(CommandQueueType.update_room, new CommandTemplate
                 {
                     RoomId = room.Id,
                     RoomAccessType = room.AccessType,
                     RoomDescription = room.Description,
                     RoomName = room.Name,
-                    RoomShowOwnerName = room.ShowOwner == 1
+                    RoomShowOwnerName = room.ShowOwner == 1,
+                    RoomQueueMax = room.QueueMax,
+                    RoomSpectatorsMax = room.SpectatorsMax
                 });
                 
                 return "success";

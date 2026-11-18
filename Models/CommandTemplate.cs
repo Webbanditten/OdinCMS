@@ -28,5 +28,7 @@ namespace KeplerCMS.Models
         public string RoomName { get; set; }
         public int RoomAccessType { get; set; }
         public bool RoomShowOwnerName { get; set; }
+        public int? RoomQueueMax { get; set; }
+        public int? RoomSpectatorsMax { get; set; }
     }
 }
