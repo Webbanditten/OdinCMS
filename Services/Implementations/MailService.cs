@@ -77,6 +77,21 @@ namespace KeplerCMS.Services
             return await SendEmail(new string[] { to }, T("help_reply_subject", "Svar på din henvendelse til Habbo"), mjml.Html);
         }
 
+        public async Task<SendResponse> SendEcard(string to, string sender, string toName, string headline, string link)
+        {
+            string T(string key, string fallback) { var v = DbRes.T(key, "emails"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+            string E(string s) => System.Net.WebUtility.HtmlEncode(s ?? "");
+            var greeting = string.IsNullOrWhiteSpace(toName) ? T("ecard_hello_anon", "Hej!") : T("ecard_hello", "Hej {name}!").Replace("{name}", E(toName));
+            var mjml = await _mjmlServices.Render(Template(@$"
+                    <mj-text font-size='20px' color='#004979' font-family='Verdana'>{T("ecard_header", "Du har fået et Habbo-julekort!")}</mj-text>
+                    <mj-text font-size='12px' color='#004979' font-family='Verdana'>{greeting} {T("ecard_body", "{sender} har lavet et julekort til dig på Habbo Danmark.").Replace("{sender}", "<b>" + E(sender) + "</b>")}</mj-text>
+                    {(string.IsNullOrWhiteSpace(headline) ? "" : "<mj-text font-size='16px' color='#b2001f' font-family='Verdana'><i>" + E(headline) + "</i></mj-text>")}
+                    <mj-button background-color='#e7a33a' color='#ffffff' font-family='Verdana' font-weight='bold' href='{E(link)}'>{T("ecard_button", "Se dit julekort")}</mj-button>
+                    <mj-text font-size='10px' color='#666666' font-family='Verdana'>{T("ecard_footer", "Du får denne e-mail, fordi en Habbo skrev din adresse på et julekort. Vi gemmer ikke din adresse.")}</mj-text>
+                "));
+            return await SendEmail(new string[] { to }, T("ecard_subject", "{sender} har sendt dig et Habbo-julekort!").Replace("{sender}", sender ?? "En Habbo"), mjml.Html);
+        }
+
         public async Task<SendResponse> SendListOfHabboNames(string to, string[] habboNames)
         {
             var content = @$"

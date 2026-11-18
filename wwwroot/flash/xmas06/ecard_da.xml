@@ -9,13 +9,13 @@
 	<mod3_txt1>Overskrift</mod3_txt1>
 	<mod3_txt2>Besked</mod3_txt2>
 	<mod4_txt1>Din vens navn</mod4_txt1>
-	<mod4_txt2>Din vens Habbo-navn</mod4_txt2>
+	<mod4_txt2>Din vens e-mail</mod4_txt2>
 	<mod4_txt3>Dit navn</mod4_txt3>
 	<sendown>Lav dit eget</sendown>
 	<send>Send</send>
 	<sendnew>Lav et nyt</sendnew>
 	<box_msg>box_msg</box_msg>
-	<box>Dit julekort er klar! Du finder linket til kortet under kortet. Giv det til din ven.</box>
+	<box>Dit julekort er klar! Har du skrevet din vens e-mail og er logget ind, sender vi det til dem. Linket finder du under kortet.</box>
 	<box_err>Kortet kunne ikke sendes. Vent lidt og send det igen.</box_err>
 	<hotelurl>https://habbo-danmark.com</hotelurl>
 </texts>
