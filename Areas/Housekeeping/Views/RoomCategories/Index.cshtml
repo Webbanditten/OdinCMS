@@ -1,0 +1,79 @@
+@model KeplerCMS.Areas.Housekeeping.RoomCategoriesController.PageView
+@{
+    ViewBag.Title = "Room categories";
+}
+
+<h1>Room categories</h1>
+<p class="rc-intro">
+    The categories of the navigator's <strong>Hotelværelser</strong> tab, in the order players see them. Drag a category by
+    <span class="rc-grip">⠿</span> to move it. <strong>Shown / Hidden</strong> takes it out of the navigator and out of the
+    list players pick their room's category from; its rooms keep it until you move them. <strong>Rooms by</strong> says who may
+    put a room in it, and <strong>Trading</strong> whether players may trade in its rooms. Nothing changes in the hotel until you
+    save; players then see it the next time they open the navigator (it keeps a list it has seen for up to 30 seconds).
+</p>
+
+<div class="rc-options">
+    <label><input type="checkbox" id="rc-busiest" @(Model.BusiestFirst ? "checked" : "") /> Busiest first</label>
+    <span class="rc-hint">Room categories with more visitors move up; between ones with as many visitors (often all of them), the
+        order here decides. Off: always the order here. The best rated lists always come first.</span>
+</div>
+
+<div id="rc-page"></div>
+
+<div class="rc-savebar" id="rc-savebar" hidden>
+    <span>You have unsaved changes.</span>
+    <button type="button" class="rc-primary" id="rc-save">Save to the hotel</button>
+    <button type="button" id="rc-discard">Discard</button>
+    <span class="rc-error" id="rc-error"></span>
+</div>
+
+<style>
+    .rc-intro { max-width: 860px; }
+    .rc-grip { color: #889; }
+    .rc-options { margin: 10px 0 14px; }
+    .rc-options label { font-weight: bold; margin-right: 8px; }
+    .rc-hint { color: #667; font-size: 11px; }
+    #rc-page { max-width: 980px; padding-bottom: 60px; }
+    .rc-box { border: 1px solid #b8c7d6; background: #f4f8fb; margin-bottom: 12px; }
+    .rc-box > header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #2b4a6a; color: #fff; }
+    .rc-box > header .rc-name { font-weight: bold; }
+    .rc-box > header small { color: #cde; }
+    .rc-box > header input { font-weight: bold; padding: 1px 4px; width: 240px; }
+    .rc-spacer { flex: 1; }
+    .rc-group-title { display: flex; align-items: center; gap: 8px; padding: 8px 10px 2px; color: #556; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .rc-group-title .rc-hint { text-transform: none; font-weight: normal; }
+    .rc-list { list-style: none; margin: 0; padding: 3px 8px 8px; min-height: 30px; }
+    .rc-list:empty::before { content: attr(data-empty); display: block; color: #99a; font-size: 11px; padding: 6px; font-style: italic; }
+    .rc-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; margin: 2px 0; background: #fff; border: 1px solid #e0e6ee; border-radius: 2px; min-height: 26px; }
+    .rc-row:hover { border-color: #9fb6cc; }
+    .rc-row .rc-name { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 140px; }
+    .rc-row input.rc-rename-input { font-weight: bold; padding: 1px 4px; width: 220px; }
+    .rc-row .rc-meta { color: #778; font-size: 11px; white-space: nowrap; }
+    .rc-row .rc-tag { font-size: 10px; padding: 0 5px; border-radius: 3px; background: #dfe9f3; color: #345; white-space: nowrap; }
+    .rc-row .rc-tag.rc-new { background: #e3f1e3; color: #2e5e30; }
+    .rc-row label { font-size: 11px; white-space: nowrap; font-weight: normal; }
+    .rc-row select { font-size: 11px; }
+    .rc-row.is-hidden { background: #f1f1f1; }
+    .rc-row.is-hidden .rc-name { color: #999; text-decoration: line-through; }
+    .rc-row.is-deleted { display: none; }
+    .rc-handle { cursor: grab; color: #889; user-select: none; padding: 0 2px; }
+    .rc-eye { font-size: 11px; border: 1px solid #2e7d32; background: #e8f5e9; color: #2e7d32; border-radius: 10px; padding: 0 8px; cursor: pointer; white-space: nowrap; }
+    .rc-row.is-hidden .rc-eye { border-color: #999; background: #fff; color: #777; }
+    .rc-small { font-size: 11px; }
+    .rc-placeholder { height: 30px; margin: 2px 0; border: 1px dashed #4a7ab0; background: #e8f0f8; list-style: none; }
+    .rc-outside { border-color: #d8c8b0; background: #fbf7f1; }
+    .rc-outside > header { background: #efe3d0; color: #533; }
+    .rc-outside > header small { color: #866; }
+    .rc-outside p { margin: 6px 10px; }
+    .rc-savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: 10px; padding: 8px 20px; background: #fff8d6; border-top: 2px solid #e0c040; box-shadow: 0 -2px 6px rgba(0,0,0,0.1); }
+    .rc-savebar[hidden] { display: none; }
+    .rc-primary { font-weight: bold; }
+    .rc-error { color: #b00; }
+    .ui-sortable-helper { box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+</style>
+
+@section scripts {
+    <script src="~/housekeeping/js/jquery-ui.min.js" type="text/javascript"></script>
+    <script>window.roomCategoriesData = @Json.Serialize(Model);</script>
+    <script src="~/housekeeping/js/room-categories.js" asp-append-version="true" type="text/javascript"></script>
+}

@@ -64,7 +64,7 @@
 
     function categoryBox(category, isNew) {
         var key = isNew ? category.key : String(category.id);
-        var section = el('section', { 'class': 'pr-cat' + (isNew ? ' is-new' : ''), 'data-key': key });
+        var section = el('section', { 'class': 'pr-cat' + (isNew ? ' is-new' : '') + (category.hidden ? ' is-hidden' : ''), 'data-key': key });
         var header = el('header');
         header.appendChild(el('span', { 'class': 'pr-handle', title: 'Drag to move the category' }, '⠿'));
         header.appendChild(el('span', { 'class': 'pr-cat-name' }, category.name));
@@ -72,6 +72,7 @@
         if (category.fuse) header.appendChild(el('span', { 'class': 'pr-tag', title: 'Only players with this right see the category' }, category.fuse));
         header.appendChild(el('small', { 'class': 'pr-count' }));
         header.appendChild(el('span', { 'class': 'pr-spacer' }));
+        header.appendChild(el('button', { type: 'button', 'class': 'pr-eye pr-cat-eye', title: 'Show or hide the whole category in the navigator' }, category.hidden ? 'Hidden' : 'Shown'));
         header.appendChild(el('button', { type: 'button', 'class': 'pr-small-button', 'data-rename': '' }, 'Rename'));
         if (!category.clubOnly) header.appendChild(el('button', { type: 'button', 'class': 'pr-small-button', 'data-delete': '' }, 'Delete'));
         section.appendChild(header);
@@ -128,7 +129,7 @@
     function categories() {
         var list = [{ key: ROOT, name: $('.pr-root > header .pr-cat-name').text() }];
         $('#pr-subs > .pr-cat').each(function () {
-            list.push({ key: this.dataset.key, name: $(this).children('header').find('.pr-cat-name').text() });
+            list.push({ key: this.dataset.key, name: $(this).children('header').find('.pr-cat-name').text(), hidden: this.classList.contains('is-hidden') });
         });
         return list;
     }
@@ -230,7 +231,7 @@
         return {
             busiestFirst: $('#pr-busiest').prop('checked'),
             rootName: cats[0].name,
-            categories: cats.slice(1).map(function (c) { return { key: String(c.key), name: c.name }; }),
+            categories: cats.slice(1).map(function (c) { return { key: String(c.key), name: c.name, hidden: !!c.hidden }; }),
             deleted: deleted,
             rooms: rooms
         };
@@ -260,7 +261,12 @@
     $(function () {
         render();
         $('#pr-busiest').on('change', changed);
-        $(document).on('click', '.pr-eye', function () {
+        $(document).on('click', '.pr-cat-eye', function () {
+            var section = $(this).closest('.pr-cat').toggleClass('is-hidden');
+            this.textContent = section.hasClass('is-hidden') ? 'Hidden' : 'Shown';
+            changed();
+        });
+        $(document).on('click', '.pr-eye:not(.pr-cat-eye)', function () {
             var row = $(this).closest('.pr-room').toggleClass('is-hidden');
             this.textContent = row.hasClass('is-hidden') ? 'Hidden' : 'Shown';
             changed();

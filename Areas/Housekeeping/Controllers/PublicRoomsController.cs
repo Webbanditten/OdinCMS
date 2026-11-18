@@ -69,6 +69,8 @@ namespace KeplerCMS.Areas.Housekeeping
             public bool ClubOnly { get; set; }
             /// <summary>The fuse a player needs to see the category, when it isn't everyone's (DEFAULT).</summary>
             public string Fuse { get; set; }
+            /// <summary>Out of the navigator (rooms_categories.is_hidden, Odin v1.33.0).</summary>
+            public bool Hidden { get; set; }
             public List<RoomView> Rooms { get; set; } = new();
         }
 
@@ -107,6 +109,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 Name = c.Name,
                 ClubOnly = c.Id == ClubCategory,
                 Fuse = string.Equals(c.FuseAccess, "DEFAULT", StringComparison.OrdinalIgnoreCase) ? null : c.FuseAccess,
+                Hidden = c.IsHidden,
                 Rooms = main.Where(r => r.Category == c.Id).Select(RoomOf).ToList(),
             };
 
@@ -190,6 +193,7 @@ namespace KeplerCMS.Areas.Housekeeping
             /// <summary>The category's id, or "new..." for one made on the page.</summary>
             public string Key { get; set; }
             public string Name { get; set; }
+            public bool Hidden { get; set; }
         }
 
         public class RoomEdit
@@ -289,6 +293,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 var category = categories.FirstOrDefault(c => c.Id == ids[request.Categories[i].Key]) ?? created.First(c => c.Id == ids[request.Categories[i].Key]);
                 category.Name = names[request.Categories[i].Key];
                 category.OrderId = i + 1;
+                category.IsHidden = request.Categories[i].Hidden;
             }
 
             var places = new Dictionary<int, int>();

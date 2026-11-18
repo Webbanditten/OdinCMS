@@ -5,7 +5,8 @@ namespace KeplerCMS.Data.Models
 {
     /// <summary>
     /// A navigator category (Odin's NavigatorCategory). Public room categories have public_spaces = 1; "Fællesrum" (3) is the
-    /// root the client opens (navigator.public.default). Housekeeping > Public rooms edits the ones under it.
+    /// root the client opens (navigator.public.default). Housekeeping > Public rooms edits the ones under it, Housekeeping >
+    /// Room categories the guest room categories under "Gæsterum" (4, navigator.private.default).
     /// </summary>
     [Table("rooms_categories")]
     public class NavigatorCategory
@@ -33,6 +34,12 @@ namespace KeplerCMS.Data.Models
         public string FuseAccess { get; set; }
         [Column("fuse_setflatcat")]
         public string FuseSetFlatCat { get; set; }
+        /// <summary>daily, weekly or alltime: lists the best rated guest rooms instead of its own (Odin's RoomRatings, v1.32.0).</summary>
+        [Column("ranking")]
+        public string Ranking { get; set; } = "";
+        /// <summary>The navigator doesn't list or open it and players can't put rooms in it (Odin v1.33.0).</summary>
+        [Column("is_hidden")]
+        public bool IsHidden { get; set; }
     }
 
     /// <summary>
