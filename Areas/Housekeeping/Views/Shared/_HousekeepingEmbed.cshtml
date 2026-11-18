@@ -17,6 +17,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="habbo-furni-url" content="@(Configuration["keplercms:furniUrl"] ?? "/habbo-imaging/furni")">
+    <meta name="habbo-furni-coloured" content="@(string.IsNullOrEmpty(Configuration["keplercms:furniRenderer:url"]) ? "0" : "1")">
     <meta name="habbo-avatar-url" content="@(Configuration["keplercms:figureUrl"] ?? "/habbo-imaging/avatarimage")">
     <title>Housekeeping ~ @PageTitle()</title>
     <link rel="stylesheet" href="~/housekeeping/css/housekeeping.css" asp-append-version="true">

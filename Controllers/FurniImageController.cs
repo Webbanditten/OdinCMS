@@ -10,13 +10,95 @@ using KeplerCMS.Chroma;
 using System.Security.Cryptography;
 using System.Text;
 using KeplerCMS.Helpers;
+using System.Linq;
+using System.Text.RegularExpressions;
+using KeplerCMS.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace KeplerCMS.Controllers
 {
+    /// <summary>
+    /// Furni pictures. With keplercms:furniRenderer:url set they come from the furni renderer (habbo-vibe-playground
+    /// tools/furni-renderer: the game's own Shockwave furni casts, drawn like the client draws them, with the item
+    /// definition's part colours). Whatever it can't draw, or with ?renderer=flash, comes from the Flash files
+    /// (swfs/hof_furni, ChromaFurniture) as before.
+    /// </summary>
     public class FurniImageController : Controller
     {
-        public FurniImageController()
+        private static readonly System.Net.Http.HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
+        private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<FurniImageController> _logger;
+
+        public FurniImageController(DataContext context, IConfiguration configuration, IMemoryCache cache, ILogger<FurniImageController> logger)
         {
+            _context = context;
+            _configuration = configuration;
+            _cache = cache;
+            _logger = logger;
+        }
+
+        /// <summary>The definition a picture asks for ("chair_norja" + color 2 = chair_norja*2) and its part colours.</summary>
+        private async Task<(string Sprite, string Colours)> Definition(string sprite, int? color)
+        {
+            var candidates = sprite.Contains('*') ? new[] { sprite } : color != null ? new[] { sprite + "*" + color, sprite } : new[] { sprite };
+            var key = "furni-def:" + string.Join("|", candidates);
+            if (_cache.TryGetValue(key, out (string, string) known)) return known;
+            var found = (candidates.Last(), (string)null);
+            foreach (var candidate in candidates)
+            {
+                var definition = await _context.ItemsDefinitions.AsNoTracking().Where(d => d.Sprite == candidate).OrderBy(d => d.Id)
+                    .Select(d => new { d.Colour }).FirstOrDefaultAsync();
+                if (definition != null)
+                {
+                    found = (candidate, definition.Colour);
+                    break;
+                }
+            }
+            _cache.Set(key, found, TimeSpan.FromMinutes(10));
+            return found;
+        }
+
+        /// <summary>The picture from the furni renderer, cached on disk; null = use the Flash renderer.</summary>
+        private async Task<IActionResult> FromCasts(string sprite, int? color, int state, int direction, bool shadows, bool small, bool icon)
+        {
+            var url = _configuration["keplercms:furniRenderer:url"];
+            if (string.IsNullOrEmpty(url) || Request.Query["renderer"] == "flash") return null;
+            if (sprite.Length > 100 || !Regex.IsMatch(sprite, @"^[A-Za-z0-9_.* -]+$")) return null;
+
+            var (definition, colours) = Regex.IsMatch(sprite, @"^poster ?\d+$") ? (sprite, (string)null) : await Definition(sprite, color);
+            var query = "sprite=" + Uri.EscapeDataString(definition) + "&direction=" + direction + "&state=" + state
+                + (string.IsNullOrEmpty(colours) ? "" : "&colors=" + Uri.EscapeDataString(colours))
+                + (shadows ? "&shadow=1" : "") + (small ? "&small=1" : "") + (icon ? "&icon=1" : "");
+            var path = "furni_export/_casts/" + Hash("casts1|" + query) + ".png";
+            byte[] bytes;
+            if (System.IO.File.Exists(path))
+            {
+                bytes = await System.IO.File.ReadAllBytesAsync(path);
+            }
+            else
+            {
+                try
+                {
+                    using var response = await Http.GetAsync(url.TrimEnd('/') + "/furni?" + query);
+                    if (!response.IsSuccessStatusCode) return null; // 404: nothing to draw from the casts
+                    bytes = await response.Content.ReadAsByteArrayAsync();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning("Furni renderer unreachable for {Query}: {Message}", query, e.Message);
+                    return null;
+                }
+                Directory.CreateDirectory("furni_export/_casts");
+                await System.IO.File.WriteAllBytesAsync(path, bytes);
+            }
+            Response.Headers["Cache-Control"] = "public, max-age=31536000";
+            Response.Headers["Access-Control-Allow-Origin"] = "*";
+            return File(bytes, "image/png");
         }
 
         [Route("habbo-imaging/furni")]
@@ -156,8 +238,18 @@ namespace KeplerCMS.Controllers
                 renderIcon = (value.ToString().Equals("1") || value.ToString().Equals("true"));
             }
 
+            // The sprite names folders under furni_export: only plain sprite names ("../" made folders anywhere).
+            if (sprite != null && (sprite.Length > 100 || !Regex.IsMatch(sprite, @"^[A-Za-z0-9_.* -]+$") || sprite.Contains("..")))
+            {
+                return NotFound();
+            }
+
             if (sprite != null && sprite.Length > 0)
             {
+                var hasColor = Request.Query.ContainsKey("color") || Request.Query.ContainsKey("colour");
+                var fromCasts = await FromCasts(sprite.Trim(), hasColor ? color : null, renderState, renderDirection, renderShadows, isSmallFurni, renderIcon);
+                if (fromCasts != null) return fromCasts;
+
                 string fileNameUnique = string.Concat(sprite, isSmallFurni, renderState, renderDirection, color, renderShadows, renderBackground, renderCanvasColour, cropImage, renderIcon);
                 string hashedUniqueName = Hash(fileNameUnique);
 

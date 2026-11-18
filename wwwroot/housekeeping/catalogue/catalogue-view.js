@@ -113,10 +113,13 @@
         return base + '?sprite=' + encodeURIComponent(parts[0]) + (parts[1] ? '&color=' + parts[1] : '') + (extra || '');
     }
 
-    // The game colours furni with the definition's part colours ("#FFFFFF,#533E10,..."); the imager draws them
-    // uncoloured. Multiply the picture by the first non-white part colour, which is how plastic, pillows etc. look.
+    // The game colours furni with the definition's part colours ("#FFFFFF,#533E10,..."). The Flash imager draws them
+    // uncoloured: multiply its picture by the first non-white part colour, which is how plastic, pillows etc. look.
+    // The furni renderer (meta habbo-furni-coloured = 1) already draws them with their colours.
+    var furniColoured = (function () { var m = document.querySelector('meta[name="habbo-furni-coloured"]'); return !!m && m.content === '1'; })();
     var tintCache = {};
     function tintColour(colours) {
+        if (furniColoured) return null;
         var list = String(colours || '').split(',').map(function (c) { return c.trim().toUpperCase(); });
         for (var i = 0; i < list.length; i++) if (/^#[0-9A-F]{6}$/.test(list[i]) && list[i] !== '#FFFFFF') return list[i];
         return null;
