@@ -30,10 +30,13 @@ namespace KeplerCMS.Services.Implementations
         private async Task<Dictionary<int, RewardFurni>> Furni(IEnumerable<int> ids)
         {
             var wanted = ids.Distinct().ToList();
-            return await _context.ItemsDefinitions
+            var furni = await _context.ItemsDefinitions
                 .Where(d => wanted.Contains(d.Id))
                 .Select(d => new RewardFurni { Id = d.Id, Name = d.Name, Sprite = d.Sprite })
                 .ToDictionaryAsync(d => d.Id);
+            var posters = await FurniService.PosterSprites(_context, wanted);
+            foreach (var f in furni.Values) f.Image = posters.GetValueOrDefault(f.Id) ?? f.Sprite;
+            return furni;
         }
 
         /// <summary>
@@ -67,6 +70,7 @@ namespace KeplerCMS.Services.Implementations
                         Id = i.DefinitionId,
                         Name = furni[i.DefinitionId].Name,
                         Sprite = furni[i.DefinitionId].Sprite,
+                        Image = furni[i.DefinitionId].Image,
                         NeedsReview = i.NeedsReview,
                         Note = i.Note,
                     }).ToList(),

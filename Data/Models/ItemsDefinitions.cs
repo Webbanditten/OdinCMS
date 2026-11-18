@@ -41,5 +41,12 @@ namespace KeplerCMS.Data.Models
         public string DrinkIds { get; set; }
         
         public ICollection<Items> Items { get; set; }
+
+        /// <summary>
+        /// Not a column: the sprite the furni imager draws it with when that isn't Sprite. Posters all have the sprite
+        /// "poster" and get "poster27" etc. from their catalogue item (FurniService.PosterSprites).
+        /// </summary>
+        [NotMapped]
+        public string ImageSprite { get; set; }
     }
 }

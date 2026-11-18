@@ -79,8 +79,9 @@ window.Rewards = (function ($) {
         return (meta && meta.content) || '/habbo-imaging/furni';
     }
 
+    // image: what the imager draws it with when that isn't the sprite (posters: "poster27").
     function furniIcon(furni) {
-        var parts = (furni.sprite || '').split('*');
+        var parts = (furni.image || furni.sprite || '').split('*');
         return furniUrl() + '?sprite=' + encodeURIComponent(parts[0]) + (parts[1] ? '&color=' + parts[1] : '') + '&icon=true';
     }
 
@@ -127,7 +128,7 @@ window.Rewards = (function ($) {
                 processResults: function (data) {
                     return {
                         results: data.slice(0, 80).map(function (f) {
-                            return { id: f.id, text: furniName(f) + ' (' + f.sprite + ')', furni: { id: f.id, name: f.name, sprite: f.sprite } };
+                            return { id: f.id, text: furniName(f) + ' (' + f.sprite + ')', furni: { id: f.id, name: f.name, sprite: f.sprite, image: f.imageSprite } };
                         })
                     };
                 }
@@ -527,7 +528,7 @@ window.Rewards = (function ($) {
             var known = {};
             state.pools.forEach(function (pool) { pool.items.forEach(function (f) { known[f.id] = f; }); });
             Promise.all(ids.filter(function (id) { return !known[id]; }).map(function (id) {
-                return fetch('/api/hotel/furni?id=' + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (f) { if (f) known[id] = { id: f.id, name: f.name, sprite: f.sprite }; });
+                return fetch('/api/hotel/furni?id=' + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (f) { if (f) known[id] = { id: f.id, name: f.name, sprite: f.sprite, image: f.imageSprite }; });
             })).then(function () {
                 state.slots.forEach(function (s) { s.itemFurni = (s.items || []).map(function (id) { return known[id]; }).filter(Boolean); });
                 renderSlots();

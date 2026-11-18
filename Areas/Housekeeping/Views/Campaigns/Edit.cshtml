@@ -385,7 +385,7 @@
                     processResults: function (data) {
                         return {
                             results: data.map(function (item) {
-                                return { id: item.id, text: "(" + item.sprite + ") " + item.name };
+                                return { id: item.id, text: "(" + (item.imageSprite || item.sprite) + ") " + item.name };
                             })
                         };
                     }

@@ -348,7 +348,12 @@
                 }
             };
         },
-        search: function (query) { return fetchJson('/api/hotel/furni/search?query=' + encodeURIComponent(query)); },
+        // Posters come back as "poster27" (imageSprite), the sprite the imager needs.
+        search: function (query) {
+            return fetchJson('/api/hotel/furni/search?query=' + encodeURIComponent(query)).then(function (list) {
+                return list.map(function (f) { return f.imageSprite ? Object.assign({}, f, { sprite: f.imageSprite }) : f; });
+            });
+        },
         rankFields: function (item) { return [item.name, item.sprite]; },
         // The same furni and colour ("rare_dragonlamp*0" is "rare_dragonlamp" in its default colour).
         same: function (a, b) {
