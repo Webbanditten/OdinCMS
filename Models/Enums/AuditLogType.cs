@@ -37,6 +37,8 @@ namespace KeplerCMS.Models
         edit_ad,
         delete_ad,
         edit_public_rooms,
-        edit_room_categories
+        edit_room_categories,
+        help_ticket_reply,
+        help_ticket_close
     }
 }

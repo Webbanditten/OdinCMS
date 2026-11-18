@@ -66,6 +66,17 @@ namespace KeplerCMS.Services
             return await SendEmail(new string[] { to }, DbRes.T("forgot_password_subject", "emails"), mjml.Html);
         }
 
+        public async Task<SendResponse> SendHelpTicketReply(string to, string link)
+        {
+            string T(string key, string fallback) { var v = DbRes.T(key, "emails"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+            var mjml = await _mjmlServices.Render(Template(@$"
+                    <mj-text font-size='20px' color='#004979' font-family='Verdana'>{T("help_reply_header", "Du har fået svar fra Habbo")}</mj-text>
+                    <mj-text font-size='12px' color='#004979' font-family='Verdana'>{T("help_reply_body", "Vi har svaret på din henvendelse til Habbo Hjælp. Læs svaret og skriv tilbage her: {link}").Replace("{link}", "<a href=\"" + link + "\">" + link + "</a>")}</mj-text>
+                "));
+
+            return await SendEmail(new string[] { to }, T("help_reply_subject", "Svar på din henvendelse til Habbo"), mjml.Html);
+        }
+
         public async Task<SendResponse> SendListOfHabboNames(string to, string[] habboNames)
         {
             var content = @$"

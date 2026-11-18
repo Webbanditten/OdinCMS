@@ -1,0 +1,8 @@
+@model KeplerCMS.Controllers.IotController.IotForm
+@* What the earlier steps answered, carried to the next one (the help tool keeps no session). *@
+@Html.AntiForgeryToken()
+<input type="hidden" name="Member" value="@(Model.Member ? "true" : "false")" />
+@if (Model.Name != null) { <input type="hidden" name="Name" value="@Model.Name" /> }
+@if (Model.Email != null) { <input type="hidden" name="Email" value="@Model.Email" /> }
+@if (Model.Issue != null) { <input type="hidden" name="Issue" value="@Model.Issue" /> }
+<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="Website" tabindex="-1" autocomplete="off" /></div>

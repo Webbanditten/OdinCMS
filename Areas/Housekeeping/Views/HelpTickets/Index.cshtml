@@ -1,0 +1,38 @@
+@using KeplerCMS.Data.Models
+@model List<KeplerCMS.Areas.Housekeeping.HelpTicketsController.TicketRow>
+@{
+    ViewData["Title"] = "Help tickets";
+    var show = (string)ViewBag.Show;
+    string Tab(string key, string label) => show == key ? "<strong>" + label + "</strong>" : "<a href=\"?show=" + key + "\">" + label + "</a>";
+}
+<h1>Help tickets</h1>
+<p>Questions players sent through the Habbo Help Tool (<a href="/iot/go" target="_blank">/iot/go</a>). Waiting: new tickets and tickets the player wrote on again.</p>
+<p>@Html.Raw(Tab("waiting", "Waiting (" + ViewBag.Waiting + ")")) | @Html.Raw(Tab("answered", "Answered")) | @Html.Raw(Tab("closed", "Closed")) | @Html.Raw(Tab("all", "All"))</p>
+@if (Model.Count == 0)
+{
+    <p><em>No tickets here.</em></p>
+}
+else
+{
+    <table class="blueTable">
+        <thead>
+            <tr><th>#</th><th>From</th><th>About</th><th>Message</th><th>Replies</th><th>Status</th><th>Updated</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                var t = row.Ticket;
+                <tr>
+                    <td>@t.Id</td>
+                    <td>@(row.Habbo ?? t.Name ?? "-")@(t.UserId == null ? " (not logged in)" : "")<br /><small>@t.Email</small></td>
+                    <td>@HelpTickets.IssueLabel(t.Issue)</td>
+                    <td>@(t.Message.Length > 90 ? t.Message.Substring(0, 90) + "…" : t.Message)</td>
+                    <td>@row.Replies</td>
+                    <td>@HelpTickets.StatusLabel(t.Status)</td>
+                    <td style="white-space: nowrap;">@t.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td><a href="@Url.Action("View", new { id = t.Id })">Open</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

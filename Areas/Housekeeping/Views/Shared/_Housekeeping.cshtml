@@ -38,6 +38,7 @@
         { "/housekeeping/polls", HousekeepingMenu.AdminTools },
         { "/housekeeping/campaigns", HousekeepingMenu.AdminTools },
         { "/housekeeping/callsforhelp", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/helptickets", HousekeepingMenu.HobbaTools },
         { "/housekeeping/publicrooms", HousekeepingMenu.AdminTools },
         { "/housekeeping/roomcategories", HousekeepingMenu.AdminTools },
     };
@@ -234,6 +235,7 @@
                             <div class="container-content">
                                 <ul>
                                     @await menuHelper.Render("Calls for help", Url.Action("Index", "CallsForHelp"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Help tickets", Url.Action("Index", "HelpTickets"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                 </ul>
                             </div>
                         </div>

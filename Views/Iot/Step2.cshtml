@@ -1,0 +1,28 @@
+@model KeplerCMS.Controllers.IotController.IotForm
+@{ ViewData["Title"] = "Habbo Hjælp"; }
+<form method="post" action="/iot/go">
+    <input type="hidden" name="Sid" value="26" />
+    <input type="hidden" name="Member" value="@(Model.Member ? "true" : "false")" />
+    @Html.AntiForgeryToken()
+    <partial name="_Head" model='(2, Model.Member ? "Hvem er du?" : "Hvordan kan vi svare dig?")' />
+    <partial name="_Error" model="Model.Error" />
+    <table border="0" cellspacing="0" cellpadding="0" class="content-table">
+        <tbody>
+            <tr>
+                <td valign="top">
+                    <table border="0">
+                        <tbody>
+                            @if (Model.Member)
+                            {
+                                <tr><td valign="center"><b>Dit Habbo-navn:</b></td><td><input type="text" name="Name" size="30" maxlength="50" value="@Model.Name" /></td></tr>
+                            }
+                            <tr><td valign="center"><b>Din e-mail:</b></td><td><input type="text" name="Email" size="30" maxlength="255" value="@Model.Email" /></td></tr>
+                        </tbody>
+                    </table>
+                    <p>Vi skriver til din e-mail, når vi har svaret på din henvendelse. Vi bruger den ikke til andet.</p>
+                </td>
+                <td class="iactiontd" align="center"><partial name="_Button" model='"Næste"' /></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
