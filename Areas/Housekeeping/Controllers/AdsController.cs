@@ -118,6 +118,9 @@ namespace KeplerCMS.Areas.Housekeeping
             public string Placement { get; set; }
             public string Image { get; set; }
             public string Fit { get; set; }
+            public double CropX { get; set; } = 0.5;
+            public double CropY { get; set; } = 0.5;
+            public double CropZoom { get; set; } = 1;
             public string ClickUrl { get; set; }
             public DateTime? StartsAt { get; set; }
             public DateTime? EndsAt { get; set; }
@@ -179,6 +182,9 @@ namespace KeplerCMS.Areas.Housekeeping
             ad.Placement = placement.Id;
             ad.Image = image;
             ad.Fit = fit;
+            ad.CropX = Math.Clamp(double.IsFinite(request.CropX) ? request.CropX : 0.5, 0, 1);
+            ad.CropY = Math.Clamp(double.IsFinite(request.CropY) ? request.CropY : 0.5, 0, 1);
+            ad.CropZoom = Math.Clamp(double.IsFinite(request.CropZoom) ? request.CropZoom : 1, 1, 4);
             ad.ClickUrl = clickUrl;
             ad.StartsAt = request.StartsAt;
             ad.EndsAt = request.EndsAt;
@@ -230,11 +236,11 @@ namespace KeplerCMS.Areas.Housekeeping
 
         /// <summary>The form's billboard preview: the picture slanted to a frame format, before it is saved.</summary>
         [HttpGet]
-        public async Task<IActionResult> Preview(string image, string format)
+        public async Task<IActionResult> Preview(string image, string format, double x = 0.5, double y = 0.5, double zoom = 1)
         {
             var source = await _ads.LoadImage(image);
             if (source == null) return NotFound();
-            var png = AdService.Slant(source.Value.Bytes, BillboardFormats.Get(format));
+            var png = AdService.Slant(source.Value.Bytes, BillboardFormats.Get(format), 0, 0, x, y, zoom);
             if (png == null) return BadRequest("Couldn't read the image.");
             return File(png, "image/png");
         }

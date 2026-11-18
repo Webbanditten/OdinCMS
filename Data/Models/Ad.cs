@@ -19,6 +19,13 @@ namespace KeplerCMS.Data.Models
         /// <summary>Billboards: "auto" (a flat picture the CMS slants to each room's frame) or the frame format the image
         /// was made for (small_left ...). Other placements: "as_is".</summary>
         [Column("fit")] public string Fit { get; set; }
+        /// <summary>
+        /// A flat billboard picture's crop (Housekeeping > Ads, drag the preview): the point of the picture (0..1 of its width
+        /// and height) the frame's screen is centred on, and how far it is zoomed in (1 = the screen just covers the picture).
+        /// </summary>
+        [Column("crop_x")] public double CropX { get; set; } = 0.5;
+        [Column("crop_y")] public double CropY { get; set; } = 0.5;
+        [Column("crop_zoom")] public double CropZoom { get; set; } = 1;
         [Column("click_url")] public string ClickUrl { get; set; }
         [Column("starts_at")] public DateTime? StartsAt { get; set; }
         [Column("ends_at")] public DateTime? EndsAt { get; set; }

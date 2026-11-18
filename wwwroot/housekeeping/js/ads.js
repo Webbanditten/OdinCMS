@@ -1,5 +1,6 @@
 // Housekeeping > Ads (Areas/Housekeeping/Views/Ads/Index): create and edit ads for every ad place.
-// Talks JSON to AdsController: Ad?id= (one ad), Save, Toggle, Delete; Preview?image=&format= draws a slanted billboard;
+// Talks JSON to AdsController: Ad?id= (one ad), Save, Toggle, Delete; Preview?image=&format=&x=&y=&zoom= draws a slanted
+// billboard (the list's thumbnails; the form draws its previews itself, see drawSlant, so they can be dragged);
 // Rooms?ids= names the room loading ad's rooms. The room picker searches with the editors' /housekeeping/editor/rooms?query=.
 (function ($) {
     'use strict';
@@ -8,6 +9,10 @@
     var editingId = 0;
     var frames = null;     // wwwroot/housekeeping/ads/frames/frames.json: format -> { room, point }
     var imageSize = null;  // natural size of the chosen picture
+    var formats = window.billboardFormats || {};  // BillboardFormats: id -> { width, height, faceHeight, left }
+    // A flat billboard's crop (Ad.CropX/CropY/CropZoom): the picture point the screens are centred on, and the zoom.
+    var crop = { x: 0.5, y: 0.5, zoom: 1 };
+    var source = null;     // the chosen picture as an <img>, for drawing the slanted previews
 
     function api(method, action, body) {
         return fetch(BASE + action, {
@@ -41,8 +46,15 @@
 
     // ---- Form state ----
 
+    function syncCrop() {
+        $('.ad-crop').toggle(isBillboard() && $('#ad-fit').val() === 'auto');
+        $('#ad-zoom').val(crop.zoom);
+        $('#ad-zoom-value').text(Math.round(crop.zoom * 100) + ' %');
+    }
+
     function syncPlacement() {
         $('.ad-billboard').toggle(isBillboard());
+        syncCrop();
         $('.ad-loading').toggle(placement() === 'room_loading');
         $('.ad-pool').toggle(placement() === 'pool_screen');
         $('#ad-click').closest('div').prev('label').addBack().toggle(placement() !== 'pool_screen');
@@ -170,27 +182,39 @@
         if (!src) { box.appendChild(el('span', { 'class': 'ad-hint' }, 'Pick a picture.')); return; }
         if (isBillboard()) {
             var fit = $('#ad-fit').val();
-            loadFrames().then(function (f) {
+            Promise.all([loadFrames(), fit === 'auto' ? loadSource(src) : Promise.resolve(null)]).then(function (loaded) {
+                var f = loaded[0];
                 box.innerHTML = '';
                 Object.keys(f).filter(function (format) { return fit === 'auto' || fit === format; }).forEach(function (format) {
                     var frame = f[format];
                     var figure = el('figure');
                     var wrap = el('div', { 'class': 'ad-frame' });
                     var bg = el('img', { 'class': 'ad-frame-bg', src: '/housekeeping/ads/frames/' + format + '.png', alt: '' });
-                    var ad = el('img', { alt: '' });
-                    ad.onload = function () {
-                        ad.style.left = (frame.point[0] - Math.floor(ad.naturalWidth / 2)) + 'px';
-                        ad.style.top = (frame.point[1] - Math.floor(ad.naturalHeight / 2)) + 'px';
-                        // The client draws it with matte ink: white around the picture's edge is see-through.
-                        ad.style.mixBlendMode = 'multiply';
-                    };
-                    ad.src = fit === 'auto' ? BASE + 'Preview?image=' + encodeURIComponent(src) + '&format=' + format + '&t=' + Date.now() : src;
                     wrap.appendChild(bg);
-                    wrap.appendChild(ad);
+                    if (fit === 'auto' && loaded[1] && formats[format]) {
+                        // Drawn here like AdService.Slant, so dragging is instant; the hotel gets the server's version.
+                        var fmt = formats[format];
+                        var canvas = el('canvas', { 'class': 'ad-slant', width: fmt.width, height: fmt.height, tabindex: '0', 'data-format': format,
+                            title: 'Drag to move the picture (arrow keys: 1 px, Shift: 10 px)' });
+                        canvas.style.left = (frame.point[0] - Math.floor(fmt.width / 2)) + 'px';
+                        canvas.style.top = (frame.point[1] - Math.floor(fmt.height / 2)) + 'px';
+                        wrap.appendChild(canvas);
+                    } else {
+                        var ad = el('img', { alt: '' });
+                        ad.onload = function () {
+                            ad.style.left = (frame.point[0] - Math.floor(ad.naturalWidth / 2)) + 'px';
+                            ad.style.top = (frame.point[1] - Math.floor(ad.naturalHeight / 2)) + 'px';
+                            // The client draws it with matte ink: white around the picture's edge is see-through.
+                            ad.style.mixBlendMode = 'multiply';
+                        };
+                        ad.src = src;
+                        wrap.appendChild(ad);
+                    }
                     figure.appendChild(wrap);
                     figure.appendChild(el('figcaption', {}, format.replace('_', ', facing ') + ' (' + frame.room + ')'));
                     box.appendChild(figure);
                 });
+                drawSlants();
             });
             return;
         }
@@ -207,6 +231,72 @@
         box.appendChild(figure);
     }
 
+    // ---- Billboard crop (flat pictures) ----
+
+    function loadSource(src) {
+        if (source && source.dataset.src === src && source.complete) return Promise.resolve(source);
+        return new Promise(function (resolve) {
+            var img = new Image();
+            img.dataset.src = src;
+            img.onload = function () { source = img; resolve(img); };
+            img.onerror = function () { resolve(null); };
+            img.src = src;
+        });
+    }
+
+    // AdService.CropFor: the screen's shape scaled to just cover the picture, zoomed, centred on the crop point, kept inside.
+    function cropFor(W, H, fw, fh) {
+        var zoom = Math.min(4, Math.max(1, crop.zoom));
+        var scale = Math.max(fw / W, fh / H) * zoom;
+        var cw = Math.min(W, Math.max(1, Math.round(fw / scale)));
+        var ch = Math.min(H, Math.max(1, Math.round(fh / scale)));
+        var cx = Math.round(Math.min(Math.max(crop.x * W - cw / 2, 0), W - cw));
+        var cy = Math.round(Math.min(Math.max(crop.y * H - ch / 2, 0), H - ch));
+        return { x: cx, y: cy, w: cw, h: ch, scale: scale };
+    }
+
+    // AdService.Slant: the cut picture sheared like the frames' screens (stepping on odd columns), with a dark outline.
+    function drawSlant(canvas) {
+        var fmt = formats[canvas.dataset.format];
+        if (!fmt || !source) return;
+        var w = fmt.width, faceH = fmt.faceHeight, half = w / 2;
+        var c = canvas.getContext('2d');
+        c.fillStyle = '#fff';
+        c.fillRect(0, 0, canvas.width, canvas.height);
+        var flat = document.createElement('canvas');
+        flat.width = w;
+        flat.height = faceH;
+        var f = flat.getContext('2d');
+        f.fillStyle = '#fff';
+        f.fillRect(0, 0, w, faceH);
+        f.imageSmoothingQuality = 'high';
+        var r = cropFor(source.naturalWidth, source.naturalHeight, w, faceH);
+        f.drawImage(source, r.x, r.y, r.w, r.h, 0, 0, w, faceH);
+        c.fillStyle = 'rgb(30,30,30)';
+        for (var x = 0; x < w; x++) {
+            var top = fmt.left ? half - Math.floor((x + 1) / 2) : Math.floor((x + 1) / 2);
+            c.drawImage(flat, x, 0, 1, faceH, x, top, 1, faceH);
+            if (x === 0 || x === w - 1) c.fillRect(x, top, 1, faceH);
+            else { c.fillRect(x, top, 1, 1); c.fillRect(x, top + faceH - 1, 1, 1); }
+        }
+    }
+
+    function drawSlants() {
+        document.querySelectorAll('#ad-preview canvas.ad-slant').forEach(drawSlant);
+    }
+
+    // Moves the crop point so the picture follows the mouse by (dx, dy) screen pixels in the given format's frame.
+    function moveCrop(format, start, dx, dy) {
+        var fmt = formats[format];
+        if (!fmt || !source) return;
+        var W = source.naturalWidth, H = source.naturalHeight;
+        var r = cropFor(W, H, fmt.width, fmt.faceHeight);
+        var minX = r.w / 2 / W, minY = r.h / 2 / H;
+        crop.x = Math.min(Math.max(start.x - dx / (r.scale * W), minX), 1 - minX);
+        crop.y = Math.min(Math.max(start.y - dy / (r.scale * H), minY), 1 - minY);
+        drawSlants();
+    }
+
     // ---- Open, save ----
 
     function open(ad, rooms) {
@@ -216,6 +306,7 @@
         $('#ad-placement').val(ad ? ad.placement : 'room_billboard');
         $('#ad-image').val(ad ? ad.image : '');
         $('#ad-fit').val(ad && ad.placement === 'room_billboard' ? ad.fit : 'auto');
+        crop = { x: ad ? ad.cropX : 0.5, y: ad ? ad.cropY : 0.5, zoom: ad ? ad.cropZoom : 1 };
         $('#ad-click').val(ad ? ad.clickUrl || '' : '');
         $('#ad-starts').val(ad && ad.startsAt ? ad.startsAt.replace('T', ' ').substring(0, 16) : '');
         $('#ad-ends').val(ad && ad.endsAt ? ad.endsAt.replace('T', ' ').substring(0, 16) : '');
@@ -244,6 +335,9 @@
             placement: placement(),
             image: $('#ad-image').val(),
             fit: $('#ad-fit').val(),
+            cropX: crop.x,
+            cropY: crop.y,
+            cropZoom: crop.zoom,
             clickUrl: placement() === 'pool_screen' ? '' : $('#ad-click').val(),
             startsAt: date($('#ad-starts').val()),
             endsAt: date($('#ad-ends').val()),
@@ -277,7 +371,42 @@
         $('#ad-dates-clear').on('click', function (e) { e.preventDefault(); $('#ad-starts, #ad-ends').val(''); });
         $('#ad-rooms-none').on('click', function (e) { e.preventDefault(); $('#ad-rooms input').prop('checked', false); });
         $('#ad-placement').on('change', function () { syncPlacement(); imageInfo(); });
-        $('#ad-fit').on('change', function () { syncRooms(); preview(); });
+        $('#ad-fit').on('change', function () { syncRooms(); syncCrop(); preview(); });
+        $('#ad-zoom').on('input', function () {
+            crop.zoom = +this.value;
+            $('#ad-zoom-value').text(Math.round(crop.zoom * 100) + ' %');
+            // Keep the point inside what the new zoom can reach.
+            var first = document.querySelector('#ad-preview canvas.ad-slant');
+            if (first) moveCrop(first.dataset.format, { x: crop.x, y: crop.y }, 0, 0);
+        });
+        $('#ad-crop-reset').on('click', function (e) {
+            e.preventDefault();
+            crop = { x: 0.5, y: 0.5, zoom: 1 };
+            syncCrop();
+            drawSlants();
+        });
+        $(document).on('pointerdown', '#ad-preview canvas.ad-slant', function (e) {
+            var canvas = this, start = { x: crop.x, y: crop.y }, x0 = e.clientX, y0 = e.clientY;
+            canvas.setPointerCapture(e.pointerId);
+            canvas.focus();
+            var move = function (ev) { moveCrop(canvas.dataset.format, start, ev.clientX - x0, ev.clientY - y0); };
+            var up = function () {
+                canvas.removeEventListener('pointermove', move);
+                canvas.removeEventListener('pointerup', up);
+                canvas.removeEventListener('pointercancel', up);
+            };
+            canvas.addEventListener('pointermove', move);
+            canvas.addEventListener('pointerup', up);
+            canvas.addEventListener('pointercancel', up);
+            e.preventDefault();
+        });
+        $(document).on('keydown', '#ad-preview canvas.ad-slant', function (e) {
+            var step = e.shiftKey ? 10 : 1;
+            var d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+            if (!d) return;
+            e.preventDefault();
+            moveCrop(this.dataset.format, { x: crop.x, y: crop.y }, d[0], d[1]);
+        });
         $('#ad-image').on('change', imageInfo);
         $('#ad-room-search').on('input', function () { clearTimeout(searchTimer); searchTimer = setTimeout(searchRooms, 250); });
         $('#ad-room-search').on('keydown', function (e) {
