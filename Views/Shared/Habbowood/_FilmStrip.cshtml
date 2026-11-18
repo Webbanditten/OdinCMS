@@ -1,0 +1,18 @@
+@*
+    The Habbowood film strip menu (styles/habbowood.css) over the Habbowood pages: the CMS page entertainment/habbowood
+    (page design "habbowood") and the studio, end, my movies and watch pages (Areas/Habbowood). ViewData["hwoodTab"] marks
+    the current one: main, shoot, mine or watch.
+*@
+@{
+    var tab = ViewData["hwoodTab"] as string ?? "main";
+    string Selected(string name) => tab == name ? "selected" : null;
+}
+<div class="hwood-filmstrip">
+    <a href="/entertainment/habbowood" class="@Selected("main")">@KeplerCMS.Areas.Habbowood.HabbowoodText.T("menu_main", "Habbowood")</a> |
+    <a href="/habbowood" class="@Selected("shoot")">@KeplerCMS.Areas.Habbowood.HabbowoodText.T("menu_shoot", "Lav en film")</a> |
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a href="/habbowood/mine" class="@Selected("mine")">@KeplerCMS.Areas.Habbowood.HabbowoodText.T("menu_mine", "Mine film")</a> @:|
+    }
+    <a href="/entertainment/habbowood#film" class="@Selected("watch")">@KeplerCMS.Areas.Habbowood.HabbowoodText.T("menu_watch", "Se film")</a>
+</div>

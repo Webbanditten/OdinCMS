@@ -1,0 +1,40 @@
+@model StudioViewModel
+@*
+    The Habbowood studio: the 2007 movie editor (habbowood/flash/habbowood_movie_editor.swf) at habbo.co.uk's 913x642 inside
+    the site page, under the film strip menu. Saving posts to MovieController.Save with the movie's session id; afterwards the
+    editor goes to end_page_url (/habbowood/end). Cancel goes back to the Habbowood page.
+*@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Habbowood";
+    ViewData["hwoodTab"] = "shoot";
+    var vars = new List<KeyValuePair<string, string>>
+    {
+        new("figuredata_url", Url.Content("~/habbowood/xml/figure_data_xml_hc.xml")),
+        new("movie_data_url", Url.Action("Movie", "Movie", new { area = "Habbowood", movie_id = Model.Movie.Id })),
+        new("localization_url", Url.Content("~/habbowood/xml/locale.xml")),
+        new("avatar_name", Model.Username),
+        new("usersearch_url", "/api/hotel/usersearch"),
+        new("cancel_url", "/entertainment/habbowood"),
+        new("post_url", Url.Action("Save", "Movie", new { area = "Habbowood" })),
+        new("end_page_url", "/habbowood/end"),
+        new("meet_filmmakers_url", "/entertainment/habbowood"),
+        new("shoot_movie_url", "/habbowood"),
+        new("is_habbo_club_member", Model.HabboClub ? "true" : "false"),
+        new("session_update_url", Url.Action("Ping", "Movie", new { area = "Habbowood" })),
+        new("session_id", Model.Movie.SessionId),
+    };
+    // The editor opens an existing movie only when it gets its id.
+    if (!string.IsNullOrEmpty(Model.Movie.Data)) vars.Add(new("movie_id", Model.Movie.Id.ToString()));
+    var editor = new FlashEmbed { Id = "habbowood", Swf = Url.Content("~/habbowood/flash/habbowood_movie_editor.swf"), Base = Url.Content("~/habbowood/flash/"), Width = 913, Height = 642, Variables = vars };
+}
+@section Styles {
+    <link rel="stylesheet" href="~/styles/habbowood.css" asp-append-version="true" />
+}
+<partial name="~/Views/Shared/Habbowood/_FilmStrip.cshtml" />
+<div class="habbomovies-custom-bg hwood-studio">
+    <div class="hwood-stage hwood-editor">
+        <partial name="~/Views/Shared/Habbowood/_Flash.cshtml" model="editor" />
+    </div>
+</div>
+<br style="clear: both;" />

@@ -26,7 +26,21 @@ namespace KeplerCMS.Services.Interfaces
         /// first (more votes first between equals; unrated last), "new" = newest first.
         /// </summary>
         Task<List<HabbowoodListMovie>> GetMovieList(string kind, int take);
+
+        /// <summary>A player's own movies for Mine film, newest first.</summary>
+        Task<List<HabbowoodUserMovie>> GetUserMovieList(int userId);
+
+        /// <summary>
+        /// The movie the studio opens: the player's own unpublished movie movieId, else their newest unpublished one that
+        /// has nothing in it yet, else a new one.
+        /// </summary>
+        Task<Movies> GetDraft(int userId, int? movieId);
+
+        /// <summary>Deletes the player's own movie and its votes.</summary>
+        Task<bool> DeleteMovie(int movieId, int userId);
     }
+
+    public record HabbowoodUserMovie(int Id, string Name, string Subtitle, bool Published, bool HasData, double Rating, int Votes);
 
     public record HabbowoodListMovie(int Id, string Name, string Director, double Rating, int Votes);
 }

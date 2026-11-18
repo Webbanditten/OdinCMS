@@ -86,6 +86,60 @@ namespace KeplerCMS.Services.Implementations
             return list.Take(take).ToList();
         }
 
+        public async Task<List<HabbowoodUserMovie>> GetUserMovieList(int userId)
+        {
+            var movies = await _context.Movies.AsNoTracking().Where(m => m.UserId == userId).OrderByDescending(m => m.Id).ToListAsync();
+            var ids = movies.Select(m => m.Id).ToList();
+            var votes = await _context.MovieVotes.AsNoTracking().Where(v => ids.Contains(v.MovieId))
+                .GroupBy(v => v.MovieId).Select(g => new { MovieId = g.Key, Average = g.Average(v => (double)v.Rating), Count = g.Count() }).ToListAsync();
+            return movies.Select(m =>
+            {
+                var v = votes.FirstOrDefault(x => x.MovieId == m.Id);
+                return new HabbowoodUserMovie(m.Id, string.IsNullOrWhiteSpace(m.Name) ? "#" + m.Id : m.Name, MovieAttribute(m.Data, "subtitle"),
+                    m.Published, !string.IsNullOrEmpty(m.Data), v?.Average ?? 0, v?.Count ?? 0);
+            }).ToList();
+        }
+
+        /// <summary>An attribute of the movie element in the editor's XML (name, subtitle, director, ...), or null.</summary>
+        public static string MovieAttribute(string data, string attribute)
+        {
+            if (string.IsNullOrEmpty(data)) return null;
+            try
+            {
+                using var reader = System.Xml.XmlReader.Create(new System.IO.StringReader(data), new System.Xml.XmlReaderSettings { DtdProcessing = System.Xml.DtdProcessing.Prohibit });
+                while (reader.Read())
+                {
+                    if (reader.NodeType == System.Xml.XmlNodeType.Element && reader.Name == "movie") return reader.GetAttribute(attribute);
+                }
+            }
+            catch (System.Xml.XmlException)
+            {
+            }
+            return null;
+        }
+
+        public async Task<Movies> GetDraft(int userId, int? movieId)
+        {
+            if (movieId != null)
+            {
+                var own = await _context.Movies.FirstOrDefaultAsync(m => m.Id == movieId && m.UserId == userId && m.IPublished == 0);
+                if (own != null) return own;
+            }
+            var blank = await _context.Movies.Where(m => m.UserId == userId && m.IPublished == 0 && (m.Data == null || m.Data == ""))
+                .OrderByDescending(m => m.Id).FirstOrDefaultAsync();
+            return blank ?? await SaveMovie(new Movies(), userId);
+        }
+
+        public async Task<bool> DeleteMovie(int movieId, int userId)
+        {
+            var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == movieId && m.UserId == userId);
+            if (movie == null) return false;
+            _context.MovieVotes.RemoveRange(await _context.MovieVotes.Where(v => v.MovieId == movieId).ToListAsync());
+            _context.Movies.Remove(movie);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<List<Movies>> GetUsersMovies(int userId)
         {
             return await _context.Movies.Where(s => s.UserId == userId).ToListAsync();

@@ -5,7 +5,8 @@
 -- A CMS page with the "habbowood" design (Views/Shared/PageDesigns/habbowood.cshtml): the intro animation
 -- ({habbowood_intro}) over the best rated and newest films ({habbowood_top}, {habbowood_new}, portlet-film boxes), a gold
 -- film strip box with the welcome text on the right, and the ad sidebar. Everything is editable in Housekeeping > Pages
--- or in edit mode. Plus the widgets' texts (ResourceSet habbowood; the code has the same Danish fallbacks).
+-- or in edit mode. Plus the texts of the widgets and the studio / end / my movies / watch pages (ResourceSet
+-- habbowood; the code has the same Danish fallbacks).
 --
 -- Only inserts what isn't there yet. Rollback: DELETE the page's boxes and the page (slug entertainment/habbowood).
 -- =====================================================================
@@ -38,12 +39,37 @@ WHERE NOT EXISTS (SELECT 1 FROM cms_containers WHERE page_id = @page);
 INSERT INTO cms_localizations (ResourceId, Value, LocaleId, ResourceSet, ValueType)
 SELECT x.id, x.value, 'da-DK', 'habbowood', 0
 FROM (
-    SELECT 'menu_main' AS id, 'Habbowood' AS value
+    SELECT 'director' AS id, 'Instruktør:' AS value
+    UNION ALL SELECT 'end_edit', 'Ret i filmen'
+    UNION ALL SELECT 'end_mine_text', 'Alle dine film ligger under Mine film. Der kan du se dem, rette i dem, der ikke er udgivet endnu, og slette dem.'
+    UNION ALL SELECT 'end_mine_title', 'Dine film'
+    UNION ALL SELECT 'end_new', 'Lav en ny film'
+    UNION ALL SELECT 'end_preview', 'Se den først'
+    UNION ALL SELECT 'end_publish', 'Udgiv filmen'
+    UNION ALL SELECT 'end_published', 'Filmen er udgivet, så alle kan se den og give den stjerner.'
+    UNION ALL SELECT 'end_text', 'Når du udgiver filmen, kan alle på Habbo se den og give den stjerner. Du kan ikke rette i den, når den er udgivet.'
+    UNION ALL SELECT 'end_title', 'Din film er gemt!'
+    UNION ALL SELECT 'end_watch', 'Se filmen'
+    UNION ALL SELECT 'menu_main', 'Habbowood'
+    UNION ALL SELECT 'menu_mine', 'Mine film'
     UNION ALL SELECT 'menu_shoot', 'Lav en film'
     UNION ALL SELECT 'menu_watch', 'Se film'
-    UNION ALL SELECT 'director', 'Instruktør:'
+    UNION ALL SELECT 'mine_delete', 'Slet'
+    UNION ALL SELECT 'mine_delete_confirm', 'Vil du slette filmen? Det kan ikke fortrydes.'
+    UNION ALL SELECT 'mine_draft', 'Ikke udgivet'
+    UNION ALL SELECT 'mine_empty', 'Tom film'
+    UNION ALL SELECT 'mine_help_text', 'Her er alle de film, du har lavet. En film, der ikke er udgivet, kan kun du se, og du kan rette i den. Udgiver du den, kan alle se den og give den stjerner.'
+    UNION ALL SELECT 'mine_help_title', 'Om dine film'
+    UNION ALL SELECT 'mine_none', 'Du har ikke lavet nogen film endnu.'
+    UNION ALL SELECT 'mine_published', 'Udgivet'
+    UNION ALL SELECT 'no_movies', 'Der er ingen færdige film endnu. Lav den første i Habbowood-studiet!'
     UNION ALL SELECT 'rating', 'Bedømmelse:'
     UNION ALL SELECT 'votes', 'Stemmer:'
-    UNION ALL SELECT 'no_movies', 'Der er ingen færdige film endnu. Lav den første i Habbowood-studiet!'
+    UNION ALL SELECT 'watch_about', 'Om filmen'
+    UNION ALL SELECT 'watch_login', 'Log ind for at give filmen stjerner.'
+    UNION ALL SELECT 'watch_preview', 'Filmen er ikke udgivet endnu, så det er kun dig, der kan se den.'
+    UNION ALL SELECT 'watch_rate', 'Giv filmen stjerner:'
+    UNION ALL SELECT 'watch_top', 'Bedst bedømte film'
+    UNION ALL SELECT 'watch_voted', 'Du har givet filmen stjerner. Tak!'
 ) x
 WHERE NOT EXISTS (SELECT 1 FROM cms_localizations l WHERE l.ResourceId = x.id AND l.ResourceSet = 'habbowood' AND l.LocaleId = 'da-DK');

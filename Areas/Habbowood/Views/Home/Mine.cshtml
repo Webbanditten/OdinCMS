@@ -1,0 +1,105 @@
+@model List<KeplerCMS.Services.Interfaces.HabbowoodUserMovie>
+@*
+    Mine film: the player's own movies, newest first. Published ones can be watched; unpublished ones edited in the studio,
+    published (POST /habbowood/publish) or watched as a preview; any can be deleted (POST /habbowood/delete).
+*@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Habbowood";
+    ViewData["hwoodTab"] = "mine";
+    var row = 0;
+}
+@section Styles {
+    <link rel="stylesheet" href="~/styles/habbowood.css" asp-append-version="true" />
+}
+<partial name="~/Views/Shared/Habbowood/_FilmStrip.cshtml" />
+<div class="habbomovies-custom-bg">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td style="width: 4px;"></td>
+                <td valign="top" style="width: 202px;">
+                    <div class="portlet-goldenfilm goldenfilm">
+                        <div class="portlet-goldenfilm-header"><h3>@HabbowoodText.T("mine_help_title", "Om dine film")</h3></div>
+                        <div class="portlet-goldenfilm-header-b"></div>
+                        <div class="portlet-goldenfilm-body">
+                            <div class="portlet-goldenfilm-content">
+                                <p>@HabbowoodText.T("mine_help_text", "Her er alle de film, du har lavet. En film, der ikke er udgivet, kan kun du se, og du kan rette i den. Udgiver du den, kan alle se den og give den stjerner.")</p>
+                                <p><a href="/habbowood"><img src="~/c_images/album1644/unknown_4.gif" width="45" height="45" align="left" hspace="5" alt="" /></a><a href="/habbowood"><strong>@HabbowoodText.T("end_new", "Lav en ny film")</strong></a></p>
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="portlet-goldenfilm-bottom"><div class="portlet-goldenfilm-bottom-body"></div></div>
+                    </div>
+                </td>
+                <td style="width: 4px;"></td>
+                <td valign="top" style="width: 525px;">
+                    <div class="portlet-film film">
+                        <div class="portlet-film-header"><h3>@HabbowoodText.T("menu_mine", "Mine film")</h3></div>
+                        <div class="portlet-film-header-b"></div>
+                        <div class="portlet-film-body">
+                            <div class="portlet-film-content">
+                                @if (Model.Count == 0)
+                                {
+                                    <p>@HabbowoodText.T("mine_none", "Du har ikke lavet nogen film endnu.") <a href="/habbowood">@HabbowoodText.T("end_new", "Lav en ny film")</a></p>
+                                }
+                                else
+                                {
+                                    <table class="hwood-movies">
+                                        <tbody>
+                                            @foreach (var movie in Model)
+                                            {
+                                                var stars = (int)Math.Round(movie.Rating);
+                                                <tr class="@(row++ % 2 == 0 ? "even" : "odd")">
+                                                    <td style="width: 20px;"><img src="~/c_images/navi_icons/habbowood_icon.gif" alt="" /></td>
+                                                    <td class="hwood-title">
+                                                        <strong>@(movie.HasData ? movie.Name : HabbowoodText.T("mine_empty", "Tom film"))</strong>
+                                                        @if (!string.IsNullOrWhiteSpace(movie.Subtitle)) {<br />@movie.Subtitle}
+                                                        <br /><span class="hwood-state @(movie.Published ? "published" : "")">@(movie.Published ? HabbowoodText.T("mine_published", "Udgivet") : HabbowoodText.T("mine_draft", "Ikke udgivet"))</span>
+                                                    </td>
+                                                    <td style="width: 90px;">
+                                                        @if (movie.Published)
+                                                        {
+                                                            <ul class="rater-list">
+                                                                @for (var i = 0; i < 5; i++)
+                                                                {
+                                                                    <li class="rater-list-item"><img src="~/images/habbomovies/stars/icon_star_@(stars > i ? "color" : "grey").gif" alt="" /></li>
+                                                                }
+                                                            </ul>
+                                                            <div class="clear"></div>
+                                                            @HabbowoodText.T("votes", "Stemmer:") @movie.Votes
+                                                        }
+                                                    </td>
+                                                    <td class="hwood-actions" style="width: 140px;">
+                                                        @if (movie.Published)
+                                                        {
+                                                            <a href="/habbowood/watch/@movie.Id">@HabbowoodText.T("end_watch", "Se filmen")</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="/habbowood?movie=@movie.Id">@HabbowoodText.T("end_edit", "Ret i filmen")</a>
+                                                            @if (movie.HasData)
+                                                            {
+                                                                <br /><a href="/habbowood/watch/@movie.Id">@HabbowoodText.T("end_preview", "Se den først")</a>
+                                                                <br /><form method="post" action="/habbowood/publish">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><button type="submit" style="color: #000; font-weight: bold;">@HabbowoodText.T("end_publish", "Udgiv filmen")</button></form>
+                                                            }
+                                                        }
+                                                        <br /><form method="post" action="/habbowood/delete" onsubmit="return confirm('@HabbowoodText.T("mine_delete_confirm", "Vil du slette filmen? Det kan ikke fortrydes.")');">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><button type="submit">@HabbowoodText.T("mine_delete", "Slet")</button></form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="portlet-film-bottom"><div class="portlet-film-bottom-body"></div></div>
+                    </div>
+                </td>
+                <partial name="~/Views/Shared/Sidebars/Ad/ad.cshtml" />
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br style="clear: both;" />

@@ -4,19 +4,8 @@
     (1, e.g. {habbowood_intro}) above two half columns (3 and 4, e.g. {habbowood_top} and {habbowood_new} in portlet-film
     boxes), a menu column on the right (2, e.g. a portlet-goldenfilm box) and the ad sidebar.
 *@
-@functions {
-    string T(string key, string fallback)
-    {
-        var value = DbRes.T(key, "habbowood");
-        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
-    }
-}
 <link rel="stylesheet" href="~/styles/habbowood.css" asp-append-version="true" />
-<div class="hwood-filmstrip">
-    <a href="/@Model.Details.Slug" class="selected">@T("menu_main", "Habbowood")</a> |
-    <a href="/habbowood">@T("menu_shoot", "Lav en film")</a> |
-    <a href="/@Model.Details.Slug#film">@T("menu_watch", "Se film")</a>
-</div>
+<partial name="~/Views/Shared/Habbowood/_FilmStrip.cshtml" />
 <div class="habbomovies-custom-bg">
     @* One outer row, so the tall ad column doesn't stretch the space between the wide column and the halves. *@
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
