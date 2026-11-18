@@ -107,9 +107,9 @@ namespace KeplerCMS.Services.Implementations
             if (source == null) return null;
             if (!auto && dx == 0 && dy == 0) return source;
 
-            var key = $"billboard:{ad.Id}:{ad.UpdatedAt.Ticks}:{ad.Image}:{(auto ? format : ad.Fit)}:{dx}:{dy}";
+            var key = $"billboard:{ad.Id}:{ad.UpdatedAt.Ticks}:{ad.Image}:{(auto ? format : ad.Fit)}:{dx}:{dy}:{ad.CropX}:{ad.CropY}:{ad.CropZoom}";
             if (_cache.TryGetValue(key, out byte[] cached)) return (cached, "image/png");
-            var png = auto ? Slant(source.Value.Bytes, BillboardFormats.Get(format), dx, dy) : Shift(source.Value.Bytes, dx, dy);
+            var png = auto ? Slant(source.Value.Bytes, BillboardFormats.Get(format), dx, dy, ad.CropX, ad.CropY, ad.CropZoom) : Shift(source.Value.Bytes, dx, dy);
             if (png == null) return null;
             _cache.Set(key, png, TimeSpan.FromHours(12));
             return (png, "image/png");
@@ -120,8 +120,10 @@ namespace KeplerCMS.Services.Implementations
         /// screens (rising to the right in left-facing frames), on white with a 1 px dark outline. The client draws it with
         /// matte ink, which makes the white around the parallelogram transparent; the outline keeps white inside the
         /// picture from touching it. dx/dy move it for frames whose centre is 1 px off (see <see cref="Canvas"/>).
+        /// cropX/cropY/zoom pick the part of the picture (<see cref="CropFor"/>); wwwroot/housekeeping/js/ads.js draws the
+        /// same in the form's preview.
         /// </summary>
-        public static byte[] Slant(byte[] flatBytes, BillboardFormats.Format format, int dx = 0, int dy = 0)
+        public static byte[] Slant(byte[] flatBytes, BillboardFormats.Format format, int dx = 0, int dy = 0, double cropX = 0.5, double cropY = 0.5, double zoom = 1)
         {
             try
             {
@@ -129,7 +131,8 @@ namespace KeplerCMS.Services.Implementations
                 var w = format.Width;
                 var half = w / 2;
                 var faceH = format.FaceHeight;
-                flat.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(w, faceH), Mode = ResizeMode.Crop, Sampler = KnownResamplers.Bicubic }));
+                var crop = CropFor(flat.Width, flat.Height, w, faceH, cropX, cropY, zoom);
+                flat.Mutate(x => x.Crop(crop).Resize(new ResizeOptions { Size = new Size(w, faceH), Mode = ResizeMode.Stretch, Sampler = KnownResamplers.Bicubic }));
 
                 var (output, ox, oy) = Canvas(w, format.Height, dx, dy);
                 using (output)
@@ -159,6 +162,22 @@ namespace KeplerCMS.Services.Implementations
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// The part of a picture a billboard screen of faceW x faceH shows: the screen's shape, scaled to just cover the picture
+        /// and then zoomed in (1..4), centred on (cropX, cropY) (0..1 of the picture's width and height) and kept inside the
+        /// picture. 0.5, 0.5, 1 is the middle, as before the crop existed.
+        /// </summary>
+        public static Rectangle CropFor(int srcW, int srcH, int faceW, int faceH, double cropX, double cropY, double zoom)
+        {
+            zoom = Math.Clamp(double.IsFinite(zoom) ? zoom : 1, 1, 4);
+            var scale = Math.Max((double)faceW / srcW, (double)faceH / srcH) * zoom;
+            var cw = Math.Clamp((int)Math.Round(faceW / scale), 1, srcW);
+            var ch = Math.Clamp((int)Math.Round(faceH / scale), 1, srcH);
+            var cx = (int)Math.Round(Math.Clamp((double.IsFinite(cropX) ? cropX : 0.5) * srcW - cw / 2.0, 0, srcW - cw));
+            var cy = (int)Math.Round(Math.Clamp((double.IsFinite(cropY) ? cropY : 0.5) * srcH - ch / 2.0, 0, srcH - ch));
+            return new Rectangle(cx, cy, cw, ch);
         }
 
         /// <summary>A ready-made billboard moved by dx/dy (white padding, which matte ink makes transparent).</summary>

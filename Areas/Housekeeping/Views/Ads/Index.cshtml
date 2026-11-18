@@ -55,6 +55,14 @@
             <div class="ad-hint">A flat picture is cut to the frame's face (160×60, or 200×80 in the large frames) and slanted; 400×160 or bigger looks best. An already slanted picture is shown as it is, only in rooms with that frame; white around it is see-through.</div>
         </div>
 
+        <label for="ad-zoom" class="ad-crop">Picture part</label>
+        <div class="ad-crop">
+            <input type="range" id="ad-zoom" min="1" max="4" step="0.05" value="1" />
+            <span id="ad-zoom-value" class="ad-zoom-value">100 %</span>
+            <a href="#" id="ad-crop-reset" class="ad-hint">middle, no zoom</a>
+            <div class="ad-hint" style="margin-left: 0">Drag a preview below to move the picture in the frames (or click one and use the arrow keys, Shift for 10 px); zoom in to show less of it. All four frames show the same part.</div>
+        </div>
+
         <label class="ad-billboard">Rooms</label>
         <div class="ad-billboard">
             <div class="ad-hint" style="margin-left: 0">None ticked: every room with a billboard (of the picture's format). <a href="#" id="ad-rooms-none">Untick all</a></div>
@@ -148,7 +156,7 @@
                 var status = !ad.Enabled ? "off" : ad.EndsAt != null && ad.EndsAt <= now ? "ended" : ad.StartsAt != null && ad.StartsAt > now ? "scheduled" : "showing";
                 var rate = ad.Views > 0 ? (100.0 * ad.Clicks / ad.Views).ToString("0.0") + " %" : "";
                 <tr class="ad-status-@status">
-                    <td class="ad-thumb"><img src="@(placement.Id == AdPlacements.RoomBillboard && ad.Fit == BillboardFormats.Auto ? Url.Action("Preview", "Ads", new { image = ad.Image, format = "small_left" }) : ad.Image)" alt="" loading="lazy" /></td>
+                    <td class="ad-thumb"><img src="@(placement.Id == AdPlacements.RoomBillboard && ad.Fit == BillboardFormats.Auto ? Url.Action("Preview", "Ads", new { image = ad.Image, format = "small_left", x = ad.CropX.ToString(System.Globalization.CultureInfo.InvariantCulture), y = ad.CropY.ToString(System.Globalization.CultureInfo.InvariantCulture), zoom = ad.CropZoom.ToString(System.Globalization.CultureInfo.InvariantCulture) }) : ad.Image)" alt="" loading="lazy" /></td>
                     <td>
                         <strong>@ad.Name</strong>
                         @if (placement.Id == AdPlacements.RoomBillboard)
@@ -202,6 +210,11 @@
     .ad-room-pick small { color: #889; }
     .ad-pool .ad-room { display: block; }
     #ad-weight { width: 70px; }
+    #ad-zoom { width: 220px; vertical-align: middle; }
+    .ad-zoom-value { display: inline-block; width: 46px; font-size: 11px; }
+    .ad-frame canvas.ad-slant { position: absolute; cursor: grab; mix-blend-mode: multiply; image-rendering: pixelated; outline: none; touch-action: none; }
+    .ad-frame canvas.ad-slant:active { cursor: grabbing; }
+    .ad-frame canvas.ad-slant:focus { box-shadow: 0 0 0 2px #ffcc00; }
     #ad-starts, #ad-ends { width: 150px; }
     .ad-hint { color: #667; font-size: 11px; margin-left: 6px; }
     .ad-rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 10px; max-height: 220px; overflow-y: auto; border: 1px solid #ccd; background: #fff; padding: 4px 6px; margin-top: 4px; }
@@ -237,5 +250,6 @@
     <script src="~/lib/datetimepicker/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
     <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
     <script src="~/housekeeping/js/media-fields.js" asp-append-version="true"></script>
+    <script>window.billboardFormats = @Json.Serialize(BillboardFormats.All.ToDictionary(f => f.Id, f => new { width = f.Width, height = f.Height, faceHeight = f.FaceHeight, left = f.Left }));</script>
     <script src="~/housekeeping/js/ads.js" asp-append-version="true" type="text/javascript"></script>
 }
