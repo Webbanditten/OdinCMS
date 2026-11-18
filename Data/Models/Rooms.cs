@@ -38,6 +38,12 @@ namespace KeplerCMS.Data.Models
         /// <summary>Spectator seats: watch the room on the client's TV screen, without an avatar (0 = none).</summary>
         [Column("spectators_max")]
         public int SpectatorsMax { get; set; }
+        /// <summary>Not in the navigator (it can still be entered). Odin's RoomData.isNavigatorHide.</summary>
+        [Column("is_hidden")]
+        public bool IsHidden { get; set; }
+        /// <summary>A public room's place in its navigator category (Housekeeping > Public rooms; Odin v1.31.0).</summary>
+        [Column("navigator_order")]
+        public int NavigatorOrder { get; set; }
         
         public Users Owner { get; set; }
     }

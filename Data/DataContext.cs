@@ -22,6 +22,7 @@ namespace KeplerCMS.Data
                 .HasKey(c => new { c.AdId, c.RoomId });
             modelBuilder.Entity<BillboardFrame>()
                 .HasKey(c => c.RoomId);
+            modelBuilder.Entity<PublicRoomWalkway>().HasNoKey();
             modelBuilder.Entity<RewardPool>()
                 .HasMany(p => p.Items).WithOne().HasForeignKey(i => i.PoolId);
 
@@ -102,6 +103,8 @@ namespace KeplerCMS.Data
         public DbSet<HomesRating> HomesRating { get; set; }
         public DbSet<HomesGuestbook> HomesGuestbook { get; set; }
         public DbSet<Rooms> Rooms { get; set; }
+        public DbSet<NavigatorCategory> NavigatorCategories { get; set; }
+        public DbSet<PublicRoomWalkway> PublicRoomWalkways { get; set; }
         public DbSet<RoomPhoto> RoomPhotos { get; set; }
         public DbSet<PromoPicture> PromoPictures { get; set; }
         public DbSet<RoomChatlogs> RoomChatlogs { get; set; }
