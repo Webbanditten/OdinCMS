@@ -153,6 +153,51 @@
                         }
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <strong>Trade ban</strong>
+                    </td>
+                    <td>
+                        @{
+                            var tradeBan = Model.User.TradeBannedUntil;
+                            var tradeBanned = tradeBan > DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                        }
+                        @if (!tradeBanned)
+                        {
+                            <text>None</text>
+                        }
+                        else if (tradeBan >= KeplerCMS.Areas.Housekeeping.UsersController.PermanentTradeBan)
+                        {
+                            <strong>Permanent</strong>
+                        }
+                        else
+                        {
+                            <strong>Until @DateTimeOffset.FromUnixTimeSeconds(tradeBan).ToLocalTime().ToString("dd-MM-yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture)</strong>
+                        }
+                        @if (userFuses != null && userFuses.Contains(Fuse.fuse_ban.Description()))
+                        {
+                            <form asp-action="TradeBan" asp-controller="Users" style="margin-top: 4px;">
+                                <input type="hidden" name="id" value="@Model.User.Id" />
+                                <select name="hours">
+                                    <option value="1">1 hour</option>
+                                    <option value="24">1 day</option>
+                                    <option value="72">3 days</option>
+                                    <option value="168" selected>1 week</option>
+                                    <option value="336">2 weeks</option>
+                                    <option value="720">30 days</option>
+                                    <option value="-1">Permanent</option>
+                                    @if (tradeBanned)
+                                    {
+                                        <option value="0">Lift the trade ban</option>
+                                    }
+                                </select>
+                                <input type="text" name="reason" maxlength="200" placeholder="Reason (audit log)" />
+                                <input type="submit" value="@(tradeBanned ? "Change trade ban" : "Ban from trading")" />
+                            </form>
+                            <small class="form-text text-muted">Can't open trades; whoever asks them gets "the other Habbo can't trade". Applies at once.</small>
+                        }
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
