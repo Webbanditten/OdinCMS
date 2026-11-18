@@ -81,10 +81,10 @@
                                                             @if (movie.HasData)
                                                             {
                                                                 <br /><a href="/habbowood/watch/@movie.Id">@HabbowoodText.T("end_preview", "Se den først")</a>
-                                                                <br /><form method="post" action="/habbowood/publish">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><button type="submit" style="color: #000; font-weight: bold;">@HabbowoodText.T("end_publish", "Udgiv filmen")</button></form>
+                                                                <form method="post" action="/habbowood/publish" class="hwood-button">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><a class="colorlink orange" href="#" onclick="if (!this.sent) { this.sent = true; this.parentNode.submit(); } return false;"><span class="stay">@HabbowoodText.T("end_publish", "Udgiv filmen")</span></a></form>
                                                             }
                                                         }
-                                                        <br /><form method="post" action="/habbowood/delete" onsubmit="return confirm('@HabbowoodText.T("mine_delete_confirm", "Vil du slette filmen? Det kan ikke fortrydes.")');">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><button type="submit">@HabbowoodText.T("mine_delete", "Slet")</button></form>
+                                                        <form method="post" action="/habbowood/delete" class="hwood-button">@Html.AntiForgeryToken()<input type="hidden" name="movieId" value="@movie.Id" /><a class="colorlink noarrow" href="#" onclick="if (!this.sent &amp;&amp; confirm('@HabbowoodText.T("mine_delete_confirm", "Vil du slette filmen? Det kan ikke fortrydes.")')) { this.sent = true; this.parentNode.submit(); } return false;"><span class="stay">@HabbowoodText.T("mine_delete", "Slet")</span></a></form>
                                                     </td>
                                                 </tr>
                                             }

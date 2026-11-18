@@ -194,3 +194,7 @@ ul.hwood-rate li a.r4 { left: 51px; }
 ul.hwood-rate li a.r4:hover { width: 68px; }
 ul.hwood-rate li a.r5 { left: 68px; }
 ul.hwood-rate li a.r5:hover { width: 85px; }
+
+/* Forms with the site's orange-arrow button (a.colorlink, like Køb): left-aligned in the text instead of floating right. */
+form.hwood-button { margin: 6px 0; overflow: hidden; }
+form.hwood-button a.colorlink { float: left; clear: none; margin: 0; }
