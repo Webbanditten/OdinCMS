@@ -51,10 +51,10 @@
                                 else
                                 {
                                     <p>@HabbowoodText.T("end_text", "Når du udgiver filmen, kan alle på Habbo se den og give den stjerner. Du kan ikke rette i den, når den er udgivet.")</p>
-                                    <form method="post" action="/habbowood/publish">
+                                    <form method="post" action="/habbowood/publish" class="hwood-button">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="movieId" value="@movie.Id" />
-                                        <input type="submit" class="submit" value="@HabbowoodText.T("end_publish", "Udgiv filmen")" />
+                                        <a class="colorlink orange" href="#" onclick="if (!this.sent) { this.sent = true; this.parentNode.submit(); } return false;"><span class="stay">@HabbowoodText.T("end_publish", "Udgiv filmen")</span></a>
                                     </form>
                                     <p class="hwood-actions">
                                         <a href="/habbowood/watch/@movie.Id">@HabbowoodText.T("end_preview", "Se den først")</a> |
