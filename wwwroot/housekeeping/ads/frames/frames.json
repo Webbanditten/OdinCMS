@@ -1,0 +1,58 @@
+{
+ "small_left": {
+  "frame": "adframe_library_left",
+  "room": "Biblioteket",
+  "point": [
+   81,
+   71
+  ],
+  "screen": [
+   1,
+   1,
+   160,
+   140
+  ]
+ },
+ "small_right": {
+  "frame": "adframe_library_right",
+  "room": "Club Orient",
+  "point": [
+   81,
+   71
+  ],
+  "screen": [
+   1,
+   1,
+   160,
+   140
+  ]
+ },
+ "large_left": {
+  "frame": "adframe_sunset_left",
+  "room": "Café Solnedgang",
+  "point": [
+   104,
+   94
+  ],
+  "screen": [
+   4,
+   4,
+   200,
+   180
+  ]
+ },
+ "large_right": {
+  "frame": "adframe_net_right",
+  "room": "Star Lounge",
+  "point": [
+   105,
+   96
+  ],
+  "screen": [
+   5,
+   6,
+   200,
+   180
+  ]
+ }
+}

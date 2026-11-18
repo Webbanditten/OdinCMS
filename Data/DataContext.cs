@@ -18,6 +18,10 @@ namespace KeplerCMS.Data
 
             modelBuilder.Entity<RewardPoolItem>()
                 .HasKey(c => new { c.PoolId, c.DefinitionId });
+            modelBuilder.Entity<AdRoom>()
+                .HasKey(c => new { c.AdId, c.RoomId });
+            modelBuilder.Entity<BillboardFrame>()
+                .HasKey(c => c.RoomId);
             modelBuilder.Entity<RewardPool>()
                 .HasMany(p => p.Items).WithOne().HasForeignKey(i => i.PoolId);
 
@@ -85,6 +89,9 @@ namespace KeplerCMS.Data
         public DbSet<ItemsDefinitions> ItemsDefinitions { get; set; }
         public DbSet<VoucherHistory> VoucherHistory { get; set; }
         public DbSet<Settings> Settings { get; set; }
+        public DbSet<Ad> Ads { get; set; }
+        public DbSet<AdRoom> AdRooms { get; set; }
+        public DbSet<BillboardFrame> BillboardFrames { get; set; }
 
         public DbSet<Homes> Homes { get; set; }
         public DbSet<HomesCatalog> HomesCatalog { get; set; }

@@ -32,6 +32,9 @@ namespace KeplerCMS.Models
         take_room_photo,
         save_promo_picture,
         trade_ban,
-        trade_unban
+        trade_unban,
+        create_ad,
+        edit_ad,
+        delete_ad
     }
 }

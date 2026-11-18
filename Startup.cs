@@ -106,6 +106,7 @@ namespace KeplerCMS
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ICreditService, CreditService>();
             services.AddScoped<IVoucherService, VoucherService>();
+            services.AddScoped<IAdService, AdService>();
             services.AddScoped<ICatalogueFurniService, CatalogueFurniService>();
             services.AddScoped<IFurniShopService, FurniShopService>();
             services.AddScoped<INewsService, NewsService>();
@@ -166,6 +167,8 @@ namespace KeplerCMS
             
             services.AddHostedService<HabboActivityBackgroundService>();
             services.AddHostedService<CampaignSchedulerService>();
+            services.AddSingleton<AdCounters>();
+            services.AddHostedService(sp => sp.GetRequiredService<AdCounters>());
             services.AddSingleton<RoomPhotographer>();
             services.AddSingleton<IRoomPhotographer>(sp => sp.GetRequiredService<RoomPhotographer>());
             services.AddHostedService(sp => sp.GetRequiredService<RoomPhotographer>());

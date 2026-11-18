@@ -1,0 +1,61 @@
+@* A website ad slot (Housekeeping > Ads): one active ad of the placement per page view, picked by weight. The view is
+   counted here, the click by /ads/click/<id>. Nothing is rendered when the placement has no active ad. *@
+@model string
+@inject KeplerCMS.Services.Interfaces.IAdService Ads
+@{
+    var ad = Ads.PickWeighted(await Ads.GetActive(Model));
+    if (ad == null) { return; }
+    Ads.CountView(ad.Id);
+    var (width, height) = KeplerCMS.Models.AdPlacements.MaxSize(Model);
+    var href = KeplerCMS.Controllers.AdsController.SafeTarget(ad.ClickUrl) != null ? $"/ads/click/{ad.Id}" : null;
+    var external = href != null && !ad.ClickUrl.Trim().StartsWith("/");
+}
+@if (Model == KeplerCMS.Models.AdPlacements.WebsitePartner)
+{
+    if (href != null)
+    {
+        <a href="@href" @(external ? "target=_blank rel=noopener" : "")><img src="@ad.Image" alt="@ad.Name" style="display: block; margin: 0 auto; max-width: @(width)px; max-height: @(height)px;" /></a>
+    }
+    else
+    {
+        <img src="@ad.Image" alt="@ad.Name" style="display: block; margin: 0 auto; max-width: @(width)px; max-height: @(height)px;" />
+    }
+    return;
+}
+<div class="ad-scale @(Model == KeplerCMS.Models.AdPlacements.WebsiteTop ? "ad-leader" : "ad160")">
+    <table>
+        <tbody>
+            <tr>
+                <td class="ad-header-tl"></td>
+                <td class="ad-header-t"></td>
+                <td class="ad-header-tr"></td>
+            </tr>
+            <tr>
+                <td class="ad-header-ml"></td>
+                <td class="ad-header-m">
+                    <h5><span class="lang-Advertissement_Title">@DbRes.T("ad", "shared")</span></h5>
+                </td>
+                <td class="ad-header-mr"></td>
+            </tr>
+            <tr>
+                <td class="ad-content-ml"></td>
+                <td class="ad-content-m" align="center" valign="top">
+                    @if (href != null)
+                    {
+                        <a href="@href" @(external ? "target=_blank rel=noopener" : "")><img style="width: @(width)px; height: @(height)px;" alt="@ad.Name" src="@ad.Image"></a>
+                    }
+                    else
+                    {
+                        <img style="width: @(width)px; height: @(height)px;" alt="@ad.Name" src="@ad.Image">
+                    }
+                </td>
+                <td class="ad-content-mr"></td>
+            </tr>
+            <tr>
+                <td class="ad-content-bl"></td>
+                <td class="ad-content-b"></td>
+                <td class="ad-content-br"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
