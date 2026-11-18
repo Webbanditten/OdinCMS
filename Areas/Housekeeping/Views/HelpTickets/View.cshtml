@@ -1,0 +1,50 @@
+@using KeplerCMS.Data.Models
+@model KeplerCMS.Areas.Housekeeping.HelpTicketsController.TicketView
+@{
+    var t = Model.Ticket;
+    ViewData["Title"] = "Help ticket #" + t.Id;
+}
+<p><a href="@Url.Action("Index")">« Help tickets</a></p>
+<h1>Help ticket #@t.Id: @HelpTickets.IssueLabel(t.Issue)</h1>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p style="background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px;">@Model.Message</p>
+}
+<table class="blueTable" style="max-width: 760px;">
+    <tbody>
+        <tr><th style="width: 120px;">From</th><td>@(Model.Habbo != null ? Model.Habbo + " (logged in)" : t.Name ?? "Someone without a Habbo") @if (t.Name != null && Model.Habbo != null && t.Name != Model.Habbo) {<text>, wrote the Habbo name "@t.Name"</text>}</td></tr>
+        <tr><th>E-mail</th><td>@(t.Email ?? "-")</td></tr>
+        <tr><th>Status</th><td>@HelpTickets.StatusLabel(t.Status)</td></tr>
+        <tr><th>Sent</th><td>@t.CreatedAt.ToString("yyyy-MM-dd HH:mm") from @t.Ip</td></tr>
+    </tbody>
+</table>
+<div class="ht-thread">
+    <div class="ht-msg"><strong>@(Model.Habbo ?? t.Name ?? "Player")</strong> · @t.CreatedAt.ToString("yyyy-MM-dd HH:mm")<div>@t.Message</div></div>
+    @foreach (var (r, staff) in Model.Responses)
+    {
+        <div class="ht-msg @(r.StaffId != null ? "ht-staff" : "")"><strong>@(r.StaffId != null ? staff ?? "Staff" : Model.Habbo ?? t.Name ?? "Player")</strong> · @r.CreatedAt.ToString("yyyy-MM-dd HH:mm")<div>@r.Message</div></div>
+    }
+</div>
+<form method="post" action="@Url.Action("Reply")" style="max-width: 760px;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@t.Id" />
+    <p><strong>Answer</strong> (the player sees it as "Habbo Staff"; written in Danish)</p>
+    <textarea name="message" rows="8" style="width: 100%;" maxlength="4000"></textarea>
+    <p>
+        <button type="submit">Send answer</button>
+        <button type="submit" name="close" value="true">Send and close</button>
+        @(t.Email != null ? "The player gets an e-mail with the link." : "The player left no e-mail address.")
+    </p>
+</form>
+<form method="post" action="@Url.Action("SetStatus")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@t.Id" />
+    <input type="hidden" name="closed" value="@(t.Status == HelpTickets.Closed ? "false" : "true")" />
+    <button type="submit">@(t.Status == HelpTickets.Closed ? "Reopen" : "Close without answering")</button>
+</form>
+<style>
+    .ht-thread { max-width: 760px; margin: 12px 0; }
+    .ht-msg { border: 1px solid #ccd; background: #f6f6f6; padding: 6px 9px; margin: 6px 0; }
+    .ht-msg div { white-space: pre-wrap; margin-top: 4px; }
+    .ht-msg.ht-staff { background: #eaf3fb; border-color: #9fb6cc; margin-left: 30px; }
+</style>

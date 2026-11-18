@@ -1,0 +1,38 @@
+@model KeplerCMS.Controllers.IotController.TicketPage
+@{
+    ViewData["Title"] = "Habbo Hjælp";
+    ViewData["noFaq"] = true;
+    var t = Model.Ticket;
+}
+<partial name="_Head" model='(t.Status == KeplerCMS.Data.Models.HelpTickets.Closed ? 5 : 4, "Din henvendelse")' />
+@if (Model.Sent)
+{
+    <p style="color: #2a7d2a; font-weight: bold;">Tak! Dit svar er sendt.</p>
+}
+<partial name="_Error" model="Model.Error" />
+<p><b>@KeplerCMS.Data.Models.HelpTickets.IssueLabel(t.Issue)</b> · @t.CreatedAt.ToString("d. MMM yyyy HH:mm") · @KeplerCMS.Data.Models.HelpTickets.StatusLabel(t.Status)</p>
+<div class="iot-message"><b>@(t.Name ?? "Dig")</b><br />@t.Message</div>
+@foreach (var r in Model.Responses)
+{
+    <div class="iot-message @(r.StaffId != null ? "iot-staff" : "")"><b>@(r.StaffId != null ? "Habbo Staff" : (t.Name ?? "Dig"))</b> · @r.CreatedAt.ToString("d. MMM yyyy HH:mm")<br />@r.Message</div>
+}
+@if (t.Status != KeplerCMS.Data.Models.HelpTickets.Closed)
+{
+    <form method="post" action="/iot/ticket">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@t.Id" />
+        <input type="hidden" name="token" value="@t.Token" />
+        <p><b>Skriv til os:</b></p>
+        <textarea name="message" class="imessageform" rows="6" cols="70" maxlength="4000"></textarea>
+        <div style="float: right;"><partial name="_Button" model='"Send"' /></div>
+        <div style="clear: both;"></div>
+    </form>
+}
+else
+{
+    <p>Henvendelsen er lukket. Har du brug for mere hjælp, så <a href="/iot/go">send en ny</a>.</p>
+}
+<style>
+    div.iot-message { text-align: left; white-space: pre-wrap; border: 1px solid #ddd; background: #f7f7f7; padding: 6px 8px; margin: 6px 0; }
+    div.iot-message.iot-staff { background: #eef6fb; border-color: #b8d4e6; }
+</style>

@@ -1,0 +1,54 @@
+@*
+    The Habbo Help Tool's own page (habbo.com's 2007 IOT, 720 px, wwwroot/iot): logo and title bar, then the step in the
+    white "process" box. IotController.
+*@
+@{
+    string T(string key, string fallback) { var v = DbRes.T(key, "iot"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+}
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <title>@T("title", "Habbo Hjælp")</title>
+    <link href="~/styles/style.css" type="text/css" rel="stylesheet" />
+    <link href="~/iot/styles/iot.css" asp-append-version="true" type="text/css" rel="stylesheet" />
+</head>
+<body style="background: #fff; margin: 10px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="720">
+        <tbody>
+            <tr>
+                <td style="background: url(/iot/images/process/top_left.gif) no-repeat; width: 8px; height: 77px;">&nbsp;</td>
+                <td style="background: url(/iot/images/process/top_mid.gif) repeat-x;" valign="top">
+                    <div style="margin: 0; padding: 10px 0 0 27px; height: 67px;"><a href="/"><img src="~/images/logos/habbo_logo_nourl.gif" alt="Habbo" /></a></div>
+                </td>
+                <td style="background: url(/iot/images/process/top_header_left.gif) no-repeat; width: 3px; height: 77px;"></td>
+                <td style="background: url(/iot/images/process/top_header_mid.gif) repeat-x; height: 77px;">
+                    <div style="height: 43px; padding: 31px 0 0 4px; margin: 0; color: #fff; text-transform: uppercase; font-weight: bold;">@T("title", "Habbo Hjælp")</div>
+                </td>
+                <td style="background: url(/iot/images/process/top_header_mid.gif) repeat-x; height: 54px; padding: 23px 0 0 0;" align="right" valign="top"></td>
+                <td style="background: url(/iot/images/process/top_right.gif) no-repeat; width: 26px; height: 77px;">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="main-content-process">
+        <div style="height: 4px;"></div>
+        <div style="height: 18px; padding: 0 0 0 12px;">&nbsp;</div>
+        <div class="portlet">
+            <div class="portlet-top-process">
+                <div class="portlet-process-header">&nbsp;</div>
+            </div>
+            <div class="portlet-body-process">
+                <div class="imaindiv">
+                    @if (ViewData["noFaq"] as bool? != true)
+                    {
+                        <b>@Html.Raw(T("faq", "Husk, at svarene på de mest almindelige spørgsmål fra Habbo'er og deres forældre allerede står på vores <a href=\"/help\">hjælpesider</a>. Står svaret der, svarer vi ikke på din henvendelse, så vi kan nå de andre."))</b>
+                        <br /><br />
+                    }
+                    @RenderBody()
+                </div>
+            </div>
+            <div class="portlet-bottom-process"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+@model (int Step, string Title)
+@* A step's heading: its number picture (iot/header_images/Western2: 1-4, pass, error) and title. *@
+<table border="0" cellspacing="0" cellpadding="0" class="ihead">
+    <tbody>
+        <tr>
+            <td class="icon"><img src="~/iot/header_images/Western2/@(Model.Step <= 4 ? Model.Step.ToString() : Model.Step == 5 ? "pass" : "error").gif" alt=" " width="47" height="37" /></td>
+            <td class="text"><h2>@Model.Title</h2></td>
+        </tr>
+    </tbody>
+</table>
+<br />

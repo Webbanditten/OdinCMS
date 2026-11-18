@@ -1,0 +1,24 @@
+@model KeplerCMS.Controllers.IotController.IotForm
+@{ ViewData["Title"] = "Habbo Hjælp"; }
+<form method="post" action="/iot/go">
+    <input type="hidden" name="Sid" value="76" />
+    <partial name="_Carry" model="Model" />
+    <partial name="_Head" model='(3, "Hvad handler din henvendelse om?")' />
+    <partial name="_Error" model="Model.Error" />
+    <table border="0" cellspacing="0" cellpadding="0" class="content-table">
+        <tbody>
+            <tr>
+                <td valign="top">
+                    <select name="Issue">
+                        <option value="">Vælg ...</option>
+                        @foreach (var (key, label) in KeplerCMS.Data.Models.HelpTickets.Issues)
+                        {
+                            <option value="@key" selected="@(Model.Issue == key)">@label</option>
+                        }
+                    </select>
+                </td>
+                <td class="iactiontd" align="center"><partial name="_Button" model='"Næste"' /></td>
+            </tr>
+        </tbody>
+    </table>
+</form>

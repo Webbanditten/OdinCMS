@@ -1,0 +1,33 @@
+@model KeplerCMS.Controllers.IotController.IotForm
+@{ ViewData["Title"] = "Habbo Hjælp"; }
+<form method="post" action="/iot/go">
+    <input type="hidden" name="Sid" value="58" />
+    @Html.AntiForgeryToken()
+    <partial name="_Head" model='(1, "Har du allerede en Habbo?")' />
+    <partial name="_Error" model="Model.Error" />
+    <table border="0" cellspacing="0" cellpadding="0" class="content-table">
+        <tbody>
+            <tr>
+                <td valign="middle" align="left" style="width: 300px;">
+                    <div class="iinfodiv">
+                        <b><label><input type="radio" name="Event" value="Member" checked /> Ja, jeg bruger Habbo</label></b><br /><br />
+                        <b><label><input type="radio" name="Event" value="Not member" /> Nej, jeg har ikke en Habbo</label></b>
+                        <br /><br />
+                        <div style="padding-left: 10px;"><partial name="_Button" model='"Næste"' /></div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+@if (Model.Mine.Count > 0)
+{
+    <br />
+    <h3>Dine henvendelser</h3>
+    <ul>
+        @foreach (var t in Model.Mine)
+        {
+            <li><a href="/iot/ticket?id=@t.Id&amp;token=@t.Token">@KeplerCMS.Data.Models.HelpTickets.IssueLabel(t.Issue)</a> · @t.CreatedAt.ToString("d. MMM yyyy") · <b>@KeplerCMS.Data.Models.HelpTickets.StatusLabel(t.Status)</b></li>
+        }
+    </ul>
+}
