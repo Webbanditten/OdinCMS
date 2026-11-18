@@ -57,6 +57,8 @@ namespace KeplerCMS.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Sprite { get; set; }
+        /// <summary>The sprite for the furni imager ("poster27"; otherwise Sprite).</summary>
+        public string Image { get; set; }
     }
 
     /// <summary>A reward as the month view shows it.</summary>

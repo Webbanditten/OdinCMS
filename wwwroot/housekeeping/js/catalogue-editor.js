@@ -78,15 +78,21 @@ var CatalogueEditor = (function () {
         return base + '?sprite=' + encodeURIComponent(parts[0]) + (parts[1] ? '&color=' + parts[1] : '') + (extra || '');
     }
 
+    // Posters all have the sprite "poster"; the product's special sprite id says which one (Odin sends "poster 27").
+    function productSprite(definition, specialSpriteId) {
+        var sprite = definition ? definition.sprite : '';
+        return sprite === 'poster' && specialSpriteId > 0 ? 'poster' + specialSpriteId : sprite;
+    }
+
     // ---- Preview ----
 
     function viewProducts() {
         return products.map(function (p) {
             return {
                 name: p.name, description: p.description, price: p.price, isPackage: p.isPackage, saleCode: p.saleCode,
-                sprite: p.definition ? p.definition.sprite : '', colour: p.definition ? p.definition.colour : '',
+                sprite: productSprite(p.definition, p.specialSpriteId), colour: p.definition ? p.definition.colour : '',
                 packages: (p.packages || []).map(function (x) {
-                    return { sprite: x.definition ? x.definition.sprite : '', colour: x.definition ? x.definition.colour : '', amount: x.amount };
+                    return { sprite: productSprite(x.definition, x.specialSpriteId), colour: x.definition ? x.definition.colour : '', amount: x.amount };
                 })
             };
         }).filter(function (p, i) { return !products[i].hidden; });
@@ -475,7 +481,7 @@ var CatalogueEditor = (function () {
         }
         var list = h('ul', { class: 'cated-products' });
         products.forEach(function (p, i) {
-            var sprite = p.isPackage ? ((p.packages[0] || {}).definition || {}).sprite : (p.definition || {}).sprite;
+            var sprite = p.isPackage ? productSprite((p.packages[0] || {}).definition, (p.packages[0] || {}).specialSpriteId) : productSprite(p.definition, p.specialSpriteId);
             var li = h('li', { draggable: 'true', 'data-id': p.id, class: (i === openProduct ? 'is-selected' : '') + (p.hidden ? ' is-hidden' : '') });
             var row = h('div', { class: 'cated-product-row' }, [
                 h('span', { class: 'cated-drag', text: '⋮⋮', title: 'Drag to reorder' }),
@@ -514,7 +520,7 @@ var CatalogueEditor = (function () {
             // Show the edit in the preview straight away.
             var target = products[openProduct];
             target.price = edit.price; target.hidden = edit.hidden; target.amount = edit.amount;
-            target.isPackage = edit.isPackage; target.packages = edit.packages;
+            target.isPackage = edit.isPackage; target.packages = edit.packages; target.specialSpriteId = edit.specialSpriteId;
             target.name = edit.isPackage ? edit.packageName : ownTexts() ? edit.ownName : (edit.definition || {}).name;
             target.description = edit.isPackage ? edit.packageDescription : ownTexts() ? edit.ownDescription : (edit.definition || {}).description;
             renderPreview();
@@ -545,7 +551,7 @@ var CatalogueEditor = (function () {
                 var parts = h('div', { class: 'cated-parts' });
                 edit.packages.forEach(function (part, i) {
                     parts.appendChild(h('div', { class: 'cated-part' }, [
-                        h('img', { src: part.definition ? furniUrl(part.definition.sprite, '&icon=true') : '', alt: '' }),
+                        h('img', { src: part.definition ? furniUrl(productSprite(part.definition, part.specialSpriteId), '&icon=true') : '', alt: '' }),
                         h('span', { class: 'cated-grow', text: part.definition ? part.definition.name + ' (' + part.definition.sprite + ')' : '#' + part.definitionId }),
                         h('input', { type: 'number', min: 1, value: part.amount, title: 'How many', oninput: function (e) { part.amount = +e.target.value; live(); } }),
                         h('button', { type: 'button', text: '×', onclick: function () { edit.packages.splice(i, 1); draw(); live(); } })
