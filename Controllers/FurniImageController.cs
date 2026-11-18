@@ -74,9 +74,12 @@ namespace KeplerCMS.Controllers
             var query = "sprite=" + Uri.EscapeDataString(definition) + "&direction=" + direction + "&state=" + state
                 + (string.IsNullOrEmpty(colours) ? "" : "&colors=" + Uri.EscapeDataString(colours))
                 + (shadows ? "&shadow=1" : "") + (small ? "&small=1" : "") + (icon ? "&icon=1" : "");
+            // Kept a day, then drawn again, so renderer fixes reach every picture by themselves; while the renderer is
+            // unreachable the old file stays in use.
             var path = "furni_export/_casts/" + Hash("casts1|" + query) + ".png";
-            byte[] bytes;
-            if (System.IO.File.Exists(path))
+            var cached = System.IO.File.Exists(path);
+            byte[] bytes = null;
+            if (cached && System.IO.File.GetLastWriteTimeUtc(path) > DateTime.UtcNow.AddDays(-1))
             {
                 bytes = await System.IO.File.ReadAllBytesAsync(path);
             }
@@ -85,18 +88,29 @@ namespace KeplerCMS.Controllers
                 try
                 {
                     using var response = await Http.GetAsync(url.TrimEnd('/') + "/furni?" + query);
-                    if (!response.IsSuccessStatusCode) return null; // 404: nothing to draw from the casts
-                    bytes = await response.Content.ReadAsByteArrayAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        bytes = await response.Content.ReadAsByteArrayAsync();
+                        Directory.CreateDirectory("furni_export/_casts");
+                        await System.IO.File.WriteAllBytesAsync(path, bytes);
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        if (cached) System.IO.File.Delete(path);
+                        return null; // nothing to draw from the casts
+                    }
                 }
                 catch (Exception e)
                 {
                     _logger.LogWarning("Furni renderer unreachable for {Query}: {Message}", query, e.Message);
-                    return null;
                 }
-                Directory.CreateDirectory("furni_export/_casts");
-                await System.IO.File.WriteAllBytesAsync(path, bytes);
+                if (bytes == null)
+                {
+                    if (!cached) return null;
+                    bytes = await System.IO.File.ReadAllBytesAsync(path);
+                }
             }
-            Response.Headers["Cache-Control"] = "public, max-age=31536000";
+            Response.Headers["Cache-Control"] = "public, max-age=86400";
             Response.Headers["Access-Control-Allow-Origin"] = "*";
             return File(bytes, "image/png");
         }
