@@ -8,8 +8,9 @@
 
 @{
     var rewards = new List<RewardsViewModel>();
-    var day1 = DateTime.Now.AddDays(-15);
-    var day2 = DateTime.Now.AddDays(15);
+    // The period comes from the box's code (ContentCodes.RewardsPeriod): {rewards}, {rewards_month} or a dated one.
+    var day1 = ViewData["rewardsFrom"] as DateTime? ?? DateTime.Now.AddDays(-15);
+    var day2 = ViewData["rewardsTo"] as DateTime? ?? DateTime.Now.AddDays(15);
     if (User.Identity is {IsAuthenticated: true})
     {
         rewards = await RewardService.GetRewardsBetweenDates(day1, day2, int.Parse(User.Identity.Name));

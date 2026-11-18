@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace KeplerCMS.Models
 {
@@ -15,6 +18,7 @@ namespace KeplerCMS.Models
     {
         public const string Credits = "{credits}";
         public const string Rewards = "{rewards}";
+        public const string RewardsMonth = "{rewards_month}";
         public const string LastOnline = "{lastonline}";
         public const string Staff = "{staff}";
         public const string PopularFurni = "{popular_furni}";
@@ -30,11 +34,43 @@ namespace KeplerCMS.Models
         {
             new Code(Credits, "Credits", "The visitor's credit balance and the voucher code form (logged out: a log-in hint)."),
             new Code(Xmas2006, "Christmas calendar", "December's rewards as the 2006 advent calendar."),
-            new Code(Rewards, "Daily rewards", "Rewards from 15 days back to 15 days ahead, today's highlighted."),
+            new Code(Rewards, "Daily rewards", "Rewards from 15 days back to 15 days ahead, today's highlighted. For a set period write {rewards_2026-11-01_2026-11-30} (both days included)."),
+            new Code(RewardsMonth, "Daily rewards (this month)", "This calendar month's rewards only, so the box never shows next month's (an advent calendar's doors)."),
             new Code(LastOnline, "Last online", "The 30 Habbos who logged in most recently."),
             new Code(Staff, "Staff", "Every rank with members, with their avatars."),
             new Code(PopularFurni, "Popular furni", "The furni players bought most in the last 30 days."),
         };
+
+        /// <summary>{rewards}, {rewards_month} or {rewards_YYYY-MM-DD_YYYY-MM-DD}.</summary>
+        private static readonly Regex RewardsCode = new(@"\{rewards(?:_(month)|_(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2}))?\}", RegexOptions.Compiled);
+
+        /// <summary>
+        /// The days a rewards box shows (from 00:00 on the first day to the end of the last day), or null when the text
+        /// has no rewards code. {rewards}: 15 days back to 15 days ahead; {rewards_month}: this month; a dated code: that
+        /// period (the days in either order).
+        /// </summary>
+        public static (DateTime From, DateTime To)? RewardsPeriod(string text, DateTime now)
+        {
+            var match = text == null ? null : RewardsCode.Match(text);
+            if (match == null || !match.Success) return null;
+
+            if (match.Groups[1].Success)
+            {
+                var first = new DateTime(now.Year, now.Month, 1);
+                return (first, first.AddMonths(1).AddTicks(-1));
+            }
+
+            if (match.Groups[2].Success
+                && DateTime.TryParseExact(match.Groups[2].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var a)
+                && DateTime.TryParseExact(match.Groups[3].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var b))
+            {
+                var from = a <= b ? a : b;
+                var to = a <= b ? b : a;
+                return (from, to.AddDays(1).AddTicks(-1));
+            }
+
+            return (now.AddDays(-15), now.AddDays(15));
+        }
 
         public record Game(string Id, string Name);
 
