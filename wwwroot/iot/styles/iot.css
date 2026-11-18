@@ -1,6 +1,30 @@
 /* The Habbo Help Tool (Views/Iot, IotController): habbo.com's 2007 IOT styles (style-iot.css) and the 'process' page
    frame from its style.css, from jeanropke/Neptune; image paths point at wwwroot/iot. */
 
+/* Phones: no text autosizing ("font boosting"), which enlarged the wide text blocks but not the form tables. */
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+/* The player's own tickets under step 1. */
+.iot-mine h3 {
+	margin: 0 0 4px 0;
+	color: #069;
+	font-size: 110%;
+	text-transform: uppercase;
+}
+
+.iot-mine ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.iot-mine li {
+	margin: 2px 0;
+}
+
 body#mypage .portlet {
 	cursor: move;
 }

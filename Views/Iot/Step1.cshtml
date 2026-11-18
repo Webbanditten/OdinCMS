@@ -23,6 +23,7 @@
 @if (Model.Mine.Count > 0)
 {
     <br />
+    <div class="iot-mine">
     <h3>Dine henvendelser</h3>
     <ul>
         @foreach (var t in Model.Mine)
@@ -30,4 +31,5 @@
             <li><a href="/iot/ticket?id=@t.Id&amp;token=@t.Token">@KeplerCMS.Data.Models.HelpTickets.IssueLabel(t.Issue)</a> · @t.CreatedAt.ToString("d. MMM yyyy") · <b>@KeplerCMS.Data.Models.HelpTickets.StatusLabel(t.Status)</b></li>
         }
     </ul>
+    </div>
 }
