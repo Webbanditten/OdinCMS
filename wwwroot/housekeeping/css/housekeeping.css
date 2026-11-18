@@ -1040,6 +1040,8 @@ button:disabled { opacity: .5; cursor: default; }
 .promo-builder-room { margin-bottom: 10px; }
 .promo-builder-room input[type=text] { width: 260px; margin-left: 8px; }
 .promo-room-current { margin-left: 6px; }
+.promo-room-heading { color: #667; font-size: 11px; margin-top: 4px; }
+.promo-room-result.is-current { border-color: #996600; background: #FFF8DC; box-shadow: inset 0 0 0 1px #996600; }
 .promo-room-results { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; max-height: 190px; overflow-y: auto; }
 .promo-room-result { display: flex; flex-direction: column; align-items: center; width: 120px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 11px; }
 .promo-room-result:hover { border-color: #996600; background: #FFF8DC; }

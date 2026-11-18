@@ -85,6 +85,21 @@ namespace KeplerCMS.Areas.Housekeeping
             return Json(items.OrderBy(r => r.id == id ? 0 : r.photo != null ? 1 : 2).ThenBy(r => r.name).Take(MaxResults));
         }
 
+        /// <summary>
+        /// Rooms that have a photo, newest photo first: what the promo picture builder lists before anything is typed
+        /// (a promo is cut from the photo).
+        /// </summary>
+        [HttpGet]
+        [Route("housekeeping/editor/rooms/photographed")]
+        [HousekeepingFilter(new[] { Fuse.housekeeping_news, Fuse.housekeeping_pages, Fuse.fuse_campaigns })]
+        public async Task<IActionResult> PhotographedRooms()
+        {
+            var ids = await _context.RoomPhotos.AsNoTracking().OrderByDescending(p => p.TakenAt).Select(p => p.RoomId).Take(60).ToListAsync();
+            var rooms = await _context.Rooms.AsNoTracking().Where(r => ids.Contains(r.Id)).ToListAsync();
+            var items = await RoomItems(rooms);
+            return Json(items.OrderBy(r => ids.IndexOf(r.id)));
+        }
+
         /// <summary>One room for the dialog when the cursor is on a {room_ID} code.</summary>
         [HttpGet]
         [Route("housekeeping/editor/rooms/{id:int}")]
