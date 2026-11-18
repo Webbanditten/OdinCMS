@@ -19,7 +19,8 @@
     var forSale = Shop.WhyNotForSale(furni) == null;
     var sprite = furni.ImageSprite ?? "";
     var parts = sprite.Split('*');
-    var image = Url.Content("~/habbo-imaging/furni") + "?direction=2&sprite=" + Uri.EscapeDataString(parts[0]) + (parts.Length > 1 ? "&color=" + Uri.EscapeDataString(parts[1]) : "");
+    // anim=1: furni that move (lamps lit, the smoke machine, fountains) show animated.
+    var image = Url.Content("~/habbo-imaging/furni") + "?direction=2&anim=1&sprite=" + Uri.EscapeDataString(parts[0]) + (parts.Length > 1 ? "&color=" + Uri.EscapeDataString(parts[1]) : "");
 }
 <div class="buy-furni" id="buy_furni_@furni.Id" style="overflow: hidden; margin: 6px 0;">
     @if (sprite.Length > 0)
