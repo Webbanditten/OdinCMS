@@ -21,40 +21,30 @@ namespace KeplerCMS.Controllers
     /// ecard_da.xml): pick a Habbo, a background, a headline and a message, and send it. The card talks Flash Remoting
     /// (Amf0) to /api/ecard/gateway: Ecard.saveCard stores it (cms_ecards) and answers with the card's code,
     /// Ecard.loadCard(code) answers with the card's XML. /xmas/ecard?card=CODE shows a card; /api/user/gethabboimage is the
-    /// avatar the card draws. No e-mail is sent or kept: the sender shares the card's link.
+    /// avatar the card draws. The card lives on the CMS page xmas/julekort ({xmas_ecard}); a logged-in sender's card is also
+    /// e-mailed to the friend's address (Mailgun, not kept), and every sender gets the card's link to share.
     /// </summary>
     public class EcardController : Controller
     {
         private const int MaxPerHour = 20;
+        private const int MaxMailsPerDay = 10;
         private readonly DataContext _context;
         private readonly ILogger<EcardController> _logger;
         private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache;
+        private readonly KeplerCMS.Services.Interfaces.IMailService _mail;
 
-        public EcardController(DataContext context, ILogger<EcardController> logger, Microsoft.Extensions.Caching.Memory.IMemoryCache cache)
+        public EcardController(DataContext context, ILogger<EcardController> logger, Microsoft.Extensions.Caching.Memory.IMemoryCache cache, KeplerCMS.Services.Interfaces.IMailService mail)
         {
             _context = context;
             _logger = logger;
             _cache = cache;
+            _mail = mail;
         }
 
-        public class EcardPage
-        {
-            public string Card { get; set; }
-            public List<ECard> Sent { get; set; } = new();
-        }
-
-        [LoggedInFilter(false)]
+        /// <summary>The card moved into the Christmas section: the CMS page xmas/julekort ({xmas_ecard}).</summary>
         [HttpGet("xmas/ecard")]
-        public async Task<IActionResult> Index(string card)
-        {
-            var page = new EcardPage { Card = card != null && await _context.ECards.AnyAsync(c => c.Code == card) ? card : null };
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var userId = int.Parse(User.Identity.Name);
-                page.Sent = await _context.ECards.AsNoTracking().Where(c => c.UserId == userId).OrderByDescending(c => c.Id).Take(10).ToListAsync();
-            }
-            return View("~/Views/Ecard/Index.cshtml", page);
-        }
+        public IActionResult Index(string card) =>
+            Redirect("/xmas/julekort" + (string.IsNullOrWhiteSpace(card) ? "" : "?card=" + Uri.EscapeDataString(card)));
 
         /// <summary>The visitor's latest cards (the page refreshes its list after sending).</summary>
         [HttpGet("xmas/ecard/mine")]
@@ -63,7 +53,7 @@ namespace KeplerCMS.Controllers
             if (User.Identity?.IsAuthenticated != true) return Json(Array.Empty<object>());
             var userId = int.Parse(User.Identity.Name);
             var cards = await _context.ECards.AsNoTracking().Where(c => c.UserId == userId).OrderByDescending(c => c.Id).Take(10)
-                .Select(c => new { code = c.Code, toName = c.ToName, headline = c.Headline, createdAt = c.CreatedAt }).ToListAsync();
+                .Select(c => new { code = c.Code, toName = c.ToName, headline = c.Headline, createdAt = c.CreatedAt, emailed = c.EmailedAt != null }).ToListAsync();
             return Json(cards);
         }
 
@@ -156,7 +146,7 @@ namespace KeplerCMS.Controllers
             if (recent >= (userId != null ? MaxPerHour : MaxPerHour * 2)) return null;
 
             // The card's arguments: its XML, (null), "your e-mail" (relabelled "Dit navn" in ecard_da.xml), the friend's
-            // name, "the friend's e-mail" (relabelled "Din vens Habbo-navn"), a notify flag, the site url and the language.
+            // name, the friend's e-mail, a notify flag, the site url and the language.
             var habbo = Element(xml, "habboname");
             if (string.IsNullOrWhiteSpace(habbo) || habbo == "0" || habbo == "undefined")
             {
@@ -173,7 +163,6 @@ namespace KeplerCMS.Controllers
                 HabboName = Limit(habbo == "0" ? null : habbo, 50),
                 FromName = Limit(args.ElementAtOrDefault(2) as string, 100),
                 ToName = Limit(args.ElementAtOrDefault(3) as string, 100),
-                ToHabbo = Limit(args.ElementAtOrDefault(4) as string, 50),
                 Headline = Limit(Element(xml, "headline"), 255),
                 Message = Limit(Element(xml, "msg"), 2000),
                 CardXml = xml,
@@ -181,6 +170,33 @@ namespace KeplerCMS.Controllers
             };
             _context.ECards.Add(card);
             await _context.SaveChangesAsync();
+
+            // Logged-in senders: the card goes to the friend's e-mail too (the address isn't kept), at most MaxMailsPerDay a day.
+            var to = (args.ElementAtOrDefault(4) as string)?.Trim();
+            if (userId != null && ValidEmail(to))
+            {
+                var day = DateTime.Now.AddDays(-1);
+                var mailed = await _context.ECards.CountAsync(c => c.UserId == userId && c.EmailedAt != null && c.EmailedAt > day);
+                var sender = await _context.Users.AsNoTracking().Where(u => u.Id == userId).Select(u => u.Username).FirstOrDefaultAsync();
+                if (mailed < MaxMailsPerDay && sender != null)
+                {
+                    var link = $"https://{Request.Host}/xmas/julekort?card={card.Code}";
+                    try
+                    {
+                        var result = await _mail.SendEcard(to, sender, card.ToName, card.Headline, link);
+                        if (result.Successful)
+                        {
+                            card.EmailedAt = DateTime.Now;
+                            await _context.SaveChangesAsync();
+                        }
+                        else _logger.LogWarning("E-card {Code}: e-mail not sent ({Errors})", card.Code, string.Join(", ", result.ErrorMessages));
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning("E-card {Code}: e-mail failed ({Message})", card.Code, e.Message);
+                    }
+                }
+            }
             return card.Code;
         }
 
@@ -190,6 +206,13 @@ namespace KeplerCMS.Controllers
             var card = await _context.ECards.AsNoTracking().FirstOrDefaultAsync(c => c.Code == code);
             // The card reads event.result.xml.
             return card == null ? null : new Dictionary<string, object> { ["xml"] = card.CardXml };
+        }
+
+        private static bool ValidEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email) || email.Length > 255) return false;
+            try { return new System.Net.Mail.MailAddress(email).Address == email; }
+            catch (FormatException) { return false; }
         }
 
         private static string Limit(string s, int length) => string.IsNullOrWhiteSpace(s) ? null : s.Trim().Length > length ? s.Trim().Substring(0, length) : s.Trim();

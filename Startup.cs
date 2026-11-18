@@ -84,8 +84,19 @@ namespace KeplerCMS
                 options => options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")
             ));
 
-            services.AddFluentEmail(Configuration.GetSection("keplercms:mailAddress").Value)
-            .AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
+            var mail = services.AddFluentEmail(Configuration.GetSection("keplercms:mailAddress").Value);
+            if (string.IsNullOrEmpty(Configuration.GetSection("keplercms:mailgunApiKey").Value))
+            {
+                // No Mailgun key (local dev): mails are written as .eml files to keplercms:mailDropFolder (or the temp folder).
+                var drop = Configuration.GetSection("keplercms:mailDropFolder").Value;
+                if (string.IsNullOrEmpty(drop)) drop = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "keplercms-mail");
+                System.IO.Directory.CreateDirectory(drop);
+                mail.Services.AddSingleton<FluentEmail.Core.Interfaces.ISender>(new FluentEmail.Core.Defaults.SaveToDiskSender(drop));
+            }
+            else
+            {
+                mail.AddMailGunSender(Configuration.GetSection("keplercms:mailgunDomain").Value, Configuration.GetSection("keplercms:mailgunApiKey").Value, FluentEmail.Mailgun.MailGunRegion.EU);
+            }
 
             services.AddRouting(options => options.LowercaseUrls = true);
 

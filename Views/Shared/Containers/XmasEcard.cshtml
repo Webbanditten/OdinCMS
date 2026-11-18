@@ -1,0 +1,94 @@
+@using KeplerCMS.Data.Models
+@model Containers
+@inject KeplerCMS.Data.DataContext Db
+@*
+    {xmas_ecard}: the 2006 Christmas card (flash/xmas06/ecard.swf, 732x473, Ruffle; EcardController is its gateway) and,
+    for a logged-in sender, the cards they sent with the links to share (refreshed after sending). A logged-in sender who
+    writes their friend's e-mail on the card also gets it sent there (EcardController.Save, Mailgun). ?card=CODE shows a
+    sent card. Put it in a nobox on a one_wide page: the card needs 732 px.
+*@
+@{
+    string T(string key, string fallback) { var v = DbRes.T(key, "ecard"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+    var host = Context.Request.Host.Host;
+    var scheme = host is "localhost" or "127.0.0.1" ? Context.Request.Scheme : "https";
+    var siteUrl = scheme + "://" + Context.Request.Host.Value;
+    var cardCode = Context.Request.Query["card"].ToString();
+    if (string.IsNullOrWhiteSpace(cardCode) || !Db.ECards.Any(c => c.Code == cardCode)) cardCode = null;
+    var me = ViewData["user"] as Users;
+    var sent = me == null ? new List<ECard>() : Db.ECards.Where(c => c.UserId == me.Id).OrderByDescending(c => c.Id).Take(10).ToList();
+    var swf = Url.Content("~/flash/xmas06/ecard.swf");
+    var vars = new List<string> { "lang=da", "siteurl=" + Uri.EscapeDataString(siteUrl), "base=" + Uri.EscapeDataString(Url.Content("~/flash/xmas06")), "token=1" };
+    if (cardCode != null) vars.Add("cardid=" + Uri.EscapeDataString(cardCode));
+}
+<div style="text-align: center;">
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = Object.assign({}, window.RufflePlayer.config, { autoplay: "on", unmuteOverlay: "hidden" });
+    </script>
+    <object type="application/x-shockwave-flash" data="@swf" width="732" height="473">
+        <param name="movie" value="@swf" />
+        <param name="flashvars" value="@Html.Raw(string.Join("&amp;", vars))" />
+        <param name="base" value="@Url.Content("~/flash/xmas06/")" />
+        <param name="allowScriptAccess" value="always" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#ffffff" />
+        <param name="menu" value="false" />
+    </object>
+</div>
+@if (cardCode != null)
+{
+    <p style="text-align: center;"><a href="/xmas/julekort"><strong>@T("make_own", "Lav dit eget Habbo-julekort her!")</strong></a></p>
+}
+else if (me == null)
+{
+    <p style="text-align: center;">@T("login_to_mail", "Log ind, hvis kortet skal sendes direkte til din vens e-mail. Ellers får du et link til kortet, som du selv kan give videre.")</p>
+}
+@if (me != null)
+{
+    <div class="ecard-mine-box">
+        <h3>@T("mine_title", "Dine julekort")</h3>
+        <p>@T("mine_text", "Når du har sendt et kort, kommer det her. Har du skrevet din vens e-mail på kortet, har vi sendt det til dem. Linket kan du også selv give videre.")</p>
+        <ul id="ecard-mine" class="ecard-mine">
+            @if (sent.Count == 0)
+            {
+                <li class="ecard-empty">@T("mine_none", "Du har ikke sendt nogen kort endnu.")</li>
+            }
+            @foreach (var card in sent)
+            {
+                <li><strong>@(card.Headline ?? "Julekort")</strong>@(card.ToName != null ? " " + T("to", "til") + " " + card.ToName : "")@(card.EmailedAt != null ? " · " + T("emailed", "sendt på e-mail") : "") <input type="text" readonly value="@siteUrl/xmas/julekort?card=@card.Code" onclick="this.select()" /></li>
+            }
+        </ul>
+    </div>
+    <script>
+        // After sending, the card lands here: refresh the list now and then while the page is open.
+        (function () {
+            var list = document.getElementById('ecard-mine'), last = list.querySelectorAll('input').length;
+            setInterval(function () {
+                fetch('/xmas/ecard/mine', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (cards) {
+                    if (cards.length === last) return;
+                    last = cards.length;
+                    list.innerHTML = '';
+                    cards.forEach(function (c) {
+                        var li = document.createElement('li'), strong = document.createElement('strong'), input = document.createElement('input');
+                        strong.textContent = c.headline || 'Julekort';
+                        li.appendChild(strong);
+                        if (c.toName) li.appendChild(document.createTextNode(' @T("to", "til") ' + c.toName));
+                        if (c.emailed) li.appendChild(document.createTextNode(' · @T("emailed", "sendt på e-mail")'));
+                        input.type = 'text'; input.readOnly = true; input.value = '@siteUrl/xmas/julekort?card=' + c.code;
+                        input.onclick = function () { this.select(); };
+                        li.appendChild(document.createTextNode(' '));
+                        li.appendChild(input);
+                        list.appendChild(li);
+                    });
+                }).catch(function () {});
+            }, 5000);
+        })();
+    </script>
+}
+<style>
+    div.ecard-mine-box { margin: 10px 4px 0; padding: 8px 10px; background: #fff7e6; border: 1px solid #e0b070; }
+    div.ecard-mine-box h3 { margin: 0 0 4px; }
+    ul.ecard-mine { list-style: none; margin: 4px 0 0; padding: 0; }
+    ul.ecard-mine li { margin: 3px 0; }
+    ul.ecard-mine input { width: 330px; margin-left: 6px; font-size: 11px; }
+</style>

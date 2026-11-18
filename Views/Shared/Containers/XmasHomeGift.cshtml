@@ -1,0 +1,82 @@
+@using KeplerCMS.Data.Models
+@using KeplerCMS.Services.Implementations
+@model Containers
+@inject KeplerCMS.Data.DataContext Db
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@*
+    {xmas_home_gift}: this Christmas's free Habbo Home decorations (setting cms.xmas_home_gift), fetched once per player
+    (XmasController.HomeGift). The box's own dates decide when it can be fetched.
+*@
+@{
+    string T(string key, string fallback) { var v = DbRes.T(key, "xmas"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+    var items = await KeplerCMS.Controllers.XmasController.GiftItems(Db);
+    var me = ViewData["user"] as Users;
+    var key = KeplerCMS.Controllers.XmasController.GiftKey(DateTime.Now);
+    var claimed = me != null && Db.HomeGifts.Any(g => g.GiftKey == key && g.UserId == me.Id);
+    var result = Context.Request.Query["gift"].ToString();
+    var returnUrl = Context.Request.Path + Context.Request.QueryString.ToString().Replace("gift=" + result, "").TrimEnd('&', '?');
+}
+<div id="xmas-home-gift" class="xmas-home-gift">
+    @if (items.Count > 0)
+    {
+        <div class="xmas-home-gift-items">
+            @foreach (var item in items)
+            {
+                var picture = HomeAssetImages.Find(Env.WebRootPath, item.CssClass);
+                if (picture == null) continue;
+                var background = item.Type == "backgrounds";
+                <span class="xmas-home-gift-item@(background ? " is-background" : "")" title="@item.Name">
+                    @if (background)
+                    {
+                        <span style="background-image: url('@picture.Url');"></span>
+                    }
+                    else
+                    {
+                        <img src="@picture.Url" alt="@item.Name" style="max-width: 80px; max-height: 80px;" />
+                    }
+                </span>
+            }
+        </div>
+    }
+    @if (result == "ok")
+    {
+        <p class="xmas-home-gift-done">@T("home_gift_ok", "Så er julepynten din! Du finder den i dit Habbo Home under Inventar.")</p>
+    }
+    else if (result == "closed")
+    {
+        <p class="xmas-home-gift-error">@T("home_gift_closed", "Julepynten kan ikke hentes lige nu.")</p>
+    }
+    @if (items.Count == 0)
+    {
+        <p>@T("home_gift_none", "Julepynten er på vej. Kig forbi igen senere!")</p>
+    }
+    else if (me == null)
+    {
+        <p>@T("home_gift_login", "Log ind, og hent GRATIS julepynt til dit Habbo Home!")</p>
+    }
+    else if (claimed)
+    {
+        if (result != "ok")
+        {
+            <p>@T("home_gift_taken", "Du har allerede hentet årets julepynt. Glædelig jul!")</p>
+        }
+        <p><a href="/home/@me.Username">@T("home_gift_go", "Gå til dit Habbo Home »")</a></p>
+    }
+    else
+    {
+        <p>@T("home_gift_text", "Pynt op til jul! Hent klistermærker og en julebaggrund til dit Habbo Home – helt GRATIS.")</p>
+        <form method="post" action="/xmas/home-gift">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <button type="submit" class="xmas-home-gift-button">@T("home_gift_button", "Hent julepynt")</button>
+        </form>
+    }
+</div>
+<style>
+    div.xmas-home-gift-items { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 6px; margin-bottom: 6px; }
+    span.xmas-home-gift-item { display: inline-block; }
+    span.xmas-home-gift-item.is-background span { display: block; width: 60px; height: 60px; border: 1px solid #c9b48a; background-position: center; }
+    p.xmas-home-gift-done { color: #2e6b1f; font-weight: bold; }
+    p.xmas-home-gift-error { color: #b2001f; font-weight: bold; }
+    button.xmas-home-gift-button { font-weight: bold; padding: 3px 12px; cursor: pointer; }
+</style>
