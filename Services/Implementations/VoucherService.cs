@@ -82,7 +82,7 @@ namespace KeplerCMS.Services.Implementations
                         SaleCode = group.Key.SaleCode,
                         Amount = group.Count(),
                         Name = entry?.Name ?? group.Key.SaleCode,
-                        Sprite = definition?.Sprite,
+                        Sprite = entry?.ImageSprite,
                         Colour = definition?.Colour,
                         Missing = entry == null,
                     });
@@ -109,7 +109,7 @@ namespace KeplerCMS.Services.Implementations
                 {
                     SaleCode = e.SaleCode,
                     Name = e.Name,
-                    Sprite = e.Parts.FirstOrDefault()?.Definition?.Sprite,
+                    Sprite = e.ImageSprite,
                     Colour = e.Parts.FirstOrDefault()?.Definition?.Colour,
                     Price = e.Price,
                     IsPackage = e.IsPackage,

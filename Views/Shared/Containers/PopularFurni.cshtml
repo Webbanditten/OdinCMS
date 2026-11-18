@@ -11,14 +11,11 @@
         <p>@(string.IsNullOrWhiteSpace(none) || none == "purchase_none" ? "Ingen har købt møbler i kataloget den sidste måned." : none)</p>
         return;
     }
-    var rawSprite = furni.Sprite;
-    var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
-    var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
     <div class="popular_furni">
     <strong>
         @furni.Name
     </strong><br />
-        <img src="~/habbo-imaging/furni?direction=2&sprite=@sprite@color"/><br />
+        <img src="@Url.Content("~/habbo-imaging/furni")?direction=2&@KeplerCMS.Helpers.FurniPicture.Query(furni.ImageSprite ?? furni.Sprite)"/><br />
         @DbRes.T("containers", "purchase_count").Replace("{amount}", @furni.Amount.ToString())
     </div>
 }

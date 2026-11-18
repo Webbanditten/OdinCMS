@@ -55,11 +55,9 @@
                                     {
                                         @foreach (var rewardItemsDefinition in reward.ItemsDefinitions)
                                         {
-                                            var rawSprite = rewardItemsDefinition.Sprite;
-                                            var sprite = (rawSprite.Contains("*")) ? rawSprite.Split("*")[0] : rawSprite;
-                                            var color = (rawSprite.Contains("*")) ? "&color=" + rawSprite.Split("*")[1] : "";
+                                            var picture = KeplerCMS.Helpers.FurniPicture.Query(rewardItemsDefinition.ImageSprite ?? rewardItemsDefinition.Sprite);
                                             <div class="rewards-item-furni">
-                                                <img src="~/habbo-imaging/furni?icon=true&sprite=@sprite@color"/>
+                                                <img src="@Url.Content("~/habbo-imaging/furni")?icon=true&@picture"/>
                                                 <span class="tooltiptext">@rewardItemsDefinition.Name</span>
                                             </div>
                                         }
