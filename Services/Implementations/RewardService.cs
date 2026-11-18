@@ -36,6 +36,9 @@ namespace KeplerCMS.Services.Implementations
             var dbDefinitions = await _context.ItemsDefinitions
                 .Where(s => itemDefinitionIds.Contains(s.Id))
                 .ToDictionaryAsync(s => s.Id);
+            // Posters' pictures need their number ("poster27").
+            var posters = await FurniService.PosterSprites(_context, itemDefinitionIds);
+            foreach (var definition in dbDefinitions.Values) definition.ImageSprite = posters.GetValueOrDefault(definition.Id);
 
             foreach (var reward in rewards)
             {
@@ -92,6 +95,9 @@ namespace KeplerCMS.Services.Implementations
             var dbDefinitions = await _context.ItemsDefinitions
                 .Where(s => itemDefinitionIds.Contains(s.Id))
                 .ToDictionaryAsync(s => s.Id);
+            // Posters' pictures need their number ("poster27").
+            var posters = await FurniService.PosterSprites(_context, itemDefinitionIds);
+            foreach (var definition in dbDefinitions.Values) definition.ImageSprite = posters.GetValueOrDefault(definition.Id);
 
             foreach (var reward in rewards)
             {
