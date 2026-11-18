@@ -57,8 +57,29 @@ namespace KeplerCMS.Areas.Housekeeping
             var ads = await _context.Ads.AsNoTracking().OrderBy(a => a.Placement).ThenByDescending(a => a.Enabled).ThenBy(a => a.Name).ToListAsync();
             var rooms = await _context.AdRooms.AsNoTracking().ToListAsync();
             ViewData["frames"] = await BillboardRooms();
+            ViewData["poolRooms"] = await PoolScreenRooms();
+            var ids = rooms.Select(r => r.RoomId).Distinct().ToList();
+            ViewData["roomNames"] = await _context.Rooms.AsNoTracking().Where(r => ids.Contains(r.Id)).ToDictionaryAsync(r => r.Id, r => r.Name);
             return View(ads.Select(a => new AdRow { Ad = a, Rooms = rooms.Where(r => r.AdId == a.Id).Select(r => r.RoomId).ToList() }).ToList());
         }
+
+        /// <summary>The rooms with the big pool screen (Habbo Poolen II, Tagterassen).</summary>
+        private async Task<List<FrameRoom>> PoolScreenRooms() =>
+            await _context.Rooms.AsNoTracking().Where(r => AdPlacements.PoolScreenModels.Contains(r.Model))
+                .OrderBy(r => r.Id).Select(r => new FrameRoom { RoomId = r.Id, Name = r.Name, Format = r.Model }).ToListAsync();
+
+        /// <summary>Room names for the room loading ad's room IDs (any room, public or private).</summary>
+        [HttpGet]
+        public async Task<IActionResult> Rooms(string ids)
+        {
+            var list = ParseIds(ids);
+            var rooms = await _context.Rooms.AsNoTracking().Where(r => list.Contains(r.Id)).Select(r => new { id = r.Id, name = r.Name, ownerId = r.OwnerId }).ToListAsync();
+            return Json(list.Select(id => rooms.FirstOrDefault(r => r.id == id) ?? (object)new { id, name = (string)null, ownerId = 0 }));
+        }
+
+        private static List<int> ParseIds(string ids) =>
+            (ids ?? "").Split(new[] { ',', ' ', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => int.TryParse(x.Trim(), out var id) ? id : 0).Where(id => id > 0).Distinct().Take(200).ToList();
 
         private async Task<List<FrameRoom>> BillboardRooms()
         {
@@ -111,6 +132,19 @@ namespace KeplerCMS.Areas.Housekeeping
 
             string fit = "as_is";
             var rooms = new List<int>();
+            var requested = (request.Rooms ?? new List<int>()).Where(id => id > 0).Distinct().ToList();
+            if (placement.Id == AdPlacements.RoomLoading && requested.Count > 0)
+            {
+                var existing = await _context.Rooms.AsNoTracking().Where(r => requested.Contains(r.Id)).Select(r => r.Id).ToListAsync();
+                var missing = requested.Except(existing).ToList();
+                if (missing.Count > 0) return BadRequest("No room has the ID " + string.Join(", ", missing) + ".");
+                rooms = requested;
+            }
+            if (placement.Id == AdPlacements.PoolScreen)
+            {
+                var pool = (await PoolScreenRooms()).Select(r => r.RoomId).ToList();
+                rooms = requested.Where(pool.Contains).ToList();
+            }
             if (placement.Id == AdPlacements.RoomBillboard)
             {
                 fit = request.Fit == BillboardFormats.Auto || BillboardFormats.All.Any(f => f.Id == request.Fit) ? request.Fit : BillboardFormats.Auto;
