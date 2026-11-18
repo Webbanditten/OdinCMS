@@ -1,0 +1,195 @@
+@using KeplerCMS.Models
+@model List<KeplerCMS.Areas.Housekeeping.AdsController.AdRow>
+@{
+    ViewBag.Title = "Ads";
+    var frames = (List<KeplerCMS.Areas.Housekeeping.AdsController.FrameRoom>)ViewData["frames"];
+    var now = DateTime.Now;
+}
+
+<h1>Ads</h1>
+<p class="ad-intro">
+    Every ad place in the hotel and on the website. Each ad rotates with the other active ads of its place: one is picked
+    per room visit, page view or hotel visit, and a higher weight is picked more often. Views count when the picture is shown
+    or downloaded, clicks when someone follows its link. Pictures come from the media library (upload them in the
+    <em>ads</em> category). In-game changes apply from the next room a player enters.
+</p>
+
+<div class="ad-panel" id="ad-form" hidden>
+    <h2 id="ad-form-title">New ad</h2>
+    <div class="ad-grid">
+        <label for="ad-name">Name</label>
+        <div><input type="text" id="ad-name" maxlength="100" placeholder="For you: shown in this list and as the picture's alt text" /></div>
+
+        <label for="ad-placement">Where</label>
+        <div>
+            <select id="ad-placement">
+                @foreach (var placement in AdPlacements.All)
+                {
+                    <option value="@placement.Id" data-size="@placement.Size" data-where="@placement.Where" data-ingame="@(placement.InGame ? "1" : "0")"
+                            data-width="@AdPlacements.MaxSize(placement.Id).Width" data-height="@AdPlacements.MaxSize(placement.Id).Height">@placement.Name</option>
+                }
+            </select>
+            <div class="ad-hint" id="ad-placement-hint"></div>
+        </div>
+
+        <label for="ad-image">Picture</label>
+        <div>
+            <input type="text" id="ad-image" placeholder="/images/ads/..." autocomplete="off" />
+            <button type="button" data-media-for="ad-image" data-media-category="ads" data-media-title="Choose the ad's picture">Choose image</button>
+            <div class="ad-hint" id="ad-image-info"></div>
+        </div>
+
+        <label for="ad-fit" class="ad-billboard">Billboard</label>
+        <div class="ad-billboard">
+            <select id="ad-fit">
+                <option value="auto">A flat picture: slant it for each room's frame</option>
+                @foreach (var format in BillboardFormats.All)
+                {
+                    <option value="@format.Id">Already slanted, @format.Name.ToLower() (@format.Width×@format.Height)</option>
+                }
+            </select>
+            <div class="ad-hint">A flat picture is cut to the frame's face (160×60, or 200×80 in the large frames) and slanted; 400×160 or bigger looks best. An already slanted picture is shown as it is, only in rooms with that frame; white around it is see-through.</div>
+        </div>
+
+        <label class="ad-billboard">Rooms</label>
+        <div class="ad-billboard">
+            <div class="ad-hint" style="margin-left: 0">None ticked: every room with a billboard (of the picture's format). <a href="#" id="ad-rooms-none">Untick all</a></div>
+            <div class="ad-rooms" id="ad-rooms">
+                @foreach (var room in frames)
+                {
+                    <label class="ad-room" data-format="@room.Format">
+                        <input type="checkbox" value="@room.RoomId" /> @room.Name <small>@room.Format.Replace("_", " ")</small>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <label for="ad-click">Link</label>
+        <div>
+            <input type="text" id="ad-click" maxlength="500" placeholder="/credits/habboclub or https://..." autocomplete="off" />
+            <div class="ad-hint">Empty: the ad can't be clicked. In the hotel a click opens a new window; on the website, site pages open in the same window and other addresses in a new one.</div>
+        </div>
+
+        <label for="ad-starts">Shown</label>
+        <div>
+            from <input type="text" id="ad-starts" class="datetimepicker" placeholder="now" autocomplete="off" />
+            until <input type="text" id="ad-ends" class="datetimepicker" placeholder="always" autocomplete="off" />
+            <a href="#" id="ad-dates-clear" class="ad-hint">no dates</a>
+        </div>
+
+        <label for="ad-weight">Weight</label>
+        <div>
+            <input type="number" id="ad-weight" min="1" max="100" value="1" />
+            <span class="ad-hint">With two active ads of weight 3 and 1, the first is shown three times as often.</span>
+        </div>
+
+        <label for="ad-enabled">On</label>
+        <div><input type="checkbox" id="ad-enabled" checked /></div>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="ad-preview" id="ad-preview"><span class="ad-hint">Pick a picture.</span></div>
+
+    <div class="ad-actions">
+        <button type="button" class="ad-primary" id="ad-save">Save ad</button>
+        <button type="button" id="ad-cancel">Cancel</button>
+        <span class="ad-error" id="ad-error"></span>
+    </div>
+</div>
+
+<p><button type="button" class="ad-primary" id="ad-new">New ad</button></p>
+
+@foreach (var placement in AdPlacements.All)
+{
+    var rows = Model.Where(r => r.Ad.Placement == placement.Id).ToList();
+    <h2 class="ad-section">@placement.Name <small>@placement.Size</small></h2>
+    <p class="ad-hint ad-where">@placement.Where @(rows.Count(r => r.Ad.IsActive(now)) == 0 ? "No ad is showing here now." : "")</p>
+    if (rows.Count == 0)
+    {
+        continue;
+    }
+    <table class="blueTable ad-table">
+        <thead>
+            <tr><th></th><th>Name</th><th>Status</th><th>Shown</th><th>Weight</th><th>Link</th><th>Views</th><th>Clicks</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows)
+            {
+                var ad = row.Ad;
+                var status = !ad.Enabled ? "off" : ad.EndsAt != null && ad.EndsAt <= now ? "ended" : ad.StartsAt != null && ad.StartsAt > now ? "scheduled" : "showing";
+                var rate = ad.Views > 0 ? (100.0 * ad.Clicks / ad.Views).ToString("0.0") + " %" : "";
+                <tr class="ad-status-@status">
+                    <td class="ad-thumb"><img src="@(placement.Id == AdPlacements.RoomBillboard && ad.Fit == BillboardFormats.Auto ? Url.Action("Preview", "Ads", new { image = ad.Image, format = "small_left" }) : ad.Image)" alt="" loading="lazy" /></td>
+                    <td>
+                        <strong>@ad.Name</strong>
+                        @if (placement.Id == AdPlacements.RoomBillboard)
+                        {
+                            <div class="ad-hint" style="margin-left: 0">
+                                @(ad.Fit == BillboardFormats.Auto ? "slanted for each frame" : BillboardFormats.Get(ad.Fit).Name.ToLower() + " only"),
+                                @(row.Rooms.Count == 0 ? "every room" : string.Join(", ", row.Rooms.Select(id => frames.FirstOrDefault(f => f.RoomId == id)?.Name ?? "#" + id)))
+                            </div>
+                        }
+                    </td>
+                    <td><span class="ad-badge">@status</span></td>
+                    <td class="ad-nowrap">@(ad.StartsAt?.ToString("yyyy-MM-dd HH:mm") ?? "")@(ad.StartsAt != null || ad.EndsAt != null ? " – " : "")@(ad.EndsAt?.ToString("yyyy-MM-dd HH:mm") ?? "")</td>
+                    <td>@ad.Weight</td>
+                    <td class="ad-link">@ad.ClickUrl</td>
+                    <td>@ad.Views.ToString("N0")</td>
+                    <td>@ad.Clicks.ToString("N0")@(rate != "" ? " (" + rate + ")" : "")</td>
+                    <td class="ad-nowrap">
+                        <a href="#" data-edit="@ad.Id">Edit</a> -
+                        <a href="#" data-toggle="@ad.Id" data-enabled="@(ad.Enabled ? "0" : "1")">@(ad.Enabled ? "Turn off" : "Turn on")</a> -
+                        <a href="#" data-delete="@ad.Id" data-name="@ad.Name">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<style>
+    .ad-intro { max-width: 780px; }
+    .ad-panel { border: 1px solid #b8c7d6; background: #f4f8fb; padding: 10px 14px; margin: 10px 0 18px; max-width: 900px; }
+    .ad-panel h2 { margin-top: 0; }
+    .ad-grid { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; align-items: start; }
+    .ad-grid > label { font-weight: bold; padding-top: 4px; }
+    .ad-grid input[type=text], .ad-grid input[type=number], .ad-grid select { padding: 3px 5px; }
+    #ad-name, #ad-image, #ad-click { width: 420px; }
+    #ad-weight { width: 70px; }
+    #ad-starts, #ad-ends { width: 150px; }
+    .ad-hint { color: #667; font-size: 11px; margin-left: 6px; }
+    .ad-rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 10px; max-height: 220px; overflow-y: auto; border: 1px solid #ccd; background: #fff; padding: 4px 6px; margin-top: 4px; }
+    .ad-room { font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ad-room small { color: #889; }
+    .ad-room.is-disabled { color: #bbb; }
+    .ad-preview { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; background: #2b3a4a; padding: 12px; min-height: 60px; color: #cde; }
+    .ad-preview figure { margin: 0; text-align: center; font-size: 11px; }
+    .ad-preview .ad-hint { color: #cde; }
+    .ad-frame { position: relative; image-rendering: pixelated; }
+    .ad-frame img { position: absolute; image-rendering: pixelated; }
+    .ad-frame img.ad-frame-bg { position: static; display: block; }
+    .ad-slot { border: 1px dashed #8ab; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
+    .ad-slot img { display: block; max-width: 100%; max-height: 100%; }
+    .ad-actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+    .ad-primary { font-weight: bold; }
+    .ad-error { color: #b00; }
+    .ad-section { margin-top: 22px; margin-bottom: 0; }
+    .ad-section small { font-weight: normal; color: #667; font-size: 12px; }
+    .ad-where { margin: 2px 0 6px 0; }
+    .ad-table { margin-bottom: 8px; }
+    .ad-thumb img { max-width: 120px; max-height: 60px; display: block; image-rendering: pixelated; }
+    .ad-badge { font-size: 11px; padding: 1px 6px; border-radius: 3px; background: #ddd; }
+    .ad-status-showing .ad-badge { background: #2e7d32; color: #fff; }
+    .ad-status-scheduled .ad-badge { background: #1565c0; color: #fff; }
+    .ad-status-off td, .ad-status-ended td { color: #999; }
+    .ad-nowrap { white-space: nowrap; }
+    .ad-link { max-width: 220px; overflow-wrap: anywhere; font-size: 11px; }
+</style>
+
+@section scripts {
+    <link rel="stylesheet" href="~/lib/datetimepicker/jquery.datetimepicker.min.css" />
+    <script src="~/lib/datetimepicker/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+    <script src="~/housekeeping/js/media-library.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/media-fields.js" asp-append-version="true"></script>
+    <script src="~/housekeeping/js/ads.js" asp-append-version="true" type="text/javascript"></script>
+}

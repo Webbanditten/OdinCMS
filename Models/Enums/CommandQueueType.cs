@@ -23,6 +23,7 @@ namespace KeplerCMS.Models.Enums
         reload_catalogue,
         reload_navigator,
         reload_inventory,
-        reload_settings
+        reload_settings,
+        reload_ads
     }
 }

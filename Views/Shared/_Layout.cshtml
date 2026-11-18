@@ -77,44 +77,9 @@
     <div id="overlay"></div>
     <h1 id="main-header">Habbo</h1>
     <div id="wrapper">
-        <!-- ADVERTISEMENT INCLUDE -->
-        <script type='text/javascript'>
-            Ads_Top('@Url.Content("~/c_images/album728/ads_habbowood.png")');
-            Links_Top = ['/habbowood'];
-        </script>
+        <!-- ADVERTISEMENT INCLUDE: Housekeeping > Ads, website top banner -->
         <div align="center">
-            <div class="ad-scale ad-leader">
-                <table>
-                    <tbody>
-                        <tr>
-                            <td class="ad-header-tl"></td>
-                            <td class="ad-header-t"></td>
-                            <td class="ad-header-tr"></td>
-                        </tr>
-                        <tr>
-                            <td class="ad-header-ml"></td>
-                            <td class="ad-header-m">
-
-                                <h5><span class="lang-Advertissement_Title">@DbRes.T("ad", "shared")</span></h5>
-                            </td>
-                            <td class="ad-header-mr"></td>
-                        </tr>
-                        <tr>
-                            <td class="ad-content-ml"></td>
-                            <td class="ad-content-m" align="center" valign="top">
-                                <a href="#" target="_self" id="TopLink"><img style="width: 728px; height: 90px;" alt="" src="#" id="TopImage"></a>
-                            </td>
-                            <td class="ad-content-mr"></td>
-                        </tr>
-                        <tr>
-                            <td class="ad-content-bl"></td>
-                            <td class="ad-content-b"></td>
-                            <td class="ad-content-br"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
+            <partial name="~/Views/Shared/Ads/_AdSlot.cshtml" model="KeplerCMS.Models.AdPlacements.WebsiteTop" />
         </div>
         <div id="top_wrap">
             @{
