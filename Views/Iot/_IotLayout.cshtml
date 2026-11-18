@@ -13,7 +13,7 @@
     <link href="~/styles/style.css" type="text/css" rel="stylesheet" />
     <link href="~/iot/styles/iot.css" asp-append-version="true" type="text/css" rel="stylesheet" />
 </head>
-<body style="background: #fff; margin: 10px;">
+<body style="background: #525d63 url(/images/bg_patterns/habbo.gif); margin: 10px;">
     <table border="0" cellpadding="0" cellspacing="0" width="720">
         <tbody>
             <tr>
@@ -49,6 +49,12 @@
             </div>
             <div class="portlet-bottom-process"></div>
         </div>
+    </div>
+    @* The white legal strip under the box closes the blue frame (as in the original); the site footer's own text. *@
+    <div id="footer-process">
+        <div id="footer-top-process" style="font-size: 8px;">&nbsp;</div>
+        <div id="footer-body-process">@Html.Raw(DbRes.T("footer_legal", "shared"))</div>
+        <div id="footer-bottom-process">&nbsp;</div>
     </div>
 </body>
 </html>
