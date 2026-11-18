@@ -32,6 +32,12 @@ namespace KeplerCMS.Data.Models
         public int VisitorsNow { get; set; }
         [Column("visitors_max")]
         public int VisitorsMax { get; set; }
+        /// <summary>How many may wait in the queue when the room is full (0 = no queue). Odin's RoomQueueManager.</summary>
+        [Column("queue_max")]
+        public int QueueMax { get; set; }
+        /// <summary>Spectator seats: watch the room on the client's TV screen, without an avatar (0 = none).</summary>
+        [Column("spectators_max")]
+        public int SpectatorsMax { get; set; }
         
         public Users Owner { get; set; }
     }

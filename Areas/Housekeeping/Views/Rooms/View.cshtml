@@ -52,6 +52,7 @@
         <th>Room name and description</th>
         <th>Door mode</th>
         <th>Show owner</th>
+        <th>When it's full</th>
         <th></th>
     </tr>
     </thead>
@@ -88,11 +89,27 @@
                 <select name="AccessType" asp-for="@Model.AccessType" asp-items="doorModes"></select>
             </td>
             <td style="text-align: center"><input type="checkbox" name="ShowOwner" value="1" @((@Model.ShowOwner == 1) ? "checked" : "") /></td>
+            <td style="white-space: nowrap; padding: 0 10px;">
+                <label style="display:block" for="QueueMax">Queue</label>
+                <input style="width: 70px;" type="number" min="0" max="500" id="QueueMax" name="QueueMax" value="@Model.QueueMax"/>
+                <label style="display:block; margin-top: 4px;" for="SpectatorsMax">Spectator seats</label>
+                <input style="width: 70px;" type="number" min="0" max="500" id="SpectatorsMax" name="SpectatorsMax" value="@Model.SpectatorsMax"/>
+            </td>
             <td style="text-align: center"><input type="submit" value="Save" /></td>
         </form>
     </tr>
     </tbody>
 </table>
+<p class="form-text text-muted" style="max-width: 900px;">
+    <b>When it's full</b> (@Model.VisitorsMax visitors): <b>Queue</b> = how many
+    may wait for a place; Habbo Club members wait in front of everyone else, and the next in line gets in as soon as someone
+    leaves. <b>Spectator seats</b> = how many may watch the room on a TV screen without an avatar (no walking, chatting or
+    trading; they don't count as visitors). The queue window then also offers "Vil du bare kigge på?"; with no queue, a full
+    room seats people as spectators straight away. Spectators keep their seat unless the setting
+    <code>room.spectator.turn.minutes</code> (Settings) gives them turns. 0 = off. Staff@(Model.OwnerId == 0 ? "" : " and the owner") always get in.
+    In private rooms the TV's close button does nothing (the client only handles it in public rooms): spectators leave
+    through the navigator.
+</p>
 
 @{
     var photo = ViewBag.Photo as KeplerCMS.Data.Models.RoomPhoto;
