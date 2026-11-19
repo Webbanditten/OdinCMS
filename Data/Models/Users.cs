@@ -46,6 +46,12 @@ namespace KeplerCMS.Data.Models
         public string Motto { get; set; }
         [Column("badge_active")]
         public int IBadgeActive { get; set; }
+        /// <summary>Friends may follow this Habbo to its room (Odin reads it at login; set on the profile's privacy tab).</summary>
+        [Column("allow_stalking")]
+        public bool AllowStalking { get; set; } = true;
+        /// <summary>Other Habbos may ask this one to be friends (Odin reads it at login).</summary>
+        [Column("allow_friend_requests")]
+        public bool AllowFriendRequests { get; set; } = true;
 
         [Column("sso_ticket")]
         public string SSOTicket { get; set; }

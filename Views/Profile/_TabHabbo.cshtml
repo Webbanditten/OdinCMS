@@ -1,0 +1,64 @@
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@* The look: Sulake's figure editor (flash/HabboRegistration2.swf; Ruffle when cms.use_ruffle = 1). It posts to /profile/updatefigure. *@
+@{
+    var user = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    var figureDataUrl = user.HasHabboClub ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
+    var localizationUrl = Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml");
+}
+<div class="editfigure">
+    <div id="flashcontent">
+        <center>
+            <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
+            <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
+        </center>
+    </div>
+</div>
+<script type="text/javascript" language="JavaScript">
+    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
+    swfobj.addVariable("post_url", "/profile/updatefigure?");
+    swfobj.addVariable("figuredata_url", "@figureDataUrl");
+    swfobj.addVariable("localization_url", "@localizationUrl");
+    swfobj.addVariable("post_figure", "figureData");
+    swfobj.addVariable("post_gender", "newGender");
+    swfobj.addParam("wmode", "opaque");
+    swfobj.addVariable("figure", "@user.Figure");
+    swfobj.addVariable("gender", "@user.Gender");
+    swfobj.addParam("base", "@Url.Content("~/flash/")");
+    swfobj.addVariable("draworder_url", "@Url.Content("~/xml/v21/draworder.xml")");
+    swfobj.write("flashcontent");
+</script>
+@if (Model.UseRuffle)
+{
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = {
+            "autoplay": "auto",
+            "defaultFonts": ["Verdana"],
+        };
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("flashcontent");
+            container.innerHTML = '';
+            container.appendChild(player);
+            player.ruffle().load({
+                url: '@Url.Content("~/flash/HabboRegistration2.swf")',
+                parameters: {
+                    post_url: '/profile/updatefigure?',
+                    figuredata_url: '@figureDataUrl',
+                    localization_url: '@localizationUrl',
+                    post_figure: 'figureData',
+                    post_gender: 'newGender',
+                    wmode: 'opaque',
+                    figure: '@user.Figure',
+                    gender: '@user.Gender',
+                    base: '@Url.Content("~/flash/")',
+                    draworder_url: '@Url.Content("~/xml/v21/draworder.xml")',
+                },
+                allowScriptAccess: true,
+            });
+            player.style.width = "406px";
+            player.style.height = "327px";
+        });
+    </script>
+}

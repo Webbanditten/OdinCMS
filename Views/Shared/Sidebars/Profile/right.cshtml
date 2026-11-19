@@ -1,51 +1,60 @@
-﻿@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Configuration
+@using KeplerCMS.Helpers
 @inject IConfiguration Configuration
+@* The profile page's right column: "Din Habbo" (habbo.com's 2006 profilebox: name, online, created, badge, figure, mission). *@
 @{
-    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    var user = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    var settings = Configuration.GetSection("keplercms");
 }
-<td style="width: 8px;"></td>
-<td valign="top" style="width: 200px;" class="habboPage-col">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <tbody>
-            <tr>
-                <div class="v2box blue darkest">
-                    <div class="headline"><h3>@DbRes.T("info_profile_title", "profile")</h3></div>
-                                        <div class="border"><div></div></div>
-                    <div class="body">
-                        <p>
-                            <div style="text-decoration: underline;line-height:20px"><b>@userData.Username</b></div>
-                            @{
-                                if (@userData.Status == "online")
-                                {
-                                    <img src="~/c_images/myhabbo/habbo_online_anim.gif" /><br>
-                                }
-                                else
-                                {
-                                    <img src="~/c_images/myhabbo/habbo_offline.gif" /><br>
-                                }
-                            }
-                            @DbRes.T("created_at", "profile")<br>@userData.CreateAt.ToShortDateString()
-                        <img src="@Configuration.GetSection("keplercms")["figureUrl"]?figure=@userData.Figure&action=std&direction=4&head_direction=4&gesture=sml" alt="" class="tabmenu-image myimage" style="margin-right:5px;margin-right: 0px;border:3px;position:absolute;padding-left:15px;margin-top:-25px;">
-                                        <br><br><br><br><br><br><br>
-                        </p>
-
-
-                            <div>
-                                <div class="content-blue">
-                                    <div class="content-blue-body">
-                                        @userData.Motto
-                                        <div class="clear"></div>
-                                    </div>
-                                </div>
-                                <div class="content-blue-bottom">
-                                    <div class="content-blue-bottom-body"></div>
-                                </div>
-                            </div>
-                        <div class="clear"></div>
+<td valign="top" style="padding-top: 3px;">
+    <div class="profilebox">
+        <div class="profilebox-header">
+            <h3>@Texts.T("info_profile_title", "profile", "Din Habbo")</h3>
+        </div>
+        <div class="profilebox-header-bottom">
+            <div></div>
+        </div>
+        <div class="profilebox-body">
+            <div class="profilebox-content">
+                <div class="profile-info">
+                    <div class="name">@user.Username</div>
+                    @if (user.Status == "online")
+                    {
+                        <img alt="online" src="~/c_images/myhabbo/habbo_online_anim.gif" />
+                    }
+                    else
+                    {
+                        <img alt="offline" src="~/c_images/myhabbo/habbo_offline.gif" />
+                    }
+                    <div class="birthday text">@Texts.T("created_at", "profile", "Oprettet d.")</div>
+                    <div class="birthday date">@user.CreateAt.ToString("dd-MM-yyyy")</div>
+                    <div class="badges">
+                        @if (user.IBadgeActive == 1 && !string.IsNullOrEmpty(user.Badge))
+                        {
+                            <img src="@settings["badgeUrl"]/@(user.Badge).gif" alt="@user.Badge" />
+                        }
                     </div>
-                    <div class="bottom"><div></div></div>
                 </div>
-            </tr>
-        </tbody>
-    </table>
+                <div class="figure">
+                    <img src="@settings["figureUrl"]?figure=@user.Figure&amp;action=std&amp;direction=4&amp;head_direction=3&amp;gesture=sml" alt="@user.Username" />
+                </div>
+                <div class="clear"></div>
+                @if (!string.IsNullOrWhiteSpace(user.Motto))
+                {
+                    <div>
+                        <div class="content-blue">
+                            <div class="content-blue-body">
+                                @user.Motto
+                                <div class="clear"></div>
+                            </div>
+                        </div>
+                        <div class="content-blue-bottom">
+                            <div class="content-blue-bottom-body"></div>
+                        </div>
+                    </div>
+                }
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
 </td>

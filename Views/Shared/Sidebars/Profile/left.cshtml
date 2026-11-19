@@ -1,38 +1,21 @@
-﻿<td style="width: 8px;"></td>
-<td valign="top" style="width: 280px;" class="habboPage-col">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <tbody>
-            <tr>
-                <div class="v3box yellow">
-                    <div class="v3box-top">
-                        <h3>@DbRes.T("info_1_title", "profile")</h3>
-                    </div>
-                    <div class="v3box-content">
-                        <div class="v3box-body">
-                            @Html.Raw(DbRes.T("info_1", "profile"))
-                            <div class="clear"></div>
-                        </div>
-                    </div>
-                    <div class="v3box-bottom">
-                        <div></div>
-                    </div>
+@* The profile page's left column: two info boxes (texts profile.info_1 / info_2). Their pictures are written as
+   src="images/...", which breaks under /profile/mission and the other tab pages, so they are made absolute. *@
+<td valign="top" style="width: 271px; padding-top: 3px;" class="habboPage-col">
+    @foreach (var n in new[] { 1, 2 })
+    {
+        <div class="v3box green">
+            <div class="v3box-top">
+                <h3>@DbRes.T("info_" + n + "_title", "profile")</h3>
+            </div>
+            <div class="v3box-content">
+                <div class="v3box-body">
+                    @Html.Raw(DbRes.T("info_" + n, "profile").Replace("src=\"images/", "src=\"/images/"))
+                    <div class="clear"></div>
                 </div>
-                <div class="v3box yellow">
-                    <div class="v3box-top">
-                        <h3>@DbRes.T("info_2_title", "profile")</h3>
-                    </div>
-                    <div class="v3box-content">
-                        <div class="v3box-body">
-
-                            @Html.Raw(DbRes.T("info_2", "profile"))
-                            <div class="clear"></div>
-                        </div>
-                    </div>
-                    <div class="v3box-bottom">
-                        <div></div>
-                    </div>
-                </div>
-            </tr>
-        </tbody>
-    </table>
-</td> 
+            </div>
+            <div class="v3box-bottom">
+                <div></div>
+            </div>
+        </div>
+    }
+</td>

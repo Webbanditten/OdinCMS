@@ -1,216 +1,71 @@
-﻿@using System.Text.RegularExpressions;
-@model System.Collections.Generic.IEnumerable<KeplerCMS.Data.Models.Settings>;
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@using KeplerCMS.Helpers
+@*
+    "Min profil", laid out like habbo.com's 2006 profile page (jeanropke/Neptune's profile views): info boxes on the left,
+    the process box with one tab per page in the middle (_Tab*.cshtml), "Din Habbo" on the right. ProfileController.
+*@
 @{
-    
-    ViewData["Title"] = @DbRes.T("my_data", "profile");
-    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
-    var figureDataUrl = (userData.HasHabboClub) ? Url.Content("~/xml/figure_data_xml_hc.xml") : Url.Content("~/xml/figure_data_xml.xml");
-    bool isOldFigure = new Regex(@"^\d+").IsMatch(userData.Figure);
-    // Set by ProfileController after saving a tab: which tab to show and the message to show above it.
-    var profileTab = TempData["profile_tab"] as string ?? Context.Request.Query["tab"].ToString();
-    var profileOk = TempData["profile_ok"] as string;
-    var profileError = TempData["profile_error"] as string;
-}
-@functions
-{
-    string L(string key, string set, string fallback)
+    ViewData["Title"] = Texts.T("my_data", "profile", "Min profil");
+    var user = (KeplerCMS.Data.Models.Users)ViewData["user"];
+    var ok = TempData["profile_ok"] as string;
+    var error = TempData["profile_error"] as string;
+    var heading = Texts.T("habbo_profile", "profile", "Habbo profil");
+    heading = heading.Contains("{username}") ? heading.Replace("{username}", user.Username) : heading + " - " + user.Username;
+    var tabs = new (string Key, string Url, string Label)[]
     {
-        var value = DbRes.T(key, set);
-        return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
-    }
+        ("habbo", "/profile", Texts.T("tab_habbo", "profile", "Habbo")),
+        ("mission", "/profile/mission", Texts.T("tab_mission", "profile", "Mission")),
+        ("email", "/profile/email", Texts.T("tab_email", "profile", "Email")),
+        ("password", "/profile/password", Texts.T("tab_password", "profile", "Adgangskode")),
+        ("privacy", "/profile/privacy", Texts.T("tab_privacy", "profile", "Privatliv")),
+    };
+    var partial = "_Tab" + char.ToUpperInvariant(Model.Tab[0]) + Model.Tab.Substring(1);
 }
-
-<!--
-<div id="page-headline">
-    <div id="page-headline-breadcrums">
-
-    </div>
-    <div id="page-headline-text">@DbRes.T("habbo_profile", "profile")</div>
-</div>
--->
-<br/>
-
-<table border="0" cellpadding="0" cellspacing="0" width="100%" class="content-2col">
+@section Styles {
+    <link href="~/styles/profile.css" asp-append-version="true" type="text/css" rel="stylesheet" />
+}
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tbody>
         <tr>
-
+            <td style="width: 6px;">&nbsp;</td>
             <partial name="~/Views/Shared/Sidebars/Profile/left.cshtml" />
-            <td valign="top" style="width: 300px;" class="habboPage-col rightmost">
+            <td valign="top" style="width: 446px; padding-top: 3px;" class="habboPage-col rightmost">
                 <div class="processbox">
                     <div class="headline">
                         <div class="headline-content">
                             <div class="headline-wrapper">
-                                <h2>@DbRes.T("habbo_profile", "profile").Replace("{username}", @userData.Username)</h2>
+                                <h2>@heading</h2>
                             </div>
                         </div>
                     </div>
                     <div class="content-top">
                         <div class="content">
-                            <div id="profile-nav" style="padding-bottom:3px; text-align:center">
-                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_look", "habbohome")" id="look" class="process-button process-button-activated" style="height:23px">
-                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_mission", "habbohome")" id="mission" class="process-button" style="height:23px">
-                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_email", "habbohome")" id="email" class="process-button" style="height:23px">
-                                <input onclick="profileNav(this)" type="button" value="@DbRes.T("change_password", "habbohome")" id="password" class="process-button" style="height:23px">
-                            </div>
-                            @if (profileOk != null)
+                            @if (error != null)
                             {
-                                <div class="content-ok" style="display:block">
-                                    <div class="content-ok-body">@profileOk<div class="clear"></div></div>
-                                </div>
-                                <div class="content-ok-bottom"><div class="content-ok-bottom-body"></div></div>
-                            }
-                            @if (profileError != null)
-                            {
-                                <div class="content-red" style="display:block">
-                                    <div class="content-red-body">@profileError<div class="clear"></div></div>
-                                </div>
+                                <div class="content-red"><div class="content-red-body">@error<div class="clear"></div></div></div>
                                 <div class="content-red-bottom"><div class="content-red-bottom-body"></div></div>
                             }
-                            <div id="registration-errors" style="display:none">
-                                <div class="content-red" style="display:block">
-                                    <div class="content-red-body" id="registration-errors-content">
-                                        <div class="clear"></div>
-                                    </div>
-                                </div>
-                                <div class="content-red-bottom">
-                                    <div class="content-red-bottom-body"></div>
-                                </div>
+                            @if (ok != null)
+                            {
+                                <div class="content-ok"><div class="content-ok-body">@ok<div class="clear"></div></div></div>
+                                <div class="content-ok-bottom"><div class="content-ok-bottom-body"></div></div>
+                            }
+                            <div id="profiletabs">
+                                <ul>
+                                    @for (var i = 0; i < tabs.Length; i++)
+                                    {
+                                        <li id="@(tabs[i].Key == Model.Tab ? "selected" : null)"><a href="@tabs[i].Url" class="@(i == tabs.Length - 1 ? "last-tab" : null)">@tabs[i].Label.ToUpper()</a></li>
+                                    }
+                                </ul>
                             </div>
-
-                            <div class="content-white-outer" id="registration-start">
+                            <br clear="all" />
+                            <div class="content-white-outer">
                                 <div class="content-white">
                                     <div class="content-white-body">
-                                        @{
-                                            if (false)
-                                            {
-                                                <div class="content-white-content">
-                                                    <div class="box-content">
-
-
-                                                        <div>&nbsp;</div>
-
-                                                        <div id="settings-editor" style="text-align: center;">
-                                                            <div id="flashcontent">
-                                                                <center>
-                                                                    <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
-                                                                    <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
-                                                                </center>
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div id="settings-hc" style="display: none">
-                                                            <div class="rounded-container">
-                                                                <div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(224, 113, 113);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div class="rounded-hcred clearfix rounded-done">
-                                                                    <a href="/club" id="settings-hc-logo"></a>
-                                                                    Items marked with the Habbo Club symbol <img src="~/images/habboclub/hc_mini.png"> are available only to Habbo Club members. <a href="/club">Join now!</a>
-                                                                </div><div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(224, 113, 113);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 144, 144);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 67, 67);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(231, 145, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(220, 96, 96);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 72, 72);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(214, 66, 66);"></div></div></div></div></div></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div id="settings-oldfigure" style="display: none">
-                                                            <div class="rounded-container">
-                                                                <div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(227, 197, 146);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 172, 98);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(209, 159, 74);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(227, 197, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 69);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(219, 181, 115);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(227, 197, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 69);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(227, 197, 146);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 172, 98);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(209, 159, 74);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div><div class="rounded-lightbrown clearfix rounded-done">
-                                                                    Your Habbo had clothes or colors that are not selectable anymore. Please save your new looks here.
-                                                                </div><div style="background-color: rgb(255, 255, 255);"><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(209, 159, 74);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(215, 172, 98);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(227, 197, 146);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 69);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(227, 197, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div><div style="margin: 0px 1px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(219, 181, 115);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div><div style="margin: 0px 2px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(227, 197, 145);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 69);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div></div><div style="margin: 0px 4px; height: 1px; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(227, 197, 146);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(215, 172, 98);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(209, 159, 74);"><div style="height: 1px; overflow: hidden; margin: 0px 1px; background-color: rgb(207, 156, 68);"></div></div></div></div></div></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <form method="post" action="/profile/updatefigure" id="settings-form" style="">
-                                                            <input type="hidden" name="tab" value="1">
-                                                            <input type="hidden" name="__app_key" value="KeplerWeb">
-                                                            <input type="hidden" name="figureData" id="settings-figure" value="@(isOldFigure ? "hr-100-1150.hd-180-1026.ch-210-1284.lg-270-1223.sh-290-1247" : userData.Figure)">
-                                                            <input type="hidden" name="newGender" id="settings-gender" value="@userData.Gender">
-                                                            <input type="hidden" name="editorState" id="settings-state" value="">
-                                                            <a onClick="document.getElementById('settings-form').submit();" id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
-
-                                                            <script type="text/javascript" language="JavaScript">
-                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration.swf")", "habboreg", "435", "400", "8");
-                                                    swfobj.addParam("base", "@Url.Content("~/flash/")");
-                                                    swfobj.addParam("wmode", "opaque");
-                                                    swfobj.addParam("AllowScriptAccess", "always");
-                                                    swfobj.addVariable("figuredata_url", "@Url.Content("~/xml/v21/figuredata.xml")");
-                                                    swfobj.addVariable("draworder_url", "@Url.Content("~/xml/v21/draworder.xml")");
-                                                    swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
-                                                    swfobj.addVariable("figure", "@(isOldFigure ? "hr-100-1150.hd-180-1026.ch-210-1284.lg-270-1223.sh-290-1247" : userData.Figure)");
-                                                    swfobj.addVariable("gender", "@userData.Gender");
-
-                                                    swfobj.addVariable("showClubSelections", "@(userData.HasHabboClub ? 1 : 0)");
-
-
-                                                    swfobj.addVariable("userHasClub", "@(userData.HasHabboClub ? 1 : 0)");
-                                                    swfobj.write("flashcontent");
-
-                                                            </script>
-
-                                                        </form>
-
-                                                    </div>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="content-white-content" id="habbo-look">
-                                                    <div class="editfigure">
-                                                        <div id="flashcontent">
-                                                            <center>
-                                                                <p>You can install and download Adobe Flash Player here: <a href="http://get.adobe.com/flashplayer/">Install flash player</a>. More instructions for installation can be found here: <a href="http://www.adobe.com/products/flashplayer/productinfo/instructions/">More information</a></p>
-                                                                <p><a href="http://www.adobe.com/go/getflashplayer"><img class="getflash" src="~/images/get_flash.png" alt="Get Adobe Flash player" /></a></p>
-                                                            </center>
-                                                        </div>
-                                                    </div>
-                                                    <script type="text/javascript" language="JavaScript">
-	                                                    var swfobj = new SWFObject("@Url.Content("~/flash/HabboRegistration2.swf")", "habboreg", "406", "327", "8");
-	                                                    swfobj.addVariable("post_url", "/profile/updatefigure?");
-	                                                    swfobj.addVariable("figuredata_url", "@figureDataUrl");
-	                                                    swfobj.addVariable("localization_url", "@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")");
-	                                                    swfobj.addVariable("post_figure", "figureData");
-	                                                    swfobj.addVariable("post_gender", "newGender");
-                                                        swfobj.addParam("wmode", "opaque");
-	                                                    swfobj.addVariable("figure", "@userData.Figure");
-	                                                    swfobj.addVariable("gender", "@userData.Gender");
-                                                        swfobj.addParam("base", "@Url.Content("~/flash/")");
-                                                        swfobj.addVariable("draworder_url", "@Url.Content("~/xml/v21/draworder.xml")");
-	                                                    swfobj.write("flashcontent");
-                                                    </script>
-                                                </div>
-                                                <div class="content-white-content profile-tab" id="habbo-mission" style="display:none;width:406px;height:329px">
-                                                    <form method="post" action="/profile/updatemission" id="mission-form">
-                                                        <p>@L("mission_intro", "profile", "Din mission står under din Habbo i hotellet og på din Habbo Home. Fortæl de andre, hvad du er ude på!")</p>
-                                                        <label for="mission-text">@L("mission_label", "profile", "Din mission:")</label>
-                                                        <input type="text" name="mission" id="mission-text" class="profile-text" maxlength="@KeplerCMS.Controllers.ProfileController.MissionMaxLength" value="@userData.Motto" />
-                                                        <input type="submit" style="display: none;" />
-                                                        <a onclick="document.getElementById('mission-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
-                                                    </form>
-                                                </div>
-                                                <div class="content-white-content profile-tab" id="habbo-email" style="display:none;width:406px;height:329px">
-                                                    <form method="post" action="/profile/updateemail" id="email-form" autocomplete="off">
-                                                        <p>@L("email_current", "profile", "Din nuværende email:") <strong>@userData.Email</strong></p>
-                                                        <label for="email-new">@L("email_new", "profile", "Ny email:")</label>
-                                                        <input type="text" name="email" id="email-new" class="profile-text" maxlength="256" />
-                                                        <label for="email-password">@L("email_password", "profile", "Din adgangskode (for at være sikker på, at det er dig):")</label>
-                                                        <input type="password" name="password" id="email-password" class="profile-text" maxlength="32" autocomplete="current-password" />
-                                                        <input type="submit" style="display: none;" />
-                                                        <a onclick="document.getElementById('email-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
-                                                    </form>
-                                                </div>
-                                                <div class="content-white-content profile-tab" id="habbo-password" style="display:none;width:406px;height:329px">
-                                                    <form method="post" action="/profile/updatepassword" id="password-form" autocomplete="off">
-                                                        <label for="password-current">@L("password_current", "profile", "Nuværende adgangskode:")</label>
-                                                        <input type="password" name="currentPassword" id="password-current" class="profile-text" maxlength="32" autocomplete="current-password" />
-                                                        <label for="password-new">@L("password_new", "profile", "Ny adgangskode (mindst 6 tegn):")</label>
-                                                        <input type="password" name="newPassword" id="password-new" class="profile-text" maxlength="32" autocomplete="new-password" />
-                                                        <label for="password-repeat">@L("password_repeat", "profile", "Gentag ny adgangskode:")</label>
-                                                        <input type="password" name="retypePassword" id="password-repeat" class="profile-text" maxlength="32" autocomplete="new-password" />
-                                                        <input type="submit" style="display: none;" />
-                                                        <a onclick="document.getElementById('password-form').submit(); return false;" class="colorlink orange" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
-                                                    </form>
-                                                </div>
-                                            }
-                                        }
-
-
-
+                                        <div class="content-white-content profile-tab">
+                                            <partial name="@partial" model="Model" />
+                                        </div>
                                         <div class="clear"></div>
                                     </div>
                                 </div>
@@ -226,22 +81,12 @@
                     </div>
                 </div>
             </td>
+            <td style="width: 3px;">&nbsp;</td>
             <partial name="~/Views/Shared/Sidebars/Profile/right.cshtml" />
+            <td style="width: 6px;">&nbsp;</td>
         </tr>
-
     </tbody>
 </table>
-
-
-@section Styles {
-    <style>
-        .profile-tab form { padding: 4px 6px; }
-        .profile-tab p { margin: 0 0 12px; }
-        .profile-tab label { display: block; margin: 0 0 3px; font-weight: bold; }
-        .profile-tab .profile-text { display: block; width: 300px; margin: 0 0 12px; padding: 2px; border: 1px solid #a5a5a5; font: 11px Verdana, Arial, sans-serif; }
-        .profile-tab .colorlink { margin-top: 4px; }
-    </style>
-}
 
 @section Scripts {
     <script src="~/js/myhabbo/visual.js" type="text/javascript"></script>
@@ -250,81 +95,3 @@
         HabboView.run();
     </script>
 }
-
-@{
-    var shouldUseRuffle = false;
-    var ruffleSetting = Model.FirstOrDefault(s=>s.Setting == "cms.use_ruffle"); 
-    if(ruffleSetting != null && ruffleSetting.Value == "1") {
-        shouldUseRuffle = true;
-    }
-}
-@if(shouldUseRuffle) {
-    <script>
-        window.RufflePlayer = window.RufflePlayer || {};
-        window.RufflePlayer.config = {
-            "autoplay": "auto",
-            "defaultFonts": ["Verdana"],
-        };
-        window.addEventListener("load", (event) => {
-            const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
-            const container = document.getElementById("flashcontent");
-            container.innerHTML = '';
-            container.appendChild(player);
-            player.ruffle().load({
-                url: '@Url.Content("~/flash/HabboRegistration2.swf")',
-                parameters: {
-                    post_url: '/profile/updatefigure?',
-                    figuredata_url: '@figureDataUrl',
-                    localization_url: '@Url.Content("~/xml/figure_editor_" + System.Threading.Thread.CurrentThread.CurrentCulture + ".xml")',
-                    post_figure: 'figureData',
-                    post_gender: 'newGender',
-                    wmode: 'opaque',
-                    figure: '@userData.Figure',
-                    gender: '@userData.Gender',
-                    base: '@Url.Content("~/flash/")',
-                    draworder_url: '@Url.Content("~/xml/v21/draworder.xml")',
-                },
-                allowScriptAccess: true,
-            });
-            player.style.width = "406px";
-            player.style.height = "327px";
-            player.style.frameRate = "8";
-        });
-    </script>
-}
-
-
-<script type="text/javascript">
-    function resetTabs() {
-        var children = Array.from(document.getElementById("profile-nav").children);
-        for(i=0; i < children.length; i++) {
-            children[i].classList.remove('process-button-activated');
-        }
-        hide(document.getElementById('habbo-look'));
-        hide(document.getElementById('habbo-mission'));
-        hide(document.getElementById('habbo-email'));
-        hide(document.getElementById('habbo-password'));
-    }
-    function profileNav(button) {
-        resetTabs();
-        button.classList.add('process-button-activated');
-        show(document.getElementById('habbo-' + button.getAttribute("id")));
-    }
-    function hide (elements) {
-        elements = elements.length ? elements : [elements];
-        for (var index = 0; index < elements.length; index++) {
-            elements[index].style.display = 'none';
-        }
-    }
-    (function () {
-        var tab = "@(profileTab is "mission" or "email" or "password" ? profileTab : "")";
-        if (tab) window.addEventListener("DOMContentLoaded", function () { profileNav(document.getElementById(tab)); });
-    })();
-    function show (elements) {
-        elements = elements.length ? elements : [elements];
-        for (var index = 0; index < elements.length; index++) {
-            elements[index].style.display = 'block';
-        }
-    }
-</script>

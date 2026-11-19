@@ -1,0 +1,22 @@
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@using KeplerCMS.Helpers
+@* Who may ask to be friends (users.allow_friend_requests) and follow you to your room (users.allow_stalking). *@
+@{ var user = (KeplerCMS.Data.Models.Users)ViewData["user"]; }
+<form method="post" action="/profile/updateprivacy">
+    <h3>@Texts.T("privacy_title", "profile", "Dine indstillinger for privatliv")</h3>
+    <div class="profile-field profile-choice">
+        <span class="label">@Texts.T("privacy_requests", "profile", "Venneansøgninger:")</span>
+        <label><input type="radio" name="friendRequests" value="1" checked="@user.AllowFriendRequests" /> @Texts.T("privacy_requests_on", "profile", "Andre Habboer må ansøge mig som ven")</label>
+        <label><input type="radio" name="friendRequests" value="0" checked="@(!user.AllowFriendRequests)" /> @Texts.T("privacy_requests_off", "profile", "Ingen må ansøge mig som ven")</label>
+    </div>
+    <div class="profile-field profile-choice">
+        <span class="label">@Texts.T("privacy_follow", "profile", "Følg efter:")</span>
+        <label><input type="radio" name="following" value="1" checked="@user.AllowStalking" /> @Texts.T("privacy_follow_on", "profile", "Mine venner må følge efter mig til det rum, jeg er i")</label>
+        <label><input type="radio" name="following" value="0" checked="@(!user.AllowStalking)" /> @Texts.T("privacy_follow_off", "profile", "Ingen må følge efter mig")</label>
+    </div>
+    <p>@Texts.T("privacy_note", "profile", "Ændringerne gælder fra næste gang, du går ind på hotellet.")</p>
+    <div id="register-buttons">
+        <div id="register-buttons-continue"><input type="submit" value="@Texts.T("save_changes", "habbohome", "Gem ændringer")" class="process-button" /></div>
+    </div>
+    <div class="clear"></div>
+</form>
