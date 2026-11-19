@@ -1,5 +1,6 @@
 @model string
+@* Model = the error's text key (IotTexts "err_*"). *@
 @if (!string.IsNullOrEmpty(Model))
 {
-    <p style="color: #c00; font-weight: bold;">@Model</p>
+    <p style="color: #c00; font-weight: bold;">@Html.IotText(Model)</p>
 }

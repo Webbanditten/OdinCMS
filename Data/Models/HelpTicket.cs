@@ -62,7 +62,7 @@ namespace KeplerCMS.Data.Models
         public const int PlayerReplied = 2;
         public const int Closed = 3;
 
-        /// <summary>The help tool's problem categories (key, Danish label).</summary>
+        /// <summary>The help tool's problem categories (key, default Danish label; staff can change the labels, see IssueLabel).</summary>
         public static readonly IReadOnlyList<(string Key, string Label)> Issues = new[]
         {
             ("login", "Jeg kan ikke logge ind"),
@@ -76,19 +76,11 @@ namespace KeplerCMS.Data.Models
             ("other", "Andet"),
         };
 
-        public static string IssueLabel(string key)
-        {
-            foreach (var (k, label) in Issues) if (k == key) return label;
-            return key;
-        }
+        /// <summary>The category's label as staff wrote it in the help tool's texts (KeplerCMS.Helpers.IotTexts), else the default above.</summary>
+        public static string IssueLabel(string key) =>
+            KeplerCMS.Helpers.IotTexts.Find("issue_" + key) != null ? KeplerCMS.Helpers.IotTexts.Plain("issue_" + key) : key;
 
-        public static string StatusLabel(int status) => status switch
-        {
-            New => "Ny",
-            Answered => "Besvaret",
-            PlayerReplied => "Svar fra spilleren",
-            Closed => "Lukket",
-            _ => status.ToString(),
-        };
+        public static string StatusLabel(int status) =>
+            KeplerCMS.Helpers.IotTexts.Find("status_" + status) != null ? KeplerCMS.Helpers.IotTexts.Plain("status_" + status) : status.ToString();
     }
 }

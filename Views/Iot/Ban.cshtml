@@ -1,0 +1,24 @@
+@model KeplerCMS.Controllers.IotController.BanPage
+@* "Er du smidt ud?" from step 1's shortcuts: the logged-in player's own hotel ban (IotController.Ban). *@
+@{
+    ViewData["noFaq"] = true;
+}
+<partial name="_Head" model='(Model.Ban != null ? 6 : 5, Html.IotText("ban_title"))' />
+@if (!Model.LoggedIn)
+{
+    <p>@Html.IotText("ban_login")</p>
+}
+else if (Model.Ban == null)
+{
+    <p>@Html.IotText("ban_none")</p>
+}
+else
+{
+    <p><b>@Html.IotText("ban_until", ("until", Model.Ban.BannedUntil.ToString("d. MMMM yyyy 'kl.' HH:mm", new System.Globalization.CultureInfo("da-DK"))))</b></p>
+    @if (!string.IsNullOrWhiteSpace(Model.Ban.Message))
+    {
+        <p>@Html.IotText("ban_reason") @Model.Ban.Message</p>
+    }
+}
+<p>@Html.IotText("ban_help")</p>
+<p><a href="/">@Html.IotText("back")</a></p>

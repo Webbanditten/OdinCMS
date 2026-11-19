@@ -1,9 +1,9 @@
 @*
     The Habbo Help Tool's own page (habbo.com's 2007 IOT, 720 px, wwwroot/iot): logo and title bar, then the step in the
-    white "process" box. IotController.
+    white "process" box. IotController. Texts: Helpers/IotTexts; staff editing them get the panel (_TextEditor) on the right.
 *@
 @{
-    string T(string key, string fallback) { var v = DbRes.T(key, "iot"); return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v; }
+    var editing = Html.IotEditing();
 }
 <!DOCTYPE html>
 <html lang="da">
@@ -11,11 +11,11 @@
     <meta charset="utf-8" />
     @* Phones lay the 720 px tool out at its own width and scale it to fit (iot.css also stops them enlarging text). *@
     <meta name="viewport" content="width=740" />
-    <title>@T("title", "Habbo Hjælpeværktøj")</title>
+    <title>@Html.IotPlain("title")</title>
     <link href="~/styles/style.css" type="text/css" rel="stylesheet" />
     <link href="~/iot/styles/iot.css" asp-append-version="true" type="text/css" rel="stylesheet" />
 </head>
-<body style="background: #525d63 url(/images/bg_patterns/habbo.gif); margin: 10px;">
+<body style="background: #525d63 url(/images/bg_patterns/habbo.gif); margin: 10px;@(editing ? " margin-right: 440px;" : "")">
     <table border="0" cellpadding="0" cellspacing="0" width="720">
         <tbody>
             <tr>
@@ -25,7 +25,7 @@
                 </td>
                 <td style="background: url(/iot/images/process/top_header_left.gif) no-repeat; width: 3px; height: 77px;"></td>
                 <td style="background: url(/iot/images/process/top_header_mid.gif) repeat-x; height: 77px;">
-                    <div style="height: 43px; padding: 31px 0 0 4px; margin: 0; color: #fff; text-transform: uppercase; font-weight: bold;">@T("title", "Habbo Hjælpeværktøj")</div>
+                    <div style="height: 43px; padding: 31px 0 0 4px; margin: 0; color: #fff; text-transform: uppercase; font-weight: bold;">@Html.IotText("title")</div>
                 </td>
                 <td style="background: url(/iot/images/process/top_header_mid.gif) repeat-x; height: 54px; padding: 23px 0 0 0;" align="right" valign="top"></td>
                 <td style="background: url(/iot/images/process/top_right.gif) no-repeat; width: 26px; height: 77px;">&nbsp;</td>
@@ -43,7 +43,7 @@
                 <div class="imaindiv">
                     @if (ViewData["noFaq"] as bool? != true)
                     {
-                        <b>@Html.Raw(T("faq", "Husk, at svarene på de mest almindelige spørgsmål fra Habbo'er og deres forældre allerede står på vores <a href=\"/help\">hjælpesider</a>. Står svaret der, svarer vi ikke på din henvendelse, så vi kan nå de andre."))</b>
+                        <b>@Html.IotText("faq")</b>
                         <br /><br />
                     }
                     @RenderBody()
@@ -58,5 +58,9 @@
         <div id="footer-body-process">@Html.Raw(DbRes.T("footer_legal", "shared"))</div>
         <div id="footer-bottom-process">&nbsp;</div>
     </div>
+    @if (editing)
+    {
+        <partial name="_TextEditor" />
+    }
 </body>
 </html>
