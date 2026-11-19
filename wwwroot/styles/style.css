@@ -1,3 +1,10 @@
+/* Phones show the site as the 2006 desktop page it is, zoomed out: no text autosizing ("font boosting"). Android Chrome
+   enlarged wide text blocks but not the boxes and form fields around them, so text and fields ran out of their boxes. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 * {
   image-rendering: optimizeSpeed; /*                     */
   image-rendering: -moz-crisp-edges; /* Firefox             */

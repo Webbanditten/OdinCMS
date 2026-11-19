@@ -12,7 +12,7 @@
     @* Phones lay the 720 px tool out at its own width and scale it to fit (iot.css also stops them enlarging text). *@
     <meta name="viewport" content="width=740" />
     <title>@Html.IotPlain("title")</title>
-    <link href="~/styles/style.css" type="text/css" rel="stylesheet" />
+    <link href="~/styles/style.css" asp-append-version="true" type="text/css" rel="stylesheet" />
     <link href="~/iot/styles/iot.css" asp-append-version="true" type="text/css" rel="stylesheet" />
 </head>
 <body style="background: #525d63 url(/images/bg_patterns/habbo.gif); margin: 10px;@(editing ? " margin-right: 440px;" : "")">
