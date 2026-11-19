@@ -1,12 +1,6 @@
 /* The Habbo Help Tool (Views/Iot, IotController): habbo.com's 2007 IOT styles (style-iot.css) and the 'process' page
    frame from its style.css, from jeanropke/Neptune; image paths point at wwwroot/iot. */
 
-/* Phones: no text autosizing ("font boosting"), which enlarged the wide text blocks but not the form tables. */
-html {
-	-webkit-text-size-adjust: 100%;
-	text-size-adjust: 100%;
-}
-
 /* Step 1's boxes: the shortcuts ("Akut hjælp") and the player's own tickets. */
 .iot-box h3 {
 	margin: 0 0 4px 0;

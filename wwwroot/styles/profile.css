@@ -1,13 +1,6 @@
 /* "Min profil" (Views/Profile): habbo.com's 2006 profile page, its styles (profile.css) and images (images/profiletabs,
    images/box-scale/profile-*) from jeanropke/Neptune. */
 
-/* Phones: no text autosizing. Android Chrome enlarged the tab's text (not the form fields' boxes), so the mission field ran
-   out of the white box (as on the help tool, iot.css). This file is only loaded on the profile pages. */
-html {
-	-webkit-text-size-adjust: 100%;
-	text-size-adjust: 100%;
-}
-
 /* The tabs over the white box: HABBO, MISSION, EMAIL, ADGANGSKODE, PRIVATLIV. */
 #profiletabs {
 	float: left;
