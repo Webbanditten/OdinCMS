@@ -1,0 +1,158 @@
+/* "Min profil" (Views/Profile): habbo.com's 2006 profile page, its styles (profile.css) and images (images/profiletabs,
+   images/box-scale/profile-*) from jeanropke/Neptune. */
+
+/* The tabs over the white box: HABBO, MISSION, EMAIL, ADGANGSKODE, PRIVATLIV. */
+#profiletabs {
+	float: left;
+	width: 100%;
+	line-height: normal;
+}
+
+#profiletabs ul {
+	margin: 0;
+	padding: 10px 10px 0;
+	list-style: none;
+}
+
+#profiletabs li {
+	float: left;
+	background: url(../images/profiletabs/tb_left.gif) no-repeat left top;
+	margin: 0;
+	padding: 0 0 0 5px;
+}
+
+#profiletabs a {
+	display: block;
+	background: url(../images/profiletabs/tb_right.gif) no-repeat right top;
+	padding: 5px 5px 5px 2px;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 10px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	color: #000;
+}
+
+#profiletabs a.last-tab {
+	background-image: url(../images/profiletabs/tb_right_last.gif);
+}
+
+#profiletabs #selected {
+	background-image: url(../images/profiletabs/tb_left_on.gif);
+}
+
+#profiletabs #selected a {
+	background-image: url(../images/profiletabs/tb_right_on.gif);
+}
+
+#profiletabs #selected a.last-tab {
+	background-image: url(../images/profiletabs/tb_right_on_last.gif);
+}
+
+/* A tab's form. */
+.profile-tab form {
+	margin: 0;
+}
+
+.profile-tab h3 {
+	margin: 0 0 8px 0;
+	font-size: 11px;
+	text-transform: uppercase;
+}
+
+.profile-tab p {
+	margin: 0 0 10px 0;
+}
+
+.profile-tab span.label,
+.profile-tab label {
+	font-weight: bold;
+	margin: 0 5px 0 0;
+}
+
+.profile-tab .profile-field {
+	margin: 0 0 10px 0;
+}
+
+.profile-tab input.profile-text {
+	margin-top: 2px;
+	padding: 2px;
+	border: 1px solid #a5a5a5;
+	font: 11px Verdana, Arial, sans-serif;
+}
+
+.profile-tab .profile-choice label {
+	display: block;
+	font-weight: normal;
+	margin: 2px 0;
+}
+
+.profile-tab #register-buttons {
+	margin-top: 1em;
+}
+
+.profile-tab #register-buttons-continue {
+	float: right;
+}
+
+/* "Din Habbo" on the right. */
+div.profilebox p {
+	margin-top: 0;
+	margin-bottom: 8px;
+}
+
+div.profilebox-header {
+	background: url(../images/box-scale/profile-tl.gif) no-repeat;
+	padding-left: 7px;
+}
+
+div.profilebox-header h3 {
+	margin: 0;
+	padding: 7px 13px 4px 6px;
+	font-size: 11px;
+	font-weight: bold;
+	background: url(../images/box-scale/profile-tr.gif) no-repeat top right;
+	text-transform: uppercase;
+	color: white;
+}
+
+div.profilebox-header-bottom {
+	background: url(../images/box-scale/profile-bl.gif) no-repeat;
+	height: 7px;
+	font-size: 1%;
+}
+
+div.profilebox-header-bottom div {
+	background: url(../images/box-scale/profile-br.gif) no-repeat top right;
+	height: 7px;
+	margin-left: 7px;
+}
+
+div.profilebox-body {
+	background: url(../images/box-scale/profile-l.gif) no-repeat bottom left;
+	padding-left: 7px;
+}
+
+div.profilebox-content {
+	background: url(../images/box-scale/profile-r.gif) no-repeat bottom right;
+	padding: 3px 7px 7px 0;
+}
+
+div.profilebox-content .profile-info {
+	width: 85px;
+	float: left;
+}
+
+div.profilebox-content .profile-info .name {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+div.profilebox-content .profile-info img {
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+div.profilebox-content .figure {
+	float: left;
+	margin-left: 5px;
+}

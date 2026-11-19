@@ -1,0 +1,16 @@
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@using KeplerCMS.Helpers
+@{ var user = (KeplerCMS.Data.Models.Users)ViewData["user"]; }
+<form method="post" action="/profile/updatemission">
+    <h3>@Texts.T("mission_title", "profile", "Ret din mission")</h3>
+    <div class="profile-field"><span class="label">@Texts.T("label_name", "profile", "Habbo-navn:")</span> @user.Username</div>
+    <div class="profile-field">
+        <label for="mission-text">@Texts.T("mission_label", "profile", "Din mission:")</label><br />
+        <input type="text" name="mission" id="mission-text" class="profile-text" size="45" maxlength="@KeplerCMS.Controllers.ProfileController.MissionMaxLength" value="@user.Motto" />
+    </div>
+    <p>@Texts.T("mission_intro", "profile", "Din mission står under din Habbo i hotellet og på din Habbo Home. Fortæl de andre, hvad du er ude på!")</p>
+    <div id="register-buttons">
+        <div id="register-buttons-continue"><input type="submit" value="@Texts.T("save_changes", "habbohome", "Gem ændringer")" class="process-button" /></div>
+    </div>
+    <div class="clear"></div>
+</form>

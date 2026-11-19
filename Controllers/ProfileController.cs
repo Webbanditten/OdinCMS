@@ -15,8 +15,9 @@ using Westwind.Globalization;
 namespace KeplerCMS.Controllers
 {
     /// <summary>
-    /// "Min profil": the look (figure editor), mission, email and password tabs (Views/Profile/Index.cshtml). Each change
-    /// writes only its own column, so it can't overwrite what the game changed meanwhile (credits and so on).
+    /// "Min profil", laid out like habbo.com's 2006 profile (Neptune's profile views): one page per tab, /profile (the look,
+    /// figure editor), /profile/mission, /profile/email, /profile/password, /profile/privacy (Views/Profile/Index.cshtml and
+    /// its _Tab* partials). Each change writes only its own columns, so it can't overwrite what the game changed meanwhile.
     /// </summary>
     [MaintenanceFilter]
     public class ProfileController : Controller
@@ -45,20 +46,47 @@ namespace KeplerCMS.Controllers
             return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
         }
 
-        /// <summary>Back to the profile on the tab that was saved, with a green or red message.</summary>
+        public static readonly string[] Tabs = { "habbo", "mission", "email", "password", "privacy" };
+
+        public class ProfilePage
+        {
+            public string Tab { get; set; }
+            public bool UseRuffle { get; set; }
+        }
+
+        /// <summary>Back to the tab that was saved, with a green or red message.</summary>
         private IActionResult Done(string tab, string ok = null, string error = null)
         {
-            TempData["profile_tab"] = tab;
             if (ok != null) TempData["profile_ok"] = ok;
             if (error != null) TempData["profile_error"] = error;
-            return RedirectToAction("Index");
+            return Redirect(tab == "habbo" ? "/profile" : "/profile/" + tab);
+        }
+
+        private async Task<IActionResult> Tab(string tab)
+        {
+            var settings = await _settingService.GetAll();
+            return View("Index", new ProfilePage { Tab = tab, UseRuffle = settings.Any(s => s.Setting == "cms.use_ruffle" && s.Value == "1") });
         }
 
         [LoggedInFilter]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string tab = null)
         {
-            return View(await _settingService.GetAll());
+            // The old one-page profile linked its tabs as ?tab=mission.
+            if (tab != null && tab != "habbo" && Tabs.Contains(tab)) return Redirect("/profile/" + tab);
+            return await Tab("habbo");
         }
+
+        [LoggedInFilter]
+        public Task<IActionResult> Mission() => Tab("mission");
+
+        [LoggedInFilter]
+        public Task<IActionResult> Email() => Tab("email");
+
+        [LoggedInFilter]
+        public Task<IActionResult> Password() => Tab("password");
+
+        [LoggedInFilter]
+        public Task<IActionResult> Privacy() => Tab("privacy");
 
         [LoggedInFilter]
         [HttpPost]
@@ -119,6 +147,19 @@ namespace KeplerCMS.Controllers
             var newHash = Argon2.Hash(newPassword);
             await _context.Users.Where(u => u.Id == UserId).ExecuteUpdateAsync(s => s.SetProperty(u => u.Password, newHash));
             return Done("password", ok: T("password_saved", "profile", "Din adgangskode er ændret."));
+        }
+
+        /// <summary>Who may ask to be friends and follow you to your room. Odin reads both at login.</summary>
+        [LoggedInFilter]
+        [HttpPost]
+        public async Task<IActionResult> UpdatePrivacy(string friendRequests, string following)
+        {
+            var allowRequests = friendRequests != "0";
+            var allowFollowing = following != "0";
+            await _context.Users.Where(u => u.Id == UserId).ExecuteUpdateAsync(s => s
+                .SetProperty(u => u.AllowFriendRequests, allowRequests)
+                .SetProperty(u => u.AllowStalking, allowFollowing));
+            return Done("privacy", ok: T("privacy_saved", "profile", "Dine indstillinger er gemt. De gælder fra næste gang, du går ind på hotellet."));
         }
     }
 }

@@ -1,0 +1,20 @@
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@using KeplerCMS.Helpers
+@{ var user = (KeplerCMS.Data.Models.Users)ViewData["user"]; }
+<form method="post" action="/profile/updateemail" autocomplete="off">
+    <h3>@Texts.T("email_title", "profile", "Ret din email")</h3>
+    <div class="profile-field"><span class="label">@Texts.T("label_name", "profile", "Habbo-navn:")</span> @user.Username</div>
+    <div class="profile-field"><span class="label">@Texts.T("email_current", "profile", "Din nuværende email:")</span> @user.Email</div>
+    <div class="profile-field">
+        <label for="email-new">@Texts.T("email_new", "profile", "Ny email:")</label><br />
+        <input type="text" name="email" id="email-new" class="profile-text" size="40" maxlength="256" />
+    </div>
+    <div class="profile-field">
+        <label for="email-password">@Texts.T("email_password", "profile", "Din adgangskode (for at være sikker på, at det er dig):")</label><br />
+        <input type="password" name="password" id="email-password" class="profile-text" size="32" maxlength="32" autocomplete="current-password" />
+    </div>
+    <div id="register-buttons">
+        <div id="register-buttons-continue"><input type="submit" value="@Texts.T("save_changes", "habbohome", "Gem ændringer")" class="process-button" /></div>
+    </div>
+    <div class="clear"></div>
+</form>
