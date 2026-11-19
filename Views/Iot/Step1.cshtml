@@ -1,32 +1,48 @@
 @model KeplerCMS.Controllers.IotController.IotForm
-@{ ViewData["Title"] = "Habbo Hjælpeværktøj"; }
+@if (Html.IotHas("intro_title"))
+{
+    <h2 class="iot-intro-title">@Html.IotText("intro_title")</h2>
+}
+@if (Html.IotHas("intro"))
+{
+    <p>@Html.IotText("intro")</p>
+}
 <form method="post" action="/iot/go">
     <input type="hidden" name="Sid" value="58" />
     @Html.AntiForgeryToken()
-    <partial name="_Head" model='(1, "Har du allerede en Habbo?")' />
+    <partial name="_Head" model='(1, Html.IotText("step1_title"))' />
     <partial name="_Error" model="Model.Error" />
     <table border="0" cellspacing="0" cellpadding="0" class="content-table">
         <tbody>
             <tr>
                 <td valign="middle" align="left" style="width: 300px;">
                     <div class="iinfodiv">
-                        <b><label><input type="radio" name="Event" value="Member" checked /> Ja, jeg bruger Habbo</label></b><br /><br />
-                        <b><label><input type="radio" name="Event" value="Not member" /> Nej, jeg har ikke en Habbo</label></b>
+                        <b><label><input type="radio" name="Event" value="Member" checked /> @Html.IotText("step1_yes")</label></b><br /><br />
+                        <b><label><input type="radio" name="Event" value="Not member" /> @Html.IotText("step1_no")</label></b>
                         <br /><br />
-                        <div style="padding-left: 10px;"><partial name="_Button" model='"Næste"' /></div>
-                        <br />
-                        Har du glemt din adgangskode? <a href="/account/forgot">Få en ny med det samme</a>.
+                        <div style="padding-left: 10px;"><partial name="_Button" model='Html.IotPlain("button_next")' /></div>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
 </form>
+@* "Akut hjælp": what players can sort out themselves right away (habbo.dk's contact page had these two shortcuts). *@
+<br />
+<div class="iot-box">
+    <h3>@Html.IotText("urgent_title")</h3>
+    @if (Html.IotHas("urgent_intro"))
+    {
+        <p>@Html.IotText("urgent_intro")</p>
+    }
+    <p><b><a href="/account/forgot">@Html.IotText("urgent_password")</a></b><br />@Html.IotText("urgent_password_text")</p>
+    <p><b><a href="/iot/ban">@Html.IotText("urgent_ban")</a></b><br />@Html.IotText("urgent_ban_text")</p>
+</div>
 @if (Model.Mine.Count > 0)
 {
     <br />
-    <div class="iot-mine">
-    <h3>Dine henvendelser</h3>
+    <div class="iot-box">
+    <h3>@Html.IotText("mine_title")</h3>
     <ul>
         @foreach (var t in Model.Mine)
         {

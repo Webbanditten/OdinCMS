@@ -1,18 +1,21 @@
 @model KeplerCMS.Controllers.IotController.IotForm
-@{ ViewData["Title"] = "Habbo Hjælpeværktøj"; }
 <form method="post" action="/iot/go">
     <input type="hidden" name="Sid" value="63" />
     <partial name="_Carry" model="Model" />
-    <partial name="_Head" model='(4, "Beskriv dit problem")' />
+    <partial name="_Head" model='(4, Html.IotText("step4_title"))' />
     <partial name="_Error" model="Model.Error" />
     <table border="0" cellspacing="0" cellpadding="0" class="content-table">
         <tbody>
             <tr>
                 <td>
-                    <p><b>@KeplerCMS.Data.Models.HelpTickets.IssueLabel(Model.Issue)</b>@(Model.Name != null ? " · " + Model.Name : "")</p>
-                    <p>Fortæl os så præcist som muligt, hvad der er sket, og hvornår. Skriv aldrig din adgangskode.</p>
+                    <p><b>@Html.IotPlain("issue_" + Model.Issue, Model.Issue)</b>@(Model.Name != null ? " · " + Model.Name : "")</p>
+                    <p>@Html.IotText("step4_intro")</p>
                     <textarea name="Message" class="imessageform" rows="10" cols="70" maxlength="4000">@Model.Message</textarea>
-                    <div style="float: right;"><partial name="_Button" model='"Send"' /></div>
+                    @if (Html.IotHas("step4_note"))
+                    {
+                        <p>@Html.IotText("step4_note")</p>
+                    }
+                    <div style="float: right;"><partial name="_Button" model='Html.IotPlain("button_send")' /></div>
                 </td>
             </tr>
         </tbody>

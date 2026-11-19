@@ -7,6 +7,7 @@
 }
 <h1>Help tickets</h1>
 <p>Questions players sent through the Habbo Help Tool (<a href="/iot/go" target="_blank">/iot/go</a>). Waiting: new tickets and tickets the player wrote on again.</p>
+<p><a href="/iot/go?edit=1" target="_blank">Edit the help tool's texts</a> (on the pages themselves; needs the localization right).</p>
 <p>@Html.Raw(Tab("waiting", "Waiting (" + ViewBag.Waiting + ")")) | @Html.Raw(Tab("answered", "Answered")) | @Html.Raw(Tab("closed", "Closed")) | @Html.Raw(Tab("all", "All"))</p>
 @if (Model.Count == 0)
 {

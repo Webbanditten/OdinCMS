@@ -1,0 +1,161 @@
+@*
+    The help tool's text editor (staff with housekeeping_localization, after /iot/go?edit=1): every text this page showed,
+    then the rest, saved by IotController.SaveTexts. A click on a marked text on the page finds its box here; typing shows
+    it on the page at once. The page links save first, so nothing typed is lost on the way to another step.
+*@
+@using KeplerCMS.Helpers
+@{
+    var used = IotTextHtml.Used(Context).OrderBy(IotTexts.IndexOf).Select(IotTexts.Find).Where(t => t != null).ToList();
+    var others = IotTexts.All.Where(t => !used.Contains(t)).ToList();
+    var query = Context.Request.Query;
+    string saved = query["saved"];
+    // Back to this page after saving: a GET page by its address (without "saved"); a step reached by posting goes to step 1.
+    var back = "/iot/go";
+    if (Microsoft.AspNetCore.Http.HttpMethods.IsGet(Context.Request.Method))
+    {
+        var rest = query.Where(q => q.Key != "saved").Select(q => Uri.EscapeDataString(q.Key) + "=" + Uri.EscapeDataString(q.Value.ToString())).ToList();
+        back = Context.Request.Path + (rest.Count > 0 ? "?" + string.Join("&", rest) : "");
+    }
+    var pages = new (string Label, string Url)[]
+    {
+        ("Step 1", "/iot/go"),
+        ("Step 2 (has a Habbo)", "/iot/go?preview=2"),
+        ("Step 2 (no Habbo)", "/iot/go?preview=2-guest"),
+        ("Step 3", "/iot/go?preview=3"),
+        ("Step 4", "/iot/go?preview=4"),
+        ("Thank you", "/iot/go?preview=5"),
+        ("Ticket", "/iot/go?preview=ticket"),
+        ("Ticket, closed", "/iot/go?preview=ticket-closed"),
+        ("Banned", "/iot/go?preview=ban"),
+        ("Not banned", "/iot/go?preview=ban-none"),
+        ("Ban, logged out", "/iot/go?preview=ban-guest"),
+    };
+}
+@functions {
+    static int Rows(string value) => Math.Clamp((value ?? "").Length / 48 + 1 + (value ?? "").Count(c => c == '\n'), 1, 10);
+}
+<div id="iot-editor">
+    <form method="post" action="/iot/texts" id="iot-editor-form">
+        @Html.AntiForgeryToken()
+        @* Every button names the page to go to after saving ("back"). *@
+        <div class="ied-head">
+            <b>Help tool texts</b>
+            <a href="/iot/go?edit=0">Close editor</a>
+        </div>
+        <div class="ied-pages">
+            @foreach (var (label, url) in pages)
+            {
+                <button type="submit" name="back" value="@url" class="@(url == back ? "here" : "")">@label</button>
+            }
+        </div>
+        <p class="ied-help">
+            Click a marked text on the page to find it here. Paste or type, then <b>Save</b> (the page buttons above save too).
+            HTML works (links); a line break stays a line break. An empty text hides an optional slot (shown as <i>[key]</i>).
+            <i>default</i> puts the original text back. Saved texts show to everyone at once.
+        </p>
+        @if (saved != null)
+        {
+            <p class="ied-saved">@(saved == "0" ? "Nothing changed." : saved == "1" ? "Saved 1 text." : "Saved " + saved + " texts.")</p>
+        }
+        <h4>On this page</h4>
+        @foreach (var t in used)
+        {
+            var value = IotTexts.Get(t.Key);
+            <div class="ied-row">
+                <label for="ied-@t.Key">@t.Where</label>
+                <textarea id="ied-@t.Key" name="t.@t.Key" data-k="@t.Key" data-default="@t.Default" rows="@Rows(value)">@value</textarea>
+                <div class="ied-tools"><span>@t.Key</span> <a href="#" class="ied-reset">default</a></div>
+            </div>
+        }
+        <details>
+            <summary>Other texts (@others.Count): other steps, errors</summary>
+            @foreach (var t in others)
+            {
+                var value = IotTexts.Get(t.Key);
+                <div class="ied-row">
+                    <label for="ied-@t.Key">@t.Where</label>
+                    <textarea id="ied-@t.Key" name="t.@t.Key" data-k="@t.Key" data-default="@t.Default" rows="@Rows(value)">@value</textarea>
+                    <div class="ied-tools"><span>@t.Key</span> <a href="#" class="ied-reset">default</a></div>
+                </div>
+            }
+        </details>
+        <div class="ied-save"><button type="submit" name="back" value="@back">Save</button> <span id="ied-dirty"></span></div>
+    </form>
+</div>
+<style>
+    .iot-t { outline: 1px dashed #e59400; outline-offset: 1px; cursor: pointer; }
+    .iot-t:hover, .iot-t.ied-lit { background: #fff1b8; }
+    .iot-t.iot-empty { color: #999; font-weight: normal; font-style: italic; }
+    #iot-editor { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; overflow-y: auto; text-align: left; background: #f4f4f4; border-left: 2px solid #e59400; font: 11px Verdana, Arial, sans-serif; color: #222; z-index: 1000; }
+    #iot-editor form { padding: 8px 10px 0 10px; }
+    #iot-editor .ied-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    #iot-editor .ied-pages { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+    #iot-editor .ied-pages button { font: 11px Verdana, Arial, sans-serif; padding: 2px 5px; border: 1px solid #bbb; background: #fff; cursor: pointer; }
+    #iot-editor .ied-pages button.here { background: #e59400; border-color: #c47f00; color: #fff; }
+    #iot-editor .ied-help { color: #555; margin: 0 0 6px 0; line-height: 1.4; }
+    #iot-editor .ied-saved { background: #dff0d8; border: 1px solid #a8d39a; padding: 4px 6px; margin: 0 0 6px 0; }
+    #iot-editor h4 { margin: 8px 0 4px 0; font-size: 12px; }
+    #iot-editor details summary { cursor: pointer; font-weight: bold; font-size: 12px; margin: 10px 0 4px 0; }
+    #iot-editor .ied-row { margin-bottom: 8px; }
+    #iot-editor .ied-row label { display: block; font-weight: bold; margin-bottom: 2px; }
+    #iot-editor .ied-row textarea { box-sizing: border-box; width: 100%; font: 12px Verdana, Arial, sans-serif; padding: 3px; border: 1px solid #bbb; resize: vertical; }
+    #iot-editor .ied-row.changed textarea { border-color: #e59400; background: #fffaf0; }
+    #iot-editor .ied-row.lit textarea { box-shadow: 0 0 0 2px #e59400; }
+    #iot-editor .ied-tools { display: flex; justify-content: space-between; color: #888; }
+    #iot-editor .ied-save { position: sticky; bottom: 0; background: #f4f4f4; border-top: 1px solid #ddd; padding: 6px 0 8px 0; margin-top: 6px; }
+    #iot-editor .ied-save button { font: bold 12px Verdana, Arial, sans-serif; padding: 4px 16px; cursor: pointer; }
+    #iot-editor #ied-dirty { color: #c47f00; margin-left: 6px; }
+</style>
+<script>
+    (function () {
+        var panel = document.getElementById('iot-editor');
+        var form = document.getElementById('iot-editor-form');
+        var dirty = document.getElementById('ied-dirty');
+        var submitting = false;
+        function box(key) { return panel.querySelector('textarea[data-k="' + key + '"]'); }
+        function marks(key) { return document.querySelectorAll('.iot-t[data-k="' + key + '"]'); }
+        function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+        function changedCount() { return panel.querySelectorAll('.ied-row.changed').length; }
+        function update(area) {
+            var row = area.parentNode;
+            row.classList.toggle('changed', area.value !== area.defaultValue);
+            var n = changedCount();
+            dirty.textContent = n ? n + (n === 1 ? ' unsaved change' : ' unsaved changes') : '';
+            // Show it on the page as it will look (HTML as typed, line breaks as breaks); an empty slot keeps its marker.
+            marks(area.getAttribute('data-k')).forEach(function (m) {
+                var v = area.value.trim();
+                m.classList.toggle('iot-empty', v === '');
+                m.innerHTML = v === '' ? '[' + escapeHtml(area.getAttribute('data-k')) + ']' : area.value.replace(/\r?\n/g, '<br />');
+            });
+        }
+        // A click on a marked text (not the link or field around it) finds its box.
+        document.addEventListener('click', function (e) {
+            var mark = e.target.closest && e.target.closest('.iot-t');
+            if (!mark || panel.contains(mark)) return;
+            e.preventDefault();
+            var area = box(mark.getAttribute('data-k'));
+            if (!area) return;
+            var details = area.closest('details');
+            if (details) details.open = true;
+            area.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            area.focus();
+            area.parentNode.classList.add('lit');
+            setTimeout(function () { area.parentNode.classList.remove('lit'); }, 1200);
+        }, true);
+        panel.addEventListener('input', function (e) { if (e.target.tagName === 'TEXTAREA') update(e.target); });
+        panel.addEventListener('click', function (e) {
+            if (!e.target.classList.contains('ied-reset')) return;
+            e.preventDefault();
+            var area = e.target.closest('.ied-row').querySelector('textarea');
+            area.value = area.getAttribute('data-default');
+            update(area);
+        });
+        // Hovering a box lights its text on the page.
+        panel.addEventListener('focusin', function (e) { if (e.target.tagName === 'TEXTAREA') marks(e.target.getAttribute('data-k')).forEach(function (m) { m.classList.add('ied-lit'); }); });
+        panel.addEventListener('focusout', function (e) { if (e.target.tagName === 'TEXTAREA') marks(e.target.getAttribute('data-k')).forEach(function (m) { m.classList.remove('ied-lit'); }); });
+        form.addEventListener('submit', function () { submitting = true; });
+        window.addEventListener('beforeunload', function (e) {
+            if (!submitting && changedCount() > 0) { e.preventDefault(); e.returnValue = ''; }
+        });
+    })();
+</script>

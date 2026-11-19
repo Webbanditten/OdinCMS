@@ -7,22 +7,30 @@ html {
 	text-size-adjust: 100%;
 }
 
-/* The player's own tickets under step 1. */
-.iot-mine h3 {
+/* Step 1's boxes: the shortcuts ("Akut hjælp") and the player's own tickets. */
+.iot-box h3 {
 	margin: 0 0 4px 0;
 	color: #069;
 	font-size: 110%;
 	text-transform: uppercase;
 }
 
-.iot-mine ul {
+.iot-box ul {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.iot-mine li {
+.iot-box li {
 	margin: 2px 0;
+}
+
+.iot-box p {
+	margin: 0 0 6px 0;
+}
+
+.iot-intro-title {
+	margin: 0 0 6px 0;
 }
 
 body#mypage .portlet {
