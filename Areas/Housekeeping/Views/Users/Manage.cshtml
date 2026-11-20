@@ -203,6 +203,8 @@
     </div>
 </div>
 <hr>
+<partial name="_UserTools" model="Model" />
+
 <h2>Last unique machine ID: <strong>@(Model.LastMachineId ?? "N/A")</strong></h2>
 <h3>Characters with same ID:</h3>
 @if (Model.OtherAccounts.Any())
@@ -357,6 +359,8 @@ else
     }
 </p>
 
+
+<partial name="_UserPursePets" model="Model" />
 
 @section scripts {
     <script>

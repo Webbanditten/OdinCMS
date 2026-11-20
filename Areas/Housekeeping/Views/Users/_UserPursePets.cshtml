@@ -1,0 +1,41 @@
+@* The user page's purse viewer (Odin's credit_log, what the in-game purse lists) and pets (items_pets). *@
+@model ManageUserViewModel
+@{
+    var extras = Model.Extras;
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    string PetType(string t) => t switch { "0" => "Dog", "1" => "Cat", "2" => "Crocodile", _ => "Type " + t };
+}
+<h2>Purse: </h2>
+<details>
+    <summary>@extras.Purse.Count transaction(s) shown (newest first, up to 200; the in-game purse's list)</summary>
+    <table class="habboTable" style="width: 100%;">
+        <thead><tr><th>Date</th><th>Type</th><th>Credits</th></tr></thead>
+        <tbody>
+            @foreach (var p in extras.Purse)
+            {
+                <tr><td style="white-space: nowrap;">@p.At.ToString("yyyy-MM-dd HH:mm", inv)</td><td>@p.Type</td><td style="text-align: right;">@p.Credits</td></tr>
+            }
+        </tbody>
+    </table>
+</details>
+
+<h2>Pets: @(extras.Pets.Count == 0 ? "none" : extras.Pets.Count.ToString())</h2>
+@if (extras.Pets.Count > 0)
+{
+    <table class="habboTable" style="width: 100%;">
+        <thead><tr><th>Name</th><th>Kind</th><th>Race</th><th>Colour</th><th>Born</th><th>Where</th></tr></thead>
+        <tbody>
+            @foreach (var pet in extras.Pets)
+            {
+                <tr>
+                    <td>@pet.Name</td>
+                    <td>@PetType(pet.Type)</td>
+                    <td>@pet.Race</td>
+                    <td>@if (!string.IsNullOrEmpty(pet.Colour)) {<span style="display: inline-block; width: 12px; height: 12px; background: #@pet.Colour; border: 1px solid #999; vertical-align: middle;"></span> @pet.Colour}</td>
+                    <td style="white-space: nowrap;">@pet.Born.ToString("yyyy-MM-dd", inv)</td>
+                    <td>@if (pet.RoomId > 0) {<a href="/housekeeping/rooms/view/@pet.RoomId">@(pet.RoomName ?? "Room #" + pet.RoomId)</a>} else {<text>In the hand</text>}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

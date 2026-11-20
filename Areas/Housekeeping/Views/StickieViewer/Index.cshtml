@@ -1,0 +1,74 @@
+@model KeplerCMS.Areas.Housekeeping.StickieViewerController.NotesPage
+@{
+    ViewBag.Title = "Stickie viewer";
+}
+<h2>Stickie viewer</h2>
+<p>The notes on Habbo Homes and group pages, reported or not.</p>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="sv-message">@Model.Message</p>
+}
+<form method="get" action="@Url.Action("Index")">
+    <table class="sv-query">
+        <tr>
+            <td>Criteria:</td>
+            <td>
+                <select name="criteria">
+                    <option value="home" selected="@(Model.Criteria == "home")">Notes on a Habbo's Home</option>
+                    <option value="writer" selected="@(Model.Criteria == "writer")">Notes a Habbo placed</option>
+                    <option value="text" selected="@(Model.Criteria == "text")">Notes containing text</option>
+                </select>
+            </td>
+        </tr>
+        <tr><td>User name or text:</td><td><input type="text" name="query" value="@Model.Query" size="30" /></td></tr>
+        <tr><td></td><td><button type="submit">Query</button></td></tr>
+    </table>
+</form>
+
+@if (Model.Query != null)
+{
+    <h3>Results</h3>
+    <p>@(Model.Notes.Count == 0 ? "No notes found." : Model.Notes.Count == 1 ? "One note found." : Model.Notes.Count + " notes found" + (Model.Notes.Count == 200 ? " (the newest 200)." : "."))</p>
+    @if (Model.Notes.Count > 0)
+    {
+        <form method="post" action="@Url.Action("Delete")" onsubmit="return confirm('Delete the checked notes? This cannot be undone.');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="criteria" value="@Model.Criteria" />
+            <input type="hidden" name="query" value="@Model.Query" />
+            <table class="sv-results">
+                <thead><tr><th><input type="checkbox" id="sv-all" /></th><th>#</th><th>On</th><th>Placed by</th><th>Text</th></tr></thead>
+                <tbody>
+                    @foreach (var n in Model.Notes)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="ids" value="@n.Id" class="sv-check" /></td>
+                            <td>@n.Id</td>
+                            <td style="white-space: nowrap;">
+                                @if (n.HomeType == "group") {<text>Group </text><a href="/groups/@n.HomeId/id" target="_blank">@(n.HomeName ?? "#" + n.HomeId)</a>}
+                                else {<text>Home of </text><a href="/home/@n.HomeOwnerId/id" target="_blank">@(n.HomeName ?? "#" + n.HomeOwnerId)</a>}
+                            </td>
+                            <td style="white-space: nowrap;">@(n.Writer ?? "#" + n.WriterId) <a href="/housekeeping/users/manage/@n.WriterId" title="User information">(i)</a></td>
+                            <td class="sv-text">@n.Text</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <p><button type="button" id="sv-toggle">Toggle</button> <button type="submit">Delete checked</button></p>
+        </form>
+    }
+}
+<style>
+    .sv-message { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }
+    .sv-query td { padding: 2px 4px; }
+    table.sv-results { border-collapse: collapse; max-width: 900px; }
+    table.sv-results th { background: #ffcc00; text-align: left; padding: 3px 5px; }
+    table.sv-results td { background: #fff7cc; padding: 4px 5px; vertical-align: top; border-bottom: 1px solid #f3e3a0; }
+    td.sv-text { white-space: pre-wrap; word-break: break-word; min-width: 260px; }
+</style>
+<script>
+    (function () {
+        var all = document.getElementById('sv-all'), toggle = document.getElementById('sv-toggle');
+        if (all) all.addEventListener('change', function () { document.querySelectorAll('.sv-check').forEach(function (c) { c.checked = all.checked; }); });
+        if (toggle) toggle.addEventListener('click', function () { document.querySelectorAll('.sv-check').forEach(function (c) { c.checked = !c.checked; }); });
+    })();
+</script>

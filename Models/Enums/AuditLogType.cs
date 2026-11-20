@@ -40,6 +40,19 @@ namespace KeplerCMS.Models
         edit_room_categories,
         help_ticket_reply,
         help_ticket_close,
-        website_report_close
+        website_report_close,
+        edit_user,
+        give_credits,
+        give_club,
+        give_furni,
+        user_note,
+        password_reset_mail,
+        mass_ban,
+        mass_unban,
+        mass_alert,
+        edit_group,
+        delete_group,
+        delete_tag,
+        delete_stickie
     }
 }

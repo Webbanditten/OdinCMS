@@ -40,14 +40,7 @@
         "archived" => "archived",
         _ => "new",
     };
-    var commonMessages = new[]
-    {
-        "Stødende indhold på Habbo Home",
-        "Chikane af andre Habbos",
-        "Personlige oplysninger på Habbo Home",
-        "Reklame for andre hoteller eller sider",
-        "Upassende sprog",
-    };
+    var commonMessages = KeplerCMS.Areas.Housekeeping.MassToolsController.CommonMessages;
 }
 <h2>@ViewBag.Title</h2>
 <p><img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" style="vertical-align: middle;" /> <strong>@Model.Total</strong> reports in database, <strong>@Model.New</strong> new.</p>

@@ -24,6 +24,8 @@ namespace KeplerCMS.Models
         public string ExtraInfo { get; set; }
         public bool BanIp { get; set; }
         public bool BanMachine { get; set; }
+        /// <summary>club_days: days of Habbo Club to give; 0 or less ends the membership now.</summary>
+        public int Days { get; set; }
         public string RoomDescription { get; set; }
         public string RoomName { get; set; }
         public int RoomAccessType { get; set; }

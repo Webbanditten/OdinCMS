@@ -1,0 +1,42 @@
+@model List<KeplerCMS.Areas.Housekeeping.RoomsController.TopRatedRow>
+@{
+    ViewBag.Title = "Top-rated flats";
+    var period = (string)ViewBag.Period;
+    string Tab(string key, string label) => period == key ? "<strong>" + label + "</strong>" : "<a href=\"?period=" + key + "\">" + label + "</a>";
+    var doors = new[] { "Open", "Locked", "Password" };
+}
+<h2>Top-rated flats</h2>
+<p>Guest rooms by their votes (each Habbo's vote counts once a week per room, as in the navigator's best rated lists).</p>
+<p>@Html.Raw(Tab("day", "Last 24 hours")) | @Html.Raw(Tab("week", "Last 7 days")) | @Html.Raw(Tab("all", "All time"))</p>
+@if (Model.Count == 0)
+{
+    <p><em>No votes in this period.</em></p>
+}
+else
+{
+    <table class="habboTable" style="width: 100%;">
+        <thead>
+            <tr><th>#</th><th>Room</th><th>Owner</th><th>@(period == "all" ? "Rating" : "Score")</th>@if (period != "all") {<th>Votes</th><th>All time</th>}<th>Door</th><th>In it now</th></tr>
+        </thead>
+        <tbody>
+            @{ var place = 0; }
+            @foreach (var r in Model)
+            {
+                place++;
+                <tr>
+                    <td>@place</td>
+                    <td><a href="/housekeeping/rooms/view/@r.Id">@r.Name</a> <small>(#@r.Id)</small></td>
+                    <td>@if (r.Owner != null) {<a href="/housekeeping/users/manage/@r.OwnerId">@r.Owner</a>} else {<text>#@r.OwnerId</text>}</td>
+                    <td><strong>@r.Score</strong></td>
+                    @if (period != "all")
+                    {
+                        <td>@r.Votes</td>
+                        <td>@r.AllTime</td>
+                    }
+                    <td>@(r.AccessType >= 0 && r.AccessType < doors.Length ? doors[r.AccessType] : r.AccessType.ToString())</td>
+                    <td>@r.VisitorsNow</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

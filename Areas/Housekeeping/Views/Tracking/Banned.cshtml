@@ -1,0 +1,49 @@
+@model List<KeplerCMS.Areas.Housekeeping.TrackingController.AttemptRow>
+@{
+    ViewBag.Title = "Banned Habbos trying to enter";
+    var days = (int)ViewBag.Days;
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+}
+<h2>Banned Habbos trying to enter</h2>
+<p>
+    Logins of banned Habbos, and connections from banned IP addresses (before anyone logs in, so without a Habbo). The same
+    ban, address and Habbo count once per 10 minutes.
+</p>
+<p>
+    @foreach (var d in KeplerCMS.Areas.Housekeeping.TrackingController.Periods)
+    {
+        if (d == days) {<strong>Last @(d == 1 ? "24 hours" : d + " days")</strong>} else {<a href="?days=@d">Last @(d == 1 ? "24 hours" : d + " days")</a>}
+        @(d != KeplerCMS.Areas.Housekeeping.TrackingController.Periods[^1] ? " | " : "")
+    }
+</p>
+@if (Model.Count == 0)
+{
+    <p><em>Nobody banned tried to enter.</em></p>
+}
+else
+{
+    <p>@Model.Count attempts@(Model.Count == 500 ? " (the newest 500)" : "") by @Model.Select(a => a.UserId?.ToString() ?? a.Ip).Distinct().Count() Habbos or addresses.</p>
+    <table class="habboTable" style="width: 100%;">
+        <thead><tr><th>When</th><th>Habbo</th><th>IP address</th><th>Ban</th><th>Reason</th><th>Banned until</th></tr></thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                <tr>
+                    <td style="white-space: nowrap;">@a.At.ToString("yyyy-MM-dd HH:mm", inv)</td>
+                    <td>@if (a.UserId != null) {<a href="/housekeeping/users/manage/@a.UserId">@(a.Username ?? "#" + a.UserId)</a>} else {<em>not logged in</em>}</td>
+                    <td>@a.Ip</td>
+                    <td>@(a.BanType == "IP_ADDRESS" ? "IP address" : a.BanType == "MACHINE_ID" ? "Computer" : "Habbo") #@a.BanId</td>
+                    <td>@a.Reason</td>
+                    <td style="white-space: nowrap;">
+                        @if (a.BannedUntil != null)
+                        {
+                            @DateTimeOffset.FromUnixTimeSeconds(a.BannedUntil.Value).ToLocalTime().ToString("yyyy-MM-dd HH:mm", inv)
+                            @if (a.BannedUntil <= now) {<small> (over)</small>}
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

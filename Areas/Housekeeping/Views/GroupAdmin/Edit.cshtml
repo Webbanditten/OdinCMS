@@ -1,0 +1,75 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.Housekeeping.GroupAdminController.GroupEdit
+@{
+    var g = Model.Group;
+    ViewBag.Title = "Group editor: " + g.GroupName;
+    var badgeUrl = Configuration.GetSection("keplercms")["groupBadgeUrl"];
+    var types = KeplerCMS.Areas.Housekeeping.GroupAdminController.GroupTypes;
+}
+<p><a href="@Url.Action("Index")">« Group editor</a></p>
+<h2>@g.GroupName <small>(#@g.Id)</small></h2>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="ga-message">@Model.Message</p>
+}
+<table class="ga-info">
+    <tr>
+        <td rowspan="4"><img src="@badgeUrl/@(g.GroupBadge).gif" alt="" /></td>
+        <td>Owner: @if (Model.Owner != null) {<a href="/housekeeping/users/manage/@g.UserId">@Model.Owner</a>} else {<text>#@g.UserId</text>}</td>
+    </tr>
+    <tr><td>Members: @Model.Members@(Model.Pending > 0 ? ", " + Model.Pending + " waiting" : "")</td></tr>
+    <tr><td>Created: @g.Created.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)</td></tr>
+    <tr><td><a href="/groups/@g.Id/id" target="_blank">Open the group page</a></td></tr>
+</table>
+
+<form method="post" action="@Url.Action("Save")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@g.Id" />
+    <table class="ga-form">
+        <tr><td>Name:</td><td><input type="text" name="name" value="@g.GroupName" size="40" maxlength="30" /></td></tr>
+        <tr><td>Description:</td><td><textarea name="description" rows="5" cols="60" maxlength="2048">@g.GroupDescription</textarea></td></tr>
+        <tr><td>Web address:</td><td>/groups/<input type="text" name="url" value="@g.GroupUrl" size="24" maxlength="30" /> <small>a-z, 0-9, - and _; empty = only /groups/@g.Id/id</small></td></tr>
+        <tr>
+            <td>Type:</td>
+            <td>
+                @for (var i = 0; i < types.Length; i++)
+                {
+                    <label style="margin-right: 10px;"><input type="radio" name="type" value="@i" checked="@(g.GroupType == i)" /> @types[i]</label>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td>Room:</td>
+            <td>
+                <select name="roomId">
+                    <option value="">No room</option>
+                    @foreach (var (roomId, roomName) in Model.Rooms)
+                    {
+                        <option value="@roomId" selected="@(g.GroupRoom == roomId)">@roomName (#@roomId)</option>
+                    }
+                </select>
+                <small>The owner's rooms.</small>
+            </td>
+        </tr>
+        <tr><td></td><td><button type="submit">Save</button></td></tr>
+    </table>
+</form>
+
+<form method="post" action="@Url.Action("ResetBadge")" style="margin-top: 10px;" onsubmit="return confirm('Reset the badge to the default?');">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@g.Id" />
+    <button type="submit">Reset badge</button> <small>For a badge that breaks the rules: the group gets the default badge and the owner can make a new one.</small>
+</form>
+
+<form method="post" action="@Url.Action("Delete")" style="margin-top: 20px;" onsubmit="return confirm('Delete this group? Its members leave and its notes and stickers go back to whoever placed them. This cannot be undone.');">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@g.Id" />
+    <button type="submit" style="color: #c00;">Delete group</button>
+</form>
+<style>
+    .ga-message { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }
+    table.ga-info td { padding: 2px 8px 2px 0; vertical-align: top; }
+    table.ga-form td { padding: 3px 6px 3px 0; vertical-align: top; }
+    table.ga-form td:first-child { font-weight: bold; white-space: nowrap; }
+</style>

@@ -1,0 +1,78 @@
+@model KeplerCMS.Areas.Housekeeping.TrackingController.CallsPage
+@{
+    ViewBag.Title = "Calls for help statistics";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    string Minutes(double? m) => m == null ? "-" : m < 1 ? "under a minute" : m < 90 ? Math.Round(m.Value) + " min" : Math.Round(m.Value / 60, 1).ToString(inv) + " hours";
+    var maxHour = Math.Max(1, Model.ByHour.Max());
+}
+<h2>Calls for help</h2>
+<p>Who picks up the calls for help and when Habbos call (Hobba events by staff, time of day and date).</p>
+<p>
+    @foreach (var d in KeplerCMS.Areas.Housekeeping.TrackingController.Periods)
+    {
+        if (d == Model.Days) {<strong>Last @(d == 1 ? "24 hours" : d + " days")</strong>} else {<a href="?days=@d">Last @(d == 1 ? "24 hours" : d + " days")</a>}
+        @(d != KeplerCMS.Areas.Housekeeping.TrackingController.Periods[^1] ? " | " : "")
+    }
+</p>
+<p>
+    <strong>@Model.Total</strong> calls, <strong>@(Model.Total - Model.NeverPicked)</strong> picked up, <strong>@Model.NeverPicked</strong> never picked up.
+    Average wait until picked up: <strong>@Minutes(Model.AvgMinutes)</strong>.
+</p>
+
+<h3>Per staff member</h3>
+@if (Model.Staff.Count == 0)
+{
+    <p><em>Nobody picked up a call.</em></p>
+}
+else
+{
+    <table class="habboTable" style="max-width: 600px;">
+        <thead><tr><th>Staff</th><th>Picked up</th><th>Answered</th><th>Average wait</th></tr></thead>
+        <tbody>
+            @foreach (var s in Model.Staff)
+            {
+                <tr><td><a href="/housekeeping/users/manage/@s.StaffId">@(s.Staff ?? "#" + s.StaffId)</a></td><td>@s.Picked</td><td>@s.Replied</td><td>@Minutes(s.AvgMinutes)</td></tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h3>By time of day</h3>
+<table class="cs-hours">
+    <tr>
+        @for (var h = 0; h < 24; h++)
+        {
+            <td title="@Model.ByHour[h] calls"><div style="height: @(Model.ByHour[h] * 80 / maxHour)px;"></div></td>
+        }
+    </tr>
+    <tr>
+        @for (var h = 0; h < 24; h++)
+        {
+            <th>@h.ToString("00")<br /><small>@Model.ByHour[h]</small></th>
+        }
+    </tr>
+</table>
+
+<h3>By date</h3>
+@if (Model.ByDay.Count == 0)
+{
+    <p><em>No calls.</em></p>
+}
+else
+{
+    <table class="habboTable" style="max-width: 400px;">
+        <thead><tr><th>Date</th><th>Calls</th><th>Picked up</th></tr></thead>
+        <tbody>
+            @foreach (var (day, calls, picked) in Model.ByDay)
+            {
+                <tr><td>@day.ToString("yyyy-MM-dd ddd", inv)</td><td>@calls</td><td>@picked</td></tr>
+            }
+        </tbody>
+    </table>
+}
+<style>
+    table.cs-hours { border-collapse: collapse; }
+    table.cs-hours td { height: 84px; vertical-align: bottom; width: 26px; padding: 0 2px; }
+    table.cs-hours td div { background: #0f5fa8; min-height: 1px; }
+    table.cs-hours th { font-weight: normal; font-size: 10px; text-align: center; }
+</style>

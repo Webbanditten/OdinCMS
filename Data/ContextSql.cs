@@ -50,6 +50,10 @@ namespace KeplerCMS.Data
             return rows;
         }
 
+        /// <summary>A query on its own: opens the connection for it (EF keeps a connection opened by an outer InConnection open).</summary>
+        public Task<List<T>> QueryOpen<T>(string sql, Func<DbDataReader, T> read, params (string, object)[] parameters) =>
+            InConnection(() => Query(sql, read, parameters));
+
         public async Task<long> LastInsertId()
         {
             await using var command = Command("SELECT LAST_INSERT_ID()");

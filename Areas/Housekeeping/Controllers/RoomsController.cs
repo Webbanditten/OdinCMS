@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
@@ -66,6 +67,38 @@ namespace KeplerCMS.Areas.Housekeeping
             
             var result = await _roomService.UpdateRoom(model);
             return Content(result);
+        }
+
+        public record TopRatedRow(int Id, string Name, int OwnerId, string Owner, int Score, int Votes, int AllTime, int VisitorsNow, int AccessType);
+
+        /// <summary>
+        /// Private rooms > Top-rated flats (Sulake's): guest rooms by the votes of the last day or week (users_room_votes, as the
+        /// navigator's best rated lists count them) or by their all-time rating (rooms.rating).
+        /// </summary>
+        [HousekeepingFilter(Fuse.fuse_private_rooms)]
+        public async Task<IActionResult> TopRated(string period = "week")
+        {
+            var sql = new ContextSql(_context);
+            const string columns = "r.id, r.name, r.owner_id, u.username, r.rating, r.visitors_now, r.accesstype";
+            List<TopRatedRow> rows;
+            if (period == "all")
+            {
+                rows = await sql.QueryOpen("SELECT " + columns + " FROM rooms r LEFT JOIN users u ON u.id = r.owner_id WHERE r.owner_id > 0 AND r.rating > 0 " +
+                    "ORDER BY r.rating DESC, r.id LIMIT 50",
+                    r => new TopRatedRow(r.GetInt32(0), r.GetString(1), r.GetInt32(2), r.IsDBNull(3) ? null : r.GetString(3), r.GetInt32(4), 0, r.GetInt32(4), r.GetInt32(5), r.GetInt32(6)));
+            }
+            else
+            {
+                period = period == "day" ? "day" : "week";
+                var since = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (period == "day" ? 86400 : 7 * 86400);
+                rows = await sql.QueryOpen("SELECT " + columns + ", v.score, v.votes FROM (SELECT room_id, SUM(vote) score, COUNT(*) votes FROM users_room_votes " +
+                    "WHERE voted_at > @since GROUP BY room_id) v JOIN rooms r ON r.id = v.room_id LEFT JOIN users u ON u.id = r.owner_id WHERE r.owner_id > 0 " +
+                    "ORDER BY v.score DESC, v.votes DESC, r.id LIMIT 50",
+                    r => new TopRatedRow(r.GetInt32(0), r.GetString(1), r.GetInt32(2), r.IsDBNull(3) ? null : r.GetString(3), Convert.ToInt32(r.GetValue(7)),
+                        Convert.ToInt32(r.GetValue(8)), r.GetInt32(4), r.GetInt32(5), r.GetInt32(6)), ("@since", since));
+            }
+            ViewBag.Period = period;
+            return View(rows);
         }
 
         [HousekeepingFilter(Fuse.fuse_private_rooms)]

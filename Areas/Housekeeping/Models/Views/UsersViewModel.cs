@@ -43,6 +43,8 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public List<SimpleUser> OtherAccounts { get; set; }
         public string LastMachineId { get; set; }
         public List<PurchaseRow> Purchases { get; set; } = new List<PurchaseRow>();
+        /// <summary>Staff notes, purse, pets, Habbo Club end (UserToolsController).</summary>
+        public KeplerCMS.Areas.Housekeeping.UserToolsController.UserExtras Extras { get; set; }
     }
 
     /// <summary>A purchase_log row as housekeeping shows it.</summary>

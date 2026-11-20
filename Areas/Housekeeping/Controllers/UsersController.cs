@@ -103,7 +103,8 @@ namespace KeplerCMS.Areas.Housekeeping
                 Ranks = ranks,
                 Message = message,
                 Badges = badges,
-                Purchases = purchases
+                Purchases = purchases,
+                Extras = await UserToolsController.Load(_context, user.Id)
             };
             return View(model);
         }
