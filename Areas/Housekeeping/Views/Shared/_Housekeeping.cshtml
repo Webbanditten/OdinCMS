@@ -40,6 +40,13 @@
         { "/housekeeping/callsforhelp", HousekeepingMenu.HobbaTools },
         { "/housekeeping/helptickets", HousekeepingMenu.HobbaTools },
         { "/housekeeping/reports", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/masstools", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/usertools", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/pets", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/groupadmin", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/tagmoderation", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/stickieviewer", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/tracking", HousekeepingMenu.HobbaTools },
         { "/housekeeping/publicrooms", HousekeepingMenu.AdminTools },
         { "/housekeeping/roomcategories", HousekeepingMenu.AdminTools },
     };
@@ -214,6 +221,22 @@
                         </div>
                     }
 
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_ban, Fuse.room_alert }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Supervisor Hobba tools
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Mass ban", Url.Action("Ban", "MassTools"), new List<Fuse> { Fuse.fuse_ban })
+                                    @await menuHelper.Render("Mass alert", Url.Action("Alert", "MassTools"), new List<Fuse> { Fuse.room_alert })
+                                    @await menuHelper.Render("Mass unban", Url.Action("Unban", "MassTools"), new List<Fuse> { Fuse.fuse_ban })
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
                     @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_kick }))
                     {
                         <div class="container">
@@ -223,6 +246,7 @@
                             <div class="container-content">
                                 <ul>
                                     @await menuHelper.Render("User search & information tool", Url.Action("Index", "Users"), new List<Fuse> { Fuse.fuse_kick })
+                                    @await menuHelper.Render("Find pets by user", Url.Action("Index", "Pets"), new List<Fuse> { Fuse.fuse_kick })
                                 </ul>
                             </div>
                         </div>
@@ -255,6 +279,9 @@
                                     @await menuHelper.Render("Room Reports", Url.Action("Index", "Reports", new { type = "room" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                     @await menuHelper.Render("Group Name Reports", Url.Action("Index", "Reports", new { type = "groupname" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                     @await menuHelper.Render("Group Description Reports", Url.Action("Index", "Reports", new { type = "groupdesc" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Stickie viewer", Url.Action("Index", "StickieViewer"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Tag moderation", Url.Action("Index", "TagModeration"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Group editor", Url.Action("Index", "GroupAdmin"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                 </ul>
                             </div>
                         </div>
@@ -269,6 +296,22 @@
                             <div class="container-content">
                                 <ul>
                                     @await menuHelper.Render("Room admin", Url.Action("Index", "Rooms"), new List<Fuse> { Fuse.fuse_private_rooms })
+                                    @await menuHelper.Render("Top-rated flats", Url.Action("TopRated", "Rooms"), new List<Fuse> { Fuse.fuse_private_rooms })
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    @if (HousekeepingAccess.HasAccess(userFuses, new List<Fuse> { Fuse.fuse_ban, Fuse.fuse_receive_calls_for_help }))
+                    {
+                        <div class="container">
+                            <div class="title">
+                                Hobba tracking tools
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Banned Habbos trying to enter", Url.Action("Banned", "Tracking"), new List<Fuse> { Fuse.fuse_ban })
+                                    @await menuHelper.Render("Calls for help", Url.Action("Calls", "Tracking"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                 </ul>
                             </div>
                         </div>

@@ -24,6 +24,8 @@ namespace KeplerCMS.Models.Enums
         reload_navigator,
         reload_inventory,
         reload_settings,
-        reload_ads
+        reload_ads,
+        /// <summary>Odin v1.34.0: Days &gt; 0 gives that many days of Habbo Club, otherwise ends the membership now.</summary>
+        club_days
     }
 }

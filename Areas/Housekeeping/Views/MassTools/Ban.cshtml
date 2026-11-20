@@ -1,0 +1,44 @@
+@model KeplerCMS.Areas.Housekeeping.MassToolsController.MassPage
+@{
+    ViewBag.Title = "Mass ban";
+}
+<h2>Mass banning</h2>
+<p>
+    This tool bans a list of Habbos at once, wherever they are (they don't need to be in the hotel). One Habbo name per line.
+    You must include a message to explain to the Habbos why they are being removed from the hotel.
+</p>
+<partial name="_Result" model="Model" />
+<form method="post" action="@Url.Action("Ban")">
+    @Html.AntiForgeryToken()
+    <table class="mt-form">
+        <tr><td class="mt-label">The bad guys</td><td><textarea name="Names" rows="12" cols="30">@Model.Names</textarea></td></tr>
+        <tr>
+            <td class="mt-label">Message</td>
+            <td>
+                <select id="mt-common">
+                    <option value="">Choose a common message</option>
+                    @foreach (var m in KeplerCMS.Areas.Housekeeping.MassToolsController.CommonMessages)
+                    {
+                        <option>@m</option>
+                    }
+                </select><br />
+                <input type="text" name="Message" id="mt-message" value="@Model.Message" size="60" maxlength="255" />
+            </td>
+        </tr>
+        <tr>
+            <td class="mt-label">Ban time</td>
+            <td>
+                <select name="BanLength">
+                    @foreach (var hours in KeplerCMS.Areas.Housekeeping.ReportsController.BanLengths)
+                    {
+                        <option value="@hours" selected="@(Model.BanLength == hours)">@hours hours</option>
+                    }
+                </select>
+            </td>
+        </tr>
+        <tr><td class="mt-label">Extra info</td><td><textarea name="ExtraInfo" rows="4" cols="60">@Model.ExtraInfo</textarea></td></tr>
+        <tr><td></td><td><label><input type="checkbox" name="BanMachine" value="true" checked="@Model.BanMachine" /> Also ban computer for more than one hour</label></td></tr>
+        <tr><td></td><td><label><input type="checkbox" name="BanIp" value="true" checked="@Model.BanIp" /> Also ban IP address for more than one hour</label></td></tr>
+        <tr><td></td><td><button type="submit">Ban</button></td></tr>
+    </table>
+</form>

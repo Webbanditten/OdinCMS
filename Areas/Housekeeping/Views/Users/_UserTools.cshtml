@@ -1,0 +1,165 @@
+@* The user page's tools (UserToolsController): staff notes, edit motto and e-mail, password reset e-mail, credits, Habbo
+   Club, give furni. Credits, Habbo Club and furni only for fuse_administrator_access. *@
+@using KeplerCMS.Data.Models
+@using KeplerCMS.Areas.Housekeeping.Helpers
+@using KeplerCMS.Models.Enums
+@model ManageUserViewModel
+@{
+    var userData = (Users)ViewData["user"];
+    var fuses = userData?.Fuses.Select(s => s.FuseName).ToList() ?? new List<string>();
+    var isAdmin = HousekeepingAccess.HasAccess(fuses, new List<Fuse> { Fuse.fuse_administrator_access });
+    var extras = Model.Extras;
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var u = Model.User;
+}
+
+<h2>Staff notes: @(extras.Notes.Count == 0 ? "none" : extras.Notes.Count.ToString())</h2>
+<div class="ut-box">
+    @foreach (var note in extras.Notes)
+    {
+        <div class="ut-note">
+            <div class="ut-note-head">
+                <strong>@(note.Staff ?? "#" + note.StaffId)</strong> wrote on @note.CreatedAt.ToString("yyyy-MM-dd HH:mm", inv):
+                @if (note.StaffId == userData?.Id || isAdmin)
+                {
+                    <form method="post" action="@Url.Action("DeleteNote", "UserTools")" class="ut-inline" onsubmit="return confirm('Delete this note?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@u.Id" /><input type="hidden" name="noteId" value="@note.Id" />
+                        <button type="submit" class="ut-link">delete</button>
+                    </form>
+                }
+            </div>
+            <div class="ut-note-text">@note.Note</div>
+        </div>
+    }
+    <form method="post" action="@Url.Action("AddNote", "UserTools")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@u.Id" />
+        <p><strong>Add note:</strong> (every moderator sees it; the Habbo never does)</p>
+        <textarea name="note" rows="3" cols="70" maxlength="@KeplerCMS.Areas.Housekeeping.UserToolsController.NoteMaxLength"></textarea><br />
+        <button type="submit">Save note</button>
+    </form>
+</div>
+
+<h2>Edit Habbo</h2>
+<div class="ut-box">
+    <form method="post" action="@Url.Action("Details", "UserTools")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@u.Id" />
+        <table class="ut-form">
+            <tr><td>Motto:</td><td><input type="text" name="motto" value="@u.Motto" size="50" maxlength="@KeplerCMS.Controllers.ProfileController.MissionMaxLength" /> <small>(the hotel shows it at once)</small></td></tr>
+            <tr><td>E-mail:</td><td><input type="text" name="email" value="@u.Email" size="50" maxlength="256" /></td></tr>
+            <tr><td></td><td><button type="submit">Save</button></td></tr>
+        </table>
+    </form>
+    <form method="post" action="@Url.Action("PasswordReset", "UserTools")" onsubmit="return confirm('Send a password reset e-mail to this Habbo?');">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@u.Id" />
+        <p>
+            <button type="submit" disabled="@(string.IsNullOrWhiteSpace(u.Email))">Send password reset e-mail</button>
+            <small>The website's "forgotten password" e-mail with a reset link (valid 10 minutes, as on the site). Change the e-mail above first if the Habbo lost theirs.</small>
+        </p>
+    </form>
+</div>
+
+@if (isAdmin)
+{
+    <h2>Credits, Habbo Club and furni</h2>
+    <div class="ut-box">
+        <form method="post" action="@Url.Action("Credits", "UserTools")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@u.Id" />
+            <table class="ut-form">
+                <tr><td>Credits:</td><td><strong>@u.Credits</strong> now. Give <input type="number" name="amount" size="8" style="width: 90px;" /> <small>(a minus takes them)</small></td></tr>
+                <tr><td>Reason:</td><td><input type="text" name="reason" size="50" maxlength="200" /> <button type="submit">Change credits</button></td></tr>
+            </table>
+        </form>
+
+        <form method="post" action="@Url.Action("Club", "UserTools")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@u.Id" />
+            <table class="ut-form">
+                <tr>
+                    <td>Habbo Club:</td>
+                    <td>
+                        @(extras.ClubUntil != null ? "Member until " + extras.ClubUntil.Value.ToString("yyyy-MM-dd HH:mm", inv) + "." : "Not a member.")
+                        Give
+                        <select name="days">
+                            @foreach (var d in KeplerCMS.Areas.Housekeeping.UserToolsController.ClubDays)
+                            {
+                                <option value="@d">@d days</option>
+                            }
+                        </select>
+                        <button type="submit">Give Habbo Club</button>
+                        @if (extras.ClubUntil != null)
+                        {
+                            <button type="submit" name="end" value="true" onclick="return confirm('End this Habbo Club membership now?');">End membership now</button>
+                        }
+                    </td>
+                </tr>
+                <tr><td>Reason:</td><td><input type="text" name="reason" size="50" maxlength="200" /> <small>As a purchase without the price: the welcome gift and badge follow.</small></td></tr>
+            </table>
+        </form>
+
+        <form method="post" action="@Url.Action("GiveFurni", "UserTools")" id="ut-furni-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@u.Id" />
+            <input type="hidden" name="catalogueItemId" id="ut-furni-id" />
+            <table class="ut-form">
+                <tr>
+                    <td>Give furni:</td>
+                    <td>
+                        <input type="text" id="ut-furni-q" size="30" placeholder="Name, sale code or catalogue id" autocomplete="off" />
+                        <span id="ut-furni-picked"></span>
+                        <div id="ut-furni-results"></div>
+                    </td>
+                </tr>
+                <tr><td>Amount:</td><td><input type="number" name="amount" value="1" min="1" max="50" style="width: 60px;" /> Reason: <input type="text" name="reason" size="30" maxlength="200" /> <button type="submit">Give furni</button></td></tr>
+            </table>
+        </form>
+    </div>
+}
+
+<style>
+    .ut-box { border: 1px solid #ccd; background: #f8f8fb; padding: 6px 10px; margin-bottom: 14px; max-width: 900px; }
+    .ut-note { border-bottom: 1px dashed #ccd; padding: 4px 0; }
+    .ut-note-head { color: #555; }
+    .ut-note-text { white-space: pre-wrap; margin-top: 2px; }
+    .ut-inline { display: inline; }
+    .ut-link { background: none; border: none; color: #c00; cursor: pointer; padding: 0; text-decoration: underline; font: inherit; }
+    table.ut-form td { padding: 3px 6px 3px 0; vertical-align: top; }
+    table.ut-form td:first-child { white-space: nowrap; font-weight: bold; width: 90px; }
+    #ut-furni-results div { cursor: pointer; padding: 2px 4px; }
+    #ut-furni-results div:hover { background: #fff1b8; }
+    #ut-furni-results .ut-no { color: #999; cursor: default; }
+    #ut-furni-picked { font-weight: bold; margin-left: 6px; }
+</style>
+<script>
+    (function () {
+        var q = document.getElementById('ut-furni-q');
+        if (!q) return;
+        var results = document.getElementById('ut-furni-results'), picked = document.getElementById('ut-furni-picked'), idField = document.getElementById('ut-furni-id'), timer;
+        function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+        q.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                if (!q.value.trim()) { results.innerHTML = ''; return; }
+                fetch('@Url.Action("FurniSearch", "UserTools")?query=' + encodeURIComponent(q.value.trim()))
+                    .then(function (r) { return r.json(); })
+                    .then(function (items) {
+                        results.innerHTML = items.length ? '' : '<div class="ut-no">Nothing found.</div>';
+                        items.forEach(function (it) {
+                            var row = document.createElement('div');
+                            row.innerHTML = '#' + it.id + ' <strong>' + esc(it.name) + '</strong> (' + esc(it.saleCode) + ')' + (it.notGivable ? ' <em>: ' + esc(it.notGivable) + '</em>' : '');
+                            if (it.notGivable) row.className = 'ut-no';
+                            else row.addEventListener('click', function () { idField.value = it.id; picked.textContent = it.name; results.innerHTML = ''; });
+                            results.appendChild(row);
+                        });
+                    });
+            }, 250);
+        });
+        document.getElementById('ut-furni-form').addEventListener('submit', function (e) {
+            if (!idField.value) { e.preventDefault(); q.focus(); picked.textContent = 'Pick a furni first.'; }
+        });
+    })();
+</script>

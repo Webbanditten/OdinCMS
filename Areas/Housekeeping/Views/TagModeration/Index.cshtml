@@ -1,0 +1,67 @@
+@model KeplerCMS.Areas.Housekeeping.TagModerationController.TagsPage
+@{
+    ViewBag.Title = "Tag moderation";
+}
+<h2>Tag moderation</h2>
+<p>@Model.Total tags on Habbo Homes and group pages. Search for a word to see who uses it, then delete single tags or the word everywhere.</p>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="tm-message">@Model.Message</p>
+}
+<form method="get" action="@Url.Action("Index")">
+    <input type="text" name="search" value="@Model.Search" size="30" /> <button type="submit">Search</button>
+</form>
+
+@if (Model.Search != null)
+{
+    <h3>Tags containing "@Model.Search": @Model.Tags.Count</h3>
+    @if (Model.Tags.Count > 0)
+    {
+        <form method="post" action="@Url.Action("Delete")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="search" value="@Model.Search" />
+            <table class="habboTable" style="max-width: 760px;">
+                <thead><tr><th><input type="checkbox" id="tm-all" /></th><th>Tag</th><th>On</th></tr></thead>
+                <tbody>
+                    @foreach (var t in Model.Tags)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="ids" value="@t.Id" class="tm-check" /></td>
+                            <td>@t.Tag</td>
+                            <td>
+                                @if (t.GroupId > 0) {<text>Group </text><a href="/groups/@t.GroupId/id" target="_blank">@(t.GroupName ?? "#" + t.GroupId)</a>}
+                                else {<text>Home of </text><a href="/home/@t.UserId/id" target="_blank">@(t.Username ?? "#" + t.UserId)</a> <a href="/housekeeping/users/manage/@t.UserId">(i)</a>}
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <p>
+                <button type="submit">Delete checked</button>
+                @if (Model.Tags.Any(t => t.Tag == Model.Search))
+                {
+                    <button type="submit" name="all" value="@Model.Search" onclick="return confirm('Delete this tag everywhere it is used?');">Delete "@Model.Search" everywhere (@Model.Tags.Count(t => t.Tag == Model.Search))</button>
+                }
+            </p>
+        </form>
+    }
+}
+
+<h3>Most used tags</h3>
+<p class="tm-cloud">
+    @foreach (var (tag, count) in Model.Top)
+    {
+        <a href="@Url.Action("Index", new { search = tag })">@tag</a> <small>(@count)</small>
+    }
+</p>
+<style>
+    .tm-message { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }
+    .tm-cloud { max-width: 760px; line-height: 1.8; }
+    .tm-cloud a { margin-left: 6px; }
+</style>
+<script>
+    (function () {
+        var all = document.getElementById('tm-all');
+        if (all) all.addEventListener('change', function () { document.querySelectorAll('.tm-check').forEach(function (c) { c.checked = all.checked; }); });
+    })();
+</script>

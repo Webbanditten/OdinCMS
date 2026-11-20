@@ -1,0 +1,37 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model KeplerCMS.Areas.Housekeeping.GroupAdminController.GroupsPage
+@{
+    ViewBag.Title = "Group editor";
+    var badgeUrl = Configuration.GetSection("keplercms")["groupBadgeUrl"];
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<h2>Group editor</h2>
+<p>@Model.Total groups. Find one by name, web address, owner or number, then change or delete it.</p>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="ga-message">@Model.Message</p>
+}
+<form method="get" action="@Url.Action("Index")">
+    <input type="text" name="search" value="@Model.Search" size="30" /> <button type="submit">Search</button>
+</form>
+<p>@(Model.Search == null ? "Newest groups:" : Model.Groups.Count + " found.")</p>
+<table class="habboTable" style="width: 100%;">
+    <thead><tr><th></th><th>#</th><th>Name</th><th>Owner</th><th>Members</th><th>Type</th><th>Created</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var g in Model.Groups)
+        {
+            <tr>
+                <td><img src="@badgeUrl/@(g.Badge).gif" alt="" width="39" height="39" /></td>
+                <td>@g.Id</td>
+                <td><a href="/groups/@g.Id/id" target="_blank">@g.Name</a>@if (!string.IsNullOrEmpty(g.Url)) {<br /><small>/groups/@g.Url</small>}</td>
+                <td>@if (g.Owner != null) {<a href="/housekeeping/users/manage/@g.OwnerId">@g.Owner</a>} else {<text>#@g.OwnerId</text>}</td>
+                <td>@g.Members</td>
+                <td>@(g.Type >= 0 && g.Type < KeplerCMS.Areas.Housekeeping.GroupAdminController.GroupTypes.Length ? KeplerCMS.Areas.Housekeeping.GroupAdminController.GroupTypes[g.Type] : g.Type.ToString())</td>
+                <td style="white-space: nowrap;">@g.Created.ToString("yyyy-MM-dd", inv)</td>
+                <td><a href="@Url.Action("Edit", new { id = g.Id })">Edit</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<style>.ga-message { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }</style>

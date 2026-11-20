@@ -1,0 +1,17 @@
+@model KeplerCMS.Areas.Housekeeping.MassToolsController.MassPage
+@{
+    ViewBag.Title = "Mass unban";
+}
+<h2>Mass unbanning</h2>
+<p>
+    This tool lifts the bans of a list of Habbos (one name per line): every running ban made on them ends now, IP address and
+    computer bans included. They can log in again at once.
+</p>
+<partial name="_Result" model="Model" />
+<form method="post" action="@Url.Action("Unban")">
+    @Html.AntiForgeryToken()
+    <table class="mt-form">
+        <tr><td class="mt-label">Habbos to unban</td><td><textarea name="Names" rows="12" cols="30">@Model.Names</textarea></td></tr>
+        <tr><td></td><td><button type="submit">Unban</button></td></tr>
+    </table>
+</form>

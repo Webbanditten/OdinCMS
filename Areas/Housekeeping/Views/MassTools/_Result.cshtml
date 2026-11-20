@@ -1,0 +1,24 @@
+@model KeplerCMS.Areas.Housekeeping.MassToolsController.MassPage
+@if (!string.IsNullOrEmpty(Model.Result))
+{
+    <p class="mt-result">@Model.Result</p>
+}
+@if (Model.NotFound.Count > 0)
+{
+    <p class="mt-notfound">No Habbo with the name: @string.Join(", ", Model.NotFound)</p>
+}
+<style>
+    .mt-result { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }
+    .mt-notfound { background: #fdecea; border: 1px solid #e0a0a0; padding: 5px 8px; max-width: 760px; }
+    table.mt-form td { padding: 3px 6px; vertical-align: top; }
+    table.mt-form td.mt-label { font-weight: bold; white-space: nowrap; text-align: right; }
+</style>
+<script>
+    // This partial comes before the form: wait for it.
+    document.addEventListener('DOMContentLoaded', function () {
+        var common = document.getElementById('mt-common');
+        if (common) common.addEventListener('change', function () {
+            if (common.value) document.getElementById('mt-message').value = common.value;
+        });
+    });
+</script>

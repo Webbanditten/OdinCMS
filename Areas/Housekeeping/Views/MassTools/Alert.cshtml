@@ -1,0 +1,30 @@
+@model KeplerCMS.Areas.Housekeeping.MassToolsController.MassPage
+@{
+    ViewBag.Title = "Mass alert";
+}
+<h2>Mass alerting</h2>
+<p>
+    This tool sends the same moderator alert to a list of Habbos (one name per line). Those who are in the hotel get it at once;
+    the others don't get it later.
+</p>
+<partial name="_Result" model="Model" />
+<form method="post" action="@Url.Action("Alert")">
+    @Html.AntiForgeryToken()
+    <table class="mt-form">
+        <tr><td class="mt-label">The recipients</td><td><textarea name="Names" rows="12" cols="30">@Model.Names</textarea></td></tr>
+        <tr>
+            <td class="mt-label">Message</td>
+            <td>
+                <select id="mt-common">
+                    <option value="">Choose a common message</option>
+                    @foreach (var m in KeplerCMS.Areas.Housekeeping.MassToolsController.CommonMessages)
+                    {
+                        <option>@m</option>
+                    }
+                </select><br />
+                <input type="text" name="Message" id="mt-message" value="@Model.Message" size="60" maxlength="255" />
+            </td>
+        </tr>
+        <tr><td></td><td><button type="submit">Alert</button></td></tr>
+    </table>
+</form>
