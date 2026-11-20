@@ -21,8 +21,8 @@
     <script src="~/js/myhabbo/common.js" type="text/javascript"></script>
     <script src="~/js/myhabbo/fullcontent.js" type="text/javascript"></script>
 
-    <script src="~/js/myhabbo/homeview.js"></script>
-    <script src="~/js/myhabbo/homeauth.js"></script>
+    <script src="~/js/myhabbo/homeview.js" asp-append-version="true"></script>
+    <script src="~/js/myhabbo/homeauth.js" asp-append-version="true"></script>
 
     <script src="~/js/myhabbo/homeedit.js"></script>
     <script src="~/js/trax.js" type="text/javascript"></script>
@@ -43,12 +43,13 @@
     </div>
 
 
-@{ if (User.Identity.IsAuthenticated && Model.HomeUser.Id == int.Parse(User.Identity.Name))
+@{ if (User.Identity.IsAuthenticated)
     {
+        var isOwner = Model.HomeUser.Id == int.Parse(User.Identity.Name);
         <div id="top-toolbar" class="clearfix" style="height: 30px;">
             <div style="padding-right: 10px; padding-left:10px;">
                 @{
-                    if (Model.IsEditing)
+                    if (isOwner && Model.IsEditing)
                     {
                         <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
                         <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
@@ -57,7 +58,11 @@
                     }
                     else
                     {
-                        <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
+                        if (isOwner)
+                        {
+                            <a href="/home/edit/@Model.Home.Id" id="edit-button" class="toolbutton edit" style="float:left"><span>@DbRes.T("edit", "habbohome")</span></a>
+                        }
+                        <partial name="~/Views/Shared/_ReportButtons.cshtml" />
                     }
                 }
             </div>

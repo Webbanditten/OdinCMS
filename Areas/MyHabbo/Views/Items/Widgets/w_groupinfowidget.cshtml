@@ -25,7 +25,7 @@
 		<div class="widget-content">
                 
         <div class="group-info-icon"><img src="@Configuration.GetSection("keplercms")["groupBadgeUrl"]/@(Model.WidgetData.Home.GroupBadge).gif"></div>
-        <h4>@Model.WidgetData.Home.GroupName</h4>
+        <h4>@Model.WidgetData.Home.GroupName <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" class="report-button report-gn" id="groupname-@Model.WidgetData.Home.Id-report" style="display: none;"></h4>
 
         <p>@DbRes.T("group_created", "habbohome"): <b>@Model.WidgetData.Home.Created.ToString("d MMM yyyy")</b></p>
         <p>@Model.WidgetData.GroupMembers.Count() @DbRes.T("members", "habbohome")</p>
@@ -37,7 +37,7 @@
             }
             
         </p>
-        <div class="group-info-description">@Model.WidgetData.Home.GroupDescription</div>
+        <div class="group-info-description">@Model.WidgetData.Home.GroupDescription <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" class="report-button report-gd" id="groupdesc-@Model.WidgetData.Home.Id-report" style="display: none;"></div>
 
 
             <div id="profile-tags-panel">

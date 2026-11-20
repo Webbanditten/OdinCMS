@@ -27,7 +27,7 @@
 
             <div class="name" style="float: left">
                 <span class="name-text">@Model.WidgetData.User.Username</span>
-                <img id="name-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
+                <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" class="report-button report-n" id="name-@Model.WidgetData.User.Id-report" style="display: none;">
             </div>
 
             <br class="clear">
@@ -78,7 +78,7 @@
 
         <div class="profile-motto">
             @Model.WidgetData.User.Motto
-            <img id="motto-4-report" class="report-button report-n" alt="report" src="~/c_images/myhabbo/report_button.gif" style="display: none;">
+            <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" class="report-button report-m" id="motto-@Model.WidgetData.User.Id-report" style="display: none;">
             <div class="clear"></div>
         </div> 
         @{

@@ -1,0 +1,283 @@
+@using KeplerCMS.Data.Models
+@using KeplerCMS.Areas.Housekeeping.Helpers
+@using KeplerCMS.Models.Enums
+@model KeplerCMS.Areas.Housekeeping.ReportsController.ReportsPage
+@{
+    var titles = new Dictionary<string, string>
+    {
+        [WebsiteReports.Name] = "Habbo Name Reports",
+        [WebsiteReports.Motto] = "Motto Reports",
+        [WebsiteReports.Stickie] = "Stickie Note Reports",
+        [WebsiteReports.Guestbook] = "Guestbook Reports",
+        [WebsiteReports.Room] = "Room Reports",
+        [WebsiteReports.GroupName] = "Group Name Reports",
+        [WebsiteReports.GroupDesc] = "Group Description Reports",
+    };
+    var writerLabel = Model.Type switch
+    {
+        WebsiteReports.Name or WebsiteReports.Motto => "Habbo",
+        WebsiteReports.Stickie => "Stickie owner",
+        WebsiteReports.Guestbook => "Entry writer",
+        WebsiteReports.Room => "Room owner",
+        _ => "Group owner",
+    };
+    ViewBag.Title = titles[Model.Type];
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var userData = (Users)ViewData["user"];
+    var canBan = HousekeepingAccess.HasAccess(userData?.Fuses.Select(f => f.FuseName).ToList() ?? new List<string>(), new List<Fuse> { Fuse.fuse_ban });
+    var removeLabel = Model.Type switch
+    {
+        WebsiteReports.Stickie or WebsiteReports.Guestbook => "Delete and archive",
+        WebsiteReports.Motto or WebsiteReports.GroupDesc => "Clear and archive",
+        WebsiteReports.GroupName => "Rename and archive",
+        _ => null,
+    };
+    var openRows = Model.Rows.Where(r => r.IsOpen).ToList();
+    var criteriaText = Model.Criteria switch
+    {
+        "writer" => writerLabel.ToLowerInvariant() + " " + Model.Username,
+        "reporter" => "reporter " + Model.Username,
+        "archived" => "archived",
+        _ => "new",
+    };
+    var commonMessages = new[]
+    {
+        "Stødende indhold på Habbo Home",
+        "Chikane af andre Habbos",
+        "Personlige oplysninger på Habbo Home",
+        "Reklame for andre hoteller eller sider",
+        "Upassende sprog",
+    };
+}
+<h2>@ViewBag.Title</h2>
+<p><img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" style="vertical-align: middle;" /> <strong>@Model.Total</strong> reports in database, <strong>@Model.New</strong> new.</p>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="rp-message">@Model.Message</p>
+}
+
+<h3>Query</h3>
+<p><a href="@Url.Action("Index", new { type = Model.Type })"><strong>Get latest reports</strong></a></p>
+<form method="get" action="@Url.Action("Index")" class="rp-query">
+    <input type="hidden" name="type" value="@Model.Type" />
+    <table>
+        <tr>
+            <td>Criteria:</td>
+            <td>
+                <select name="criteria">
+                    <option value="new" selected="@(Model.Criteria == "new")">New reports</option>
+                    <option value="writer" selected="@(Model.Criteria == "writer")">@writerLabel</option>
+                    <option value="reporter" selected="@(Model.Criteria == "reporter")">Reporter</option>
+                    <option value="archived" selected="@(Model.Criteria == "archived")">Archived</option>
+                </select>
+            </td>
+        </tr>
+        <tr><td>User name:</td><td><input type="text" name="username" value="@Model.Username" /></td></tr>
+        <tr>
+            <td>Show max:</td>
+            <td>
+                <select name="max">
+                    @foreach (var n in KeplerCMS.Areas.Housekeeping.ReportsController.ShowMax)
+                    {
+                        <option value="@n" selected="@(Model.Max == n)">@n</option>
+                    }
+                </select>
+            </td>
+        </tr>
+        <tr><td></td><td><button type="submit">Query</button></td></tr>
+    </table>
+</form>
+
+<h3>Results</h3>
+<p>Search criteria: @criteriaText</p>
+<p>@(Model.Rows.Count == 0 ? "No items found." : Model.Rows.Count == 1 ? "One item found." : Model.Rows.Count + " items found.")</p>
+
+@if (Model.Rows.Count > 0)
+{
+    <form method="post" action="@Url.Action("Archive")" id="rp-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="type" value="@Model.Type" />
+        <input type="hidden" name="criteria" value="@Model.Criteria" />
+        <input type="hidden" name="username" value="@Model.Username" />
+        <input type="hidden" name="max" value="@Model.Max" />
+        <table class="rp-results">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Reported</th>
+                    <th>@writerLabel</th>
+                    <th>Reported by</th>
+                    <th>@(Model.Type == WebsiteReports.Room ? "Name and description" : "Text")</th>
+                    @if (Model.Type == WebsiteReports.GroupName)
+                    {
+                        <th>New name</th>
+                    }
+                    <th>Archived</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var n = 0; }
+                @foreach (var row in Model.Rows)
+                {
+                    n++;
+                    var latest = row.Latest;
+                    var reporters = row.Reports.Select(r => r.ReporterId).Distinct().ToList();
+                    <tr class="@(n % 2 == 0 ? "rp-even" : "")">
+                        <td>@if (row.IsOpen) {<input type="checkbox" name="ids" value="@row.ObjectId" class="rp-check" checked />}</td>
+                        <td>@n</td>
+                        <td style="white-space: nowrap;">@latest.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss", inv)@if (row.Reports.Count > 1) {<br /><small>@row.Reports.Count reports, first @row.Reports[^1].CreatedAt.ToString("yyyy-MM-dd HH:mm", inv)</small>}</td>
+                        <td style="white-space: nowrap;">
+                            @if (latest.AuthorId != null)
+                            {
+                                if (row.Link != null) {<a href="@row.Link" target="_blank">@Model.Name(latest.AuthorId)</a>} else {@Model.Name(latest.AuthorId)}
+                                <a href="/housekeeping/users/manage/@latest.AuthorId" title="User information">(i)</a>
+                            }
+                            @if (Model.Type == WebsiteReports.Room)
+                            {
+                                <br /><a href="/housekeeping/rooms/view/@row.ObjectId">Room #@row.ObjectId</a>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var reporter in reporters)
+                            {
+                                <div style="white-space: nowrap;">@Model.Name(reporter) <a href="/housekeeping/users/manage/@reporter" title="User information">(i)</a></div>
+                            }
+                        </td>
+                        <td class="rp-text">@(latest.Content)@if (row.Current == null)
+                            {
+<div class="rp-now">(gone)</div>
+                            }
+                            else if (row.Current != latest.Content)
+                            {
+<div class="rp-now">Now: @(row.Current.Length == 0 ? "(empty)" : row.Current)</div>
+                            }</td>
+                        @if (Model.Type == WebsiteReports.GroupName)
+                        {
+                            <td>@if (row.IsOpen) {<input type="text" name="name_@row.ObjectId" maxlength="30" size="16" />}</td>
+                        }
+                        <td style="white-space: nowrap;">
+                            @if (!row.IsOpen)
+                            {
+                                @latest.Outcome<br /><small>@Model.Name(latest.ClosedBy), @latest.ClosedAt?.ToString("yyyy-MM-dd HH:mm", inv)</small>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (openRows.Count > 0)
+        {
+            <p class="rp-buttons">
+                <button type="button" id="rp-toggle">Toggle</button>
+                @if (removeLabel != null)
+                {
+                    <button type="submit" name="remove" value="true">@removeLabel</button>
+                }
+                <button type="submit">Archive</button>
+            </p>
+            <p>
+                <strong>Note:</strong>
+                @if (removeLabel != null)
+                {
+                    @(Model.Type switch
+                    {
+                        WebsiteReports.Stickie => "when you click \"Delete and archive\" or \"Ban and archive\", stickie notes that are checked will be deleted from the database.",
+                        WebsiteReports.Guestbook => "when you click \"Delete and archive\" or \"Ban and archive\", guestbook entries that are checked will be deleted from the database.",
+                        WebsiteReports.Motto => "\"Clear and archive\" and \"Ban and archive\" empty the checked Habbos' mottos (in the hotel at once).",
+                        WebsiteReports.GroupDesc => "\"Clear and archive\" and \"Ban and archive\" empty the checked groups' descriptions.",
+                        _ => "\"Rename and archive\" gives the checked groups the name in their row. \"Ban and archive\" keeps the name.",
+                    })
+                }
+                else if (Model.Type == WebsiteReports.Room)
+                {
+                    <text>a room's name and description are changed on its room page (the room number link). "Archive" only closes the report.</text>
+                }
+                else
+                {
+                    <text>Habbo names can't be changed here. "Archive" only closes the report; "Ban and archive" bans the Habbo.</text>
+                }
+                Every open report of a checked row is archived with it.
+            </p>
+
+            @if (canBan)
+            {
+                <div class="rp-banbar"><a href="#" id="rp-ban-open">Ban selected...</a></div>
+                <div class="rp-ban" id="rp-ban" style="display: none;">
+                    <table>
+                        <tr>
+                            <td class="rp-label">Ban selected accounts for:</td>
+                            <td>
+                                <select name="banLength">
+                                    @foreach (var hours in KeplerCMS.Areas.Housekeeping.ReportsController.BanLengths)
+                                    {
+                                        <option value="@hours">@hours hours</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="rp-label">Message:</td>
+                            <td>
+                                <select id="rp-common">
+                                    <option value="">Choose a common message</option>
+                                    @foreach (var m in commonMessages)
+                                    {
+                                        <option>@m</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr><td></td><td><input type="text" name="banMessage" id="rp-message" size="60" maxlength="255" /></td></tr>
+                        <tr><td class="rp-label">Extra info:</td><td><textarea name="extraInfo" rows="5" cols="60"></textarea></td></tr>
+                        <tr>
+                            <td></td>
+                            <td class="rp-banbox">
+                                <label><input type="checkbox" name="banMachine" value="true" checked /> Also ban computer for more than one hour</label><br />
+                                <label><input type="checkbox" name="banIp" value="true" checked /> Also ban IP address for more than one hour</label><br />
+                                <button type="submit" formaction="@Url.Action("BanAndArchive")">Ban and archive</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <p><small>The message is what the Habbo sees in the hotel (write it in Danish). The ban goes through the hotel like Remote banning and kicking.</small></p>
+                </div>
+            }
+        }
+    </form>
+}
+
+<style>
+    .rp-message { background: #e8f5e9; border: 1px solid #9c9; padding: 5px 8px; max-width: 760px; }
+    .rp-query td { padding: 2px 4px; }
+    table.rp-results { border-collapse: collapse; max-width: 900px; }
+    table.rp-results th { background: #ffcc00; text-align: left; padding: 3px 5px; white-space: nowrap; }
+    table.rp-results td { background: #fff7cc; padding: 4px 5px; vertical-align: top; }
+    table.rp-results tr.rp-even td { background: #fffbe6; }
+    td.rp-text { white-space: pre-wrap; word-break: break-word; min-width: 240px; }
+    .rp-now { color: #777; font-style: italic; margin-top: 4px; }
+    .rp-buttons button { margin-right: 4px; }
+    .rp-banbar { background: #eee; text-align: right; padding: 8px; max-width: 900px; margin-top: 10px; }
+    .rp-ban { background: #eee; padding: 8px; max-width: 900px; margin-top: 6px; }
+    .rp-ban td { padding: 2px 4px; vertical-align: top; }
+    .rp-ban td.rp-label { text-align: right; white-space: nowrap; }
+    .rp-banbox { border: 1px solid #c00; padding: 6px !important; text-align: right; }
+</style>
+<script>
+    (function () {
+        var toggle = document.getElementById('rp-toggle');
+        if (toggle) toggle.addEventListener('click', function () {
+            document.querySelectorAll('.rp-check').forEach(function (c) { c.checked = !c.checked; });
+        });
+        var open = document.getElementById('rp-ban-open');
+        if (open) open.addEventListener('click', function (e) {
+            e.preventDefault();
+            var ban = document.getElementById('rp-ban');
+            ban.style.display = ban.style.display === 'none' ? '' : 'none';
+        });
+        var common = document.getElementById('rp-common');
+        if (common) common.addEventListener('change', function () {
+            if (common.value) document.getElementById('rp-message').value = common.value;
+        });
+    })();
+</script>

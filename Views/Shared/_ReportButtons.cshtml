@@ -1,0 +1,5 @@
+@* The Home's and group page's report mode (homeview.js: startReportingModeObserver shows every .report-button on the page;
+   ReportController takes the reports). Hidden until homeview.js's initView shows it, like the original. *@
+@using KeplerCMS.Helpers
+<a href="#" class="toolbutton reporting-start" id="reporting-button" style="float: right; display: none"><span>@ReportTexts.T("button_start")</span></a>
+<a href="#" class="toolbutton reporting-stop" id="stop-reporting-button" style="float: right; display: none"><span>@ReportTexts.T("button_stop")</span></a>

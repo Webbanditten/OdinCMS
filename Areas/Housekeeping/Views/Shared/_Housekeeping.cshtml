@@ -39,6 +39,7 @@
         { "/housekeeping/campaigns", HousekeepingMenu.AdminTools },
         { "/housekeeping/callsforhelp", HousekeepingMenu.HobbaTools },
         { "/housekeeping/helptickets", HousekeepingMenu.HobbaTools },
+        { "/housekeeping/reports", HousekeepingMenu.HobbaTools },
         { "/housekeeping/publicrooms", HousekeepingMenu.AdminTools },
         { "/housekeeping/roomcategories", HousekeepingMenu.AdminTools },
     };
@@ -237,6 +238,23 @@
                                 <ul>
                                     @await menuHelper.Render("Calls for help", Url.Action("Index", "CallsForHelp"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                     @await menuHelper.Render("Help tickets", Url.Action("Index", "HelpTickets"), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="title">
+                                Content moderation
+                            </div>
+                            <div class="container-content">
+                                <ul>
+                                    @await menuHelper.Render("Stickie Note Reports", Url.Action("Index", "Reports", new { type = "stickie" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Guestbook Reports", Url.Action("Index", "Reports", new { type = "guestbook" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Motto Reports", Url.Action("Index", "Reports", new { type = "motto" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Habbo Name Reports", Url.Action("Index", "Reports", new { type = "name" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Room Reports", Url.Action("Index", "Reports", new { type = "room" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Group Name Reports", Url.Action("Index", "Reports", new { type = "groupname" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
+                                    @await menuHelper.Render("Group Description Reports", Url.Action("Index", "Reports", new { type = "groupdesc" }), new List<Fuse> { Fuse.fuse_receive_calls_for_help })
                                 </ul>
                             </div>
                         </div>
