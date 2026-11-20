@@ -88,10 +88,6 @@ var startReportingModeObserver = function(C) {
         Element.show(E);
         E.style.zIndex = 9998
     });
-    $$(".reporting-start").each(function(E) {
-        Element.show(E);
-        E.style.zIndex = 9998
-    });
     D.select(".stickie").each(function(E) {
         Event.observe(E, "click", this.bringToTop.bindAsEventListener(E), false)
     });
@@ -114,13 +110,6 @@ var startReportingModeObserver = function(C) {
             Event.observe(E, "click", function(G) {
                 Event.stop(G);
                 ReportDialogManager.show("name", F, E)
-            }, false)
-        });
-        $$(".reporting-start").each(function(E) {
-            var F = E.id.substring("url-".length, E.id.length - "-report".length);
-            Event.observe(E, "click", function(G) {
-                Event.stop(G);
-                ReportDialogManager.show("url", F, E)
             }, false)
         });
         $$(".report-button.report-m").each(function(E) {
@@ -171,7 +160,6 @@ var stopReportingModeObserver = function(A) {
     Event.stop(A);
     var C = $("playground");
     C.select(".report-button").each(function(D) { Element.hide(D) });
-    $$(".reporting-start").each(function(D) { Element.hide(D) });
     reportingZ = 8100;
     C.select(".stickie").each(function(D) { Event.stopObserving(D, "click", this.bringToTop, false) });
     C.select(".ProfileWidget").each(function(D) {
@@ -189,8 +177,7 @@ var stopReportingModeObserver = function(A) {
     oldZ = new Array();
     Element.hide("stop-reporting-button");
     ReportDialogManager.hideAll();
-    Element.show("reporting-button");
-    Event.observe("reporting-button", "click", startReportingModeObserver, false)
+    Element.show("reporting-button")
 };
 
 function observeAnim() {

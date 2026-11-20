@@ -17,6 +17,15 @@
                 <br />
             </div>
         }
+        else if (User.Identity.IsAuthenticated && Model.Entry.Id > 0)
+        {
+            @* Shown in the Home's report mode (homeview.js shows every .report-button in the playground). *@
+            <div class="guestbook-actions">
+                <div class="report-button" style="display: none">
+                    <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" class="gbentry-report" id="gbentry-report-@Model.Entry.Id" alt="" />
+                </div>
+            </div>
+        }
     }
 
 

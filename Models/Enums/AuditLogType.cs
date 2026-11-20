@@ -39,6 +39,7 @@ namespace KeplerCMS.Models
         edit_public_rooms,
         edit_room_categories,
         help_ticket_reply,
-        help_ticket_close
+        help_ticket_close,
+        website_report_close
     }
 }

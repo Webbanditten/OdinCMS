@@ -160,7 +160,7 @@ namespace KeplerCMS.Services.Implementations
             if (home.UserId == userId) return true;
 
             return home.Type == GroupHome
-                && await _context.GroupMembers.AnyAsync(s => s.GroupId == homeId && s.UserId == userId && s.IRights == 1 && !s.Pending);
+                && await _context.GroupMembers.AnyAsync(s => s.GroupId == homeId && s.UserId == userId && s.IRights == 1 && s.IPending == 0);
         }
 
         // ---------------------------------------------------------------- editing a home
@@ -526,7 +526,7 @@ namespace KeplerCMS.Services.Implementations
             if (!isPrivate || await CanEditHome(home.Id, userId)) return true;
 
             return home.Type == GroupHome
-                ? await _context.GroupMembers.AnyAsync(m => m.GroupId == home.Id && m.UserId == userId && !m.Pending)
+                ? await _context.GroupMembers.AnyAsync(m => m.GroupId == home.Id && m.UserId == userId && m.IPending == 0)
                 : await _friendService.IsFriends(userId, home.UserId);
         }
 

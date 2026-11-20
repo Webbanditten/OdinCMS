@@ -11,6 +11,10 @@
                             Event.observe("stickie-@Model.Item.Id-edit", "click", function (e) { openEditMenu(e, @Model.Item.Id, "stickie", "stickie-@Model.Item.Id-edit", false); }, false);
                         </script>
                     }
+                    else
+                    {
+                        <img src="~/c_images/myhabbo/report_button.gif" width="19" height="18" alt="" class="report-button report-s" id="stickie-@Model.Item.Id-report" style="display: none;">
+                    }
                 }
             </h3>
             <div class="clear"></div>
