@@ -66,7 +66,7 @@ namespace KeplerCMS.Controllers
             if (figure == null || !Regex.IsMatch(figure, @"^\d{25}$")) return null;
             // The renderer takes Avatara's parameter names; only the ones it reads go along (and make the cache key).
             var query = "figure=" + figure + (string.IsNullOrEmpty(sex) ? "" : "&sex=" + Uri.EscapeDataString(sex));
-            foreach (var name in new[] { "size", "direction", "head_direction", "action", "gesture", "head", "frame", "crr", "drk", "dance", "anim" })
+            foreach (var name in new[] { "size", "direction", "head_direction", "action", "gesture", "head", "frame", "crr", "drk", "dance", "anim", "format", "bg" })
             {
                 var value = Request.Query[name].ToString();
                 if (value.Length > 0 && value.Length <= 20 && Regex.IsMatch(value, @"^[A-Za-z0-9,]+$"))
@@ -225,7 +225,7 @@ namespace KeplerCMS.Controllers
             if (fromCasts != null)
             {
                 Response.Headers["Cache-Control"] = Request.Query.ContainsKey("habbo") ? "public, max-age=600" : "public, max-age=86400";
-                return File(fromCasts, "image/png");
+                return File(fromCasts, Request.Query["format"] == "gif" ? "image/gif" : "image/png");
             }
 
             if (figure != null && figure.Length > 0)
