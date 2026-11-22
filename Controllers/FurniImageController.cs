@@ -75,9 +75,17 @@ namespace KeplerCMS.Controllers
             var query = "sprite=" + Uri.EscapeDataString(definition) + "&direction=" + direction + (state != null ? "&state=" + state : "")
                 + (string.IsNullOrEmpty(colours) ? "" : "&colors=" + Uri.EscapeDataString(colours))
                 + (shadows ? "&shadow=1" : "") + (small ? "&small=1" : "") + (icon ? "&icon=1" : "") + (anim ? "&anim=1" : "");
+            // format=gif: a GIF (animated with anim=1) for places that don't play animated PNGs; bg=RRGGBB flattens it.
+            var gif = Request.Query["format"] == "gif";
+            if (gif)
+            {
+                query += "&format=gif";
+                var bg = Request.Query["bg"].ToString().TrimStart('#');
+                if (Regex.IsMatch(bg, "^[0-9A-Fa-f]{6}$")) query += "&bg=" + bg;
+            }
             // Kept a day, then drawn again, so renderer fixes reach every picture by themselves; while the renderer is
             // unreachable the old file stays in use.
-            var path = "furni_export/_casts/" + Hash("casts1|" + query) + ".png";
+            var path = "furni_export/_casts/" + Hash("casts1|" + query) + (gif ? ".gif" : ".png");
             var cached = System.IO.File.Exists(path);
             byte[] bytes = null;
             if (cached && System.IO.File.GetLastWriteTimeUtc(path) > DateTime.UtcNow.AddDays(-1))
@@ -113,7 +121,7 @@ namespace KeplerCMS.Controllers
             }
             Response.Headers["Cache-Control"] = "public, max-age=86400";
             Response.Headers["Access-Control-Allow-Origin"] = "*";
-            return File(bytes, "image/png");
+            return File(bytes, gif ? "image/gif" : "image/png");
         }
 
         [Route("habbo-imaging/furni")]
