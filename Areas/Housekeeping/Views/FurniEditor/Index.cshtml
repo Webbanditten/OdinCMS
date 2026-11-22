@@ -1,0 +1,93 @@
+@{
+    Layout = "_Housekeeping";
+    ViewBag.Title = "Furni editor";
+    ViewBag.WideContent = true;
+    var editorUrl = (string)ViewData["editorUrl"];
+    var cmsOrigin = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var frameUrl = editorUrl + (editorUrl.Contains('?') ? "&" : "?") + "embed=housekeeping&parent=" + Uri.EscapeDataString(cmsOrigin);
+}
+<link rel="stylesheet" href="~/housekeeping/css/furni-editor-host.css" asp-append-version="true">
+
+<h1>Furni editor</h1>
+@Html.AntiForgeryToken()
+
+<div class="fe-host">
+    <div class="fe-side">
+        <div class="fe-box">
+            <b>Open a furni</b>
+            <input type="search" id="fe-search" placeholder="Sprite, name or id" autocomplete="off">
+            <div id="fe-results" class="fe-results"></div>
+            <small class="fe-muted">The hotel's own furni open read-only: make a copy with "New furni from this…" in the editor and publish that.</small>
+        </div>
+
+        <div class="fe-box" id="fe-made-box" hidden>
+            <b>Made in the editor</b>
+            <div id="fe-made" class="fe-results"></div>
+        </div>
+
+        <div class="fe-box" id="fe-publish" hidden>
+            <b>Publish <span id="fe-pub-sprite"></span></b>
+            <div id="fe-report"></div>
+            <label class="fe-note-field" id="fe-note-row" hidden>What changed <input id="fe-note" maxlength="255" placeholder="optional, shown in the versions"></label>
+            <form id="fe-def" hidden>
+                <label class="fe-check"><input type="checkbox" id="fe-save-def" checked> Save its definition (<span id="fe-def-state"></span>)</label>
+                <div class="fe-def-fields">
+                    <label>Name <input id="fe-name" maxlength="100"></label>
+                    <label>Description <input id="fe-desc" maxlength="200"></label>
+                    <label>Kind
+                        <select id="fe-preset">
+                            <option value="furniture">Furniture (solid)</option>
+                            <option value="table">Table (things stack on it)</option>
+                            <option value="seat">Seat</option>
+                            <option value="bed">Bed</option>
+                            <option value="lamp">Lamp / switches on and off</option>
+                            <option value="rug">Rug (walk and stack on it)</option>
+                            <option value="wall">Wall item</option>
+                            <option value="walllamp">Wall item that switches on and off</option>
+                            <option value="keep">Keep as it is</option>
+                        </select>
+                    </label>
+                    <label>Size <input id="fe-length" type="number" min="1" max="10" class="fe-num"> × <input id="fe-width" type="number" min="1" max="10" class="fe-num"> tiles</label>
+                    <label>Height <input id="fe-height" type="number" min="0" max="10" step="0.1" class="fe-num"></label>
+                    <label>Part colours <input id="fe-colour" maxlength="200" placeholder="#FFFFFF,#F7EBBC"></label>
+                    <label class="fe-check"><input type="checkbox" id="fe-tradable" checked> tradable</label>
+                    <label class="fe-check"><input type="checkbox" id="fe-recyclable" checked> recyclable</label>
+                </div>
+            </form>
+            <div class="fe-actions">
+                <button type="button" id="fe-cancel">Cancel</button>
+                <button type="button" id="fe-confirm" class="fe-primary" disabled>Publish to the hotel</button>
+            </div>
+        </div>
+
+        <div class="fe-box" id="fe-history-box" hidden>
+            <b>Versions of <span id="fe-hist-sprite"></span></b>
+            <div id="fe-history"></div>
+            <label class="fe-check"><input type="checkbox" id="fe-rollback-def"> a roll back also puts back that version's definition</label>
+        </div>
+
+        <p class="fe-note">
+            @if ((bool)ViewData["canPublish"])
+            {
+                <text>Publishing writes <code>hof_furni/hh_furni_xx_&lt;sprite&gt;.cct</code> (and <code>hh_furni_xx_s_&lt;sprite&gt;.cct</code>) on the asset host after the server has checked them (only bitmaps, fields and palettes, no scripts, member names of the furni itself, a furni class of the client) and you confirm here. Only furni made in this editor are ever written: the hotel's own casts never are. Every publish is a version you can roll back to, and is in the audit log.</text>
+            }
+            else
+            {
+                <text><b>Publishing is off</b>: <code>keplercms:furniEditor:castDir</code> and <code>historyDir</code> aren't set. Open, edit and save casts still works.</text>
+            }
+        </p>
+    </div>
+    <div class="fe-main">
+        <iframe id="fe-frame" src="@frameUrl" title="Furni editor"></iframe>
+    </div>
+</div>
+
+<script>
+    window.furniEditorHost = {
+        editorOrigin: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)ViewData["editorOrigin"])),
+        canPublish: @(((bool)ViewData["canPublish"]) ? "true" : "false"),
+        base: '@Url.Action("Index", "FurniEditor")'.replace(/\/Index$/i, '').replace(/\/$/, ''),
+        catalogueUrl: '@Url.Action("Index", "Catalogue")'
+    };
+</script>
+<script src="~/housekeeping/js/furni-editor-host.js" asp-append-version="true"></script>

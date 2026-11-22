@@ -95,6 +95,7 @@ namespace KeplerCMS.Data
         public DbSet<HelpTicketResponse> HelpTicketResponses { get; set; }
         public DbSet<WebsiteReport> WebsiteReports { get; set; }
         public DbSet<UserNote> UserNotes { get; set; }
+        public DbSet<FurniVersion> FurniVersions { get; set; }
         public DbSet<ECard> ECards { get; set; }
         public DbSet<HomeGift> HomeGifts { get; set; }
         public DbSet<AdRoom> AdRooms { get; set; }

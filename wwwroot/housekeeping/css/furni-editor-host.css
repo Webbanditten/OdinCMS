@@ -1,0 +1,29 @@
+.fe-host { display: flex; gap: 12px; align-items: stretch; }
+.fe-side { width: 330px; flex: none; display: flex; flex-direction: column; gap: 10px; }
+.fe-main { flex: 1; min-width: 0; }
+.fe-main iframe { width: 100%; height: calc(100vh - 160px); min-height: 640px; border: 1px solid #c9c9c9; background: #fff; }
+.fe-box[hidden] { display: none; }
+.fe-box { border: 1px solid #c9c9c9; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.fe-box input[type=search], .fe-def-fields input:not([type=checkbox]):not(.fe-num), .fe-def-fields select { width: 100%; box-sizing: border-box; }
+.fe-results { max-height: 260px; overflow: auto; }
+.fe-result { display: flex; justify-content: space-between; gap: 6px; padding: 3px 4px; border-bottom: 1px solid #eee; cursor: pointer; }
+.fe-result:hover, .fe-result.is-active { background: #e8f0fa; }
+.fe-result small { color: #777; }
+.fe-def-fields { display: flex; flex-direction: column; gap: 4px; }
+.fe-def-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.fe-def-fields label.fe-check, .fe-check { flex-direction: row; align-items: center; gap: 4px; }
+.fe-num { width: 56px; }
+.fe-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.fe-primary { font-weight: bold; }
+.fe-report-ok { color: #2d7a2d; }
+.fe-report-error { color: #b3261e; }
+.fe-report ul { margin: 2px 0 2px 16px; padding: 0; }
+.fe-note { font-size: 12px; color: #555; }
+.fe-history-row { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; padding: 2px 0; border-bottom: 1px solid #eee; }
+.fe-muted { color: #777; }
+.fe-badge { font-size: 10px; background: #e2efe2; color: #2d7a2d; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+.fe-history-row .fe-hist-meta { flex: 1; }
+.fe-history-row button { margin-left: 4px; }
+.fe-history-row.is-current { font-weight: bold; }
+.fe-note-field { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.fe-note-field input { width: 100%; box-sizing: border-box; }

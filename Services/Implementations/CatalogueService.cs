@@ -320,6 +320,8 @@ namespace KeplerCMS.Services.Implementations
             return definition == null ? null : ToFurni(definition);
         }
 
+        public async Task<int> MaxSpriteId() => await _context.ItemsDefinitions.MaxAsync(d => (int?)d.SpriteId) ?? 0;
+
         public async Task<bool> SpriteExists(string sprite, int exceptId) =>
             await _context.ItemsDefinitions.AnyAsync(d => d.Sprite == sprite && d.Id != exceptId);
 

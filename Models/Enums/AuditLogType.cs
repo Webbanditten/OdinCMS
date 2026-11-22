@@ -53,6 +53,8 @@ namespace KeplerCMS.Models
         edit_group,
         delete_group,
         delete_tag,
-        delete_stickie
+        delete_stickie,
+        publish_furni_cast,
+        restore_furni_cast
     }
 }
