@@ -1,4 +1,4 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
+@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
 @{
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
 }
@@ -26,8 +26,6 @@
             }
         </select>
     </p>
-
-    <p class="warning">@DbRes.T("note_warning", "habbohome")</p>
 
     <div id="webstore-notes-edit-container">
 <textarea id="webstore-notes-text" rows="7" cols="42" name="noteText">@Model.NoteText</textarea>
@@ -60,13 +58,18 @@
                 linkTool = new LinkTool(bbcodeToolbar.textarea);
             </script>
         </div>
+        <p class="warning">@DbRes.T("note_warning", "habbohome")</p>
     </div>
 
 </form>
 
-<p>
-    <a href="#" class="new-button" id="webstore-confirm-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
-    <a href="#" class="new-button" id="webstore-notes-continue"><b>@DbRes.T("store_continue", "habbohome")</b><i></i></a>
-</p>
+<div class="player-buttons" style="height: 11px">
+    <a href="#" id="note-editor-purchase" class="colorlink"><span>@DbRes.T("note_purchase", "habbohome")</span></a>
+</div>
+<br />
+<div>
+    <a href="#" id="webstore-confirm-cancel" class="toolbutton"><span>@DbRes.T("cancel", "habbohome")</span></a>
+    <a href="#" id="webstore-notes-continue" class="colorlink disabled-button" style="margin: 0; margin-top: 4px"><span>@DbRes.T("preview", "habbohome")</span></a>
+</div>
 
 <div class="clear"></div>

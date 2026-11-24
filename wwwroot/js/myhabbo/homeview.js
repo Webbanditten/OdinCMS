@@ -32,18 +32,21 @@ function initView(D, E) {
             openGroupJoinWithInviteDialog("/groups/actions/join", D)
         })
     }
-    var A = $("webstore-button");
+    // The 2006 edit toolbar: each button opens that item type's inventory (myhabbo-store.js), Noter the note editor.
+    ["stickers", "widgets", "backgrounds"].each(function(type) {
+        var button = $(type + "-button");
+        if (button) {
+            Event.observe(button, "click", function(O) {
+                Event.stop(O);
+                loadWebStore(function() { if (window.WebStore) { WebStore.open(type) } })
+            })
+        }
+    });
+    var A = $("notes-button");
     if (A) {
         Event.observe(A, "click", function(O) {
             Event.stop(O);
-            loadWebStore(function() { if (window.WebStore) { WebStore.open("webstore-store") } })
-        })
-    }
-    var F = $("inventory-button");
-    if (F) {
-        Event.observe(F, "click", function(O) {
-            Event.stop(O);
-            loadWebStore(function() { if (window.WebStore) { WebStore.open("webstore-inventory") } })
+            loadWebStore(function() { if (window.WebStore) { WebStore.NoteEditor.open() } })
         })
     }
     var I = $("reporting-button");

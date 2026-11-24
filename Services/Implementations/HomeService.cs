@@ -390,6 +390,38 @@ namespace KeplerCMS.Services.Implementations
             return _context.HomesCategories.Where(c => c.IEnabled == 1).ToListAsync();
         }
 
+        public async Task<List<HomesCategories>> GetStoreCategoryList(string type)
+        {
+            var categories = await GetStoreCategories();
+            var list = new List<HomesCategories>();
+            foreach (var main in categories.Where(c => c.ParentId == 0 && c.Type == type).OrderBy(c => c.Order).ThenBy(c => c.Name))
+            {
+                var children = categories.Where(c => c.ParentId == main.Id).OrderBy(c => c.Order).ThenBy(c => c.Name).ToList();
+                list.AddRange(children.Count > 0 ? children : new List<HomesCategories> { main });
+            }
+            return list;
+        }
+
+        public Task<CatalogItem> GetNotesProduct()
+        {
+            return (from item in _context.HomesCatalog
+                    join def in _context.HomesItemData on item.ItemId equals def.Id
+                    join category in _context.HomesCategories on item.Category equals category.Id
+                    where def.Type == Notes && category.IEnabled == 1
+                    orderby item.Id
+                    select new CatalogItem { Details = item, Definition = def })
+                   .FirstOrDefaultAsync();
+        }
+
+        public Task<int> GetNoteCount(int userId)
+        {
+            return (from inv in PersonalInventory(userId)
+                    join def in _context.HomesItemData on inv.ItemId equals def.Id
+                    where def.Type == Notes
+                    select inv.Amount)
+                   .SumAsync();
+        }
+
         public Task<List<CatalogItem>> GetCatelogItemsInCategory(int category)
         {
             return (from item in _context.HomesCatalog

@@ -38,6 +38,17 @@ namespace KeplerCMS.Services.Implementations
             return true;
         }
 
+        /// <summary>Gives back credits a purchase took (the item couldn't be handed over); Odin adds them to an online player.</summary>
+        public async Task Refund(int credit, int userId)
+        {
+            if (credit <= 0) return;
+
+            await _context.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(set => set.SetProperty(u => u.Credits, u => u.Credits + credit));
+            _commandQueueService.QueueCommand(Models.Enums.CommandQueueType.update_credits, new Models.CommandTemplate { UserId = userId, Credits = credit });
+        }
+
         public async Task<bool> CanPurchase(int credit, int userId)
         {
             var user = await _context.Users.Where(s => s.Id == userId).FirstOrDefaultAsync();

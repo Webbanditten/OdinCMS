@@ -1,171 +1,21 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.MainViewModel;
+@model KeplerCMS.Areas.MyHabbo.Models.StoreViewModel
 @{
     Layout = null;
-    var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
 }
-
-<div style="position: relative;">
-    <div id="webstore-categories-container">
-        <h4>@DbRes.T("store_categories", "habbohome"):</h4>
-        <div id="webstore-categories">
-            <ul class="purchase-main-category">
-                @{
-                    foreach (var category in Model.Categories.Where(s => s.ParentId == 0))
-                    {
-                        var subCategoryItems = Model.Categories.Where(s => s.ParentId == category.Id);
-                        var defaultSelected = (category == Model.Categories.First()) ? "webstore-selected-main selected-main-category" : (subCategoryItems.Count() > 0) ? "main-category" : "main-category-no-subcategories";
-                        <li id="maincategory-@category.Id-@category.Type" class="@defaultSelected">
-                            <div>@category.Name</div>
-                            @{
-                                if (subCategoryItems.Count() > 0)
-                                {
-                                    <ul class="purchase-subcategory-list" id="main-category-items-@category.Id">
-
-
-                                       @{ 
-                                           foreach(var sub in subCategoryItems)
-                                           {
-                                               var subClass = (category == Model.Categories.First() && sub == subCategoryItems.First()) ? "subcategory-selected" : "subcategory";
-                                                <li id="subcategory-@category.Id-@sub.Id-@sub.Type" class="@subClass">
-                                                    <div>@sub.Name</div>
-                                                </li>
-                                           }
-                                       }
-
-
-                                    </ul>
-                                    } else
-                                    {
-			                            <ul class="purchase-subcategory-list" id="main-category-items-@category.Id">
-
-				                            <li id="subcategory-@category.Id-0-@category.Type" class="subcategory">
-					                            <div>0</div>
-				                            </li>
-
-			                            </ul>
-                                    }
-                            }
-                        </li>
-                    }
-
-                }
-
-
-            </ul>
-
-        </div>
-    </div>
-
-
-    <div id="webstore-content-container">
-        <div id="webstore-items-container">
-            <h4>@DbRes.T("store_select_an_item", "habbohome")</h4>
-            <div id="webstore-items">
-               <partial name="~/Areas/MyHabbo/Views/Store/Items.cshtml" model=Model.Items />
-            </div>
-        </div>
-        <div id="webstore-preview-container">
-            <div id="webstore-preview-default"></div>
-            <div id="webstore-preview">
-                @{
-                    if (Model.Type == KeplerCMS.Areas.MyHabbo.Models.DialogType.WebStore)
-                    {
-                        <h4 title=""></h4>
-
-                        <div id="webstore-preview-box"></div>
-
-                        <div id="webstore-preview-price">
-                            @DbRes.T("store_price", "habbohome"):<br /><b>
-                                @if (Model.Items.Count() > 0)
-                                {
-                                    @:@Model.Items.First().Details.Price @DbRes.T("coins", "credits")
-                                }
-                            </b>
-                        </div>
-
-                        <div id="webstore-preview-purse">
-                            @DbRes.T("store_you_have", "habbohome"):<br /><b>@userData.Credits @DbRes.T("coins", "credits")</b><br />
-                            <a href="/credits" target=_blank>@DbRes.T("store_getcredits", "habbohome")</a>
-                        </div>
-
-                        <div id="webstore-preview-purchase" class="clearfix">
-                            <div class="clearfix">
-                                <a href="#" class="new-button" id="webstore-purchase"><b>@DbRes.T("store_purchase", "habbohome")</b><i></i></a>
-                            </div>
-                        </div>
-
-                        <span id="webstore-preview-bg-text" style="display: none">@DbRes.T("store_preview", "habbohome")</span>
-                    }
-                }
-
-
-            </div>
-        </div>
-    </div>
-
-    <div id="inventory-categories-container">
-        <h4>@DbRes.T("store_categories", "habbohome"):</h4>
-        <div id="inventory-categories">
-            <ul class="purchase-main-category">
-                <li id="inv-cat-stickers" class="selected-main-category-no-subcategories">
-                    <div>@DbRes.T("store_stickers", "habbohome")</div>
-                </li>
-                <li id="inv-cat-backgrounds" class="main-category-no-subcategories">
-                    <div>@DbRes.T("store_backgrounds", "habbohome")</div>
-                </li>
-                <li id="inv-cat-widgets" class="main-category-no-subcategories">
-                    <div>@DbRes.T("store_widgets", "habbohome")</div>
-                </li>
-                <li id="inv-cat-notes" class="main-category-no-subcategories">
-                    <div>@DbRes.T("store_notes", "habbohome")</div>
-                </li>
-            </ul>
-
-        </div>
-    </div>
-
-    <div id="inventory-content-container">
-        <div id="inventory-items-container">
-            <h4>@DbRes.T("store_select_an_item", "habbohome")</h4>
-            <div id="inventory-items">
-                @{
-                    if (Model.InventoryType == null)
-                    {
-
-                        if (Model.InventoryType == "stickers" || Model.InventoryType == "backgrounds" || Model.InventoryType == "notes")
-                        {
-                            <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
-                        }
-                        else if (Model.InventoryType == "widgets")
-                        {
-                            <partial name="~/Areas/MyHabbo/Views/Store/InventoryItemsWidgets.cshtml" model=Model.InventoryItems />
-                        }
-                    }
-                    else
-                    {
-                        <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model=Model.InventoryItems />
-                    }
-                }
-            </div>
-        </div>
-        <div id="inventory-preview-container">
-            <div id="inventory-preview-default"></div>
-            <div id="inventory-preview">
-                <h4>&nbsp;</h4>
-
-                <div id="inventory-preview-box"></div>
-
-                <div id="inventory-preview-place" class="clearfix">
-                    <div class="clearfix">
-                        <a href="#" class="new-button" id="inventory-place"><b>@DbRes.T("place", "habbohome")</b><i></i></a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <div id="webstore-close-container">
-        <div class="clearfix"><a href="#" id="webstore-close" class="new-button"><b>@DbRes.T("close", "habbohome")</b><i></i></a></div>
-    </div>
+@* The store for one item type (StoreController.Main), shown in the inventory dialog's #webstore-content. *@
+<div id="webstore-categories">
+    <ul class="purchase-subcategory-list">
+        @foreach (var category in Model.Categories)
+        {
+            <li id="category-@category.Id-@Model.Type"><div>@category.Name</div></li>
+        }
+    </ul>
+</div>
+<div id="webstore-content-container" class="@Model.Type">
+    <partial name="~/Areas/MyHabbo/Views/Store/Items.cshtml" model="Model.Items" />
+</div>
+<div class="clear"></div>
+<div>
+    <a href="#" id="webstore-close" class="toolbutton"><span>@DbRes.T("close", "habbohome")</span></a>
+    <a href="#" id="load-inventory" class="colorlink" style="margin: 0; margin-top: 4px"><span>@DbRes.T("store_open_inventory", "habbohome") <span id="webstore-inventory-new"></span></span></a>
 </div>

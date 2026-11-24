@@ -1,0 +1,10 @@
+@model string
+@{
+    Layout = null;
+}
+@* A refused purchase (owned already, not enough coins): replaces the purchase question, closed by its OK button. *@
+<p>@Model</p>
+<p>
+    <a href="#" class="colorlink orange last" id="webstore-confirm-cancel"><span>@DbRes.T("ok", "habbohome")</span></a>
+</p>
+<div class="clear"></div>

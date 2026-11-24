@@ -1,36 +1,38 @@
-﻿@model List<KeplerCMS.Areas.MyHabbo.Models.CatalogItem>;
-@{Layout = null;}
-    <ul id="webstore-item-list">
-        @{
-            foreach (var item in Model)
+@model List<KeplerCMS.Areas.MyHabbo.Models.CatalogItem>
+@{
+    Layout = null;
+    var first = Model.FirstOrDefault();
+    var fill = Model.Count < 12 ? 12 - Model.Count : (4 - Model.Count % 4) % 4;
+}
+<div id="webstore-items-container">
+    <div id="webstore-items">
+        <ul id="webstore-item-list">
+            @foreach (var item in Model)
             {
                 <li id="webstore-item-@item.Details.Id" title="@item.Definition.Name">
                     <div class="webstore-item-preview @(item.Definition.CssClass)_pre">
                         <div class="webstore-item-mask">
-                            @{
-                                if (item.Details.Amount > 1)
-                                {
-                                    <div class="webstore-item-count"><div>@("x" + item.Details.Amount)</div></div>
-                                }
+                            @if (item.Details.Amount > 1)
+                            {
+                                <div class="webstore-item-count"><div>x@(item.Details.Amount)</div></div>
                             }
                         </div>
                     </div>
                 </li>
             }
-
-            var amountOfEmptyToGenerate = 20 - Model.Count();
-
-            if (amountOfEmptyToGenerate > 0)
+            @for (var i = 0; i < fill; i++)
             {
-                for (int i = 0; i < amountOfEmptyToGenerate; i++)
-                {
-                    <li class="webstore-item-empty"></li>
-                }
+                <li class="webstore-item-empty"></li>
             }
+        </ul>
+    </div>
+</div>
+<div id="webstore-preview-container">
+    <div id="webstore-preview-default"></div>
+    <div id="webstore-preview">
+        @if (first != null)
+        {
+            <partial name="~/Areas/MyHabbo/Views/Store/Preview.cshtml" model="first" />
         }
-
-
-
-
-
-    </ul>
+    </div>
+</div>

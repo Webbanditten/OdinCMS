@@ -918,36 +918,9 @@ ul.web-item-list li:hover {
     background-image: url(/c_images/myhabbo/widgets/raster_selected.gif);
 }
 
-#purchase-main-dialog {
-    width: 596px;
-}
+/* Habbo Home web store and inventory: the 2006 layout (from jeanropke/Neptune), js/myhabbo-store.js */
 
-#purchase-main-dialog h4 {
-    font-size: 10px;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-weight: normal;
-    margin: 4px 0;
-}
-
-#webstore-preview h4,
-#inventory-preview h4 {
-    font-weight: bold;
-    text-align: center;
-    overflow: hidden;
-}
-
-#purchase-main-dialog-body {
-    height: 324px;
-    padding-bottom: 10px;
-}
-
-#webstore-categories-container,
-#webstore-content-container,
-#inventory-categories-container,
-#inventory-content-container {
-    display: none;
-}
-
+/* Web Inventory */
 #webstore-categories-container,
 #webstore-items-container,
 #webstore-preview-container,
@@ -955,40 +928,16 @@ ul.web-item-list li:hover {
 #inventory-categories-container,
 #inventory-items-container,
 #inventory-preview-container {
-    position: absolute;
+    position: relative;
     top: 0;
-}
-
-#webstore-categories-container,
-#inventory-categories-container,
-#webstore-categories,
-#inventory-categories {
-    width: 150px;
-    left: 0;
 }
 
 #webstore-items-container,
 #inventory-items-container {
     width: 263px;
-    left: 154px;
+    float: left;
 }
 
-#webstore-preview-container,
-#inventory-preview-container {
-    width: 150px;
-    left: 423px;
-    height: 306px;
-}
-
-#webstore-close-container {
-    width: 150px;
-    left: 423px;
-    top: 306px;
-}
-
-#webstore-categories,
-#webstore-items,
-#inventory-categories,
 #inventory-items {
     overflow: auto;
     overflow-x: hidden;
@@ -996,72 +945,17 @@ ul.web-item-list li:hover {
     height: 306px;
 }
 
-#webstore-categories,
-#inventory-categories {
-    background: url(/c_images/myhabbo/store/categories_bg.png) no-repeat;
-}
-
-#webstore-content-container.avatar #webstore-items-container {
-    width: 419px;
-}
-
-#webstore-content-container.avatar #webstore-preview-container {
-    display: none;
-}
-
-#webstore-categories ul,
-#webstore-items ul,
-#inventory-categories ul,
 #inventory-items ul {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-#webstore-items ul li,
-#inventory-items ul li {
-    padding: 0;
-    cursor: pointer;
-}
-
-#webstore-items ul li h3,
-#webstore-items ul li p,
-#inventory-items ul li h3,
-#inventory-items ul li p {
-    margin: 0;
-    font-size: 10px;
-}
-
-#webstore-items ul li h3,
-#inventory-items ul li h3 {
-    padding-bottom: 3px;
-    margin-bottom: 3px;
-    border-bottom: 1px dashed black;
-}
-
-#webstore-items ul li,
 #inventory-items ul li {
     float: left;
     width: 61px;
     height: 61px;
     background: url(/c_images/myhabbo/store/slot.gif) no-repeat 1px 1px;
-}
-
-#webstore-items ul li.webstore-widget-item,
-#inventory-items ul li.webstore-widget-item {
-    float: none;
-    width: 240px;
-    height: 61px;
-    background: url(/c_images/myhabbo/store/slot_widget.png) no-repeat 1px 1px;
-    clear: both;
-}
-
-#webstore-items ul li.webstore-widget-disabled,
-#inventory-items ul li.webstore-widget-disabled {
-    -moz-opacity: .5;
-    opacity: .50;
-    filter: alpha(opacity=50);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 }
 
 #webstore-items ul li:hover,
@@ -1071,16 +965,21 @@ ul.web-item-list li:hover {
     background: url(/c_images/myhabbo/store/highlight_slot.gif) no-repeat 1px 1px;
 }
 
-#webstore-items ul li.webstore-widget-item:hover,
-#webstore-items ul li.webstore-widget-item.selected,
-#inventory-items ul li.webstore-widget-item:hover,
-#inventory-items ul li.webstore-widget-item.selected {
-    background: url(/c_images/myhabbo/store/highlight_slot_widget.png) no-repeat 1px 1px;
+#webstore-items ul li div.webstore-item-preview,
+#inventory-items ul li div.webstore-item-preview {
+    float: left;
+    width: 61px;
+    height: 61px;
 }
 
-#webstore-items ul li.webstore-widget-disabled:hover,
-#inventory-items ul li.webstore-widget-disabled:hover {
-    background: url(/c_images/myhabbo/store/slot_widget.png) no-repeat 1px 1px;
+li.selected div.webstore-item-preview div.webstore-item-mask {
+    background: url(/c_images/myhabbo/store/selector.png) no-repeat 0 0;
+}
+
+div.webstore-item-preview div.webstore-item-mask {
+    background: url(/c_images/myhabbo/store/slot_mask.png) no-repeat 0 0;
+    width: 61px;
+    height: 61px;
 }
 
 #webstore-items ul li.webstore-item-empty,
@@ -1091,70 +990,33 @@ ul.web-item-list li:hover {
     cursor: default;
 }
 
-#webstore-items ul li.webstore-widget-empty,
-#webstore-items ul li.webstore-widget-empty:hover,
-#inventory-items ul li.webstore-widget-empty,
-#inventory-items ul li.webstore-widget-empty:hover {
-    background: url(/c_images/myhabbo/store/empty_widget_slot.png) no-repeat 1px 1px;
-    cursor: default;
-    float: none;
-    width: 240px;
-    clear: both;
+#webstore-preview-container,
+#inventory-preview-container {
+    width: 120px;
+    left: 264px;
 }
 
-div.progressbar {
-    width: 32px;
-    margin-left: auto;
-    margin-right: auto;
+#webstore-preview-box,
+#inventory-preview-box {
+    border: 1px solid black;
+    height: 120px;
+    background: url(/c_images/myhabbo/store/preview_background.gif) no-repeat 50% 50%;
 }
 
-#webstore-items div.progressbar {
-    margin-top: 136px;
+#webstore-preview-pre,
+#inventory-preview-pre {
+    height: 100%;
+    position: relative;
 }
 
-#webstore-preview div.progressbar {
-    margin-top: 90px;
+#inventory-preview {
+    width: 120px;
+    float: right;
+    position: absolute;
 }
 
-div.webstore-item-preview {
-    float: left;
-    width: 61px;
-    height: 61px;
-}
-
-div.webstore-widget-description {
-    overflow: hidden;
-    padding: 3px 0 3px 3px;
-    margin-right: 4px;
-}
-
-#webstore-items ul li div.webstore-item-preview,
-#inventory-items ul li div.webstore-item-preview {
-    float: left;
-    width: 61px;
-    height: 61px;
-}
-
-#webstore-confirm div.webstore-item-preview {
-    margin: 0 4px 4px 0;
-}
-
-div.webstore-item-preview div.webstore-item-mask {
-    background: url(/c_images/myhabbo/store/slot_mask.png) no-repeat 0 0;
-    width: 61px;
-    height: 61px;
-}
-
-li.webstore-widget-item div.webstore-item-preview div.webstore-item-mask {
-    background: url(/c_images/myhabbo/store/slot_widget_mask.png) no-repeat 0 0;
-}
-
-li.selected div.webstore-item-preview div.webstore-item-mask {
-    background: url(/c_images/myhabbo/store/selector.png) no-repeat 0 0;
-}
-
-li.webstore-widget-item.selected div.webstore-item-preview div.webstore-item-mask {
-    background: url(/c_images/myhabbo/store/selector_widget.png) no-repeat 0 0;
+#inventory-preview-place {
+    float: right;
 }
 
 div.webstore-item-count {
@@ -1173,11 +1035,267 @@ div.webstore-item-count div {
     background: url(/c_images/myhabbo/dialogs/item_count_label.gif) no-repeat;
 }
 
-#webstore-preview-box,
-#inventory-preview-box {
+div.webstore-widget-description {
+    overflow: hidden;
+    padding: 3px 0 3px 3px;
+    margin-right: 4px;
+}
+
+#webstore-items ul li h3,
+#inventory-items ul li h3 {
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+    border-bottom: 1px dashed black;
+}
+
+#webstore-items ul li h3,
+#webstore-items ul li p,
+#inventory-items ul li h3,
+#inventory-items ul li p {
+    margin: 0;
+    font-size: 10px;
+}
+
+#webstore-items ul li.webstore-widget-disabled,
+#inventory-items ul li.webstore-widget-disabled {
+    -moz-opacity: .5;
+    opacity: .50;
+    filter: alpha(opacity=50);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+}
+
+#webstore-items ul li.webstore-widget-item,
+#inventory-items ul li.webstore-widget-item {
+    float: none;
+    width: 240px;
+    height: 61px;
+    background: url(/c_images/myhabbo/store/slot_widget.png) no-repeat 1px 1px;
+    clear: both;
+}
+
+/* Neptune's additions for the 2006 layout */
+
+#webstore-content {
+    height: 331px;
+    display: none;
+}
+
+#webstore-content a span #webstore-inventory-new.new {
+    padding: 0px 14px 0 4px;
+    background: url(/c_images/myhabbo/store/animated_arrow.gif) no-repeat 100% 0% !important;
+}
+
+#webstore-content a span #webstore-inventory-new {
+    font-weight: bold;
+    text-decoration: none;
+    background-image: none !important;
+    float: right;
+    display: none;
+}
+
+#webstore-tabs li a span {
+    background: none;
+    display: inline;
+    padding: 0;
+    margin: 0;
+}
+
+#webstore-items-container {
+    float: right;
+    top: 128px;
+}
+
+#webstore-preview-container {
+    left: 122px;
+}
+
+#webstore-preview-box {
+    width: 120px;
+    float: left;
+}
+
+#webstore-preview {
+    width: 245px;
+    float: right;
+    position: absolute;
+}
+
+#webstore-preview h4 {
+    margin: 0px;
+    text-align: center;
+}
+
+#webstore-items {
+    width: 264px;
+    height: 184px;
+}
+
+
+#webstore-categories {
+    height: 308px;
+    float: left;
+    width: 118px;
     border: 1px solid black;
-    height: 150px;
-    background: url(/c_images/myhabbo/store/preview_background.gif) no-repeat 50% 50%;
+    overflow-y: auto;
+}
+
+#webstore-categories ul,
+#webstore-items ul,
+#inventory-categories ul,
+#inventory-items ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#webstore-items {
+    width: 264px;
+    height: 184px;
+}
+
+#webstore-items ul li.webstore-item-empty,
+#webstore-items ul li.webstore-item-empty:hover,
+#inventory-items ul li.webstore-item-empty,
+#inventory-items ul li.webstore-item-empty:hover {
+    background: url(/c_images/myhabbo/store/empty_slot.gif) no-repeat 1px 1px;
+    cursor: default;
+}
+
+#webstore-items ul li,
+#inventory-items ul li {
+    padding: 0;
+    cursor: pointer;
+}
+
+#webstore-items ul li h3,
+#webstore-items ul li p {
+    margin: 0;
+    font-size: 10px;
+}
+
+#webstore-items ul li h3 {
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+    border-bottom: 1px dashed black;
+}
+
+#webstore-items ul li {
+    float: left;
+    width: 61px;
+    height: 61px;
+    background: url(/c_images/myhabbo/store/slot.gif) no-repeat 1px 1px;
+}
+
+#webstore-items ul li.webstore-widget-item {
+    float: none;
+    width: 240px;
+    height: 61px;
+    background: url(/c_images/myhabbo/store/slot_widget.png) no-repeat 1px 1px;
+    clear: both;
+}
+
+#webstore-items ul li.webstore-widget-disabled {
+    -moz-opacity: .5;
+    opacity: .50;
+    filter: alpha(opacity=50);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+}
+
+#webstore-items ul li:hover,
+#webstore-items ul li.selected {
+    background: url(/c_images/myhabbo/store/highlight_slot.gif) no-repeat 1px 1px;
+}
+
+#webstore-items ul li.webstore-widget-item:hover,
+#webstore-items ul li.webstore-widget-item.selected {
+    background: url(/c_images/myhabbo/store/highlight_slot_widget.png) no-repeat 1px 1px;
+}
+
+#stickers_dialog-body {
+    height: 329px;
+}
+
+#webstore-categories ul,
+#webstore-items ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#webstore-items {
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 184px;
+}
+
+ul.purchase-main-category div {
+    color: black;
+    padding-left: 13px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+ul.purchase-main-category {
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-top: 1px solid black;
+}
+
+li.main-category,
+li.main-category-no-subcategories,
+li.selected-main-category,
+li.selected-main-category-no-subcategories {
+    border-bottom: 1px solid black;
+    padding-left: 0;
+    padding-top: 2px;
+}
+
+li.main-category div,
+li.main-category-no-subcategories div,
+li.selected-main-category div,
+li.selected-main-category-no-subcategories div {
+    padding-bottom: 2px;
+}
+
+li.main-category,
+li.main-category-no-subcategories {
+    background-color: #bdbdbd;
+}
+
+li.selected-main-category,
+li.selected-main-category-no-subcategories {
+    background-color: #e2e2e2;
+}
+
+li.selected-main-category div {
+    background: url(/c_images/myhabbo/store/arrow_down.gif) no-repeat 2px 3px;
+    font-weight: bold;
+}
+
+li.main-category div {
+    background: url(/c_images/myhabbo/store/arrow_right.gif) no-repeat 2px 3px;
+}
+
+#webstore-items-container {
+    float: right;
+    top: 128px;
+}
+
+div.webstore-item-count {
+    padding: 5px 5px 0 0;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+div.webstore-item-count div {
+    text-align: center;
+    float: right;
+    width: 32px;
+    height: 17px;
+    padding-top: 2px;
+    background: url(/c_images/myhabbo/dialogs/item_count_label.gif) no-repeat;
 }
 
 #webstore-preview-pre,
@@ -1276,134 +1394,10 @@ span.webstore-preview-error {
     color: red;
 }
 
-
-/* inventory */
-
-#webstore-tabs li a span {
-    background: none;
-    display: inline;
-    padding: 0;
-    margin: 0;
-}
-
-#webstore-inventory a {
-    text-decoration: none;
-}
-
-#webstore-inventory a span {
-    text-decoration: underline;
-}
-
-#webstore-inventory.selected a span {
-    text-decoration: none;
-}
-
-#webstore-inventory a span#webstore-inventory-new {
-    font-weight: bold;
-    text-decoration: none;
-    background-image: none !important;
-}
-
-#webstore-inventory a span#webstore-inventory-new.new {
-    padding-right: 13px;
-    background: url(/c_images/myhabbo/store/animated_arrow.gif) no-repeat 100% 50% !important;
-}
-
-#webstore-noteeditor {
-    width: 320px;
-}
-
-#webstore-notes-counter {
-    background-color: #FC0;
-    border: 1px solid black;
-    padding: 3px;
-    margin: 5px 5px 0 0;
-    float: right;
-}
-
-#webstore-notes-form {
-    margin-bottom: 12px;
-}
-
-#webstore-notes-form textarea {
-    width: 96%;
-}
-
-#webstore-notes-container {
-    position: relative;
-    margin: 0 0 1em 20px;
-}
-
-#webstore-notes-container div.stickie {
-    position: relative;
-    cursor: default;
-}
-
-#webstore-notes-container div.stickie h3 img {
-    display: none;
-}
-
-#webstore-notes-edit-container {
-    overflow: auto;
-}
-
-
-/* main categories */
-
-ul.purchase-main-category div {
-    color: black;
-    padding-left: 13px;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-ul.purchase-main-category {
-    border-left: 1px solid black;
-    border-right: 1px solid black;
-    border-top: 1px solid black;
-}
-
-li.main-category,
-li.main-category-no-subcategories,
-li.selected-main-category,
-li.selected-main-category-no-subcategories {
-    border-bottom: 1px solid black;
-    padding-left: 0;
-    padding-top: 2px;
-}
-
-li.main-category div,
-li.main-category-no-subcategories div,
-li.selected-main-category div,
-li.selected-main-category-no-subcategories div {
-    padding-bottom: 2px;
-}
-
-li.main-category,
-li.main-category-no-subcategories {
-    background-color: #bdbdbd;
-}
-
-li.selected-main-category,
-li.selected-main-category-no-subcategories {
-    background-color: #e2e2e2;
-}
-
-li.selected-main-category div {
-    background: url(/c_images/myhabbo/store/arrow_down.gif) no-repeat 2px 3px;
-    font-weight: bold;
-}
-
-li.main-category div {
-    background: url(/c_images/myhabbo/store/arrow_right.gif) no-repeat 2px 3px;
-}
-
-
-/* subcategories */
-
 ul.purchase-subcategory-list li {
-    border-top: 1px dotted black;
-    padding: 2px 0;
+    border-bottom: 1px dotted black;
+    padding: 3px;
+    cursor: pointer;
 }
 
 li.subcategory {
@@ -1450,10 +1444,120 @@ div.webstore-frank div.blackbubble-bottom-body img.invitation-tail {
     margin-right: 60px;
 }
 
+div.webstore-item-count {
+    padding: 5px 5px 0 0;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+div.webstore-item-count div {
+    text-align: center;
+    float: right;
+    width: 32px;
+    height: 17px;
+    padding-top: 2px;
+    background: url(/c_images/myhabbo/dialogs/item_count_label.gif) no-repeat;
+}
+
 div.es_dynamic_animator_sticker_pre div.preview-image {
     height: 100%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
+}
+
+/* Kept from our earlier (2008) store: the wait animation, the purchase question's picture, widget slots, the note editor */
+
+div.progressbar {
+    width: 32px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#webstore-items div.progressbar,
+#inventory-items div.progressbar {
+    margin-top: 80px;
+}
+
+#webstore-preview div.progressbar,
+#inventory-preview div.progressbar {
+    margin-top: 50px;
+}
+
+#webstore-confirm div.webstore-item-preview,
+#webstore-notes-purchase div.webstore-item-preview {
+    float: left;
+    width: 61px;
+    height: 61px;
+    margin: 0 4px 4px 0;
+}
+
+li.webstore-widget-item div.webstore-item-preview div.webstore-item-mask {
+    background: url(/c_images/myhabbo/store/slot_widget_mask.png) no-repeat 0 0;
+}
+
+li.webstore-widget-item.selected div.webstore-item-preview div.webstore-item-mask {
+    background: url(/c_images/myhabbo/store/selector_widget.png) no-repeat 0 0;
+}
+
+#inventory-items ul li.webstore-widget-item:hover,
+#inventory-items ul li.webstore-widget-item.selected {
+    background: url(/c_images/myhabbo/store/highlight_slot_widget.png) no-repeat 1px 1px;
+}
+
+#inventory-items ul li.webstore-widget-disabled,
+#inventory-items ul li.webstore-widget-disabled:hover {
+    background: url(/c_images/myhabbo/store/slot_widget.png) no-repeat 1px 1px;
+    cursor: default;
+}
+
+/* the purchase question's Annuller / Køb side by side (as Neptune) */
+.dialog-grey-content .new-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+a.colorlink.disabled-button {
+    opacity: .5;
+    cursor: default;
+}
+
+#webstore-noteeditor {
+    width: 345px;
+}
+
+#webstore-notes-counter {
+    background-color: #FC0;
+    border: 1px solid black;
+    padding: 3px;
+    margin: 5px 5px 0 0;
+    float: right;
+}
+
+#webstore-notes-form {
+    margin-bottom: 12px;
+}
+
+#webstore-notes-form textarea {
+    width: 96%;
+}
+
+#webstore-notes-container {
+    position: relative;
+    margin: 0 0 1em 25px;
+}
+
+#webstore-notes-container div.stickie {
+    position: relative;
+    cursor: default;
+}
+
+#webstore-notes-container div.stickie h3 img {
+    display: none;
+}
+
+#webstore-notes-edit-container {
+    overflow: auto;
 }
 
 a#group-url-button {
