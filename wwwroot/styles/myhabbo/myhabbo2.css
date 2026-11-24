@@ -1824,30 +1824,6 @@ h2.title.dialog-handle.rounded-done {
     padding-left: 8px;
 }
 
-#reporting-button,
-.create-report-button {
-    background-position: 0 -101px;
-}
-
-#stop-reporting-button {
-    background-position: 0 -155px;
-}
-
-.delete-button {
-    background-position: 0 -402px;
-    padding-left: 17px;
-}
-
-.delete-button:hover {
-    background-position: 0 -432px;
-}
-
-.create-report-button,
-.delete-button {
-    display: block;
-    height: 16px;
-}
-
 a.toolbutton,
 a.urltoolbutton {
     float: left;
