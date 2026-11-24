@@ -1511,6 +1511,38 @@ li.webstore-widget-item.selected div.webstore-item-preview div.webstore-item-mas
     cursor: default;
 }
 
+/* "Habbo mønter" is longer than "credits": the column takes the 13 px gap beside the preview box (Preview.cshtml),
+   the amounts stay clear of the coin and purse icons, and "Køb Habbo mønter" gets the full width under the purse */
+#webstore-preview-price,
+#webstore-preview-purse div.webstore-preview-purse-amount {
+    padding-left: 17px;
+    background-repeat: no-repeat;
+    background-position: 1px 50%;
+}
+
+#webstore-preview-price {
+    background-image: url(/c_images/myhabbo/store/credit_icon.gif);
+}
+
+#webstore-preview-purse {
+    background-image: none;
+}
+
+#webstore-preview-purse div.webstore-preview-purse-amount {
+    background-image: url(/c_images/myhabbo/store/purse_icon.gif);
+}
+
+#webstore-preview-purse a {
+    margin-left: 0;
+}
+
+/* a long name stays on one line (full name on hover), so the Køb button never reaches the item grid */
+#webstore-preview h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* the purchase question's Annuller / Køb side by side (as Neptune) */
 .dialog-grey-content .new-buttons {
     display: flex;
