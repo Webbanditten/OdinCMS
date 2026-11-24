@@ -7,10 +7,10 @@
 <div style="width: 123px; float: right;">
     <h4 title="@Model.Definition.Name">@Model.Definition.Name</h4>
     <div id="webstore-preview-price">
-        @DbRes.T("store_price", "habbohome"):<br /><b>@Model.Details.Price @DbRes.T("store_coins", "habbohome")</b>
+        @DbRes.T("store_price", "habbohome"):<br /><b>@Model.Details.Price</b> @DbRes.T("store_coins", "habbohome")
     </div>
     <div id="webstore-preview-purse">
-        <div class="webstore-preview-purse-amount">@DbRes.T("store_you_have", "habbohome"):<br /><b>@(userData?.Credits ?? 0) @DbRes.T("store_coins", "habbohome")</b></div>
+        <div class="webstore-preview-purse-amount">@DbRes.T("store_you_have", "habbohome"):<br /><b>@(userData?.Credits ?? 0)</b> @DbRes.T("store_coins", "habbohome")</div>
         <a href="/credits" target="_blank">@DbRes.T("store_getcredits", "habbohome")</a>
     </div>
     <div id="webstore-preview-purchase">

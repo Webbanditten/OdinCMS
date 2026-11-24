@@ -23,15 +23,9 @@ FROM (
     UNION SELECT 'store_not_purchasable', 'Du kan ikke købe dette produkt.'
     UNION SELECT 'note_purchase', 'Køb noter'
     UNION SELECT 'note_none', 'Du har ikke flere noter.'
-    UNION SELECT 'store_coins', 'Habbo mønter'
+    UNION SELECT 'store_coins', 'Habbo Mønter'
 ) k
 WHERE NOT EXISTS (SELECT 1 FROM cms_localizations c WHERE c.ResourceId = k.id AND c.ResourceSet = 'habbohome' AND c.LocaleId = 'da-DK');
-
-UPDATE cms_localizations SET Value = 'Køb Habbo mønter'
-WHERE ResourceSet = 'habbohome' AND LocaleId = 'da-DK' AND ResourceId = 'store_getcredits' AND Value = 'Køb Habbo Mønter';
-
-UPDATE cms_localizations SET Value = REPLACE(Value, 'Habbo Mønter', 'Habbo mønter')
-WHERE ResourceSet = 'habbohome' AND LocaleId = 'da-DK' AND ResourceId = 'store_notenough_credits' AND Value LIKE BINARY '%Habbo Mønter%';
 
 -- ---------------------------------------------------------------- spelling
 
