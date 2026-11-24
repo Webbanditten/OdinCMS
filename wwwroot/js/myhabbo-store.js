@@ -1,551 +1,430 @@
+/*
+ * Habbo Home web store, inventory and note editor, laid out like habbo.com's first Home editor (2006; structure after
+ * jeanropke/Neptune's port of it). The edit toolbar opens one item type at a time in a grey dialog: the inventory
+ * first, "Køb ..." turns the same dialog into that type's store and "Åbn inventar" turns it back. Notes have their own
+ * editor, which also sells them. Loaded on demand by homeview.js (ScriptLoader "myhabbo-store").
+ *
+ * Server side: Areas/MyHabbo/Controllers/StoreController.cs and NoteEditorController.cs. Placing items on the page is
+ * homeedit.js (doPlaceImageOnPage, doPlaceWidget, doChangeBg, initMovableItems).
+ */
 var WebStore = {
-  
-  created: false, 
-  dialog: null, 
-  itemsDiv: null, 
-  tabList: null,
-  selectedItem: null, 
-  selectedCategory: null, 
-  selectedSubCategory: null, 
-  selectedTab: null, 
-  loadingCategory: false, 
-  previewItemPointer: 0, 
-  previewItems: null, 
-  originalBg: null,
+
+  created: false,
+  dialog: null,
+  selectedType: null,
+  selectedItem: null,
+  selectedCategory: null,
+  selectedCategoryId: null,
+  loadingCategory: false,
+  previewItems: null,
+  previewItemPointer: 0,
   storeOpened: false,
-  backgroundPreviewWarning: false, 
-  localization: null, 
-  
-  open: function(tab) {
+  backgroundPreviewWarning: false,
+  originalBg: null,
+
+  /** type: "stickers", "widgets" or "backgrounds" */
+  open: function(type) {
     if (!WebStore.created) {
       WebStore._create();
-      WebStore._loadMainContent(tab);
-    } else {
-      WebStore._selectTab(tab);
     }
-    
+    if (WebStore.selectedType != type) {
+      WebStore.Inventory.inventoryOpened = false;
+      WebStore.storeOpened = false;
+    }
     WebStore.originalBg = $("mypage-bg").className;
-    
-    WebStore.dialog.show();
     Overlay.show();
+    WebStore.dialog.show();
+    WebStore._loadMainContent(type, "inventory");
     Dialog.moveDialogToCenter(WebStore.dialog);
-  }, 
-  
+  },
+
   close: function() {
+    if (!WebStore.dialog) {
+      return;
+    }
     WebStore.dialog.style.left = "-1500px";
     WebStore.dialog.hide();
     Overlay.hide();
-    
+
     WebStore.Inventory.newItems = [];
-    WebStore.Inventory.updateNewItemCount(0);
-    
-    $("mypage-bg").className = WebStore.originalBg;
-    
+    WebStore.Inventory.updateNewItemCount();
+    if (WebStore.originalBg != null) {
+      $("mypage-bg").className = WebStore.originalBg;
+    }
     WebStore.loadingCategory = false;
     WebStore.Inventory.loadingCategory = false;
-  }, 
-  
-  openSubCategory: function(subCategoryId, categoryId, force, productId) {
-    if ((!WebStore.loadingCategory && subCategoryId != WebStore.selectedSubCategory) || force) {
+  },
+
+  /** habbo.com's grey dialog (dialog-grey in style.css), which the 2006 store and note editor use. */
+  createDialog: function(dialogId, header, zIndex, left, top, exitCallback) {
+    var overlay = $("overlay");
+    var headerBar = [Builder.node("div", [Builder.node("h3", [Builder.node("span", header || "")])])];
+    if (exitCallback) {
+      var exitButton = Builder.node("a", { href: "#", className: "dialog-grey-exit" }, [
+        Builder.node("img", { src: habboStaticFilePath + "/images/dialogs/grey-exit.gif", width: 12, height: 12, alt: "" })
+      ]);
+      Event.observe(exitButton, "click", exitCallback, false);
+      headerBar.push(exitButton);
+    }
+    var dialog = overlay.parentNode.insertBefore(Builder.node("div", { id: dialogId, className: "dialog-grey" }, [
+      Builder.node("div", { className: "dialog-grey-top dialog-grey-handle" }, headerBar),
+      Builder.node("div", { className: "dialog-grey-content" }, [
+        Builder.node("div", { id: dialogId + "-body", className: "dialog-grey-body" }, [Builder.node("div", { className: "clear" })])
+      ]),
+      Builder.node("div", { className: "dialog-grey-bottom" }, [Builder.node("div")])
+    ]), overlay.nextSibling);
+    dialog.style.zIndex = zIndex || 9001;
+    dialog.style.left = (left || -1000) + "px";
+    dialog.style.top = (top || 0) + "px";
+    if (typeof Draggable != "undefined") {
+      new Draggable(dialog, { handle: "dialog-grey-handle", starteffect: Prototype.emptyFunction, endeffect: Prototype.emptyFunction, zindex: 9100 });
+    }
+    return dialog;
+  },
+
+  _create: function() {
+    WebStore.dialog = WebStore.createDialog("purchase-main-dialog", "", 9001, -1500, 0, function(e) {
+      if (e) { Event.stop(e); }
+      WebStore.close();
+    });
+    WebStore.created = true;
+  },
+
+  /** tab: "inventory" or "store" */
+  _loadMainContent: function(type, tab) {
+    WebStore.selectedType = type;
+    if (tab == "inventory") {
+      if (WebStore.Inventory.inventoryOpened) {
+        WebStore.hideWebStoreDivs();
+        WebStore.Inventory.reloadIfNeeded();
+        WebStore.Inventory.newItems = [];
+        WebStore.Inventory.updateNewItemCount();
+      } else {
+        WebStore.Inventory.load(type);
+      }
+      return;
+    }
+
+    if (WebStore.storeOpened) {
+      WebStore.Inventory.hideInventoryDivs();
+      return;
+    }
+    WebStore.Inventory.hideInventoryDivs();
+    Element.wait($("webstore-content"));
+    new Ajax.Request(habboReqPath + "/myhabbo/store/main", {
+      method: "post", parameters: { type: type },
+      onComplete: function(req, json) {
+        if (WebStore._checkResponse(req.responseText)) {
+          $("webstore-content").innerHTML = req.responseText;
+          WebStore.storeOpened = true;
+          WebStore.selectedItem = null;
+          WebStore._clearPreview();
+
+          var firstEl = $A($("webstore-categories").getElementsByTagName("li")).first();
+          if (firstEl) {
+            WebStore.selectedCategory = firstEl;
+            WebStore.selectedCategoryId = firstEl.id.split("-")[1];
+            firstEl.className = "subcategory-selected";
+          }
+
+          if (json && json[0]) {
+            WebStore.previewItems = json;
+            WebStore._showPreview();
+            var el = $A($("webstore-item-list").getElementsByTagName("li")).first();
+            if (el && el.id) { WebStore._selectItem(el); }
+          }
+          WebStore.Inventory.updateNewItemCount();
+          WebStore._setEventHandlers();
+        }
+      }
+    });
+  },
+
+  // explicit display values: the stylesheet hides #webstore-content until the store is opened
+  hideWebStoreDivs: function() {
+    if ($("webstore-content")) { $("webstore-content").style.display = "none"; }
+    if ($("inventory-content")) { $("inventory-content").style.display = "block"; }
+  },
+
+  _setEventHandlers: function() {
+    if ($("webstore-items")) {
+      $("webstore-items").onclick = WebStore._handleItemClick.bindAsEventListener(WebStore);
+    }
+    if ($("webstore-preview")) {
+      $("webstore-preview").onclick = WebStore._handlePreviewClick.bindAsEventListener(WebStore);
+    }
+    if ($("webstore-close")) {
+      $("webstore-close").onclick = function(e) { Event.stop(e); WebStore.close(); };
+    }
+    if ($("webstore-categories")) {
+      $("webstore-categories").onclick = WebStore._handleCategoryClick.bindAsEventListener(WebStore);
+    }
+    WebStore.Inventory._setEventHandlers();
+  },
+
+  _handleCategoryClick: function(e) {
+    Event.stop(e);
+    if (!WebStore.loadingCategory) {
+      var el = Event.findElement(e, "li");
+      if (el && el.id && el.id.indexOf("category-") == 0) {
+        var temp = el.id.split("-");
+        WebStore._changeCategory(temp[1], el);
+        $("webstore-content-container").className = temp[2];
+      }
+    }
+  },
+
+  _changeCategory: function(categoryId, categoryEl) {
+    if (WebStore.selectedCategory) {
+      WebStore.selectedCategory.className = "";
+    }
+    WebStore.selectedCategory = categoryEl;
+    categoryEl.className = "subcategory-selected";
+    WebStore.openCategory(categoryId);
+  },
+
+  openCategory: function(categoryId, force, productId) {
+    if ((!WebStore.loadingCategory && categoryId != WebStore.selectedCategoryId) || force) {
       WebStore.loadingCategory = true;
       WebStore._resetState();
       Element.wait($("webstore-items"));
-      WebStore._loadSubCategory(categoryId, subCategoryId, productId);
+      WebStore._loadCategory(categoryId, productId);
     }
-  }, 
-  
-  closeConfirmation: function(e) {
-    if (e) {
-      Event.stop(e);
-    }
-    if ($("webstore-confirm")) {
-      Element.remove($("webstore-confirm"));
-      Overlay.move("9000");
-    }
-  }, 
-  
-  showWebStoreDivs: function() {
-    WebStore.Inventory.hideInventoryDivs();
-    $("webstore-categories-container").style.display = "block";
-    $("webstore-content-container").style.display = "block";
-    $("webstore-items-container").style.display = "block";
-    $("webstore-preview-container").style.display = "block";
-  }, 
-  
-  hideWebStoreDivs: function() {
-    $("webstore-categories-container").style.display = "none";
-    $("webstore-content-container").style.display = "none";
-    $("webstore-items-container").style.display = "none";
-    $("webstore-preview-container").style.display = "none";
-  }, 
-  
-  _create: function() {
-    this.dialog = Dialog.createDialog("purchase-main-dialog", false, false, -1500, 0, function(e) {
-      if (e) { Event.stop(e); }
-      WebStore.close();
-    }, Builder.node("div", [ Builder.node("ul", { id:"webstore-tabs" }) ]).innerHTML);
-    new Draggable(this.dialog, { handle:'webstore-tabs', starteffect:Prototype.emptyFunction, endeffect:Prototype.emptyFunction, zindex:9100 });
-    Dialog.setAsWaitDialog(WebStore.dialog);
-  }, 
-  
-  _loadMainContent: function(tab) {
-    if (tab == "webstore-inventory") {
-      WebStore.Inventory.load();
-    } else {
-      new Ajax.Request(
-        habboReqPath + "/myhabbo/store/main", {
-          method: "post",
-          onComplete: function(req, json) {
-            if (WebStore._checkResponse(req.responseText)) {
-              Dialog.setDialogBody(WebStore.dialog, req.responseText);
-              WebStore.created = true;
-              WebStore.storeOpened = true;
-              WebStore.MenuBar.init();
-              WebStore.Inventory.initMenu();
-              
-              WebStore.localization = json[0];
-              WebStore._buildTabs();
-              WebStore._selectTab("webstore-store");
-              
-              if (WebStore.MenuBar.selectedMainCategory) {
-                WebStore._setContentClassName(WebStore.MenuBar.selectedMainCategory.id.split("-").last());
-              }
-              
-              if (json[1] && json[1].length > 0) {
-                WebStore.previewItems = json[1];
-                WebStore._showPreview();
-                
-                var el = $A($("webstore-item-list").getElementsByTagName("li")).first();
-                if (el) { WebStore._selectItem(el); }
-              }
-              
-              WebStore._setEventHandlers();
-            }
+  },
+
+  _loadCategory: function(categoryId, productId) {
+    WebStore.selectedCategoryId = categoryId;
+    new Ajax.Request(habboReqPath + "/myhabbo/store/items", {
+      method: "post", parameters: { categoryId: categoryId },
+      onComplete: function(req, json) {
+        WebStore.loadingCategory = false;
+        if (WebStore._checkResponse(req.responseText)) {
+          $("webstore-content-container").innerHTML = req.responseText;
+
+          var productEls = $A($("webstore-item-list").getElementsByTagName("li")).findAll(function(el) { return el.id; });
+          var selected = productEls.find(function(el) { return productId && el.id.split("-").last() == productId; }) || productEls.first();
+          if (selected) {
+            WebStore._selectItem(selected);
+            WebStore._loadPreview(selected.id.split("-").last());
+          } else {
+            WebStore._showDefaultPreview();
           }
+          WebStore._setEventHandlers();
         }
-      );
-    }
-  }, 
-  
-  _setEventHandlers: function() {
-    if ($("webstore-items")) {
-      $("webstore-items").onclick = WebStore._handleItemClick.bindAsEventListener(this);
-    }
-    
-    if ($("webstore-preview")) {
-      $("webstore-preview").onclick = WebStore._handlePreviewClick.bindAsEventListener(this);
-    }
-    
-    if ($("webstore-close")) {
-      $("webstore-close").onclick = function(e) { Event.stop(e); WebStore.close(); }.bindAsEventListener(this);
-    }
-    
-    if (WebStore.tabList) {
-      WebStore.tabList.onclick = WebStore._handleTabClick.bindAsEventListener(this);
-    }
-    
-    WebStore.Inventory._setEventHandlers();
-  }, 
-  
+      }
+    });
+  },
+
   _handleItemClick: function(e) {
     var el = Event.findElement(e, "li");
     if (el && el.id && el != WebStore.selectedItem) {
       WebStore._selectItem(el);
-      WebStore._loadPreview(el.id.substring(el.id.lastIndexOf("-")+1));
+      WebStore._loadPreview(el.id.split("-").last());
     }
     Event.stop(e);
-  }, 
-  
+  },
+
   _selectItem: function(el) {
-    try {
-      if (!Element.hasClassName(el, "selected")) {
-        Element.removeClassName(WebStore.selectedItem, "selected");
-        Element.addClassName(el, "selected");
-        WebStore.selectedItem = el;
-      }
-    } catch (ex) {}
-  }, 
-  
+    if (WebStore.selectedItem && WebStore.selectedItem != el) {
+      Element.removeClassName(WebStore.selectedItem, "selected");
+    }
+    Element.addClassName(el, "selected");
+    WebStore.selectedItem = el;
+  },
+
   _handlePreviewClick: function(e) {
     var el = Event.findElement(e, "a");
-    if (el && el.id) {
-      try {
-        if (el.id == "webstore-purchase-disabled") {
-          Event.stop(e);
-        } else if (el.id == "webstore-purchase") {
-          Event.stop(e);
-          WebStore._purchaseConfirm(WebStore.selectedItem.id.split("-").last());
-        } else if (el.id == "webstore-add") {
-          Event.stop(e);
-        } else if (el.id == "webstore-preview-bg") {
-          Event.stop(e);
-          
-          if (!WebStore.backgroundPreviewWarning) {
-            var warning = Dialog.createDialog("webstore-warning", "", 9003);
-            Dialog.setAsWaitDialog(warning);
-            Overlay.move(9002);
-            Dialog.moveDialogToCenter(warning);
-            Dialog.makeDialogDraggable(warning);
-            new Ajax.Request(habboReqPath + "/myhabbo/store/background_warning", {
-                method: "post",
-                onComplete: function(req) {
-                  if (WebStore._checkResponse(req.responseText)) {
-                    Dialog.setDialogBody(warning, req.responseText);
-                    WebStore.backgroundPreviewWarning = true;
-                    
-                    Event.observe($("webstore-warning-ok"), "click", function(e) {
-                      Event.stop(e);
-                      Element.remove(warning);
-                      Overlay.move(9000);
-                      WebStore._previewBg();
-                    });
-                  }
-                }
-              }
-            );
-          } else {
-            WebStore._previewBg();
+    if (!el || !el.id) {
+      return;
+    }
+    if (el.id == "webstore-purchase") {
+      Event.stop(e);
+      if (WebStore.selectedItem) {
+        WebStore._purchaseConfirm(WebStore.selectedItem.id.split("-").last());
+      }
+    } else if (el.id == "webstore-preview-bg") {
+      Event.stop(e);
+      if (WebStore.backgroundPreviewWarning) {
+        WebStore._previewBg();
+        return;
+      }
+      var warning = WebStore.createDialog("webstore-warning", "", 9003);
+      Dialog.setAsWaitDialog(warning);
+      Overlay.move(9002);
+      Dialog.moveDialogToCenter(warning);
+      new Ajax.Request(habboReqPath + "/myhabbo/store/background_warning", {
+        method: "post",
+        onComplete: function(req) {
+          if (WebStore._checkResponse(req.responseText)) {
+            Dialog.setDialogBody(warning, req.responseText);
+            WebStore.backgroundPreviewWarning = true;
+            Event.observe($("webstore-warning-ok"), "click", function(e) {
+              Event.stop(e);
+              Element.remove(warning);
+              Overlay.move(9000);
+              WebStore._previewBg();
+            });
           }
         }
-      } catch (ex) {}
+      });
     }
-  }, 
-  
+  },
+
+  /** Shows the previewed background on the page for a moment (the overlay goes see-through). */
   _previewBg: function() {
+    var item = WebStore.previewItems && WebStore.previewItems[WebStore.previewItemPointer];
+    if (!item || !item.bgCssClass) {
+      return;
+    }
     var overlay = $("overlay");
     overlay.style.backgroundColor = "transparent";
-    $("mypage-bg").className = WebStore.previewItems[WebStore.previewItemPointer].bgCssClass;
+    $("mypage-bg").className = item.bgCssClass;
     window.setTimeout(function() {
       if (WebStore.dialog.style.left != "-1500px") {
         overlay.style.backgroundColor = "black";
       }
     }, 2500);
-  }, 
-  
-  _handleTabClick: function(e) {
-    Event.stop(e);
-    if (!WebStore.loadingCategory && !WebStore.Inventory.loadingCategory) {
-      var el = Event.findElement(e, "a");
-      if (el && el.parentNode && el.parentNode.id) {
-        if (el.parentNode.id != WebStore.selectedTab) {
-          WebStore._selectTab(el.parentNode.id);
-        }
-      }
-    }
-  }, 
-  
-  _buildTabs: function() {
-    WebStore.tabList = $("webstore-tabs");
-    WebStore.tabList.appendChild(Builder.node("li", {id:"webstore-inventory"}, [
-      Builder.node("a", {href:"#"}, [ document.createTextNode(WebStore.localization[0] + " "), Builder.node("span", {id:"webstore-inventory-new"}) ]),
-      Builder.node("span", {className:"tab-spacer"})
-    ]));
-    WebStore.tabList.appendChild(Builder.node("li", {id:"webstore-store"}, [
-      Builder.node("a", {href:"#"}, WebStore.localization[1]),
-      Builder.node("span", {className:"tab-spacer"})
-    ]));
-  }, 
-  
-  _selectTab: function(id) {
-    if (WebStore.selectedTab) { $(WebStore.selectedTab).className = ""; }
-    $(id).className = "selected";
-    WebStore.selectedTab = id;
-    var header = $$("#purchase-main-dialog h3 span").first();
-    
-    if (id == "webstore-store") {
-      if (header && WebStore.localization) { header.innerHTML = WebStore.localization[1]; }
-      
-      var type = "_webstore";
-      if (WebStore.MenuBar.selectedMainCategory != null) {
-        type = WebStore.MenuBar.selectedMainCategory.id.split("-").last();
-      }
-      WebStore.Inventory.hideInventoryDivs();
-      
-      WebStore._setDialogSize(type, function() {
-        if (!WebStore.storeOpened) {
-          WebStore._loadSubCategory(WebStore.selectedCategory, WebStore.selectedSubCategory);
-          WebStore.storeOpened = true;
-        }
-        
-        WebStore.showWebStoreDivs();
-      });
-    } else {
-      if (header && WebStore.localization) { header.innerHTML = WebStore.localization[0]; }
-      
-      WebStore.hideWebStoreDivs();
-      
-      WebStore._setDialogSize("_inventory", function() {
-        WebStore.Inventory.showInventoryDivs();
-        
-        if (!WebStore.Inventory.inventoryOpened) {
-          WebStore.Inventory.loadCategory("stickers");
-          WebStore.Inventory.inventoryOpened = true;
-        }
-        
-        // reset counter
-        WebStore.Inventory.newItems = [];
-        WebStore.Inventory.updateNewItemCount();
-        
-        WebStore.Inventory.reloadIfNeeded();
-      });
-    }
-  }, 
-  
-  _loadSubCategory: function(categoryId, subCategoryId, productId) {
-    var query = { categoryId: categoryId };
-    if (!!subCategoryId) {
-      query.subCategoryId = subCategoryId;
-    }
-    new Ajax.Request(
-      habboReqPath + "/myhabbo/store/items", {
-        method: "post", parameters: query,
-        onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            $("webstore-items").innerHTML = req.responseText;
-            WebStore.selectedCategory = categoryId;
-            WebStore.selectedSubCategory = subCategoryId;
-            WebStore.loadingCategory = false;
-            
-            var itemSelected = false;
-            var productEls = $A($("webstore-item-list").getElementsByTagName("li"));
-            if (productId) {
-              productEls.each(function(el) {
-                if (el.id) {
-                  var id = el.id.substring(el.id.lastIndexOf("-")+1);
-                  if (id == productId) {
-                    WebStore._selectItem(el);
-                    WebStore._loadPreview(id);
-                    itemSelected = true;
-                    throw $break;
-                  }
-                }
-              });
-            }
-            
-            if (!itemSelected) {
-              var el = productEls.first();
-              if (el && el.id) {
-                WebStore._selectItem(el);
-                WebStore._loadPreview(el.id.substring(el.id.lastIndexOf("-")+1));
-              }
-            }
-            
-            // make sure inventory is hidden
-            WebStore.Inventory.hideInventoryDivs();
-          }
-        }
-      }
-    );
-  }, 
-  
+  },
+
   _resetState: function() {
     WebStore.selectedItem = null;
-    WebStore.selectedCategory = null;
-    WebStore.selectedSubCategory = null;
     WebStore._showDefaultPreview();
-    
-  }, 
-  
+  },
+
   _loadPreview: function(productId) {
     WebStore._clearPreview();
     Element.wait($("webstore-preview"));
-    WebStore._showPreview();
-    new Ajax.Request(
-      habboReqPath + "/myhabbo/store/preview", {
-        method: "post", parameters: { "productId": productId, "subCategoryId": WebStore.selectedSubCategory },
-        onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            WebStore.previewItems = json;
-            WebStore._showPreview(req.responseText);
-            
-            // make sure inventory is hidden
-            WebStore.Inventory.hideInventoryDivs();
-          }
+    $("webstore-preview").show();
+    new Ajax.Request(habboReqPath + "/myhabbo/store/preview", {
+      method: "post", parameters: { productId: productId },
+      onComplete: function(req, json) {
+        if (WebStore._checkResponse(req.responseText)) {
+          WebStore.previewItems = json;
+          WebStore._showPreview(req.responseText);
         }
       }
-    );
-  }, 
-  
+    });
+  },
+
   _showPreview: function(previewHtml) {
     var previewDiv = $("webstore-preview");
-    if (previewHtml) { previewDiv.innerHTML = previewHtml };
-    
-    if (WebStore.previewItems) {
+    if (!previewDiv) {
+      return;
+    }
+    if (previewHtml) { previewDiv.innerHTML = previewHtml; }
+
+    if (WebStore.previewItems && $("webstore-preview-box")) {
       var preview = $("webstore-preview-box").appendChild(Builder.node("div", { id: "webstore-preview-pre" }));
-      
       if (WebStore.previewItems.length == 1 && WebStore.previewItems[0].itemCount > 1) {
         preview.appendChild(Builder.node("div", { id: "webstore-preview-count", className: "webstore-item-count" }));
-      } else if (WebStore.previewItems.length > 1) {
-        preview.appendChild(Builder.node("div", { id: "webstore-preview-count", className: "webstore-item-count" }));
-        preview.appendChild(Builder.node("div", { id: "webstore-preview-page" }));
-        Event.observe(preview.appendChild(Builder.node("div", { id: "webstore-preview-next" })), "click", function(e) { WebStore._nextPreviewItem(); });
-        Event.observe(preview.appendChild(Builder.node("div", { id: "webstore-preview-prev" })), "click", function(e) { WebStore._previousPreviewItem(); });
       }
-      
       WebStore._setPreviewItem();
     }
-    
     previewDiv.show();
-  }, 
-  
+  },
+
   _showDefaultPreview: function() {
     WebStore._clearPreview();
     var previewDiv = $("webstore-preview");
-    previewDiv.hide();
-    $("webstore-preview-default").show();
-    previewDiv.innerHTML = "";
-  }, 
-  
-  _setContentClassName: function(className) {
-    $("webstore-content-container").className = className;
-  }, 
-  
-  _nextPreviewItem: function() {
-    WebStore.previewItemPointer++;
-    if (WebStore.previewItemPointer >= WebStore.previewItems.length) {
-      WebStore.previewItemPointer = 0;
+    if (previewDiv) {
+      previewDiv.hide();
+      previewDiv.innerHTML = "";
     }
-    WebStore._setPreviewItem();
-  }, 
-  
-  _previousPreviewItem: function() {
-    WebStore.previewItemPointer--;
-    if (WebStore.previewItemPointer < 0) {
-      WebStore.previewItemPointer = WebStore.previewItems.length - 1;
+    if ($("webstore-preview-default")) {
+      $("webstore-preview-default").show();
     }
-    WebStore._setPreviewItem();
-  }, 
-  
+  },
+
   _setPreviewItem: function() {
     var currItem = WebStore.previewItems[WebStore.previewItemPointer];
     var pre = $("webstore-preview-pre");
     pre.className = currItem.previewCssClass;
-    pre.title = decodeURIComponent(currItem.titleKey);
+    pre.title = currItem.titleKey;
     if ($("webstore-preview-count")) {
       $("webstore-preview-count").innerHTML = "<div>x" + currItem.itemCount + "</div>";
     }
-    if ($("webstore-preview-page")) {
-      $("webstore-preview-page").innerHTML = (WebStore.previewItemPointer + 1) + "/" + WebStore.previewItems.length;
-    }
-    
-    if (currItem.imageUrl && currItem.imageUrl != "") {
-      pre.appendChild(Builder.node("div", { "class": "preview-image", "style": "background-image: url(" + habboImagerUrl + currItem.imageUrl +")"}));      
-    }
-    if (currItem.bgCssClass && currItem.bgCssClass != "") {
-      if (!$("webstore-preview-bgpreview")) {
-        pre.appendChild(Builder.node("div", { id: "webstore-preview-bgpreview" }, [ 
-          Builder.node("a", { href:"#", className:"toolbutton", id: "webstore-preview-bg" }, [
-            Builder.node("span", { id:"webstore-preview-bg-"+currItem.bgCssClass }, $("webstore-preview-bg-text").innerHTML)
+    if (currItem.bgCssClass) {
+      if (!$("webstore-preview-bgpreview") && $("webstore-preview-bg-text")) {
+        pre.appendChild(Builder.node("div", { id: "webstore-preview-bgpreview" }, [
+          Builder.node("a", { href: "#", className: "toolbutton", id: "webstore-preview-bg" }, [
+            Builder.node("span", $("webstore-preview-bg-text").innerHTML)
           ])
         ]));
       }
     } else if ($("webstore-preview-bgpreview")) {
       Element.remove($("webstore-preview-bgpreview"));
     }
-  }, 
-    
+  },
+
   _clearPreview: function() {
     WebStore.previewItems = null;
     WebStore.previewItemPointer = 0;
-    var previewBox = $("webstore-preview-box");
-    if (previewBox) {
-      previewBox.innerHTML = "";
+    if ($("webstore-preview-box")) {
+      $("webstore-preview-box").innerHTML = "";
     }
-  }, 
-  
+  },
+
+  closeConfirmation: function(e) {
+    if (e) { Event.stop(e); }
+    if ($("webstore-confirm")) {
+      Element.remove($("webstore-confirm"));
+      Overlay.move(9000);
+    }
+  },
+
   _purchaseConfirm: function(productId) {
-    Overlay.move("9002");
-    var dialog = Dialog.createDialog("webstore-confirm", "", "9003", -1500, 0, WebStore.closeConfirmation);
-    Dialog.makeDialogDraggable(dialog);
+    Overlay.move(9002);
+    var dialog = WebStore.createDialog("webstore-confirm", "", 9003, -1500, 0, WebStore.closeConfirmation);
     Dialog.setAsWaitDialog(dialog);
     Dialog.moveDialogToCenter(dialog);
-    
-    new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_confirm", { 
-      method: "post", parameters: { "productId" : productId, "subCategoryId" :  WebStore.selectedSubCategory }, 
-      onComplete: function(req, json) {
+
+    new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_confirm", {
+      method: "post", parameters: { productId: productId },
+      onComplete: function(req) {
         if (WebStore._checkResponse(req.responseText)) {
           Dialog.setDialogBody(dialog, req.responseText);
           if ($("webstore-confirm-submit")) {
             Event.observe($("webstore-confirm-submit"), "click", function(e) {
               Event.stop(e);
-              WebStore._purchase(WebStore.selectedItem.id.split("-").last(), dialog);
+              WebStore._purchase(productId, dialog);
             });
           }
-          Event.observe($("webstore-confirm-cancel"), "click", WebStore.closeConfirmation);
-        }
-      }
-    });
-  }, 
-  
-  _purchase: function(productId, dialog) {
-    Dialog.setAsWaitDialog(dialog);
-    var type = WebStore.MenuBar.selectedMainCategory.id.split("-").last();
-    new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_" + type, { 
-      method: "post", parameters: { task: "purchase", selectedId: productId }, onComplete: function(req, json) {
-        if (WebStore._checkResponse(req.responseText)) {
-          if (req.responseText.strip() != "OK") {
-            Dialog.setDialogBody(dialog, req.responseText);
+          if ($("webstore-confirm-cancel")) {
             Event.observe($("webstore-confirm-cancel"), "click", WebStore.closeConfirmation);
-          } else {
-            WebStore.Inventory.newItems.push(json);
-            WebStore.Inventory.updateNewItemCount();
-            Overlay.move("9000");
-            Element.remove(dialog);
-            
-            // refresh both webstore and inventory (if needed)
-            WebStore.openSubCategory(WebStore.selectedSubCategory, WebStore.selectedCategory, true, productId);
-            if (WebStore.Inventory.inventoryOpened) {
-              WebStore.Inventory.selectCategory(WebStore.MenuBar.selectedMainCategory.id.split("-").last());
-              WebStore.Inventory._clearPreview();
-              WebStore.Inventory.waitingForReload = true;
-              WebStore.Inventory.lastId = json;
-            }
           }
         }
       }
     });
   },
-  
-  _getCategoryOpener: function(mainCategoryType) {
-    if (mainCategoryType == "avatar") {
-      return function(subcategoryId, mainCategoryId, subcategoryEl) {
-        if (!WebStore.loadingCategory) {
-          WebStore.loadingCategory = true;
-          WebStore._resetState();
-          Element.wait($("webstore-items"));
-          WebStore.StickerEditor.open();
+
+  _purchase: function(productId, dialog) {
+    Dialog.setAsWaitDialog(dialog);
+    new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_" + WebStore.selectedType, {
+      method: "post", parameters: { selectedId: productId },
+      onComplete: function(req) {
+        if (!WebStore._checkResponse(req.responseText)) {
+          return;
         }
-      };
-    } else {
-      return function(subcategoryId, mainCategoryId, subcategoryEl) {
-        if (!WebStore.loadingCategory) {
-          Element.wait($("webstore-items"));
-          WebStore._resetState();
-          WebStore.MenuBar.changeSubcategory(subcategoryId, mainCategoryId, subcategoryEl);
-          WebStore.loadingCategory = true;
+        if (req.responseText.strip() != "OK") {
+          // Refused (owned already, not enough coins): the answer comes with its own OK button.
+          Dialog.setDialogBody(dialog, req.responseText);
+          if ($("webstore-confirm-cancel")) {
+            Event.observe($("webstore-confirm-cancel"), "click", WebStore.closeConfirmation);
+          }
+          return;
         }
-      };
-    }
-  }, 
-  
-  _setDialogSize: function(mainCategoryType, afterFinishCallback) {
-    if (mainCategoryType == "avatar") {
-      new Effect.Transform([
-        {"#purchase-main-dialog-body":"height: 399px"}, 
-        {"#webstore-items":"height: 381px"}, 
-        {"#webstore-categories":"height: 381px"}
-      ], { afterFinish: afterFinishCallback || Prototype.emptyFunction }).play();
-      $("webstore-close-container").style.display = "none";
-    } else {
-      new Effect.Transform([
-        {"#purchase-main-dialog-body":"height: 324px"}, 
-        {"#webstore-items":"height: 306px"}, 
-        {"#webstore-categories":"height: 306px"}
-      ], { afterFinish: afterFinishCallback || Prototype.emptyFunction }).play();
-      $("webstore-close-container").style.display = "block";
-    }
-  }, 
-  
+        WebStore.Inventory.newItems.push(productId);
+        Overlay.move(9000);
+        Element.remove(dialog);
+
+        // the store shows the new purse; the inventory reloads when it is shown again
+        WebStore.openCategory(WebStore.selectedCategoryId, true, productId);
+        WebStore.Inventory.waitingForReload = true;
+        WebStore.Inventory.updateNewItemCount();
+      }
+    });
+  },
+
   _checkResponse: function(responseText) {
     if (responseText.strip() == "REFRESH") {
       WebStore.NoteEditor.close();
@@ -556,715 +435,449 @@ var WebStore = {
     }
     return true;
   }
-  
-};
-
-WebStore.MenuBar = {
-  
-  selectedMainCategory: null, 
-  selectedSubcategory: null, 
-
-    init: function(){
-    WebStore.MenuBar._setEventHandler();
-    
-    WebStore.MenuBar.selectedMainCategory = $("webstore-categories").select(".webstore-selected-main").first();
-    if (WebStore.MenuBar.selectedMainCategory) WebStore.selectedCategory = WebStore.MenuBar.selectedMainCategory.id.split("-")[1];
-    WebStore.MenuBar.selectedSubcategory = $(WebStore.MenuBar.selectedMainCategory).select(".subcategory-selected").first();
-    if (WebStore.MenuBar.selectedSubcategory) WebStore.selectedSubCategory = WebStore.MenuBar.selectedSubcategory.id.split("-")[2];
-    },
-
-    changeMainCategory: function(mainCategoryId, mainCategoryEl, mainCategoryType) {
-      if (!WebStore.loadingCategory) {
-      if (mainCategoryEl == WebStore.MenuBar.selectedMainCategory) {
-          if (WebStore.MenuBar.selectedMainCategory != null) {
-            if (Element.hasClassName(WebStore.MenuBar.selectedMainCategory, "selected-main-category")) {
-            WebStore.MenuBar._closeMainCategory(mainCategoryId, mainCategoryEl);
-            } else if (Element.hasClassName(WebStore.MenuBar.selectedMainCategory, "main-category")) {
-              WebStore.MenuBar._setMainCategory(mainCategoryId, mainCategoryEl);
-            }
-          }
-        return;
-      }
-      
-      Overlay.show(); // re-display overlay if coming from avatar category
-      
-      var oldMainCat = WebStore.MenuBar.selectedMainCategory;
-      var switched = false;
-      if (oldMainCat != null && oldMainCat != mainCategoryEl) {
-        WebStore.MenuBar._unselectSelectedMainCategory();
-        WebStore.MenuBar._unselectSelectedSubcategory();
-        switched = true;
-      }
-      WebStore.MenuBar._setMainCategory(mainCategoryId, mainCategoryEl);
-      
-      if (switched) {
-        WebStore._showDefaultPreview();
-        Element.wait($("webstore-items"));
-        WebStore._setDialogSize(mainCategoryType, function() {
-          var subcategoryEl = mainCategoryEl.select(".subcategory").first();
-          if (subcategoryEl && subcategoryEl.id) {
-            var subcategoryId = subcategoryEl.id.split("-")[2];
-            WebStore._getCategoryOpener(mainCategoryType)(subcategoryId, mainCategoryId, subcategoryEl);
-          } else {
-            WebStore.selectedSubCategory = null;
-            WebStore.MenuBar.selectedSubcategory = null;
-          }
-        });
-      }
-      }
-  },
-  
-  changeSubcategory: function(subcategoryId, mainCategoryId, subcategoryEl) {
-    WebStore.MenuBar._unselectSelectedSubcategory();
-    WebStore.MenuBar.selectedSubcategory = subcategoryEl;
-    subcategoryEl.className = "subcategory-selected";
-    
-    WebStore.openSubCategory(subcategoryId, mainCategoryId);
-  }, 
-  
-  _setEventHandler: function() {
-    $("webstore-categories").onclick = WebStore.MenuBar._handleCategoryClick.bindAsEventListener(this);
-  }, 
-  
-  _handleCategoryClick: function(e) {
-    Event.stop(e);
-    if (!WebStore.loadingCategory) {
-      var el = Event.findElement(e, "li");
-      if (el && el.id) {
-        if (el.id.indexOf("maincategory-") == 0) {
-          var temp = el.id.split("-");
-          WebStore.MenuBar.changeMainCategory(temp[1], el, temp[2]);
-          WebStore._setContentClassName(temp[2]);
-        } else if (el.id.indexOf("subcategory-") == 0) {
-          var temp = el.id.split("-");
-          WebStore.MenuBar.changeSubcategory(temp[2], temp[1], el);
-          WebStore._setContentClassName(temp[3]);
-        }
-      }
-    }
-  }, 
-
-    _setMainCategory: function(mainCategoryId, mainCategoryEl){
-    mainCategoryEl.className = "selected-" + mainCategoryEl.className;
-    if (mainCategoryEl.className.indexOf("no-subcategories") == -1) {
-      Effect.SlideDown($("main-category-items-" + mainCategoryId), { duration: 0.2 });
-    }
-    WebStore.MenuBar.selectedMainCategory = mainCategoryEl;
-    },
-
-  _hideSubcategories: function(){
-    $$(".purchase-subcategory-list").each(function (el) { Element.hide(el); });
-  },
-  
-  _closeMainCategory: function(mainCategoryId, mainCategoryEl) {
-    if (WebStore.MenuBar.selectedSubcategory != null && 
-      Element.hasClassName(WebStore.MenuBar.selectedMainCategory, "selected-main-category")) {
-      Effect.SlideUp("main-category-items-" + mainCategoryId, { duration: 0.2 });
-    }
-    if (WebStore.MenuBar.selectedSubcategory != mainCategoryEl) {
-      WebStore.MenuBar._unselectSelectedMainCategory();
-    }
-  },
-  
-  _unselectSelectedSubcategory: function() {
-    if (WebStore.MenuBar.selectedSubcategory) {
-      WebStore.MenuBar.selectedSubcategory.className = "subcategory";
-    }
-  },
-  
-  _unselectSelectedMainCategory: function() {
-    if (WebStore.MenuBar.selectedMainCategory != null) {
-      if (Element.hasClassName(WebStore.MenuBar.selectedMainCategory, "selected-main-category-no-subcategories")) {
-          WebStore.MenuBar.selectedMainCategory.className = "main-category-no-subcategories";
-      } else if (Element.hasClassName(WebStore.MenuBar.selectedMainCategory, "selected-main-category")) {
-          WebStore.MenuBar.selectedMainCategory.className = "main-category";
-      }
-    }
-    WebStore.MenuBar._hideSubcategories();
-  }
 };
 
 WebStore.Inventory = {
-  
+
   newItems: [],
   inventoryOpened: false,
   selectedItem: null,
-  selectedCategory: null, 
-  loadingCategory: false, 
-  previewItem: null, 
+  loadingCategory: false,
+  previewItem: null,
   waitingForReload: false,
-  lastId: 0,
-  
+
+  /** "Åbn inventar (n)": the purchases since the inventory was last shown. */
   updateNewItemCount: function() {
     var newDiv = $("webstore-inventory-new");
-    if (newDiv) {
-      var itemCount = WebStore.Inventory.newItems.length;
-      if (itemCount > 0) {
-        newDiv.innerHTML = " (" + itemCount + ")";
-        newDiv.className = "new";
-      } else {
-        newDiv.innerHTML = "";
-        newDiv.className = "";
-      }
+    if (!newDiv) {
+      return;
     }
-  }, 
-  
-  load: function() {
-    new Ajax.Request(
-      habboReqPath + "/myhabbo/store/inventory", {
-        method: "post", parameters: { type: "stickers" }, 
-        onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            Dialog.setDialogBody(WebStore.dialog, req.responseText);
-            WebStore.created = true;
-            WebStore.Inventory.inventoryOpened = true;
-            WebStore.MenuBar.init();
-            WebStore.Inventory.initMenu();
-            
-            WebStore.localization = json[0];
-            WebStore._buildTabs();
-            WebStore._selectTab("webstore-inventory");
-            
-            WebStore.Inventory.previewItem = json[1];
-            WebStore.Inventory._showPreview();
-            
-            var el = $A($("inventory-item-list").getElementsByTagName("li")).first();
-            if (el) { WebStore.Inventory._selectItem(el); }
-            
-            WebStore._setEventHandlers();
-          }
-        }
-      }
-    );
-  }, 
-  
-  initMenu: function() {
-    $("inventory-categories").onclick = WebStore.Inventory._handleCategoryClick.bindAsEventListener(this);
-    WebStore.Inventory.selectedCategory = $A($("inventory-categories").getElementsByTagName("li")).first().id.split("-").last();
-  }, 
-  
-  loadCategory: function(type) {
-    if (!WebStore.Inventory.loadingCategory) {
-      Element.wait($("inventory-items"));
-      WebStore.Inventory._clearPreview();
-      WebStore.Inventory.loadingCategory = true;
-      new Ajax.Request(
-        habboReqPath + "/myhabbo/store/inventory_items", {
-          method: "post", parameters: { type: type },
-          onComplete: function(req, json) {
-            if (WebStore._checkResponse(req.responseText)) {
-              $("inventory-items").innerHTML = req.responseText;
-              WebStore.Inventory.selectedCategory = type;
-              WebStore.Inventory.loadingCategory = false;
-              
-              var items = $A($("inventory-item-list").getElementsByTagName("li"));
-              var done = false;
-              
-              if (items && items.length > 0) {
-                // check if the last purchased item is found and select that
-                if (WebStore.Inventory.lastId != 0) {
-                  items.each(function(el) {
-                    if (el && el.id && (!el.className || !Element.hasClassName(el, "webstore-widget-disabled"))) {
-                      var temp = el.id.split("-");
-                      if (temp.last() == WebStore.Inventory.lastId) {
-                        WebStore.Inventory._selectItem(el);
-                        WebStore.Inventory._loadPreview(temp.last(), type, temp[2] == "p");
-                        done = true;
-                        WebStore.Inventory.lastId = 0;
-                        throw $break;
-                      }
-                    }
-                  });
-                }
-                
-                // otherwise select the first available item
-                if (!done) {
-                  items.each(function(el) {
-                    if (el && el.id && (!el.className || !Element.hasClassName(el, "webstore-widget-disabled"))) {
-                      WebStore.Inventory._selectItem(el);
-                      var temp = el.id.split("-");
-                      WebStore.Inventory._loadPreview(temp.last(), type, temp[2] == "p");
-                      done = true;
-                      throw $break;
-                    }
-                  });
-                }
-              }
+    var itemCount = WebStore.Inventory.newItems.length;
+    if (itemCount > 0) {
+      newDiv.innerHTML = " (" + itemCount + ")";
+      newDiv.className = "new";
+      newDiv.style.display = "block";
+    } else {
+      newDiv.innerHTML = "";
+      newDiv.className = "";
+      newDiv.style.display = "none";
+    }
+  },
 
-              if (!done) {
-                WebStore.Inventory._showDefaultPreview();
-              }
-              
-              // make sure webstore is hidden
-              WebStore.hideWebStoreDivs();
-            }
-          }
+  load: function(type) {
+    Dialog.setAsWaitDialog(WebStore.dialog);
+    new Ajax.Request(habboReqPath + "/myhabbo/store/inventory", {
+      method: "post", parameters: { type: type },
+      onComplete: function(req, json) {
+        if (WebStore._checkResponse(req.responseText)) {
+          Dialog.setDialogBody(WebStore.dialog, req.responseText);
+          WebStore.Inventory.inventoryOpened = true;
+          WebStore.Inventory.waitingForReload = false;
+          WebStore.Inventory.selectedItem = null;
+          WebStore.Inventory.previewItem = json;
+          WebStore.Inventory._showPreview();
+          var el = WebStore.Inventory._firstSelectable();
+          if (el) { WebStore.Inventory._selectItem(el); }
+          WebStore._setEventHandlers();
+          Dialog.moveDialogToCenter(WebStore.dialog);
         }
-      );
+      }
+    });
+  },
+
+  /** Reloads the item list (after a purchase or an item taken off the page). */
+  loadCategory: function(type) {
+    if (WebStore.Inventory.loadingCategory) {
+      return;
     }
-  }, 
-  
+    Element.wait($("inventory-items"));
+    WebStore.Inventory._clearPreview();
+    WebStore.Inventory.loadingCategory = true;
+    new Ajax.Request(habboReqPath + "/myhabbo/store/inventory_items", {
+      method: "post", parameters: { type: type },
+      onComplete: function(req) {
+        WebStore.Inventory.loadingCategory = false;
+        if (WebStore._checkResponse(req.responseText)) {
+          $("inventory-items").innerHTML = req.responseText;
+          WebStore.Inventory.selectedItem = null;
+          var el = WebStore.Inventory._firstSelectable();
+          if (el) {
+            WebStore.Inventory._selectItem(el);
+            var temp = el.id.split("-");
+            WebStore.Inventory._loadPreview(temp.last(), type);
+          } else {
+            WebStore.Inventory._showDefaultPreview();
+          }
+          WebStore._setEventHandlers();
+        }
+      }
+    });
+  },
+
   reloadIfNeeded: function() {
-    if (WebStore.Inventory.waitingForReload && WebStore.Inventory.selectedCategory) {
-      WebStore.Inventory.loadCategory(WebStore.Inventory.selectedCategory);
+    if (WebStore.Inventory.waitingForReload && WebStore.selectedType) {
       WebStore.Inventory.waitingForReload = false;
+      WebStore.Inventory.loadCategory(WebStore.selectedType);
     }
-  }, 
-  
-  selectCategory: function(type, categoryEl) {
-    if (!categoryEl) {
-      categoryEl = $("inv-cat-" + type);
-    }
-    if (WebStore.Inventory.selectedCategory != type && categoryEl) {
-      categoryEl.className = "selected-main-category-no-subcategories";
-      if (WebStore.Inventory.selectedCategory != null) {
-        $("inv-cat-" + WebStore.Inventory.selectedCategory).className = "main-category-no-subcategories";
-      }
-      WebStore.Inventory.selectedCategory = type;
-      WebStore.Inventory.loadCategory(type);
-      WebStore.Inventory._setContentClassName(type);
-    }
-  }, 
-  
-  showInventoryDivs: function() {
-    WebStore.hideWebStoreDivs();
-    $("inventory-categories-container").style.display = "block";
-    $("inventory-content-container").style.display = "block";
-    $("inventory-items-container").style.display = "block";
-    $("inventory-preview-container").style.display = "block";
-  }, 
-  
+  },
+
   hideInventoryDivs: function() {
-    $("inventory-categories-container").style.display = "none";
-    $("inventory-content-container").style.display = "none";
-    $("inventory-items-container").style.display = "none";
-    $("inventory-preview-container").style.display = "none";
-  }, 
-  
-  _handleCategoryClick: function(e) {
-    Event.stop(e);
-    if (!WebStore.Inventory.loadingCategory) {
-      var el = Event.findElement(e, "li");
-      if (el && el.id) {
-        WebStore.Inventory.selectCategory(el.id.split("-").last(), el);
-      }
+    if ($("inventory-content")) { $("inventory-content").style.display = "none"; }
+    if ($("webstore-content")) { $("webstore-content").style.display = "block"; }
+  },
+
+  _firstSelectable: function() {
+    if (!$("inventory-item-list")) {
+      return null;
     }
-  }, 
-  
+    return $A($("inventory-item-list").getElementsByTagName("li")).find(function(el) {
+      return el.id && !Element.hasClassName(el, "webstore-widget-disabled");
+    });
+  },
+
   _setEventHandlers: function() {
     if ($("inventory-items")) {
-      $("inventory-items").onclick = WebStore.Inventory._handleItemClick.bindAsEventListener(this);
+      $("inventory-items").onclick = WebStore.Inventory._handleItemClick.bindAsEventListener(WebStore.Inventory);
     }
-    
     if ($("inventory-preview")) {
-      $("inventory-preview").onclick = WebStore.Inventory._handlePreviewClick.bindAsEventListener(this);
+      $("inventory-preview").onclick = WebStore.Inventory._handlePreviewClick.bindAsEventListener(WebStore.Inventory);
     }
-  }, 
-  
+    if ($("purchase-stickers")) {
+      $("purchase-stickers").onclick = function(e) { Event.stop(e); WebStore._loadMainContent(WebStore.selectedType, "store"); };
+    }
+    if ($("inventory-close")) {
+      $("inventory-close").onclick = function(e) { Event.stop(e); WebStore.close(); };
+    }
+    if ($("load-inventory")) {
+      $("load-inventory").onclick = function(e) { Event.stop(e); WebStore._loadMainContent(WebStore.selectedType, "inventory"); };
+    }
+  },
+
   _handleItemClick: function(e) {
     Event.stop(e);
     var el = Event.findElement(e, "li");
-    if (el && el.id && el != WebStore.Inventory.selectedItem && (!el.className || !Element.hasClassName(el, "webstore-widget-disabled"))) {
+    if (el && el.id && el != WebStore.Inventory.selectedItem && !Element.hasClassName(el, "webstore-widget-disabled")) {
       WebStore.Inventory._selectItem(el);
-      var temp = el.id.split("-");
-      WebStore.Inventory._loadPreview(temp.last(), WebStore.Inventory.selectedCategory, temp[2] == "p");
+      WebStore.Inventory._loadPreview(el.id.split("-").last(), WebStore.selectedType);
     }
-  }, 
-  
-  _handlePreviewClick: function(e) {
-    Event.stop(e);
-    var el = Event.findElement(e, "a");
-    if (el && el.id) {
-      if (el.id == "inventory-place") {
-        WebStore.Inventory._place();
-      } else if (el.id == "inventory-place-all") {
-        WebStore.Inventory._placeAll();
-      }
-    }
-  }, 
-  
-  _setContentClassName: function(className) {
-    $("inventory-content-container").className = className;
   },
-  
+
+  _handlePreviewClick: function(e) {
+    var el = Event.findElement(e, "a");
+    if (el && el.id == "inventory-place") {
+      Event.stop(e);
+      WebStore.Inventory._place();
+    }
+  },
+
   _selectItem: function(el) {
-    try {
-      if (!Element.hasClassName(el, "selected")) {
-        Element.removeClassName(WebStore.Inventory.selectedItem, "selected");
-        Element.addClassName(el, "selected");
-        WebStore.Inventory.selectedItem = el;
-      }
-    } catch (ex) {}
-  }, 
-  
-  _loadPreview: function(itemId, type, privileged) {
+    if (WebStore.Inventory.selectedItem && WebStore.Inventory.selectedItem != el) {
+      Element.removeClassName(WebStore.Inventory.selectedItem, "selected");
+    }
+    Element.addClassName(el, "selected");
+    WebStore.Inventory.selectedItem = el;
+  },
+
+  _loadPreview: function(itemId, type) {
     WebStore.Inventory._clearPreview();
     Element.wait($("inventory-preview"));
-    WebStore.Inventory._showPreview();
-    var qs = { itemId: itemId, type: type };
-    if (type == "widgets") {
-      qs.privileged = privileged;
-    }
-    new Ajax.Request(
-      habboReqPath + "/myhabbo/store/inventory_preview", {
-        method: "post", parameters: qs,
-        onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            WebStore.Inventory.previewItem = json;
-            WebStore.Inventory._showPreview(req.responseText);
-          }
-          
-          // make sure webstore is hidden
-          WebStore.hideWebStoreDivs();
+    new Ajax.Request(habboReqPath + "/myhabbo/store/inventory_preview", {
+      method: "post", parameters: { itemId: itemId, type: type },
+      onComplete: function(req, json) {
+        if (WebStore._checkResponse(req.responseText)) {
+          WebStore.Inventory.previewItem = json;
+          WebStore.Inventory._showPreview(req.responseText);
         }
       }
-    );
-  }, 
-  
+    });
+  },
+
   _showPreview: function(previewHtml) {
     var previewDiv = $("inventory-preview");
-    if (previewHtml) { previewDiv.innerHTML = previewHtml };
-    
-    if (WebStore.Inventory.previewItem && WebStore.Inventory.previewItem.length > 0) {
+    if (!previewDiv) {
+      return;
+    }
+    if (previewHtml) { previewDiv.innerHTML = previewHtml; }
+
+    var item = WebStore.Inventory.previewItem;
+    if (item && item.length > 0 && $("inventory-preview-box")) {
       var preview = $("inventory-preview-box").appendChild(Builder.node("div", { id: "inventory-preview-pre" }));
-      if (WebStore.Inventory.previewItem[5] && WebStore.Inventory.previewItem[5] > 1) {
+      if (item[5] && item[5] > 1) {
         preview.appendChild(Builder.node("div", { id: "inventory-preview-count", className: "webstore-item-count" }));
       }
-      
       WebStore.Inventory._setPreviewItem();
+      $("inventory-preview-container").show();
     }
-    
     previewDiv.show();
-  }, 
-    
+  },
+
   _clearPreview: function() {
     WebStore.Inventory.previewItem = null;
-    var previewBox = $("inventory-preview");
-    if (previewBox) {
-      previewBox.innerHTML = "";
+    if ($("inventory-preview-box")) {
+      $("inventory-preview-box").innerHTML = "";
     }
-  }, 
-  
+  },
+
   _showDefaultPreview: function() {
     WebStore.Inventory._clearPreview();
-    var previewDiv = $("inventory-preview");
-    previewDiv.hide();
-    $("inventory-preview-default").show();
-    previewDiv.innerHTML = "";
-  }, 
-  
+    if ($("inventory-preview-container")) {
+      $("inventory-preview-container").hide();
+    }
+  },
+
   _setPreviewItem: function() {
+    var item = WebStore.Inventory.previewItem;
     var pre = $("inventory-preview-pre");
-    pre.className = WebStore.Inventory.previewItem[0];
-      pre.title = decodeURIComponent(WebStore.Inventory.previewItem[2]);
-    if (WebStore.Inventory.previewItem[3] == "DynamicSticker") {
-      pre.style.backgroundImage = "url(" + habboImagerUrl + WebStore.Inventory.previewItem[4] + ")";
-    }
+    pre.className = item[0];
+    pre.title = item[2];
     if ($("inventory-preview-count")) {
-      $("inventory-preview-count").innerHTML = "<div>x" + WebStore.Inventory.previewItem[5] + "</div>";
+      $("inventory-preview-count").innerHTML = "<div>x" + item[5] + "</div>";
     }
-  }, 
-  
+  },
+
   _place: function() {
-    if (WebStore.Inventory.selectedCategory == "stickers") {
-      doPlaceImageOnPage(WebStore.Inventory.selectedItem.id.split("-").last());
-      WebStore.Inventory._closeAfterPlace();
-    } else if (WebStore.Inventory.selectedCategory == "backgrounds") {
+    var selected = WebStore.Inventory.selectedItem;
+    if (!selected) {
+      return;
+    }
+    var temp = selected.id.split("-");
+    if (WebStore.selectedType == "stickers") {
+      doPlaceImageOnPage(temp.last());
+    } else if (WebStore.selectedType == "backgrounds") {
+      if (!WebStore.Inventory.previewItem) {
+        return;
+      }
       WebStore.originalBg = WebStore.Inventory.previewItem[1];
-      doChangeBg(WebStore.Inventory.previewItem[1], WebStore.Inventory.selectedItem.id.split("-").last());
-      WebStore.Inventory._closeAfterPlace();
-    } else if (WebStore.Inventory.selectedCategory == "widgets") {
-      var temp = WebStore.Inventory.selectedItem.id.split("-");
+      doChangeBg(WebStore.Inventory.previewItem[1], temp.last());
+    } else if (WebStore.selectedType == "widgets") {
       doPlaceWidget(temp[3], temp[2] == "p");
-      WebStore.Inventory._closeAfterPlace();
-    } else if (WebStore.Inventory.selectedCategory == "notes") {
-      WebStore.NoteEditor.open();
     }
-  }, 
-  
-  _placeAll: function() {
-    if (WebStore.Inventory.selectedCategory == "stickers") {
-      doPlaceImageOnPage(WebStore.Inventory.selectedItem.id.split("-").last(), true);
-      WebStore.Inventory._closeAfterPlace();
-    }
-  }, 
-  
+    WebStore.Inventory._closeAfterPlace();
+  },
+
   _closeAfterPlace: function() {
     WebStore.close();
     WebStore.Inventory._clearPreview();
-    Element.wait($("inventory-items"));
+    if ($("inventory-items")) {
+      Element.wait($("inventory-items"));
+    }
     WebStore.Inventory.waitingForReload = true;
   }
-  
-}
+};
 
+/** The avatar sticker editor of later Homes isn't offered; homeedit.js's previewEsticker still calls this. */
 WebStore.StickerEditor = {
-  
-  figureParams: null, 
-  
-  open: function() {
-    new Ajax.Request(
-      habboReqPath + "/myhabbo/stickereditor/stickereditor_flash", {
-        method: "post", parameters: WebStore.StickerEditor.figureParams || "", 
-        onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            Overlay.hideIfMacFirefox();
-            
-            var itemsDiv = $("webstore-items");
-            itemsDiv.innerHTML = req.responseText;
-            req.responseText.evalScripts();
-            
-            WebStore.loadingCategory = false;
-          }
-        }
-      }
-    );
-  }, 
-  
-  preview: function(figureParams) {
-    WebStore.StickerEditor.figureParams = figureParams;
-    
-    $("flashcontent").style.display = "none";
-    $("flashalternate").style.display = "block";
-    
-    Overlay.show();
-    Overlay.move("9002");
-    var dialog = Dialog.createDialog("webstore-confirm", "", "9003", -1500, 0, function(e) {
-      WebStore.closeConfirmation(e);
-      WebStore.StickerEditor.open();
-    });
-    Dialog.makeDialogDraggable(dialog);
-    Dialog.setAsWaitDialog(dialog);
-    Dialog.moveDialogToCenter(dialog);
-    
-    new Ajax.Request(habboReqPath + "/myhabbo/stickereditor/preview", {
-      method: "post", parameters: figureParams || "", 
-      onComplete: function(req, json) {
-        if (WebStore._checkResponse(req.responseText)) {
-          Dialog.setDialogBody(dialog, req.responseText);
-          Event.observe($("avatarimage-preview-img"), "load", function(e) { Element.remove("avatarimage-progressbar"); });
-          Event.observe($("avatarimage-preview-purchase"), "click", function(e) {
-            Event.stop(e);
-            Dialog.setAsWaitDialog(dialog);
-            WebStore.StickerEditor._purchase(json);
-          });
-          Event.observe($("avatarimage-preview-edit"), "click", function(e) {
-            Event.stop(e);
-            Element.remove($("webstore-confirm"));
-            Overlay.move("9000");
-            Overlay.hideIfMacFirefox();
-            Element.wait($("flashcontent"));
-            $("flashalternate").style.display = "none";
-            $("flashcontent").style.display = "block";
-            WebStore.StickerEditor.open();
-          });
-        }
-      }
-    });
-  }, 
-  
-  _purchase: function(imageUrl) {
-    new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_avatarsticker", {
-      method: "post", parameters: { stickerimage: imageUrl },
-      onComplete: function(req, json) {
-        if (WebStore._checkResponse(req.responseText)) {
-          if (req.responseText.strip() != "OK") {
-            Dialog.setDialogBody($("webstore-confirm"), req.responseText);
-            Event.observe($("webstore-confirm-cancel"), "click", WebStore.closeConfirmation);
-          } else {
-            WebStore.Inventory.newItems.push(json);
-            WebStore.Inventory.updateNewItemCount();
-            Element.remove($("webstore-confirm"));
-            WebStore.StickerEditor.open();
-            Overlay.move("9000");
-            
-            // refresh inventory (if needed)
-            if (WebStore.Inventory.inventoryOpened) {
-              WebStore.Inventory.selectCategory(WebStore.MenuBar.selectedMainCategory.id.split("-").last());
-              WebStore.Inventory._clearPreview();
-              WebStore.Inventory.waitingForReload = true;
-              WebStore.Inventory.lastId = json;
-            }
-          }
-        }
-      }
-    });
-  }
-  
-}
+  preview: function() {}
+};
 
 WebStore.NoteEditor = {
-  
-  dialog: null, 
-  noteParams: null, 
-  id: null, 
-  
+
+  dialog: null,
+  noteParams: null,
+  purchaseTitle: "",
+  placeAfterPurchase: false,
+
+  /** From the toolbar's Noter button. */
   open: function() {
-    Overlay.move("9002");
-    WebStore.NoteEditor._createEditorDialog();
-    WebStore.NoteEditor._loadEditor();
-  }, 
-  
-  close: function(e) {
-    if (e) { Event.stop(e); }
-    if ($("webstore-noteeditor")) {
-      Element.remove($("webstore-noteeditor"));
-      if (WebStore.NoteEditor.id) {
-        Overlay.hide();
-      } else {
-        Overlay.move("9000");
-      }
-    }
-    WebStore.NoteEditor.id = null;
-  }, 
-  
-  edit: function(id) {
-    WebStore.NoteEditor.id = id;
+    WebStore.NoteEditor.noteParams = null;
     Overlay.show();
-    WebStore.NoteEditor._createEditorDialog();
-    WebStore.NoteEditor._loadEditor({ id: id });
-  }, 
-  
-  _createEditorDialog: function() {
-    WebStore.NoteEditor.dialog = Dialog.createDialog("webstore-noteeditor", "", "9003", -1500, 0, WebStore.NoteEditor.close);
-    Dialog.makeDialogDraggable(WebStore.NoteEditor.dialog);
+    WebStore.NoteEditor.dialog = WebStore.createDialog("webstore-noteeditor", "", 9003, -1500, 0, WebStore.NoteEditor.close);
     Dialog.setAsWaitDialog(WebStore.NoteEditor.dialog);
     Dialog.moveDialogToCenter(WebStore.NoteEditor.dialog);
-  }, 
-  
+    WebStore.NoteEditor._loadEditor();
+  },
+
+  close: function(e) {
+    if (e) { Event.stop(e); }
+    WebStore.NoteEditor._removePurchaseDialog();
+    if ($("webstore-noteeditor")) {
+      Element.remove($("webstore-noteeditor"));
+      Overlay.hide();
+    }
+    WebStore.NoteEditor.noteParams = null;
+  },
+
   _loadEditor: function(noteParams, backFromPreview) {
     WebStore.NoteEditor.noteParams = noteParams || "";
-    
     new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/editor", {
-      method: "post", parameters: WebStore.NoteEditor.noteParams, onComplete: function(req, json) {
-            if (WebStore._checkResponse(req.responseText)) {
-              Dialog.setDialogBody(WebStore.NoteEditor.dialog, req.responseText);
-              req.responseText.evalScripts();
+      method: "post", parameters: WebStore.NoteEditor.noteParams,
+      onComplete: function(req) {
+        if (!WebStore._checkResponse(req.responseText)) {
+          return;
+        }
+        Dialog.setDialogBody(WebStore.NoteEditor.dialog, req.responseText);
+        req.responseText.evalScripts();
 
-              var limitCallback = function(limitReached) {
-                try {
-                  var currentLength = $F("webstore-notes-text").length;
-                  $("webstore-notes-counter").innerHTML = maxLength - currentLength;
-                  if (currentLength > 0) { WebStore.NoteEditor._enableContinue(); }
-                  else { WebStore.NoteEditor._disableContinue(); }
-                } catch (e) {}
-              };
-            
-              if (backFromPreview || WebStore.NoteEditor.id) {
-                window.setTimeout(function() {
-                  $("webstore-notes-text").focus();
-                  limitCallback();
-                }, 100);
-              }
-              
-              var maxLength = $F("webstore-notes-maxlength");
-              Utils.limitTextarea($("webstore-notes-text"), maxLength, limitCallback);
-              if (maxLength < 0) {
-                  WebStore.NoteEditor._enableContinue();
-              }
-              
-              if ($("webstore-confirm-cancel")) { Event.observe($("webstore-confirm-cancel"), "click", WebStore.NoteEditor.close); }
-              if ($("webstore-notes-continue")) { Event.observe($("webstore-notes-continue"), "click", function(e) {
-                Event.stop(e);
-                var el = Event.findElement(e, "a");
-                
-                if (!el.className || !Element.hasClassName(el, "disabled-button")) {
-                  WebStore.NoteEditor.noteParams = Form.serialize($("webstore-notes-form"));
-                  Dialog.setAsWaitDialog(WebStore.NoteEditor.dialog);
-                  new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/preview", {
-                    method: "post", parameters: WebStore.NoteEditor.noteParams, onComplete: function(req, json) {
-                      if (WebStore._checkResponse(req.responseText)) {
-                        if (req.responseText.strip() == "BACK") {
-                          WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
-                        } else {
-                          Dialog.setDialogBody(WebStore.NoteEditor.dialog, req.responseText);
-                          
-                          if ($("webstore-confirm-cancel")) { Event.observe($("webstore-confirm-cancel"), "click", WebStore.NoteEditor.close); }
-                          if ($("webstore-notes-add")) { Event.observe($("webstore-notes-add"), "click", function(e) {
-                            var isEditing = !!WebStore.NoteEditor.id;
-                            WebStore.NoteEditor.close(e);
-                            if (isEditing) {
-                              WebStore.NoteEditor._saveChanges();
-                            } else {
-                              WebStore.NoteEditor._place();
-                              WebStore.Inventory._closeAfterPlace();
-                            }
-                          }); }
-                          if ($("webstore-notes-edit")) { Event.observe($("webstore-notes-edit"), "click", function(e) {
-                            Event.stop(e);
-                            WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
-                          });
-                        }
-                      }
-                    }
-                  }
-                });
-              }
-            });
-          }
+        var maxLength = $F("webstore-notes-maxlength");
+        var limitCallback = function() {
+          try {
+            var currentLength = $F("webstore-notes-text").length;
+            $("webstore-notes-counter").innerHTML = maxLength - currentLength;
+            if (currentLength > 0) { WebStore.NoteEditor._enableContinue(); }
+            else { WebStore.NoteEditor._disableContinue(); }
+          } catch (ex) {}
+        };
+        if (backFromPreview) {
+          window.setTimeout(function() {
+            $("webstore-notes-text").focus();
+            limitCallback();
+          }, 100);
+        }
+        Utils.limitTextarea($("webstore-notes-text"), maxLength, limitCallback);
+        if (maxLength < 0) {
+          WebStore.NoteEditor._enableContinue();
+        }
+
+        if ($("note-editor-purchase")) {
+          WebStore.NoteEditor.purchaseTitle = $("note-editor-purchase").innerText || $("note-editor-purchase").textContent;
+          Event.observe($("note-editor-purchase"), "click", function(e) {
+            Event.stop(e);
+            WebStore.NoteEditor.placeAfterPurchase = false;
+            WebStore.NoteEditor.openPurchaseDialog(false);
+          });
+        }
+        if ($("webstore-confirm-cancel")) { Event.observe($("webstore-confirm-cancel"), "click", WebStore.NoteEditor.close); }
+        if ($("webstore-notes-continue")) {
+          Event.observe($("webstore-notes-continue"), "click", function(e) {
+            Event.stop(e);
+            var el = Event.findElement(e, "a");
+            if (!Element.hasClassName(el, "disabled-button")) {
+              WebStore.NoteEditor.noteParams = Form.serialize($("webstore-notes-form"));
+              WebStore.NoteEditor._loadPreview();
+            }
+          });
         }
       }
     });
-  }, 
-  
+  },
+
+  _loadPreview: function() {
+    Dialog.setAsWaitDialog(WebStore.NoteEditor.dialog);
+    new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/preview", {
+      method: "post", parameters: WebStore.NoteEditor.noteParams,
+      onComplete: function(req) {
+        if (!WebStore._checkResponse(req.responseText)) {
+          return;
+        }
+        if (req.responseText.strip() == "BACK") {
+          WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
+          return;
+        }
+        Dialog.setDialogBody(WebStore.NoteEditor.dialog, req.responseText);
+        if ($("webstore-notes-add")) {
+          Event.observe($("webstore-notes-add"), "click", function(e) {
+            Event.stop(e);
+            WebStore.NoteEditor._place();
+          });
+        }
+        if ($("webstore-notes-edit")) {
+          Event.observe($("webstore-notes-edit"), "click", function(e) {
+            Event.stop(e);
+            WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
+          });
+        }
+      }
+    });
+  },
+
   _place: function() {
-    if (WebStore.NoteEditor.noteParams) {
-      new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/place", {
-        method: "post", parameters: WebStore.NoteEditor.noteParams, onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            if (req.responseText.strip() == "BACK") {
-              WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
-            } else if (req.responseText.strip() != "") {
-              $("playground").insert(req.responseText);
-              var note = $("stickie-" + json);
-              Element.hide(note);
-              note.style.top = "10px";
-              note.style.left = "10px";
-              Effect.BlindDown(note, {scaleX:true, scaleY:true});
-              initMovableItems();
-              Utils.setAllEmbededObjectsVisibility('hidden');
-            }
-          }
-        }
-      });
+    if (!WebStore.NoteEditor.noteParams) {
+      return;
     }
-  }, 
-  
-  _saveChanges: function() {
-    if (WebStore.NoteEditor.noteParams) {
-      new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/save", {
-        method: "post", parameters: WebStore.NoteEditor.noteParams, onComplete: function(req, json) {
-          if (WebStore._checkResponse(req.responseText)) {
-            if (req.responseText.strip() == "BACK") {
-              WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
-            } else if (req.responseText.strip() != "") {
-              var oldNote = $("stickie-" + json);
-              var x = oldNote.offsetLeft;
-              var y = oldNote.offsetTop;
-              Element.remove(oldNote);
-              $("playground").insert(req.responseText);
-              var note = $("stickie-" + json);
-              Element.hide(note);
-              note.style.top = y+"px";
-              note.style.left = x+"px";
-              Effect.Appear(note);
-              initMovableItems();
-              Utils.setAllEmbededObjectsVisibility('hidden');
-            }
-          }
+    new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/place", {
+      method: "post", parameters: WebStore.NoteEditor.noteParams,
+      onComplete: function(req, json) {
+        if (!WebStore._checkResponse(req.responseText)) {
+          return;
         }
-      });
+        var answer = req.responseText.strip();
+        if (answer == "NONOTES") {
+          // none left: offer to buy notes, then place this one
+          WebStore.NoteEditor.placeAfterPurchase = true;
+          WebStore.NoteEditor.openPurchaseDialog(true);
+        } else if (answer == "BACK") {
+          WebStore.NoteEditor._loadEditor(WebStore.NoteEditor.noteParams, true);
+        } else if (answer != "" && answer != "ERROR") {
+          WebStore.NoteEditor.close();
+          $("playground").insert(req.responseText);
+          var note = $("stickie-" + json);
+          Element.hide(note);
+          note.style.top = "10px";
+          note.style.left = "10px";
+          Effect.BlindDown(note, { scaleX: true, scaleY: true });
+          initMovableItems();
+          Utils.setAllEmbededObjectsVisibility("hidden");
+        } else {
+          WebStore.NoteEditor.close();
+        }
+      }
+    });
+  },
+
+  /** "Køb noter": the notes product's purchase question above the editor. none: the editor had no note left. */
+  openPurchaseDialog: function(none) {
+    WebStore.NoteEditor._removePurchaseDialog();
+    var dialog = WebStore.createDialog("webstore-notes-purchase", WebStore.NoteEditor.purchaseTitle, 9005, -1500, 0, WebStore.NoteEditor.closePurchaseDialog);
+    Dialog.setAsWaitDialog(dialog);
+    Dialog.moveDialogToCenter(dialog);
+    Overlay.move(9004);
+    new Ajax.Request(habboReqPath + "/myhabbo/noteeditor/purchase", {
+      method: "post", parameters: { none: !!none },
+      onComplete: function(req) {
+        if (!WebStore._checkResponse(req.responseText)) {
+          return;
+        }
+        Dialog.setDialogBody(dialog, req.responseText);
+        if ($("webstore-confirm-cancel")) { Event.observe($("webstore-confirm-cancel"), "click", WebStore.NoteEditor.closePurchaseDialog); }
+        if ($("webstore-confirm-submit")) {
+          Event.observe($("webstore-confirm-submit"), "click", function(e) {
+            Event.stop(e);
+            var productId = $F("webstore-confirm-product");
+            Dialog.setAsWaitDialog(dialog);
+            new Ajax.Request(habboReqPath + "/myhabbo/store/purchase_notes", {
+              method: "post", parameters: { selectedId: productId },
+              onComplete: function(req) {
+                if (!WebStore._checkResponse(req.responseText)) {
+                  return;
+                }
+                if (req.responseText.strip() != "OK") {
+                  Dialog.setDialogBody(dialog, req.responseText);
+                  if ($("webstore-confirm-cancel")) { Event.observe($("webstore-confirm-cancel"), "click", WebStore.NoteEditor.closePurchaseDialog); }
+                  return;
+                }
+                var placeNow = WebStore.NoteEditor.placeAfterPurchase;
+                WebStore.NoteEditor.closePurchaseDialog();
+                if (placeNow) {
+                  WebStore.NoteEditor._place();
+                }
+              }
+            });
+          });
+        }
+      }
+    });
+  },
+
+  closePurchaseDialog: function(e) {
+    if (e) { Event.stop(e); }
+    WebStore.NoteEditor._removePurchaseDialog();
+    WebStore.NoteEditor.placeAfterPurchase = false;
+  },
+
+  _removePurchaseDialog: function() {
+    if ($("webstore-notes-purchase")) {
+      Element.remove($("webstore-notes-purchase"));
+      Overlay.move(9000);
     }
-  }, 
-  
+  },
+
   _enableContinue: function() {
     Element.removeClassName($("webstore-notes-continue"), "disabled-button");
-  }, 
-  
+  },
+
   _disableContinue: function() {
     Element.addClassName($("webstore-notes-continue"), "disabled-button");
   }
-  
-}
+};
 
 ScriptLoader.notify("myhabbo-store");

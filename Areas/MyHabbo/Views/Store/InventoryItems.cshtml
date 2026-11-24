@@ -1,36 +1,24 @@
-﻿@model List<KeplerCMS.Areas.MyHabbo.Models.InventoryItem>;
-@{Layout = null;}
+@model List<KeplerCMS.Areas.MyHabbo.Models.InventoryItem>
+@{
+    Layout = null;
+    var fill = Model.Count < 20 ? 20 - Model.Count : (4 - Model.Count % 4) % 4;
+}
 <ul id="inventory-item-list">
-    @{
-        foreach (var item in Model)
-        {
-            <li id="webstore-item-@item.Details.Id" title="@item.Definition.Name">
-                <div class="webstore-item-preview @(item.Definition.CssClass)_pre">
-                    <div class="webstore-item-mask">
-                        @{
-                            if (item.Details.Amount > 1)
-                            {
-                                <div class="webstore-item-count"><div>@("x" + item.Details.Amount)</div></div>
-                            }
-                        }
-                    </div>
+    @foreach (var item in Model)
+    {
+        <li id="inventory-item-@item.Details.Id" title="@item.Definition.Name">
+            <div class="webstore-item-preview @(item.Definition.CssClass)_pre">
+                <div class="webstore-item-mask">
+                    @if (item.Details.Amount > 1)
+                    {
+                        <div class="webstore-item-count"><div>x@(item.Details.Amount)</div></div>
+                    }
                 </div>
-            </li>
-        }
-
-        var amountOfEmptyToGenerate = 20 - Model.Count();
-
-        if (amountOfEmptyToGenerate > 0)
-        {
-            for (int i = 0; i < amountOfEmptyToGenerate; i++)
-            {
-                <li class="webstore-item-empty"></li>
-            }
-        }
+            </div>
+        </li>
     }
-
-
-
-
-
+    @for (var i = 0; i < fill; i++)
+    {
+        <li class="webstore-item-empty"></li>
+    }
 </ul>

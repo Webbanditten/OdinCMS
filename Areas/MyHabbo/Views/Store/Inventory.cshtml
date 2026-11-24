@@ -1,0 +1,35 @@
+@model KeplerCMS.Areas.MyHabbo.Models.InventoryViewModel
+@{
+    Layout = null;
+    var purchaseKey = Model.Type == "backgrounds" ? "store_purchase_backgrounds" : "store_purchase_stickers";
+}
+@* The inventory for one item type (StoreController.Inventory); the type's store loads into #webstore-content. *@
+<div id="inventory-content">
+    <div id="inventory-items-container">
+        <div id="inventory-items">
+            @if (Model.Type == "widgets")
+            {
+                <partial name="~/Areas/MyHabbo/Views/Store/InventoryItemsWidgets.cshtml" model="Model.Items" />
+            }
+            else
+            {
+                <partial name="~/Areas/MyHabbo/Views/Store/InventoryItems.cshtml" model="Model.Items" />
+            }
+        </div>
+    </div>
+    <div id="inventory-preview-container" style="display: none;">
+        <div id="inventory-preview-default"></div>
+        <div id="inventory-preview">
+            <partial name="~/Areas/MyHabbo/Views/Store/InventoryPreview.cshtml" />
+        </div>
+    </div>
+    <div class="clear">
+        <a href="#" id="inventory-close" class="toolbutton"><span>@DbRes.T("close", "habbohome")</span></a>
+        @if (Model.Type != "widgets")
+        {
+            <a href="#" id="purchase-stickers" class="colorlink" style="margin: 0; margin-top: 4px"><span>@DbRes.T(purchaseKey, "habbohome")</span></a>
+        }
+    </div>
+    <div class="clear"></div>
+</div>
+<div id="webstore-content"></div>

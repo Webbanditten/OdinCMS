@@ -1,4 +1,4 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
+@model KeplerCMS.Areas.MyHabbo.Models.NoteEditorViewModel
 @{
     var userData = (KeplerCMS.Data.Models.Users)ViewData["user"];
 }
@@ -24,9 +24,9 @@
 
 <p class="warning">@DbRes.T("note_warning", "habbohome")</p>
 
-<p>
-    <a href="#" class="new-button" id="webstore-notes-edit"><b>@DbRes.T("note_edit", "habbohome")</b><i></i></a>
-    <a href="#" class="new-button" id="webstore-notes-add"><b>@DbRes.T("note_add", "habbohome")</b><i></i></a>
-</p>
+<div>
+    <a href="#" id="webstore-notes-edit" class="toolbutton"><span>@DbRes.T("note_edit", "habbohome")</span></a>
+    <a href="#" id="webstore-notes-add" class="colorlink" style="margin: 0; margin-top: 4px"><span>@DbRes.T("note_add", "habbohome")</span></a>
+</div>
 
 <div class="clear"></div>

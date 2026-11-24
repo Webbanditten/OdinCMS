@@ -9,7 +9,7 @@
     <link href="~/styles/myhabbo/assets.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/skins.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/dialogs.css" rel="stylesheet" />
-    <link href="~/styles/myhabbo/myhabbo2.css" rel="stylesheet" />
+    <link href="~/styles/myhabbo/myhabbo2.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/styles/myhabbo/buttons.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/control.textarea.css" rel="stylesheet" />
     <link href="~/styles/myhabbo/groups.css" rel="stylesheet" />
@@ -29,6 +29,11 @@
     <script src="~/js/myhabbo/homeauth.js" asp-append-version="true"></script>
 
     <script src="~/js/myhabbo/homeedit.js"></script>
+    @if (Model.IsEditing)
+    {
+        @* loaded here, versioned, instead of by ScriptLoader (an unversioned file stays cached for hours) *@
+        <script src="~/js/myhabbo-store.js" asp-append-version="true"></script>
+    }
     <script src="~/js/trax.js" type="text/javascript"></script>
 }
 
@@ -58,8 +63,10 @@
                     
                     if (Model.IsEditing)
                     {
-                        <a href="#" id="inventory-button" class="toolbutton inventory"><span>@DbRes.T("inventory", "habbohome")</span></a>
-                        <a href="#" id="webstore-button" class="toolbutton webstore"><span>@DbRes.T("webstore", "habbohome")</span></a>
+                        <a href="#" id="notes-button" class="toolbutton notes"><span>@DbRes.T("store_notes", "habbohome")</span></a>
+                        <a href="#" id="stickers-button" class="toolbutton stickers"><span>@DbRes.T("store_stickers", "habbohome")</span></a>
+                        <a href="#" id="widgets-button" class="toolbutton widgets"><span>@DbRes.T("store_widgets", "habbohome")</span></a>
+                        <a href="#" id="backgrounds-button" class="toolbutton backgrounds"><span>@DbRes.T("store_backgrounds", "habbohome")</span></a>
                         <a id="cancel-button" class="toolbutton cancel" href="#"><span>@DbRes.T("cancel_editing", "habbohome")</span></a>
                         <a id="save-button" class="toolbutton save" href="#"><span>@DbRes.T("save_changes", "habbohome")</span></a>
                     }

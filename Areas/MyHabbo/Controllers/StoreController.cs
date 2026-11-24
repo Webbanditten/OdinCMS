@@ -6,15 +6,23 @@ using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
 using Westwind.Globalization;
 
 namespace KeplerCMS.Areas.MyHabbo
 {
+    /// <summary>
+    /// The Habbo Home's web store and inventory (js/myhabbo-store.js). The edit toolbar opens one item type at a time
+    /// (stickers, widgets, backgrounds) in the inventory; "Køb ..." switches the same window to that type's store.
+    /// Notes are bought and written in the note editor (NoteEditorController).
+    /// </summary>
     [Area("MyHabbo")]
     public class StoreController : HomeEditController
     {
+        private static readonly string[] StoreTypes = { "stickers", "backgrounds" };
+        private static readonly string[] InventoryTypes = { "stickers", "backgrounds", "widgets" };
+
         private readonly ICreditService _creditService;
 
         public StoreController(IHomeService homeService, ICreditService creditService) : base(homeService)
@@ -22,89 +30,81 @@ namespace KeplerCMS.Areas.MyHabbo
             _creditService = creditService;
         }
 
-        private static string Encode(string value) => HttpUtility.UrlEncode(value ?? string.Empty);
+        /// <summary>The x-json header as JSON with non-ASCII escaped (header values must be ASCII; the script decodes it).</summary>
+        private void SetJsonValue(object value) => SetJson(JsonSerializer.Serialize(value));
 
-        private string TabTitles => "[\"" + DbRes.T("inventory", "habbohome") + "\",\"" + DbRes.T("webstore", "habbohome") + "\"]";
+        private static object PreviewJson(CatalogItem product) => product.Definition.Type == "backgrounds"
+            ? new { itemCount = product.Details.Amount, previewCssClass = product.Definition.CssClass + "_pre", titleKey = product.Definition.Name, bgCssClass = product.Definition.CssClass }
+            : (object)new { itemCount = product.Details.Amount, previewCssClass = product.Definition.CssClass + "_pre", titleKey = product.Definition.Name };
+
+        private static object[] InventoryJson(InventoryItem item) => new object[]
+        {
+            item.Definition.CssClass + "_pre", item.Definition.CssClass, item.Definition.Name, item.Definition.Type, null, item.Details.Amount,
+        };
+
+        private IActionResult Message(string key) => View("Message", DbRes.T(key, "habbohome"));
+
+        // ------------------------------------------------------------------ inventory
 
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Main()
+        [Route("myhabbo/store/inventory")]
+        public async Task<IActionResult> Inventory(string type)
         {
-            var categories = await HomeService.GetStoreCategories();
-            var first = categories.OrderBy(s => s.Order).FirstOrDefault();
-            var items = first == null ? new List<CatalogItem>() : await HomeService.GetStoreCatelog(first.Id, 0);
-            var previewClass = items.FirstOrDefault()?.Definition.CssClass ?? "";
+            if (!InventoryTypes.Contains(type) || await EditableHome() is not var (homeId, userId)) return Error();
 
-            SetJson("[" + TabTitles + ",[{\"itemCount\":1,\"previewCssClass\":\"" + Encode(previewClass) + "_pre\", \"titleKey\":\"\"}]]");
-            return View(new MainViewModel { Categories = categories, Items = items, Type = DialogType.WebStore, InventoryItems = new List<InventoryItem>() });
+            var items = await HomeService.GetInventory(homeId, type, userId);
+            // A placed widget's stack stays at 0: it lists greyed out and isn't the one shown first.
+            var first = items.FirstOrDefault(i => i.Details.Amount > 0);
+            if (first != null) SetJsonValue(InventoryJson(first));
+            return View("Inventory", new InventoryViewModel { Type = type, Items = items });
         }
 
         [HttpPost]
         [LoggedInFilter]
-        public async Task<IActionResult> Inventory(string type)
+        [Route("myhabbo/store/inventory_items")]
+        public async Task<IActionResult> InventoryItems(string type)
         {
-            if (await EditableHome() is not var (homeId, userId)) return Error();
+            if (!InventoryTypes.Contains(type) || await EditableHome() is not var (homeId, userId)) return Error();
 
-            var categories = await HomeService.GetStoreCategories();
-            var inventory = await HomeService.GetInventory(homeId, type, userId);
-            var first = inventory.FirstOrDefault()?.Definition;
-
-            SetJson("[" + TabTitles + ",[\"" + Encode(first?.CssClass) + "_pre\", \"" + Encode(first?.CssClass) + "\", \"" + Encode(first?.Name) + "\", \"\", null,1]]");
-            return View("Main", new MainViewModel { InventoryType = type, Items = new List<CatalogItem>(), Categories = categories, InventoryItems = inventory, Type = DialogType.Inventory });
+            var items = await HomeService.GetInventory(homeId, type, userId);
+            return type == "widgets" ? View("InventoryItemsWidgets", items) : View(items);
         }
 
         [HttpPost]
         [LoggedInFilter]
         [Route("myhabbo/store/inventory_preview")]
-        public async Task<IActionResult> InventoryPreview(int itemId)
+        public async Task<IActionResult> InventoryPreview(int itemId, string type)
         {
-            if (CurrentUserId is not int userId) return Error();
+            if (await EditableHome() is not var (homeId, userId)) return Error();
 
-            var item = await HomeService.GetInventoryItem(itemId, userId);
-            if (item != null)
-            {
-                var cssClass = Encode(item.Definition.CssClass);
-                SetJson(item.Definition.Type == "notes"
-                    ? "[\"" + cssClass + "_pre\",null,null,\"WebCommodity\",null,1]"
-                    : "[\"" + cssClass + "_pre\",\"" + cssClass + "\", \"" + Encode(item.Definition.Name) + "\", \"\", null,1]");
-            }
+            // Looked up in what this home's inventory lists, so a group's widgets preview on the group page too.
+            var items = await HomeService.GetInventory(homeId, InventoryTypes.Contains(type) ? type : "stickers", userId);
+            var item = items.FirstOrDefault(i => i.Details.Id == itemId && i.Details.Amount > 0);
+            if (item != null) SetJsonValue(InventoryJson(item));
             return View();
         }
 
+        // ------------------------------------------------------------------ store
+
         [HttpPost]
         [LoggedInFilter]
-        [Route("myhabbo/store/purchase_confirm")]
-        public async Task<IActionResult> PurchaseConfirm(int productId)
+        public async Task<IActionResult> Main(string type)
         {
-            var product = await HomeService.GetProduct(productId);
-            return product == null ? Error() : View(product);
+            if (!StoreTypes.Contains(type)) type = "stickers";
+
+            var categories = await HomeService.GetStoreCategoryList(type);
+            var first = categories.FirstOrDefault();
+            var items = first == null ? new List<CatalogItem>() : await HomeService.GetStoreCatelog(first.Id, 0);
+            if (items.Count > 0) SetJsonValue(new[] { PreviewJson(items[0]) });
+            return View(new StoreViewModel { Type = type, Categories = categories, Items = items });
         }
 
         [HttpPost]
         [LoggedInFilter]
-        [Route("myhabbo/store/purchase_backgrounds")]
-        [Route("myhabbo/store/purchase_stickers")]
-        [Route("myhabbo/store/purchase_notes")]
-        public async Task<IActionResult> PurchaseItem(int selectedId)
+        public async Task<IActionResult> Items(int categoryId)
         {
-            if (CurrentUserId is not int userId) return Error();
-
-            var product = await HomeService.GetProduct(selectedId);
-            if (product == null) return Error();
-
-            if (!await HomeService.CanReceiveItem(product.Details.ItemId, userId))
-            {
-                return Content(DbRes.T("store_owned", "habbohome"));
-            }
-            // Pay first: Purchase checks and takes the credits in one step.
-            if (!await _creditService.Purchase(product.Details.Price, userId))
-            {
-                return Content(DbRes.T("store_notenough_credits", "habbohome"));
-            }
-
-            await HomeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId);
-            await _creditService.LogPurchase(userId, PurchaseLog.HomeStore, product.Definition.Name, product.Details.Price);
-            return Content("OK");
+            return View(await HomeService.GetStoreCatelog(categoryId, 0));
         }
 
         [HttpPost]
@@ -114,17 +114,8 @@ namespace KeplerCMS.Areas.MyHabbo
             var product = await HomeService.GetProduct(productId);
             if (product == null) return Error();
 
-            var definition = product.Definition;
-            var background = definition.Type == "backgrounds" ? "\"bgCssClass\":\"" + Encode(definition.CssClass) + "\"," : "";
-            SetJson("[{" + background + "\"itemCount\":1,\"previewCssClass\":\"" + Encode(definition.CssClass) + "_pre\", \"titleKey\":\"" + Encode(definition.Name) + "\"}]");
+            SetJsonValue(new[] { PreviewJson(product) });
             return View(product);
-        }
-
-        [HttpPost]
-        [LoggedInFilter]
-        public async Task<IActionResult> Items(int categoryId, int subCategoryId)
-        {
-            return View(await HomeService.GetStoreCatelog(categoryId, subCategoryId));
         }
 
         [HttpPost]
@@ -137,13 +128,42 @@ namespace KeplerCMS.Areas.MyHabbo
 
         [HttpPost]
         [LoggedInFilter]
-        [Route("myhabbo/store/inventory_items")]
-        public async Task<IActionResult> InventoryItems(string type)
+        [Route("myhabbo/store/purchase_confirm")]
+        public async Task<IActionResult> PurchaseConfirm(int productId)
         {
-            if (await EditableHome() is not var (homeId, userId)) return Error();
+            return View(new PurchaseConfirmViewModel { Product = await HomeService.GetProduct(productId) });
+        }
 
-            var items = await HomeService.GetInventory(homeId, type, userId);
-            return type == "widgets" ? View("InventoryItemsWidgets", items) : View(items);
+        [HttpPost]
+        [LoggedInFilter]
+        [Route("myhabbo/store/purchase_backgrounds")]
+        [Route("myhabbo/store/purchase_stickers")]
+        [Route("myhabbo/store/purchase_notes")]
+        public async Task<IActionResult> PurchaseItem(int selectedId)
+        {
+            if (CurrentUserId is not int userId) return Error();
+
+            var product = await HomeService.GetProduct(selectedId);
+            if (product == null) return Message("store_not_purchasable");
+
+            if (!await HomeService.CanReceiveItem(product.Details.ItemId, userId))
+            {
+                return Message("store_owned");
+            }
+            // Pay first: Purchase checks and takes the credits in one step.
+            if (!await _creditService.Purchase(product.Details.Price, userId))
+            {
+                return Message("store_notenough_credits");
+            }
+            // Two clicks at once on a background: the second one is paid but can't be given, so it's paid back.
+            if (!await HomeService.GiveItem(product.Details.ItemId, product.Details.Amount, userId))
+            {
+                await _creditService.Refund(product.Details.Price, userId);
+                return Message("store_owned");
+            }
+
+            await _creditService.LogPurchase(userId, PurchaseLog.HomeStore, product.Definition.Name, product.Details.Price);
+            return Content("OK");
         }
     }
 }

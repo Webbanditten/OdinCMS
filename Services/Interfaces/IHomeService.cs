@@ -34,6 +34,12 @@ namespace KeplerCMS.Services.Interfaces
 
         // Store
         Task<List<HomesCategories>> GetStoreCategories();
+        /// <summary>The store's category list for one item type: each main category's sub categories, or itself without any.</summary>
+        Task<List<HomesCategories>> GetStoreCategoryList(string type);
+        /// <summary>The store product that sells notes (bought from the note editor).</summary>
+        Task<CatalogItem> GetNotesProduct();
+        /// <summary>How many notes the user has left to place.</summary>
+        Task<int> GetNoteCount(int userId);
         Task<List<CatalogItem>> GetStoreCatelog(int category, int subCategory);
         Task<List<CatalogItem>> GetCatelogItemsInCategory(int category);
         Task<CatalogItem> GetProduct(int productId);

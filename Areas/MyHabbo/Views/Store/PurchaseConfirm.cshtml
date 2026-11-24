@@ -1,20 +1,36 @@
-﻿@model KeplerCMS.Areas.MyHabbo.Models.CatalogItem
-@{Layout = null;}
-
-<div class="webstore-item-preview @(Model.Definition.CssClass)_pre">
-    <div class="webstore-item-mask">
-
+@model KeplerCMS.Areas.MyHabbo.Models.PurchaseConfirmViewModel
+@{
+    Layout = null;
+    var product = Model.Product;
+}
+@if (product != null)
+{
+    if (Model.Notice != null)
+    {
+        <p><b>@Model.Notice</b></p>
+    }
+    <div class="webstore-item-preview @(product.Definition.CssClass)_pre">
+        <div class="webstore-item-mask">
+            @if (product.Details.Amount > 1)
+            {
+                <div class="webstore-item-count"><div>x@(product.Details.Amount)</div></div>
+            }
+        </div>
     </div>
-</div>
+    <input type="hidden" id="webstore-confirm-product" value="@product.Details.Id" />
+    <p>@DbRes.T("store_confirm_question", "habbohome")</p>
+    <p>@DbRes.T("store_price_is", "habbohome") <b>@product.Details.Price</b> @DbRes.T("store_coins", "habbohome").</p>
 
-
-<p>
-    @DbRes.T("store_are_you_sure", "habbohome")
-</p>
-
-<p class="new-buttons">
-    <a href="#" class="new-button" id="webstore-confirm-cancel"><b>@DbRes.T("cancel", "habbohome")</b><i></i></a>
-    <a href="#" class="new-button" id="webstore-confirm-submit"><b>@DbRes.T("store_continue", "habbohome")</b><i></i></a>
-</p>
-
+    <p class="new-buttons">
+        <a href="#" class="colorlink noarrow" id="webstore-confirm-cancel"><span>@DbRes.T("cancel", "habbohome")</span></a>
+        <a href="#" class="colorlink orange last" id="webstore-confirm-submit"><span>@DbRes.T("store_purchase", "habbohome")</span></a>
+    </p>
+}
+else
+{
+    <p>@DbRes.T("store_not_purchasable", "habbohome")</p>
+    <p class="new-buttons">
+        <a href="#" class="colorlink noarrow" id="webstore-confirm-cancel"><span>@DbRes.T("ok", "habbohome")</span></a>
+    </p>
+}
 <div class="clear"></div>

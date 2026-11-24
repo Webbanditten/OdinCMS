@@ -36,11 +36,26 @@ namespace KeplerCMS.Areas.MyHabbo
         {
             if (await EditableHome() is not var (homeId, userId)) return Error();
 
+            // No note left to write on: the editor offers to buy some (myhabbo-store.js).
+            if (await HomeService.GetNoteCount(userId) < 1) return Content("NONOTES");
+
             var item = await HomeService.PlaceNote(homeId, model.Skin, model.NoteText, userId);
             if (item == null) return Error();
 
             SetJson(item.Item.Id.ToString());
             return View(StickieView, item);
+        }
+
+        /// <summary>The "Køb noter" question: the notes product, bought through the store's purchase_notes.</summary>
+        [HttpPost]
+        [LoggedInFilter]
+        public async Task<IActionResult> Purchase(bool none)
+        {
+            return View("~/Areas/MyHabbo/Views/Store/PurchaseConfirm.cshtml", new PurchaseConfirmViewModel
+            {
+                Product = await HomeService.GetNotesProduct(),
+                Notice = none ? Westwind.Globalization.DbRes.T("note_none", "habbohome") : null,
+            });
         }
 
         [HttpPost]
