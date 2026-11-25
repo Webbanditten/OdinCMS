@@ -12,6 +12,7 @@ namespace KeplerCMS.Data.Models
         [Column("model_id")] public string ModelId { get; set; }
         [Column("door_x")] public int DoorX { get; set; }
         [Column("door_y")] public int DoorY { get; set; }
+        [Column("door_z")] public double DoorZ { get; set; }
         [Column("heightmap")] public string Heightmap { get; set; }
     }
 
