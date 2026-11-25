@@ -1,0 +1,61 @@
+/* Housekeeping > Bots: the list and the edit page (Areas/Housekeeping/Views/Bots) */
+.bot-message { color: #2d7a2d; }
+.bot-error { color: #b3261e; }
+.bot-hint { color: #666; font-size: 12px; margin: 2px 0; }
+.bot-label { font-size: 12px; color: #444; font-weight: bold; }
+
+.bot-rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+.bot-room { border: 1px solid #ddd; background: #fafbfc; padding: 8px; }
+.bot-room h3 { margin: 0 0 6px; font-size: 14px; }
+.bot-room h3 small { font-weight: normal; color: #888; font-size: 11px; }
+.bot-add { font-size: 11px; font-weight: normal; margin-left: 8px; }
+.bot-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.bot-card { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 120px; padding: 6px; border: 1px solid #c9c9c9; background: #fff; text-decoration: none; color: #222; }
+.bot-card:hover { background: #eef4fb; border-color: #8fb1d9; }
+.bot-thumb { height: 128px; display: flex; align-items: flex-end; justify-content: center; background: repeating-conic-gradient(#f2f4f6 0% 25%, #e6e9ec 0% 50%) 0 0 / 12px 12px; width: 100%; }
+.bot-thumb img { image-rendering: pixelated; }
+.bot-name { font-weight: bold; font-size: 12px; }
+.bot-mission { font-size: 11px; color: #777; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+
+.bot-editor { display: flex; gap: 14px; align-items: flex-start; }
+.bot-side { width: 300px; flex: none; position: sticky; top: 8px; }
+.bot-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.bot-box { border: 1px solid #c9c9c9; background: #fff; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.bot-box legend { font-weight: bold; padding: 0 4px; }
+.bot-box label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.bot-box label input, .bot-box label select, .bot-box textarea { box-sizing: border-box; width: 100%; }
+.bot-box label.bot-inline { flex-direction: row; align-items: center; gap: 4px; }
+.bot-box label.bot-inline input { width: 64px; }
+.bot-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+.bot-stage { height: 280px; display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#f2f4f6 0% 25%, #e6e9ec 0% 50%) 0 0 / 16px 16px; border: 1px solid #ddd; }
+.bot-stage img { image-rendering: pixelated; }
+.bot-stage.failed::after { content: "The picture couldn't be drawn (renderer)"; color: #b3261e; font-size: 12px; }
+.bot-stage.failed img { display: none; }
+.bot-zoom { font-size: 11px; color: #666; }
+.bot-dir { font-size: 11px; color: #666; }
+.bot-poses button.on { background: #1b74b8; color: #fff; border-color: #1b74b8; }
+.bot-warnings { margin: 0; padding-left: 16px; color: #b3261e; font-size: 12px; }
+.bot-warnings:empty { display: none; }
+
+.bot-parts { display: flex; flex-direction: column; gap: 4px; }
+.bot-part { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.bot-part select { width: 100%; }
+.bot-colour { display: inline-flex; align-items: center; gap: 4px; }
+.bot-colour input[type=color] { width: 40px; height: 24px; padding: 0 2px; }
+.bot-colour small { color: #888; font-size: 11px; min-width: 52px; }
+.bot-tag { font-size: 10px; padding: 0 4px; border-radius: 3px; }
+.bot-tag.room { background: #fff1c2; color: #7a5800; }
+.bot-tag.staff { background: #e8eaf6; color: #3b4691; }
+.bot-advanced textarea { font: 12px ui-monospace, Menlo, monospace; }
+
+.bot-lines { display: flex; flex-direction: column; gap: 4px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+.bot-line { display: grid; grid-template-columns: minmax(0, 1fr) 90px 28px; gap: 4px; }
+.bot-line-list { display: flex; flex-direction: column; gap: 4px; }
+.bot-lines > button, .bot-drinks > button { align-self: flex-start; }
+.bot-ai { width: 100%; box-sizing: border-box; }
+.bot-drinks { display: flex; flex-direction: column; gap: 4px; }
+#bot-drink-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.bot-drink input { width: 60px; }
+.bot-actions { display: flex; align-items: center; gap: 10px; }
+.bot-delete { margin-top: 12px; }

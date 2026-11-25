@@ -1,0 +1,123 @@
+@model KeplerCMS.Areas.Housekeeping.Models.Views.BotEditView
+
+@{
+    var bot = Model.Bot;
+    var isNew = bot.Id == 0;
+    ViewBag.Title = isNew ? "New bot" : "Bot: " + bot.Name;
+    ViewBag.WideContent = true;
+    var look = (bot.StartLook ?? "2,2").Split(',');
+}
+<link rel="stylesheet" href="~/housekeeping/css/bots.css" asp-append-version="true">
+
+<p><a href="@Url.Action("Index")">← All bots</a></p>
+<h1>@ViewBag.Title</h1>
+@if (Model.Message != null) { <p class="bot-message">@Model.Message</p> }
+@if (Model.Error != null) { <p class="bot-error">@Model.Error</p> }
+
+<form method="post" action="@Url.Action("Save")" id="bot-form" class="bot-editor">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@bot.Id">
+    <input type="hidden" name="figure" id="bot-figure" value="@bot.figure">
+    <input type="hidden" name="StartLook" id="bot-startlook" value="@bot.StartLook">
+    <input type="hidden" name="Speech" id="bot-speech" value="@bot.Speech">
+    <input type="hidden" name="Response" id="bot-response" value="@bot.Response">
+    <input type="hidden" name="UnrecognisedResponse" id="bot-unrecognised" value="@bot.UnrecognisedResponse">
+    <input type="hidden" name="HandItems" id="bot-handitems" value="@bot.HandItems">
+
+    <div class="bot-side">
+        <div class="bot-box bot-preview-box">
+            <div class="bot-stage" id="bot-stage"><img id="bot-preview" alt="The bot"></div>
+            <div class="bot-zoom" id="bot-zoom-note"></div>
+            <div class="bot-row">
+                <span class="bot-label">Body</span>
+                <button type="button" data-turn="body" data-by="1" title="Turn left">↺</button>
+                <button type="button" data-turn="body" data-by="-1" title="Turn right">↻</button>
+                <span class="bot-label">Head</span>
+                <button type="button" data-turn="head" data-by="1" title="Turn the head left">↺</button>
+                <button type="button" data-turn="head" data-by="-1" title="Turn the head right">↻</button>
+                <span class="bot-dir" id="bot-dir"></span>
+            </div>
+            <div class="bot-row bot-poses" id="bot-poses">
+                <button type="button" data-pose="" class="on">Stand</button>
+                <button type="button" data-pose="wav">Wave</button>
+                <button type="button" data-pose="spk">Talk</button>
+                <button type="button" data-pose="wlk">Walk</button>
+                <button type="button" data-pose="sit">Sit</button>
+                <select id="bot-carry" title="Hold one of its drinks"><option value="0">no drink</option></select>
+            </div>
+            <ul class="bot-warnings" id="bot-warnings"></ul>
+        </div>
+    </div>
+
+    <div class="bot-main">
+        <fieldset class="bot-box">
+            <legend>Bot</legend>
+            <label>Name <input name="Name" maxlength="25" value="@bot.Name" required></label>
+            <label>Mission <input name="Mission" maxlength="255" value="@bot.Mission" placeholder="shown when you click it"></label>
+            <label>Room
+                <select name="RoomId" id="bot-room">
+                    @foreach (var r in Model.Rooms)
+                    {
+                        <option value="@r.Id" data-casts="@r.Casts" selected="@(r.Id == bot.RoomId)">@r.Name (@r.Id)</option>
+                    }
+                </select>
+            </label>
+        </fieldset>
+
+        <fieldset class="bot-box">
+            <legend>Look</legend>
+            <p class="bot-hint">What this room can dress a bot in. <span class="bot-tag room">room</span> clothes exist only in this room's casts; <span class="bot-tag staff">not for players</span> are in the people casts but not in the clothes players can pick.</p>
+            <div id="bot-parts" class="bot-parts"><p class="bot-hint">Loading the room's clothes…</p></div>
+            <details class="bot-advanced">
+                <summary>Figure as text</summary>
+                <textarea id="bot-figure-text" rows="3" spellcheck="false"></textarea>
+                <small>part=model/colour, joined with &amp;: colour r,g,b, a palette number, or nothing.</small>
+            </details>
+        </fieldset>
+
+        <fieldset class="bot-box">
+            <legend>Where it stands</legend>
+            <div class="bot-row">
+                <label class="bot-inline">X <input name="X" type="number" min="0" max="99" value="@bot.X"></label>
+                <label class="bot-inline">Y <input name="Y" type="number" min="0" max="99" value="@bot.Y"></label>
+                <span class="bot-hint">facing: body <b id="bot-body-dir">@(look.Length > 1 ? look[1] : look[0])</b>, head <b id="bot-head-dir">@look[0]</b> (turn it in the preview)</span>
+            </div>
+            <label>Walk area <textarea name="Walkspace" id="bot-walkspace" rows="3" spellcheck="false" placeholder="x,y x,y ...">@bot.Walkspace</textarea></label>
+            <small class="bot-hint" id="bot-walk-count"></small>
+        </fieldset>
+
+        <fieldset class="bot-box">
+            <legend>What it says</legend>
+            <div class="bot-lines" data-for="bot-speech" data-title="Says now and then"></div>
+            <div class="bot-lines" data-for="bot-response" data-title="Answers when talked to"></div>
+            <div class="bot-lines" data-for="bot-unrecognised" data-title="Answers it doesn't understand"></div>
+            <div class="bot-drinks">
+                <span class="bot-label">Serves drinks (hand item numbers)</span>
+                <div id="bot-drink-list"></div>
+                <button type="button" id="bot-drink-add">+ drink</button>
+            </div>
+        </fieldset>
+
+        <div class="bot-actions">
+            <button type="submit" class="btn btn-primary">@(isNew ? "Add the bot" : "Save")</button>
+            <span class="bot-hint">Saving reloads the room's bots in the hotel.</span>
+        </div>
+    </div>
+</form>
+
+@if (!isNew)
+{
+    <form method="post" action="@Url.Action("Delete")" class="bot-delete" onsubmit="return confirm('Delete @bot.Name from the hotel?')">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@bot.Id">
+        <button type="submit" class="btn">Delete this bot</button>
+    </form>
+}
+
+<script>
+    window.botEditor = {
+        picture: '@Url.Action("Picture")',
+        parts: '@Url.Action("Parts")',
+    };
+</script>
+<script src="~/housekeeping/js/bot-editor.js" asp-append-version="true"></script>
