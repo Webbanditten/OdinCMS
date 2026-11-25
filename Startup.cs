@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Net;
 using KeplerCMS.BackgroundServices;
@@ -101,6 +102,11 @@ namespace KeplerCMS
             services.AddRouting(options => options.LowercaseUrls = true);
 
 
+            // The public furni editor (GitHub Pages) reads the hotel's furni definitions (colours, names); only that
+            // GET gets CORS ([EnableCors("furniEditor")] on HotelApiController.SearchFurni).
+            var furniEditorOrigins = (Configuration.GetSection("keplercms:furniEditor")["corsOrigins"] ?? "https://webbanditten.github.io")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            services.AddCors(o => o.AddPolicy("furniEditor", p => p.WithOrigins(furniEditorOrigins).WithMethods("GET")));
             services.AddControllersWithViews().AddViewLocalization();
 
             // this *has to go here* after view localization has been initialized
@@ -224,6 +230,7 @@ namespace KeplerCMS
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors();
 
             // who are you?  
             app.UseAuthentication();

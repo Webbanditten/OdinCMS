@@ -50,7 +50,9 @@ namespace KeplerCMS.Models
         [Description("fuse_receive_calls_for_help")]
         fuse_receive_calls_for_help,
         [Description("fuse_campaigns")]
-        fuse_campaigns
-        
+        fuse_campaigns,
+        /// <summary>The furni editor in Housekeeping: publish casts to hof_furni (docs/furni-editor-housekeeping.md). Its own fuse.</summary>
+        [Description("housekeeping_furni_editor")]
+        housekeeping_furni_editor
     }
 }

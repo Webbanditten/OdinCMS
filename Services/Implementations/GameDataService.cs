@@ -33,6 +33,8 @@ namespace KeplerCMS.Services.Implementations
         /// ("https://images.habbo-danmark.com=http://images-habbo"): on prod the CMS container can't reach the asset host
         /// through its public address. Browsers keep the public URLs.
         /// </summary>
+        public string InternalUrl(string url) => Internal(url);
+
         private string Internal(string url)
         {
             var map = _configuration.GetSection("keplercms")["gameDataInternal"];

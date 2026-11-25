@@ -101,6 +101,7 @@ namespace KeplerCMS.Controllers
         }
         
         [Route("api/hotel/furni/search")]
+        [Microsoft.AspNetCore.Cors.EnableCors("furniEditor")]
         public async Task<IActionResult> SearchFurni(string query)
         {
             return Ok(await _furniService.Search(query));

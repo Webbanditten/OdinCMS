@@ -26,5 +26,6 @@ namespace KeplerCMS.Services.Interfaces
         Task<CatalogueFurni> GetFurni(int id);
         Task<bool> SpriteExists(string sprite, int exceptId);
         Task<int> SaveFurni(CatalogueFurni edit);
+        Task<int> MaxSpriteId();
     }
 }
