@@ -57,7 +57,7 @@ over. The definition is only ever created by the first publish or updated later;
 Every publish is a **version**: a revision number per sprite, the cast's bytes, the definition as it was saved, who,
 when, a note, and where it came from (editor, Flash import, roll back of version n).
 
-- Table `furni_versions` (Odin's `update.1.51.sql`: sprite, revision, both casts' SHA-256 and sizes, the definition id
+- Table `furni_versions` (Odin's `update.1.52.sql`: sprite, revision, both casts' SHA-256 and sizes, the definition id
   and JSON, user, time, note, source `editor`/`rollback`, rolled_back_from) and the casts in
   `historyDir/<sprite>/r<n>.cct` and `r<n>_s.cct`, written once (create-new) and never changed. Each version is a whole
   furni: a publish without a small cast keeps the current one.
@@ -65,7 +65,7 @@ when, a note, and where it came from (editor, Flash import, roll back of version
   (checked again, like any publish), optionally with n's definition too. The list then reads r1, r2, r3 "rolled back to
   r1": nothing is lost and the roll back can itself be undone. **Open** loads any version into the editor.
 - Odin sends sprite and highest revision (from `furni_versions`, read at every request) in the furni revision list the
-  client asks for before its first download (message 295, `SPRITE_LIST`, empty until v1.36.0). With
+  client asks for before its first download (message 295, `SPRITE_LIST`, empty until v1.40.0). With
   `dynamic.download.name.template=hof_furni/hh_furni_xx_%typeid%.cct?v=%revision%` a new revision is a new URL, so
   clients download it past their cache and any proxy (a small cast `s_x` uses x's revision). Players get it on their
   next login; a cast a client has already loaded stays until then. Furni without versions get `?v=` (empty), which the
@@ -111,16 +111,16 @@ Anything else is refused with the reason; there is no override.
 `Access-Control-Allow-Origin` for the editor's origin (setting `keplercms:furniEditor:corsOrigins`), so the public page
 shows the hotel's colour variants too. Nothing else gets CORS.
 
-## Rollout on prod (waits for Patrick's OK)
+## Rollout on prod (Patrick's OK 2026-11-25: fuse for rank 1)
 
-1. DB backup, then Odin's `tools/migrations/update.1.51.sql` (`furni_versions`) and
+1. DB backup, then Odin's `tools/migrations/update.1.52.sql` (`furni_versions`) and
    `sql/migrations/2026-11-22_furni_editor_fuse.sql` (the fuse, granted to nobody). Both only add.
-2. Odin ≥ v1.36.0 (the revision list from `furni_versions`; an older Odin ignores the table).
+2. Odin ≥ v1.40.0 (the revision list from `furni_versions`; an older Odin ignores the table).
 3. CMS `:latest` with this branch, plus in compose for `kepler_cms`: the two mounts above and
    `keplercms__furniEditor__castDir: /furni-casts`, `keplercms__furniEditor__historyDir: /furni-history`. Files the CMS
    writes are 0644, which the asset host's Apache reads. Add `furni-history/` to the prod backups.
-4. Patrick gives the fuse to a rank (Housekeeping > Ranks).
-5. The download template: `dynamic.download.name.template=hof_furni/hh_furni_xx_%typeid%.cct?v=%revision%`. Web client
-   first (a line swap in `external_vars_web.php`, like the other web-only lines), Shockwave (`external_vars.php`) after a
-   real Shockwave session has loaded a furni through it. Until then a republished furni reaches players when their cache
-   lets go of the old one (the asset host sends `no-store` today, so in practice on the next room visit).
+4. The fuse goes to rank 1 (Hotel Manager), Patrick's choice; more ranks in Housekeeping > Ranks.
+5. The download template: `dynamic.download.name.template=hof_furni/hh_furni_xx_%typeid%.cct?v=%revision%` in
+   `gamedata/external_vars.php` and `debug/external_vars.php`. Both clients read that file since 2026-11-23 (the web
+   wrapper only includes it), and per the one-set-of-casts rule it is checked in DirPlayer, not a real Shockwave player.
+   Furni without versions get `?v=` (empty), which the asset host ignores.

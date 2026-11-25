@@ -8,7 +8,7 @@ namespace KeplerCMS.Data.Models
     /// One publish of a furni from the Housekeeping furni editor (docs/furni-editor-housekeeping.md): revision n of a
     /// sprite, whose casts are kept as furni-history/&lt;sprite&gt;/r&lt;n&gt;.cct (+ r&lt;n&gt;_s.cct). A sprite with rows here
     /// was made in the editor, and only those may be published again; Odin sends the highest revision per sprite in the
-    /// furni revision list, so clients download a new revision instead of a cached one. Table from Odin's update.1.51.sql.
+    /// furni revision list, so clients download a new revision instead of a cached one. Table from Odin's update.1.52.sql.
     /// </summary>
     [Table("furni_versions")]
     public class FurniVersion
