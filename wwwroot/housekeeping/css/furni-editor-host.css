@@ -27,3 +27,9 @@
 .fe-history-row.is-current { font-weight: bold; }
 .fe-note-field { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
 .fe-note-field input { width: 100%; box-sizing: border-box; }
+.fe-steps { margin: 0; padding-left: 18px; font-size: 12px; display: flex; flex-direction: column; gap: 3px; }
+.fe-steps li { color: #555; }
+.fe-steps li.is-done { color: #8a8a8a; }
+.fe-steps li.is-current { color: #000; background: #fff6d8; margin-left: -4px; padding: 2px 4px; border-radius: 3px; }
+.fe-now { font-size: 12px; padding: 4px 6px; background: #f1f5fa; border: 1px solid #dbe4ef; }
+.fe-now code, .fe-steps code { font-size: 11px; }

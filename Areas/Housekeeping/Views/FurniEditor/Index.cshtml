@@ -13,16 +13,16 @@
 
 <div class="fe-host">
     <div class="fe-side">
-        <div class="fe-box">
-            <b>Open a furni</b>
-            <input type="search" id="fe-search" placeholder="Sprite, name or id" autocomplete="off">
-            <div id="fe-results" class="fe-results"></div>
-            <small class="fe-muted">The hotel's own furni open read-only: make a copy with "New furni from this…" in the editor and publish that.</small>
-        </div>
-
-        <div class="fe-box" id="fe-made-box" hidden>
-            <b>Made in the editor</b>
-            <div id="fe-made" class="fe-results"></div>
+        <div class="fe-box fe-steps-box">
+            <b>How publishing works</b>
+            <ol class="fe-steps" id="fe-steps">
+                <li data-step="1"><b>Open a furni</b>: search the hotel's below, or in the editor open a cast or import a Flash <code>.swf</code>.</li>
+                <li data-step="2"><b>Make it yours</b>: the hotel's own furni are never written over. <i>Make a copy…</i> in the editor gives it a class name of its own (<i>Rename…</i> on your own furni).</li>
+                <li data-step="3"><b>Edit</b> it in the editor; <i>Check</i> shows what the hotel would refuse.</li>
+                <li data-step="4"><b>Publish…</b> in the editor sends it here: read the check, fill in its definition (name, kind, size) and press <i>Publish to the hotel</i>.</li>
+                <li data-step="5"><b>Sell or give it</b>: put it on a catalogue page, or in a voucher. Players get it on their next login.</li>
+            </ol>
+            <div class="fe-now" id="fe-now">Nothing open yet.</div>
         </div>
 
         <div class="fe-box" id="fe-publish" hidden>
@@ -58,6 +58,18 @@
                 <button type="button" id="fe-cancel">Cancel</button>
                 <button type="button" id="fe-confirm" class="fe-primary" disabled>Publish to the hotel</button>
             </div>
+        </div>
+
+        <div class="fe-box">
+            <b>Open a furni</b>
+            <input type="search" id="fe-search" placeholder="Sprite, name or id" autocomplete="off">
+            <div id="fe-results" class="fe-results"></div>
+            <small class="fe-muted">The hotel's own furni open read-only: <i>Make a copy…</i> in the editor (or just <i>Publish…</i>: it asks for the copy's name) and publish that.</small>
+        </div>
+
+        <div class="fe-box" id="fe-made-box" hidden>
+            <b>Made in the editor</b>
+            <div id="fe-made" class="fe-results"></div>
         </div>
 
         <div class="fe-box" id="fe-history-box" hidden>

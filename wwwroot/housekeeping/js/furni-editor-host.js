@@ -4,7 +4,8 @@
 // login and antiforgery token, after a click in this panel; the editor only proposes a furni.
 //
 // Messages to the editor: open { large: {name, bytes}, small?: {name, bytes}, colors, sprite, revision, madeHere },
-// published { ok, text }, status { text }. From the editor: ready, publish { sprite, large, small?, colour }.
+// published { ok, text }, status { text }. From the editor: ready, publish { sprite, large, small?, colour },
+// state { sprite, hotel, wall } (what is open now: the steps box shows where you are).
 (function () {
     'use strict';
     var cfg = window.furniEditorHost;
@@ -13,6 +14,29 @@
     var $ = function (id) { return document.getElementById(id); };
     var upload = null; // the last checked furni: { uploadId, sprite, report }
     var shown = null;  // sprite whose versions are listed
+    var made = {};     // sprite -> live revision, of the furni made here
+    var current = null; // what the editor has open: { sprite, hotel, wall }
+    var lastPublished = null; // sprite just published here (its next step is the catalogue)
+
+    // --- where you are ---
+    function step(n, text) {
+        document.querySelectorAll('#fe-steps li').forEach(function (li) {
+            var k = +li.getAttribute('data-step');
+            li.classList.toggle('is-done', k < n);
+            li.classList.toggle('is-current', k === n);
+        });
+        if (text !== undefined) $('fe-now').innerHTML = text;
+    }
+    function showState() {
+        if (!current || !current.sprite) return step(1, 'Nothing open yet.');
+        var kind = current.wall ? 'wall item' : 'furni';
+        var name = '<code>' + esc(current.sprite) + '</code>';
+        if (lastPublished === current.sprite && made[current.sprite])
+            return step(5, name + ' r' + made[current.sprite] + ' is in the hotel. Next: <a href="' + cfg.catalogueUrl + '">put it on a catalogue page</a> (or in a voucher) so players can get it.');
+        if (current.hotel) return step(2, 'Open: ' + name + ', the hotel\'s own ' + kind + ' (read-only). <i>Make a copy…</i> in the editor to make it yours.');
+        if (made[current.sprite]) return step(3, 'Open: ' + name + ', your ' + kind + ', live as r' + made[current.sprite] + '. <i>Publish…</i> again makes r' + (made[current.sprite] + 1) + '.');
+        step(3, 'Open: ' + name + ', your new ' + kind + ': not in the hotel yet. <i>Publish…</i> in the editor when it\'s ready.');
+    }
 
     function send(message, transfer) {
         if (frame.contentWindow) frame.contentWindow.postMessage(message, cfg.editorOrigin, transfer || []);
@@ -86,6 +110,9 @@
 
     function loadMade() {
         api('Made').then(function (list) {
+            made = {};
+            list.forEach(function (m) { made[m.sprite] = m.revision; });
+            showState();
             $('fe-made-box').hidden = list.length === 0;
             $('fe-made').innerHTML = list.map(function (m) {
                 return '<div class="fe-result" data-sprite="' + esc(m.sprite) + '" data-made="1"><span>' + esc(m.sprite) + '</span><small>r' + m.revision + ' · ' + esc(when(m.createdAt)) + '</small></div>';
@@ -125,7 +152,10 @@
     function onPublish(m) {
         if (!cfg.canPublish) { alertBox('Publishing is off on this hotel (keplercms:furniEditor:castDir and historyDir).'); return; }
         var sprite = String(m.sprite || '');
+        lastPublished = null;
+        step(4, 'Publishing <code>' + esc(sprite) + '</code>: read the check below, fill in its definition and press <i>Publish to the hotel</i>.');
         $('fe-publish').hidden = false;
+        $('fe-publish').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         $('fe-pub-sprite').textContent = sprite;
         $('fe-report').innerHTML = '<p>Checking…</p>';
         $('fe-def').hidden = true;
@@ -162,6 +192,7 @@
             $('fe-def').hidden = false;
             $('fe-note-row').hidden = false;
             $('fe-confirm').disabled = false;
+            if (r.large.classes.some(function (c) { return /^Item Object/.test(c); })) $('fe-length').value = $('fe-width').value = 1;
         }).catch(function (err) { alertBox('Check failed: ' + err.message); });
     }
 
@@ -193,6 +224,9 @@
                 var text = 'Published ' + r.sprite + ' r' + r.revision + (r.small ? ' (with its small cast)' : '') + (r.definitionId ? ', definition ' + r.definitionId : '') +
                     '. The hotel reloaded its catalogue; players get it on their next login.';
                 $('fe-report').innerHTML = '<p class="fe-report-ok">' + esc(text) + '</p><p><a href="' + cfg.catalogueUrl + '">Put it on a catalogue page</a></p>';
+                made[r.sprite] = r.revision;
+                lastPublished = r.sprite;
+                showState();
                 $('fe-def').hidden = true;
                 $('fe-note-row').hidden = true;
                 send({ type: 'published', ok: true, text: text, sprite: r.sprite, revision: r.revision });
@@ -241,6 +275,11 @@
         if (e.origin !== cfg.editorOrigin || e.source !== frame.contentWindow) return;
         var m = e.data || {};
         if (m.type === 'publish' && m.large instanceof ArrayBuffer && (!m.small || m.small instanceof ArrayBuffer)) onPublish(m);
+        else if (m.type === 'state') {
+            current = { sprite: String(m.sprite || ''), hotel: !!m.hotel, wall: !!m.wall };
+            if (lastPublished && lastPublished !== current.sprite) lastPublished = null;
+            showState();
+        }
     });
 
     loadMade();
