@@ -15,5 +15,17 @@ namespace KeplerCMS.Areas.Housekeeping.Models.Views
         public List<Rooms> Rooms { get; set; }
         public string Message { get; set; }
         public string Error { get; set; }
+        /// <summary>handitem1..25 from the hotel's texts.</summary>
+        public Dictionary<int, string> HandItemNames { get; set; } = new();
+        /// <summary>The other bots, to start a look from one of them.</summary>
+        public List<BotSummary> Others { get; set; } = new();
+    }
+
+    public class BotSummary
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Room { get; set; }
+        public string Figure { get; set; }
     }
 }
