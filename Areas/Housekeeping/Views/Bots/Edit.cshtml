@@ -5,119 +5,164 @@
     var isNew = bot.Id == 0;
     ViewBag.Title = isNew ? "New bot" : "Bot: " + bot.Name;
     ViewBag.WideContent = true;
-    var look = (bot.StartLook ?? "2,2").Split(',');
 }
 <link rel="stylesheet" href="~/housekeeping/css/bots.css" asp-append-version="true">
 
-<p><a href="@Url.Action("Index")">← All bots</a></p>
-<h1>@ViewBag.Title</h1>
+<p class="be-back"><a href="@Url.Action("Index")">← All bots</a></p>
 @if (Model.Message != null) { <p class="bot-message">@Model.Message</p> }
 @if (Model.Error != null) { <p class="bot-error">@Model.Error</p> }
 
-<form method="post" action="@Url.Action("Save")" id="bot-form" class="bot-editor">
+<form method="post" action="@Url.Action("Save")" id="bot-form" class="be" data-new="@(isNew ? 1 : 0)">
     @Html.AntiForgeryToken()
     <input type="hidden" name="Id" value="@bot.Id">
     <input type="hidden" name="figure" id="bot-figure" value="@bot.figure">
     <input type="hidden" name="StartLook" id="bot-startlook" value="@bot.StartLook">
+    <input type="hidden" name="X" id="bot-x" value="@bot.X">
+    <input type="hidden" name="Y" id="bot-y" value="@bot.Y">
+    <input type="hidden" name="Walkspace" id="bot-walkspace" value="@bot.Walkspace">
     <input type="hidden" name="Speech" id="bot-speech" value="@bot.Speech">
     <input type="hidden" name="Response" id="bot-response" value="@bot.Response">
     <input type="hidden" name="UnrecognisedResponse" id="bot-unrecognised" value="@bot.UnrecognisedResponse">
     <input type="hidden" name="HandItems" id="bot-handitems" value="@bot.HandItems">
 
-    <div class="bot-side">
-        <div class="bot-box bot-preview-box">
-            <div class="bot-stage" id="bot-stage"><img id="bot-preview" alt="The bot"></div>
-            <div class="bot-zoom" id="bot-zoom-note"></div>
-            <div class="bot-row">
-                <span class="bot-label">Body</span>
-                <button type="button" data-turn="body" data-by="1" title="Turn left">↺</button>
-                <button type="button" data-turn="body" data-by="-1" title="Turn right">↻</button>
-                <span class="bot-label">Head</span>
-                <button type="button" data-turn="head" data-by="1" title="Turn the head left">↺</button>
-                <button type="button" data-turn="head" data-by="-1" title="Turn the head right">↻</button>
-                <span class="bot-dir" id="bot-dir"></span>
+    <header class="be-head">
+        <input name="Name" id="bot-name" maxlength="25" value="@bot.Name" placeholder="Name your bot" required autocomplete="off">
+        <span class="be-in">in</span>
+        <select name="RoomId" id="bot-room">
+            @foreach (var r in Model.Rooms)
+            {
+                <option value="@r.Id" data-casts="@r.Casts" selected="@(r.Id == bot.RoomId)">@r.Name</option>
+            }
+        </select>
+    </header>
+
+    <div class="be-body">
+        <aside class="be-stage-col">
+            <div class="be-stage" id="bot-stage">
+                <div class="be-bubble" id="bot-bubble" hidden></div>
+                <img id="bot-preview" alt="The bot">
             </div>
-            <div class="bot-row bot-poses" id="bot-poses">
-                <button type="button" data-pose="" class="on">Stand</button>
-                <button type="button" data-pose="wav">Wave</button>
-                <button type="button" data-pose="spk">Talk</button>
-                <button type="button" data-pose="wlk">Walk</button>
-                <button type="button" data-pose="sit">Sit</button>
-                <select id="bot-carry" title="Hold one of its drinks"><option value="0">no drink</option></select>
+            <div class="be-stage-note" id="bot-zoom-note"></div>
+            <div class="be-controls">
+                <div class="be-ctl-group">
+                    <span>Turn</span>
+                    <button type="button" data-turn="body" data-by="1" title="Turn left">↺</button>
+                    <button type="button" data-turn="body" data-by="-1" title="Turn right">↻</button>
+                    <span>Head</span>
+                    <button type="button" data-turn="head" data-by="1" title="Look left">↺</button>
+                    <button type="button" data-turn="head" data-by="-1" title="Look right">↻</button>
+                </div>
+                <div class="be-ctl-group be-poses" id="bot-poses">
+                    <button type="button" data-pose="" class="on">Stand</button>
+                    <button type="button" data-pose="wav">Wave</button>
+                    <button type="button" data-pose="spk">Talk</button>
+                    <button type="button" data-pose="wlk">Walk</button>
+                    <button type="button" data-pose="sit">Sit</button>
+                </div>
+                <div class="be-ctl-group">
+                    <button type="button" id="bot-play" title="Show its lines above it, one after another">▶ Play its lines</button>
+                    <select id="bot-carry" title="Hold one of its drinks"><option value="0">no drink</option></select>
+                </div>
             </div>
-            <ul class="bot-warnings" id="bot-warnings"></ul>
-        </div>
-    </div>
+            <ul class="be-warnings" id="bot-warnings"></ul>
+        </aside>
 
-    <div class="bot-main">
-        <fieldset class="bot-box">
-            <legend>Bot</legend>
-            <label>Name <input name="Name" maxlength="25" value="@bot.Name" required></label>
-            <label>Mission <input name="Mission" maxlength="255" value="@bot.Mission" placeholder="shown when you click it"></label>
-            <label>Room
-                <select name="RoomId" id="bot-room">
-                    @foreach (var r in Model.Rooms)
-                    {
-                        <option value="@r.Id" data-casts="@r.Casts" selected="@(r.Id == bot.RoomId)">@r.Name (@r.Id)</option>
-                    }
-                </select>
-            </label>
-        </fieldset>
+        <section class="be-main">
+            <nav class="be-tabs" id="be-tabs">
+                <button type="button" data-tab="look" class="on"><b>1</b> Look</button>
+                <button type="button" data-tab="place"><b>2</b> Place</button>
+                <button type="button" data-tab="talk"><b>3</b> Talk</button>
+                <button type="button" data-tab="details"><b>4</b> Details</button>
+            </nav>
 
-        <fieldset class="bot-box">
-            <legend>Look</legend>
-            <p class="bot-hint">What this room can dress a bot in. <span class="bot-tag room">room</span> clothes exist only in this room's casts; <span class="bot-tag staff">not for players</span> are in the people casts but not in the clothes players can pick.</p>
-            <div id="bot-parts" class="bot-parts"><p class="bot-hint">Loading the room's clothes…</p></div>
-            <details class="bot-advanced">
-                <summary>Figure as text</summary>
-                <textarea id="bot-figure-text" rows="3" spellcheck="false"></textarea>
-                <small>part=model/colour, joined with &amp;: colour r,g,b, a palette number, or nothing.</small>
-            </details>
-        </fieldset>
-
-        <fieldset class="bot-box">
-            <legend>Where it stands</legend>
-            <div class="bot-row">
-                <label class="bot-inline">X <input name="X" type="number" min="0" max="99" value="@bot.X"></label>
-                <label class="bot-inline">Y <input name="Y" type="number" min="0" max="99" value="@bot.Y"></label>
-                <span class="bot-hint">facing: body <b id="bot-body-dir">@(look.Length > 1 ? look[1] : look[0])</b>, head <b id="bot-head-dir">@look[0]</b> (turn it in the preview)</span>
+            <div class="be-panel" data-panel="look">
+                <div class="be-start">
+                    <span class="be-label">Start from</span>
+                    <button type="button" id="bot-random">🎲 Random look</button>
+                    <span class="be-start-habbo"><input id="bot-habbo" placeholder="a Habbo's name"><button type="button" id="bot-habbo-use">Use their look</button></span>
+                    <select id="bot-copy">
+                        <option value="">another bot…</option>
+                        @foreach (var o in Model.Others)
+                        {
+                            <option value="@o.Figure">@o.Name (@o.Room)</option>
+                        }
+                    </select>
+                </div>
+                <div class="be-cats" id="bot-cats"></div>
+                <div class="be-options" id="bot-options"><p class="be-hint">Loading the room's clothes…</p></div>
+                <div class="be-colours" id="bot-colours"></div>
+                <details class="be-advanced">
+                    <summary>The look as text</summary>
+                    <textarea id="bot-figure-text" rows="3" spellcheck="false"></textarea>
+                    <small>part=model/colour joined with &amp; (the hotel's bot format): colour r,g,b, a palette number, or nothing.</small>
+                </details>
             </div>
-            <label>Walk area <textarea name="Walkspace" id="bot-walkspace" rows="3" spellcheck="false" placeholder="x,y x,y ...">@bot.Walkspace</textarea></label>
-            <small class="bot-hint" id="bot-walk-count"></small>
-        </fieldset>
 
-        <fieldset class="bot-box">
-            <legend>What it says</legend>
-            <div class="bot-lines" data-for="bot-speech" data-title="Says now and then"></div>
-            <div class="bot-lines" data-for="bot-response" data-title="Answers when talked to"></div>
-            <div class="bot-lines" data-for="bot-unrecognised" data-title="Answers it doesn't understand"></div>
-            <div class="bot-drinks">
-                <span class="bot-label">Serves drinks (hand item numbers)</span>
-                <div id="bot-drink-list"></div>
-                <button type="button" id="bot-drink-add">+ drink</button>
+            <div class="be-panel" data-panel="place" hidden>
+                <div class="be-tools" id="bot-tools">
+                    <button type="button" data-tool="stand" class="on">📍 Where it stands</button>
+                    <button type="button" data-tool="paint">🖌 Paint where it walks</button>
+                    <button type="button" data-tool="erase">⌫ Erase</button>
+                    <span class="be-sep"></span>
+                    <span class="be-label">Walk around it</span>
+                    <button type="button" data-radius="1">1</button>
+                    <button type="button" data-radius="2">2</button>
+                    <button type="button" data-radius="3">3</button>
+                    <button type="button" data-radius="99">everywhere</button>
+                    <button type="button" id="bot-walk-clear">Clear</button>
+                </div>
+                <div class="be-map-wrap"><canvas id="bot-map"></canvas><div class="be-map-tip" id="bot-map-tip" hidden></div></div>
+                <p class="be-hint" id="bot-place-note"></p>
+                <p class="be-legend"><i class="lg-walk"></i> walks here <i class="lg-furni"></i> furniture <i class="lg-seat"></i> seat <i class="lg-door"></i> door <i class="lg-bot"></i> other bots</p>
             </div>
-        </fieldset>
 
-        <div class="bot-actions">
-            <button type="submit" class="btn btn-primary">@(isNew ? "Add the bot" : "Save")</button>
-            <span class="bot-hint">Saving reloads the room's bots in the hotel.</span>
-        </div>
+            <div class="be-panel" data-panel="talk" hidden>
+                <div class="be-chat" data-for="bot-speech" data-title="Says now and then" data-hint="Every 20 to 50 seconds it says one of these to the room, never the same one twice in a row."></div>
+                <div class="be-chat" data-for="bot-unrecognised" data-title="When someone says its name" data-hint="A Habbo within about 3 tiles who says its name (and doesn't ask for a drink) gets one of these." data-ai="1"></div>
+                <div class="be-drinks be-chat">
+                    <div class="be-chat-head"><span class="be-label">Drinks it serves</span></div>
+                    <p class="be-hint">A Habbo near it who says a drink's name gets that drink; "drink please", "can i have" or "i'll have" gets a random one. A name the hotel has a hand item for is that item; any other name is a drink with that name.</p>
+                    <div id="bot-drink-list" class="be-drink-list"></div>
+                    <span class="be-add-drink"><input type="text" id="bot-drink-new" maxlength="30" placeholder="a drink's name" list="bot-handitems-list"><button type="button" id="bot-drink-add">Add drink</button></span>
+                    <datalist id="bot-handitems-list">@foreach (var h in Model.HandItemNames) { <option value="@h.Value"></option> }</datalist>
+                    <div class="be-handitems" id="bot-handitem-chips"></div>
+                </div>
+                <div class="be-chat" data-for="bot-response" data-title="When it serves a drink" data-hint="Said as it hands the drink over. %drink% is the drink's name, %lowercaseDrink% the same in lower case." data-ai="1" data-drink="1"></div>
+            </div>
+
+            <div class="be-panel" data-panel="details" hidden>
+                <label class="be-field">Mission <input name="Mission" maxlength="255" value="@bot.Mission" placeholder="shown when someone clicks it"></label>
+                <div class="be-summary" id="bot-summary"></div>
+            </div>
+
+            <div class="be-bar">
+                <button type="button" class="be-prev" id="be-prev" hidden>← Back</button>
+                <button type="button" class="be-next" id="be-next">Next →</button>
+                <span class="be-spacer"></span>
+                <span class="be-hint">@(isNew ? "Adding puts it in the room at once." : "Saving reloads the room's bots in the hotel.")</span>
+                <button type="submit" class="be-save">@(isNew ? "Add the bot" : "Save")</button>
+            </div>
+        </section>
     </div>
 </form>
 
 @if (!isNew)
 {
-    <form method="post" action="@Url.Action("Delete")" class="bot-delete" onsubmit="return confirm('Delete @bot.Name from the hotel?')">
+    <form method="post" action="@Url.Action("Delete")" class="be-delete" onsubmit="return confirm('Delete @bot.Name from the hotel?')">
         @Html.AntiForgeryToken()
         <input type="hidden" name="id" value="@bot.Id">
-        <button type="submit" class="btn">Delete this bot</button>
+        <button type="submit">Delete @bot.Name</button>
     </form>
 }
 
 <script>
     window.botEditor = {
+        botId: @bot.Id,
         picture: '@Url.Action("Picture")',
         parts: '@Url.Action("Parts")',
+        map: '@Url.Action("Map")',
+        lookOf: '@Url.Action("LookOf")',
+        handItems: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.HandItemNames)),
     };
 </script>
 <script src="~/housekeeping/js/bot-editor.js" asp-append-version="true"></script>

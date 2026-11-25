@@ -31,14 +31,20 @@ namespace KeplerCMS.Areas.Housekeeping
         private readonly IRoomService _roomService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<BotsController> _logger;
+        private readonly KeplerCMS.Data.DataContext _context;
+        private readonly IUserService _userService;
+        private readonly IGameDataService _gameData;
 
-        public BotsController(ICommandQueueService commandQueueService, IBotService botService, IRoomService roomService, IConfiguration configuration, ILogger<BotsController> logger)
+        public BotsController(ICommandQueueService commandQueueService, IBotService botService, IRoomService roomService, IConfiguration configuration, ILogger<BotsController> logger, KeplerCMS.Data.DataContext context, IUserService userService, IGameDataService gameData)
         {
+            _gameData = gameData;
             _commandQueueService = commandQueueService;
             _botService = botService;
             _roomService = roomService;
             _configuration = configuration;
             _logger = logger;
+            _context = context;
+            _userService = userService;
         }
 
         [HousekeepingFilter(Fuse.fuse_bots)]
@@ -54,7 +60,7 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             var bot = await _botService.Get(id);
             if (bot == null) return RedirectToAction("Index", new { Message = "That bot doesn't exist" });
-            return View(new BotEditView { Bot = bot, Rooms = await PublicRooms(), Message = message });
+            return View(new BotEditView { Bot = bot, Rooms = await PublicRooms(), Message = message, HandItemNames = await HandItemNames(), Others = await OtherBots(id) });
         }
 
         [HousekeepingFilter(Fuse.fuse_bots)]
@@ -69,7 +75,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 figure = "sd=001/0&hr=010/224,186,120&hd=001/255,204,153&ey=001/0&fc=001/255,204,153&bd=001/255,204,153&lh=001/255,204,153&rh=001/255,204,153&ch=005/204,204,204&ls=002/204,204,204&rs=002/204,204,204&lg=006/51,51,51&sh=003/41,41,41",
                 Speech = "", Response = "", UnrecognisedResponse = "", HandItems = "",
             };
-            return View("Edit", new BotEditView { Bot = bot, Rooms = rooms });
+            return View("Edit", new BotEditView { Bot = bot, Rooms = rooms, HandItemNames = await HandItemNames(), Others = await OtherBots(0) });
         }
 
         [HttpPost]
@@ -82,17 +88,22 @@ namespace KeplerCMS.Areas.Housekeeping
             bot.figure = (bot.figure ?? "").Trim();
             bot.Walkspace = Regex.Replace((bot.Walkspace ?? "").Trim(), @"\s+", " ");
             bot.Speech ??= ""; bot.Response ??= ""; bot.UnrecognisedResponse ??= "";
-            bot.HandItems = Regex.Replace(bot.HandItems ?? "", @"\s+", "");
+            // drinks are names: Odin looks for them in what Habbos say and hands over the hand item whose text
+            // (handitemN) has that name, else a drink by that name
+            bot.HandItems = string.Join(",", (bot.HandItems ?? "").Split(',').Select(d => Regex.Replace(d, @"\s+", " ").Trim()).Where(d => d.Length > 0));
             var error =
                 bot.Name.Length == 0 || bot.Name.Length > 25 ? "The name needs 1 to 25 characters" :
                 bot.Mission.Length > 255 ? "The mission is at most 255 characters" :
                 bot.figure.Length == 0 || bot.figure.Length > 255 || !bot.figure.Contains('=') ? "The look (figure) is missing or longer than 255 characters" :
                 !Regex.IsMatch(bot.StartLook ?? "", @"^[0-7],[0-7]$") ? "The start look is \"head,body\" directions, 0 to 7" :
                 bot.Walkspace.Length > 0 && !Regex.IsMatch(bot.Walkspace, @"^\d+,\d+( \d+,\d+)*$") ? "The walk area is tiles as \"x,y x,y ...\"" :
-                bot.HandItems.Length > 0 && !Regex.IsMatch(bot.HandItems, @"^\d+(,\d+)*$") ? "Drinks are hand item numbers, separated by commas" :
-                (await PublicRooms()).All(r => r.Id != bot.RoomId) ? "Pick a public room" : null;
+                bot.HandItems.Length > 50 ? "The drinks are at most 50 characters together" :
+                bot.HandItems.IndexOfAny(new[] { '|', '#' }) >= 0 ? "Drink names can't contain | or #" :
+                LinesError("What it says now and then", bot.Speech) ?? LinesError("What it says when it serves a drink", bot.Response) ??
+                LinesError("What it says when someone says its name", bot.UnrecognisedResponse) ??
+                ((await PublicRooms()).All(r => r.Id != bot.RoomId) ? "Pick a public room" : null);
             if (error != null)
-                return View("Edit", new BotEditView { Bot = bot, Rooms = await PublicRooms(), Error = error });
+                return View("Edit", new BotEditView { Bot = bot, Rooms = await PublicRooms(), Error = error, HandItemNames = await HandItemNames(), Others = await OtherBots(bot.Id) });
             // Odin reads the walk area tile by tile; an empty one would stop it loading the bot: the start tile at least.
             if (bot.Walkspace.Length == 0) bot.Walkspace = $"{bot.X},{bot.Y}";
 
@@ -103,7 +114,7 @@ namespace KeplerCMS.Areas.Housekeeping
                 return RedirectToAction("Edit", new { id = bot.Id, message = $"{bot.Name} is in the room now" });
             }
             if (!await _botService.UpdateBot(bot))
-                return View("Edit", new BotEditView { Bot = bot, Rooms = await PublicRooms(), Error = "Couldn't save the bot" });
+                return View("Edit", new BotEditView { Bot = bot, Rooms = await PublicRooms(), Error = "Couldn't save the bot", HandItemNames = await HandItemNames(), Others = await OtherBots(bot.Id) });
             return RedirectToAction("Edit", new { id = bot.Id, message = "Saved: the room's bots were reloaded" });
         }
 
@@ -122,7 +133,7 @@ namespace KeplerCMS.Areas.Housekeeping
         /// <summary>A bot's picture as the client draws it in its room: the saved bot (id), or a look being edited
         /// (figure + roomId), turned and posed as asked.</summary>
         [HousekeepingFilter(Fuse.fuse_bots)]
-        public async Task<IActionResult> Picture(int id = 0, string figure = null, int roomId = 0, int? direction = null, int? headDirection = null, string action = null, int drink = 0, string size = null)
+        public async Task<IActionResult> Picture(int id = 0, string figure = null, int roomId = 0, int? direction = null, int? headDirection = null, string action = null, int drink = 0, string size = null, bool head = false)
         {
             var renderer = _configuration["keplercms:avatarRenderer:url"];
             if (string.IsNullOrEmpty(renderer)) return StatusCode(503, "No avatar renderer (keplercms:avatarRenderer:url)");
@@ -138,7 +149,8 @@ namespace KeplerCMS.Areas.Housekeeping
             }
             if (string.IsNullOrEmpty(figure) || figure.Length > 500) return BadRequest();
             var room = roomId > 0 ? await _roomService.GetRoom(roomId) : null;
-            var query = $"figure={Uri.EscapeDataString(figure)}&casts={Uri.EscapeDataString(room?.Casts ?? "")}&raw=1" +
+            // head=1: the head alone, cropped (the look editor's hair and face pictures); else the client's whole canvas
+            var query = $"figure={Uri.EscapeDataString(figure)}&casts={Uri.EscapeDataString(room?.Casts ?? "")}" + (head ? "&head=1" : "&raw=1") +
                         $"&direction={Math.Clamp(direction ?? 2, 0, 7)}&head_direction={Math.Clamp(headDirection ?? direction ?? 2, 0, 7)}";
             if (action is "wav" or "spk" or "wlk" or "sit" or "lay") query += "&action=" + action;
             if (drink > 0) query += $"&action=crr&crr={drink}";
@@ -177,6 +189,81 @@ namespace KeplerCMS.Areas.Housekeeping
                 return StatusCode(502, "The avatar renderer can't be reached");
             }
         }
+
+        /// <summary>Odin reads a line's chat type from what follows its first '#' (Enum.valueOf): anything but one '#' and
+        /// SHOUT / WHISPER / CHAT would stop the room loading its bots.</summary>
+        private static string LinesError(string what, string lines)
+        {
+            if (lines.Contains("_AI_")) return null; // Odin uses none of them
+            foreach (var line in lines.Split('|'))
+            {
+                var parts = line.Split('#');
+                if (parts.Length == 1) continue;
+                if (parts.Length > 2 || !new[] { "SHOUT", "WHISPER", "CHAT" }.Contains(parts[1]))
+                    return $"{what}: \"{line}\" has a # the hotel can't read (only #SHOUT, #WHISPER or #CHAT at the end)";
+            }
+            return null;
+        }
+
+        /// <summary>The room for the Place tab: its floor plan (rooms_models), its own furniture (public_items) and the
+        /// other bots standing and walking in it.</summary>
+        [HousekeepingFilter(Fuse.fuse_bots)]
+        public async Task<IActionResult> Map(int roomId, int botId = 0)
+        {
+            var room = await _roomService.GetRoom(roomId);
+            if (room == null) return NotFound();
+            var model = _context.RoomModels.FirstOrDefault(m => m.ModelId == room.Model);
+            if (model == null) return NotFound("No floor plan for " + room.Model);
+            var furni = _context.PublicItems.Where(p => p.RoomModel == room.Model)
+                .Select(p => new { p.X, p.Y, p.Sprite, p.Behaviour, p.Length, p.Width, p.Rotation }).ToList();
+            var bots = (await _botService.GetForRoom(roomId)).Where(b => b.Id != botId)
+                .Select(b => new { b.Id, b.Name, b.X, b.Y, walk = b.Walkspace }).ToList();
+            var rows = (model.Heightmap ?? "").Replace("\r", "").Replace("\n", "|").Split('|', StringSplitOptions.RemoveEmptyEntries);
+            return Json(new { model = room.Model, rows, door = new { x = model.DoorX, y = model.DoorY }, furni, bots });
+        }
+
+        /// <summary>A Habbo's look in the bot format (the renderer's /convert), to start a bot from it.</summary>
+        [HousekeepingFilter(Fuse.fuse_bots)]
+        public async Task<IActionResult> LookOf(string username)
+        {
+            var renderer = _configuration["keplercms:avatarRenderer:url"];
+            if (string.IsNullOrEmpty(renderer)) return StatusCode(503, "No avatar renderer (keplercms:avatarRenderer:url)");
+            var user = string.IsNullOrWhiteSpace(username) ? null : await _userService.GetUserByUsername(username.Trim());
+            if (user == null) return NotFound("No Habbo called " + username);
+            try
+            {
+                using var response = await Http.GetAsync(renderer.TrimEnd('/') + "/convert?figure=" + Uri.EscapeDataString(user.Figure ?? "") + "&sex=" + Uri.EscapeDataString(user.Gender ?? ""));
+                var body = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode) return StatusCode((int)response.StatusCode, user.Username + "'s look can't be read (" + body + ")");
+                return Content(body, "application/json");
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning("Avatar renderer unreachable for a look: {Message}", e.Message);
+                return StatusCode(502, "The avatar renderer can't be reached");
+            }
+        }
+
+        /// <summary>The hotel's hand items by number (handitem1..25 in the external texts): a drink with one of these names
+        /// is that hand item.</summary>
+        private async Task<System.Collections.Generic.Dictionary<int, string>> HandItemNames()
+        {
+            try
+            {
+                var texts = await _gameData.GetTexts(Enumerable.Range(1, 25).Select(i => "handitem" + i));
+                return Enumerable.Range(1, 25).Where(i => texts.TryGetValue("handitem" + i, out var t) && !string.IsNullOrWhiteSpace(t))
+                    .ToDictionary(i => i, i => texts["handitem" + i].Trim());
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning("No hand item names for the bot editor: {Message}", e.Message);
+                return new();
+            }
+        }
+
+        private async Task<System.Collections.Generic.List<BotSummary>> OtherBots(int exceptId) =>
+            (await _botService.GetAllBots()).Where(b => b.Id != exceptId)
+                .Select(b => new BotSummary { Id = b.Id, Name = b.Name, Room = b.Room?.Name, Figure = b.figure }).OrderBy(b => b.Name).ToList();
 
         private async Task<System.Collections.Generic.List<Rooms>> PublicRooms() =>
             (await _roomService.GetPublicRooms()).OrderBy(r => r.Name).ToList();
