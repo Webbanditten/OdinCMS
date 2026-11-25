@@ -190,7 +190,7 @@
         renderLook();
         fetch(cfg.parts + '?roomId=' + room().id, { credentials: 'same-origin' })
             .then(function (r) { if (!r.ok) return r.text().then(function (t) { throw new Error(t || 'HTTP ' + r.status); }); return r.json(); })
-            .then(function (json) { choices = json; renderLook(); changed(); })
+            .then(function (json) { choices = json; renderLook(); changed(); drawMap(); })
             .catch(function (err) { $('bot-options').innerHTML = '<p class="bot-error">Couldn\'t load the room\'s clothes: ' + esc(err.message) + '</p>'; changed(); });
     }
 
@@ -300,8 +300,27 @@
             });
         }
         if (map && !tileFree(+$('bot-x').value, +$('bot-y').value)) out.push('It stands on a tile with no floor or on furniture: pick another in Place');
-        $('bot-warnings').innerHTML = out.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('');
+        var html = out.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('');
+        if (map && tileFree(+$('bot-x').value, +$('bot-y').value)) {
+            // walk tiles Odin's pathfinder can't take it to: it stands still when it picks one
+            var lost = unreachableWalk(), bare = lost.filter(function (k) { var c = k.split(','); return !isFloor(+c[0], +c[1]); }).length;
+            if (lost.length) html += '<li>' + esc(
+                (bare ? bare + ' tile' + (bare === 1 ? '' : 's') + ' where it walks ha' + (bare === 1 ? 's' : 've') + ' no floor in this room' : '') +
+                (bare && lost.length > bare ? ', and ' : '') +
+                (lost.length > bare ? (lost.length - bare) + ' can\'t be reached from where it stands (furniture, or a step higher than 1.5)' : '') +
+                '. It stands still when it picks one.') + ' <button type="button" data-fix="walk">Remove them</button></li>';
+        }
+        $('bot-warnings').innerHTML = html;
     }
+
+    $('bot-warnings').addEventListener('click', function (e) {
+        if (!e.target.closest('[data-fix=walk]')) return;
+        unreachableWalk().forEach(function (k) { walk.delete(k); });
+        saveWalk();
+        drawMap();
+        warnings();
+        placeNote();
+    });
 
     function changed() {
         $('bot-figure').value = textOf(figure);
@@ -314,12 +333,16 @@
     }
 
     // ===== Place: the room's floor plan =====
-    var map = null; // { rows, door, furni, bots, solid: Set, seats: Set }
+    // As Odin reads it (RoomModel): a digit is floor at that height, anything else no floor; the door tile is floor at
+    // door_z. Drawn like the client's Room Geometry: a tile is lifted by its height * #factorh of the room's layout.
+    // Habbos (and bots) can't step up or down more than 1.5 (Pathfinder.MAX_LIFT_HEIGHT).
+    var map = null; // { rows, door, bots, solid: Set, seats: Set, names, tiles: [{ x, y, h }] in drawing order, minH, maxH }
     var walk = new Set(($('bot-walkspace').value || '').trim().split(/\s+/).filter(function (t) { return /^\d+,\d+$/.test(t); }));
     var tool = 'stand';
-    var T = 32, HW = 16, HH = 8, PAD = 24, TOP = 70;
+    var T = 32, HW = 16, HH = 8, PAD = 24, TOP = 70, MAX_STEP = 1.5;
     var canvas = $('bot-map'), ctx = canvas.getContext('2d');
     var key = function (x, y) { return x + ',' + y; };
+    var STEPS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
     function loadMap() {
         map = null;
@@ -339,6 +362,15 @@
                     }
                 });
                 map = { rows: json.rows, door: json.door, bots: json.bots, solid: solid, seats: seats, names: names };
+                var tiles = [];
+                var cols = Math.max.apply(null, json.rows.map(function (r) { return r.length; }).concat([json.door.x + 1]));
+                var rows = Math.max(json.rows.length, json.door.y + 1);
+                for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) { var h = height(x, y); if (h !== null) tiles.push({ x: x, y: y, h: h }); }
+                tiles.sort(function (a, b) { return (a.x + a.y) - (b.x + b.y) || a.x - b.x; }); // back to front, as the client's locZ
+                map.tiles = tiles;
+                map.cols = cols; map.rowCount = rows;
+                map.minH = Math.min.apply(null, tiles.map(function (t) { return t.h; }).concat([0]));
+                map.maxH = Math.max.apply(null, tiles.map(function (t) { return t.h; }).concat([0]));
                 // a new bot, or one moved to another room, starts on the nearest free tile inside the door
                 if ((isNew || roomMoved) && !tileFree(+$('bot-x').value, +$('bot-y').value)) nearDoor();
                 drawMap();
@@ -346,37 +378,67 @@
             })
             .catch(function (err) { map = null; $('bot-place-note').textContent = 'Couldn\'t load the room\'s floor plan: ' + err.message; });
     }
+    function height(x, y) {
+        if (!map) return null;
+        if (map.door && map.door.x === x && map.door.y === y) return +map.door.z || 0;
+        var row = map.rows[y], c = row ? row.charAt(x) : '';
+        return /^[0-9]$/.test(c) ? +c : null;
+    }
+    function isFloor(x, y) { return height(x, y) !== null; }
+    function tileFree(x, y) { return isFloor(x, y) && !map.solid.has(key(x, y)); }
+    function canStep(x1, y1, x2, y2) { return Math.abs(height(x1, y1) - height(x2, y2)) <= MAX_STEP; }
+    function isDoor(x, y) { return !!map.door && map.door.x === x && map.door.y === y; }
+    // where a Habbo can walk from (x, y): free floor, no seats in the way, no step over 1.5
+    function reachable(x, y) {
+        var seen = new Set([key(x, y)]), queue = [[x, y]];
+        while (queue.length) {
+            var q = queue.shift();
+            STEPS.forEach(function (d) {
+                var nx = q[0] + d[0], ny = q[1] + d[1], k = key(nx, ny);
+                if (seen.has(k) || !tileFree(nx, ny) || !canStep(q[0], q[1], nx, ny)) return;
+                seen.add(k);
+                if (!map.seats.has(k)) queue.push([nx, ny]); // a seat can be walked to, not through
+            });
+        }
+        return seen;
+    }
+    function unreachableWalk() {
+        if (!map) return [];
+        var r = reachable(+$('bot-x').value, +$('bot-y').value);
+        return Array.from(walk).filter(function (k) { return !r.has(k); });
+    }
     var roomMoved = false;
     function nearDoor() {
         var d = map.door || { x: 0, y: 0 }, seen = new Set([key(d.x, d.y)]), queue = [[d.x, d.y]];
         while (queue.length) {
             var q = queue.shift();
-            if ((q[0] !== d.x || q[1] !== d.y) && tileFree(q[0], q[1]) && !map.seats.has(key(q[0], q[1])) && !map.bots.some(function (b) { return b.x === q[0] && b.y === q[1]; })) {
+            if (!isDoor(q[0], q[1]) && tileFree(q[0], q[1]) && !map.seats.has(key(q[0], q[1])) && !map.bots.some(function (b) { return b.x === q[0] && b.y === q[1]; })) {
                 $('bot-x').value = q[0]; $('bot-y').value = q[1];
                 walk = new Set([key(q[0], q[1])]);
                 saveWalk();
                 return;
             }
-            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (dxy) {
+            STEPS.forEach(function (dxy) {
                 var nx = q[0] + dxy[0], ny = q[1] + dxy[1], k = key(nx, ny);
-                if (seen.has(k) || !floor(nx, ny)) return;
+                if (seen.has(k) || !tileFree(nx, ny) || !canStep(q[0], q[1], nx, ny)) return;
                 seen.add(k);
                 queue.push([nx, ny]);
             });
         }
     }
-    function floor(x, y) { if (!map) return null; var row = map.rows[y]; var c = row ? row.charAt(x) : ''; return c && c !== 'x' && c !== 'X' ? c : null; }
-    function tileFree(x, y) { return !!floor(x, y) && !map.solid.has(key(x, y)); }
+    // pixels one height level lifts a tile at the map's tile width (the layout's #factorh at its #factorx)
+    function lift() { return choices && choices.heightFactor ? choices.heightFactor * T / (choices.zoom || 32) : 2 * HH; }
     function size() {
-        var rows = map.rows.length, cols = Math.max.apply(null, map.rows.map(function (r) { return r.length; }));
-        return { rows: rows, cols: cols, ox: PAD + rows * HW, oy: PAD + TOP, w: (cols + rows) * HW + PAD * 2, h: (cols + rows) * HH + PAD * 2 + TOP };
+        var L = lift(), rise = (map.maxH - map.minH) * L;
+        return { L: L, ox: PAD + map.rowCount * HW, oy: PAD + TOP + rise, w: (map.cols + map.rowCount) * HW + PAD * 2, h: (map.cols + map.rowCount) * HH + PAD * 2 + TOP + rise };
     }
-    function screen(x, y, s) { return { x: s.ox + (x - y) * HW, y: s.oy + (x + y) * HH }; }
-    function diamond(p, fill, stroke) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + HW, p.y - HH); ctx.lineTo(p.x + T, p.y); ctx.lineTo(p.x + HW, p.y + HH); ctx.closePath();
+    // a tile's left corner on the canvas, lifted by its height
+    function screen(x, y, s) { var h = height(x, y); return { x: s.ox + (x - y) * HW, y: s.oy + (x + y) * HH - ((h === null ? map.minH : h) - map.minH) * s.L }; }
+    function path(points) { ctx.beginPath(); ctx.moveTo(points[0], points[1]); for (var i = 2; i < points.length; i += 2) ctx.lineTo(points[i], points[i + 1]); ctx.closePath(); }
+    function diamond(p, fill, stroke, width) {
+        path([p.x, p.y, p.x + HW, p.y - HH, p.x + T, p.y, p.x + HW, p.y + HH]);
         if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-        if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+        if (stroke) { ctx.lineWidth = width || 1; ctx.strokeStyle = stroke; ctx.stroke(); ctx.lineWidth = 1; }
     }
     function drawMap() {
         if (tab !== 'place') return;
@@ -389,24 +451,25 @@
         ctx.clearRect(0, 0, s.w, s.h);
         ctx.lineWidth = 1;
         var sx = +$('bot-x').value, sy = +$('bot-y').value;
-        for (var d = 0; d < s.cols + s.rows; d++) {
-            for (var y = 0; y < s.rows; y++) {
-                var x = d - y;
-                if (x < 0 || x >= s.cols) continue;
-                var c = floor(x, y);
-                if (!c) continue;
-                var p = screen(x, y, s), k = key(x, y);
-                var h = parseInt(c, 36) || 0;
-                var base = 'hsl(45, 22%, ' + Math.min(92, 78 + h * 3) + '%)';
-                diamond(p, base, '#c9c1a6');
-                if (map.solid.has(k)) diamond(p, 'rgba(120, 82, 45, 0.55)');
-                else if (map.seats.has(k)) diamond(p, 'rgba(60, 110, 190, 0.45)');
-                if (map.door && map.door.x === x && map.door.y === y) diamond(p, 'rgba(40, 160, 80, 0.7)');
-                map.bots.forEach(function (b) { if ((' ' + (b.walk || '') + ' ').indexOf(' ' + k + ' ') >= 0) diamond(p, 'rgba(140, 140, 160, 0.25)'); });
-                if (walk.has(k)) diamond(p, 'rgba(245, 150, 20, 0.55)', '#d27a00');
-                if (x === sx && y === sy) diamond(p, null, '#000');
+        var lost = new Set(unreachableWalk());
+        var others = {};
+        map.bots.forEach(function (b) { (b.walk || '').split(/\s+/).forEach(function (k) { if (k) others[k] = true; }); });
+        map.tiles.forEach(function (t) {
+            var p = screen(t.x, t.y, s), k = key(t.x, t.y), drop = (t.h - map.minH) * s.L;
+            if (drop > 0) { // the block's two visible sides, down to the room's lowest floor (tiles in front paint over them)
+                path([p.x, p.y, p.x + HW, p.y + HH, p.x + HW, p.y + HH + drop, p.x, p.y + drop]);
+                ctx.fillStyle = '#b9ae8b'; ctx.fill();
+                path([p.x + HW, p.y + HH, p.x + T, p.y, p.x + T, p.y + drop, p.x + HW, p.y + HH + drop]);
+                ctx.fillStyle = '#a69c7b'; ctx.fill();
             }
-        }
+            diamond(p, 'hsl(45, 22%, ' + Math.min(90, 80 + (t.h - map.minH) * 2) + '%)', '#c4bb9e');
+            if (map.solid.has(k)) diamond(p, 'rgba(120, 82, 45, 0.55)');
+            else if (map.seats.has(k)) diamond(p, 'rgba(60, 110, 190, 0.45)');
+            if (isDoor(t.x, t.y)) diamond(p, 'rgba(40, 160, 80, 0.7)');
+            if (others[k]) diamond(p, 'rgba(140, 140, 160, 0.25)');
+            if (walk.has(k)) diamond(p, lost.has(k) ? 'rgba(220, 40, 30, 0.45)' : 'rgba(245, 150, 20, 0.55)', lost.has(k) ? '#b3261e' : '#d27a00');
+            if (t.x === sx && t.y === sy) diamond(p, null, '#000', 2);
+        });
         // the other bots, and this one at its tile
         ctx.font = '11px Verdana, sans-serif';
         map.bots.forEach(function (b) {
@@ -415,23 +478,34 @@
             ctx.beginPath(); ctx.arc(p.x + HW, p.y - 4, 4, 0, Math.PI * 2); ctx.fill();
             ctx.fillText(b.name, p.x + HW + 6, p.y - 2);
         });
-        if (botImage.complete && botImage.naturalWidth) {
+        if (botImage.complete && botImage.naturalWidth && isFloor(sx, sy)) {
             var p = screen(sx, sy, s);
             var w = botImage.naturalWidth, hgt = botImage.naturalHeight, scale = w > 40 ? 0.5 : 1;
             ctx.drawImage(botImage, p.x + HW - (w * scale) / 2, p.y + 4 - hgt * scale, w * scale, hgt * scale);
         }
         placeNote();
     }
+    // the tile under the mouse: the front-most block (its top or its sides) that holds the point, as it is drawn
+    function inside(px, py, pts) {
+        var hit = false;
+        for (var i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) {
+            if ((pts[i + 1] > py) !== (pts[j + 1] > py) && px < (pts[j] - pts[i]) * (py - pts[i + 1]) / (pts[j + 1] - pts[i + 1]) + pts[i]) hit = !hit;
+        }
+        return hit;
+    }
     function tileAt(ev) {
+        if (!map) return null;
         var s = size(), r = canvas.getBoundingClientRect();
-        var px = (ev.clientX - r.left) * (canvas.width / r.width) - s.ox, py = (ev.clientY - r.top) * (canvas.height / r.height) - s.oy;
-        var a = (px - HW) / HW, b = py / HH; // a = x - y, b = x + y (from the tile's centre)
-        var x = Math.round((a + b) / 2), y = Math.round((b - a) / 2);
-        return { x: x, y: y };
+        var px = (ev.clientX - r.left) * (canvas.width / r.width), py = (ev.clientY - r.top) * (canvas.height / r.height);
+        for (var i = map.tiles.length - 1; i >= 0; i--) {
+            var t = map.tiles[i], p = screen(t.x, t.y, s), drop = (t.h - map.minH) * s.L;
+            if (inside(px, py, [p.x, p.y, p.x + HW, p.y - HH, p.x + T, p.y, p.x + T, p.y + drop, p.x + HW, p.y + HH + drop, p.x, p.y + drop])) return t;
+        }
+        return null;
     }
     var painting = false;
     function apply(t) {
-        if (!map || !floor(t.x, t.y)) return;
+        if (!map || !t) return;
         var k = key(t.x, t.y);
         if (tool === 'stand') {
             if (!tileFree(t.x, t.y)) return flash('It can\'t stand on furniture', true);
@@ -446,17 +520,19 @@
     }
     canvas.addEventListener('mousedown', function (ev) { painting = tool !== 'stand'; apply(tileAt(ev)); });
     window.addEventListener('mouseup', function () { painting = false; });
+    var lastTip = '';
     canvas.addEventListener('mousemove', function (ev) {
         if (!map) return;
-        var t = tileAt(ev), tip = $('bot-map-tip'), c = floor(t.x, t.y);
+        var t = tileAt(ev), tip = $('bot-map-tip');
         if (painting) apply(t);
-        if (!c) { tip.hidden = true; return; }
+        if (!t) { tip.hidden = true; return; }
         var k = key(t.x, t.y);
-        tip.textContent = t.x + ',' + t.y + (map.names[k] ? ' · ' + map.names[k] : '') + (map.door && map.door.x === t.x && map.door.y === t.y ? ' · door' : '') +
+        var text = t.x + ',' + t.y + ' · height ' + t.h + (map.names[k] ? ' · ' + map.names[k] : '') + (isDoor(t.x, t.y) ? ' · door' : '') +
             map.bots.filter(function (b) { return b.x === t.x && b.y === t.y; }).map(function (b) { return ' · ' + b.name; }).join('');
-        var r = canvas.getBoundingClientRect(), wr = canvas.parentElement.getBoundingClientRect();
-        tip.style.left = (ev.clientX - wr.left + 12) + 'px';
-        tip.style.top = (ev.clientY - wr.top + 12) + 'px';
+        if (text !== lastTip) { tip.textContent = text; lastTip = text; }
+        var wr = canvas.parentElement.getBoundingClientRect();
+        tip.style.left = (ev.clientX - wr.left + canvas.parentElement.scrollLeft + 12) + 'px';
+        tip.style.top = (ev.clientY - wr.top + canvas.parentElement.scrollTop + 12) + 'px';
         tip.hidden = false;
     });
     canvas.addEventListener('mouseleave', function () { $('bot-map-tip').hidden = true; });
@@ -468,14 +544,14 @@
             document.querySelectorAll('#bot-tools [data-tool]').forEach(function (x) { x.classList.toggle('on', x === b); });
         } else if (b.hasAttribute('data-radius')) {
             if (!map) return;
-            // every free tile within n steps of where it stands (walking round furniture)
+            // every free tile within n steps of where it stands, walking round furniture and over steps of at most 1.5
             var n = +b.getAttribute('data-radius'), sx = +$('bot-x').value, sy = +$('bot-y').value;
             var seen = new Set([key(sx, sy)]), queue = [[sx, sy, 0]];
             while (queue.length) {
                 var q = queue.shift();
-                [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (dxy) {
+                STEPS.forEach(function (dxy) {
                     var nx = q[0] + dxy[0], ny = q[1] + dxy[1], k = key(nx, ny);
-                    if (q[2] >= n || seen.has(k) || !tileFree(nx, ny) || map.seats.has(k) || (map.door && map.door.x === nx && map.door.y === ny)) return;
+                    if (q[2] >= n || seen.has(k) || !tileFree(nx, ny) || map.seats.has(k) || isDoor(nx, ny) || !canStep(q[0], q[1], nx, ny)) return;
                     seen.add(k);
                     queue.push([nx, ny, q[2] + 1]);
                 });
@@ -483,12 +559,14 @@
             walk = seen;
             saveWalk();
             drawMap();
+            warnings();
         }
     });
-    $('bot-walk-clear').addEventListener('click', function () { walk = new Set([key($('bot-x').value, $('bot-y').value)]); saveWalk(); drawMap(); });
+    $('bot-walk-clear').addEventListener('click', function () { walk = new Set([key($('bot-x').value, $('bot-y').value)]); saveWalk(); drawMap(); warnings(); });
     function saveWalk() { $('bot-walkspace').value = Array.from(walk).join(' '); }
     function placeNote() {
-        $('bot-place-note').textContent = 'Stands on ' + $('bot-x').value + ',' + $('bot-y').value + ', facing ' + body + (head !== body ? ' (looking ' + head + ')' : '') +
+        var h = map ? height(+$('bot-x').value, +$('bot-y').value) : null;
+        $('bot-place-note').textContent = 'Stands on ' + $('bot-x').value + ',' + $('bot-y').value + (h !== null ? ' (height ' + h + ')' : '') + ', facing ' + body + (head !== body ? ' (looking ' + head + ')' : '') +
             ' · walks on ' + walk.size + ' tile' + (walk.size === 1 ? '' : 's') + ' · turn it with the buttons under the preview';
     }
 

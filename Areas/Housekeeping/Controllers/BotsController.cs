@@ -219,7 +219,7 @@ namespace KeplerCMS.Areas.Housekeeping
             var bots = (await _botService.GetForRoom(roomId)).Where(b => b.Id != botId)
                 .Select(b => new { b.Id, b.Name, b.X, b.Y, walk = b.Walkspace }).ToList();
             var rows = (model.Heightmap ?? "").Replace("\r", "").Replace("\n", "|").Split('|', StringSplitOptions.RemoveEmptyEntries);
-            return Json(new { model = room.Model, rows, door = new { x = model.DoorX, y = model.DoorY }, furni, bots });
+            return Json(new { model = room.Model, rows, door = new { x = model.DoorX, y = model.DoorY, z = model.DoorZ }, furni, bots });
         }
 
         /// <summary>A Habbo's look in the bot format (the renderer's /convert), to start a bot from it.</summary>

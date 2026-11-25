@@ -50,6 +50,7 @@
 .be-ctl-group > span:first-child { margin-left: 0; }
 .be-warnings { margin: 0; padding: 6px 8px 6px 22px; color: #8a1c14; background: #fdecea; border-radius: 6px; font-size: 12px; }
 .be-warnings:empty { display: none; }
+.be .be-warnings button { padding: 1px 6px; font-size: 11px; margin-left: 4px; }
 
 .be-main { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: flex; flex-direction: column; }
 .be-tabs { display: flex; border-bottom: 1px solid var(--line); }
@@ -86,13 +87,13 @@
 
 .be-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .be-sep { width: 1px; height: 22px; background: var(--line); margin: 0 6px; }
-.be-map-wrap { position: relative; overflow: auto; max-height: 560px; border: 1px solid var(--line); border-radius: 6px; background: #f7f7f2; }
+.be-map-wrap { position: relative; min-height: 120px; overflow: auto; max-height: 560px; border: 1px solid var(--line); border-radius: 6px; background: #f7f7f2; }
 .be-map-wrap canvas { display: block; cursor: crosshair; height: auto; image-rendering: pixelated; margin: 0 auto; }
 .be-map-tip { position: absolute; background: rgba(20, 24, 30, .88); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; pointer-events: none; white-space: nowrap; }
 .be-legend { font-size: 11px; color: #555; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0; }
 .be-legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 3px; vertical-align: -1px; }
 .lg-walk { background: rgba(245, 150, 20, .7); } .lg-furni { background: rgba(120, 82, 45, .7); } .lg-seat { background: rgba(60, 110, 190, .6); }
-.lg-door { background: rgba(40, 160, 80, .8); } .lg-bot { background: #556; border-radius: 50% !important; width: 10px !important; }
+.lg-door { background: rgba(40, 160, 80, .8); } .lg-lost { background: rgba(220, 40, 30, .55); } .lg-bot { background: #556; border-radius: 50% !important; width: 10px !important; }
 
 .be-chat { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--soft); }
 .be-chat-head { display: flex; justify-content: space-between; align-items: center; }
