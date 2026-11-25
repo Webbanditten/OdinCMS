@@ -43,6 +43,24 @@ the Housekeeping page, with its cookie, after a click in Housekeeping's own UI.
 Players get a new revision on their next login (see Versions). Adding it to a catalogue page stays in the catalogue
 editor (linked from the result).
 
+## Step by step (what the page shows)
+
+The side panel's "How publishing works" box has the five steps and highlights where you are, from what the editor
+reports (message `state`: the open class, whether it is the hotel's, whether it is a wall item):
+
+1. **Open a furni**: search the hotel's here, or open a cast / import a Flash `.swf` in the editor.
+2. **Make it yours**: a hotel furni is read-only. *Make a copy…* in the editor (a dialog asks for the class name)
+   renames every member, field and index to it; on your own furni the same button is *Rename…*. *Publish…* on a hotel
+   furni asks for that name itself and then goes on to publish.
+3. **Edit** it; *Check* lists what the hotel would refuse.
+4. **Publish…** in the editor: the publish box (right under the steps, scrolled into view) shows the check and the
+   definition form; *Publish to the hotel* writes it.
+5. **Sell or give it**: a catalogue page (catalogue editor) or a voucher. Players get it on their next login.
+
+Wall items (OdinCMS#133 era, dirplayer-rs `cea9e65e`): the editor converts Flash wall items to the hotel's wall
+layout (`leftwall <class>_<layer>_<frame>`, Item Object classes, see dirplayer-rs `habbo/furni-editor/src/flash.ts`),
+previews them on a wall, and the publish form picks the kind "Wall item" (`wall_item`, 1×1) by itself from the cast.
+
 ## Only furni made here
 
 A sprite may be published when it is **new**: not reserved (`s_…` is a small cast's name, `poster…` casts are numbered
