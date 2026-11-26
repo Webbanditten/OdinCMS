@@ -111,8 +111,6 @@ namespace KeplerCMS.Areas.Housekeeping
             public string Sprite { get; set; }
             public int PageId { get; set; }
             public int Price { get; set; }
-            /// <summary>Give me one: wrapped as a present to open in a room (needs the furni in the catalogue).</summary>
-            public bool Present { get; set; }
         }
 
         /// <summary>The definition of a furni made here that is live, or the reason there is none.</summary>
@@ -146,12 +144,7 @@ namespace KeplerCMS.Areas.Housekeeping
             return Json(new { id = item.Id, page = pageName, price = item.Price });
         }
 
-        /// <summary>
-        /// One of a furni made here into your own hand, to try it in a room: the furni itself, which needs nothing else, or
-        /// (Present) wrapped as a present. Odin opens a present by looking up the catalogue item its data names
-        /// (PRESENTOPEN: "&lt;catalogue item id&gt;|from|note|extra data|time"), so a present needs the furni to be in the
-        /// catalogue; a hidden product counts.
-        /// </summary>
+        /// <summary>One of a furni made here into your own hand, to try it in a room. It needs no catalogue item.</summary>
         [HttpPost]
         public async Task<IActionResult> GiveMe([FromBody] AfterRequest request)
         {
@@ -159,36 +152,17 @@ namespace KeplerCMS.Areas.Housekeeping
             if (problem != null) return BadRequest(problem);
             var me = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == UserId);
             if (me == null) return Forbid();
-            CatalogueItems product = null;
-            ItemsDefinitions wrapping = null;
-            if (request.Present)
-            {
-                product = await _context.CatalogueItems.AsNoTracking().Where(i => i.DefinitionId == definition.Id && i.IIsPackage == 0).OrderBy(i => i.Id).FirstOrDefaultAsync();
-                if (product == null)
-                    return BadRequest($"A present opens into a catalogue item, and {definition.Sprite} isn't in the catalogue yet. Take it unwrapped, or put it in the catalogue first.");
-                var boxes = await _context.ItemsDefinitions.AsNoTracking().Where(d => d.Sprite.StartsWith("present_gen")).ToListAsync();
-                if (boxes.Count == 0) return BadRequest("The hotel has no present boxes (present_gen1...).");
-                wrapping = boxes[Random.Shared.Next(boxes.Count)];
-            }
             var sql = new ContextSql(_context);
             await sql.InConnection(async () =>
             {
                 await using var transaction = await _context.Database.BeginTransactionAsync();
-                if (product != null)
-                {
-                    // as Odin's ItemManager.createGift writes it; "-" is the client's "no purchase data"
-                    var note = ("Nyt møbel: " + (string.IsNullOrWhiteSpace(definition.Name) ? definition.Sprite : definition.Name)).Replace("|", "");
-                    var data = $"{product.Id}|{me.Username.Replace("|", "")}|{note}|-|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-                    await sql.Execute("INSERT INTO items (user_id, definition_id, custom_data, owned_since) VALUES (@user, @definition, @data, @since)",
-                        ("@user", me.Id), ("@definition", wrapping.Id), ("@data", data.Length > 255 ? data[..255] : data), ("@since", DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
-                }
-                else await _give.Give(me.Id, me.Username, new CatalogueFurniPart { Definition = definition, SpecialSpriteId = 0, Amount = 1 });
+                await _give.Give(me.Id, me.Username, new CatalogueFurniPart { Definition = definition, SpecialSpriteId = 0, Amount = 1 });
                 await transaction.CommitAsync();
                 return true;
             });
             _commands.QueueCommand(CommandQueueType.reload_inventory, new CommandTemplate { UserId = me.Id });
-            await _audit.AddLog(AuditLogType.give_furni, UserId, "Gave 1 x " + definition.Sprite + " to " + me.Username + (product != null ? " as a present" : ""), "from the furni editor, to try it", me.Id, definition.Id);
-            return Json(new { ok = true, present = product != null });
+            await _audit.AddLog(AuditLogType.give_furni, UserId, "Gave 1 x " + definition.Sprite + " to " + me.Username, "from the furni editor, to try it", me.Id, definition.Id);
+            return Json(new { ok = true });
         }
 
         /// <summary>The furni made here, newest first.</summary>

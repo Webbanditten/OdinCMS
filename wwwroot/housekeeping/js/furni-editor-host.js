@@ -285,11 +285,7 @@
             .then(function () { button.disabled = false; });
     }
     $('fe-giveme').addEventListener('click', function () {
-        after('GiveMe', { present: $('fe-present').checked }, this, function (r, sprite) {
-            return r.present
-                ? 'A present with <code>' + esc(sprite) + '</code> is in your hand: place it in a room of yours and open it.'
-                : 'One <code>' + esc(sprite) + '</code> is in your hand: open the hotel and place it in a room.';
-        });
+        after('GiveMe', {}, this, function (r, sprite) { return 'One <code>' + esc(sprite) + '</code> is in your hand: open the hotel and place it in a room.'; });
     });
     $('fe-sell').addEventListener('click', function () {
         if (!+$('fe-page').value) { afterResult('Pick the catalogue page it goes on first.', false); return; }
