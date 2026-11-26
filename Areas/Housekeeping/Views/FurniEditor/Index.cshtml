@@ -21,7 +21,7 @@
                 <li data-step="1"><b>Open a furni</b>: search the hotel's below, or in the editor open a cast or import a Flash <code>.swf</code>.</li>
                 <li data-step="2"><b>Make it yours</b>: the hotel's own furni are never written over. <i>Make a copy…</i> in the editor gives it a class name of its own (<i>Rename…</i> on your own furni).</li>
                 <li data-step="3"><b>Edit</b> it in the editor; <i>Check</i> shows what the hotel would refuse.</li>
-                <li data-step="4"><b>Publish…</b> in the editor sends it here: read the check, fill in its definition (name, kind, size) and press <i>Publish to the hotel</i>.</li>
+                <li data-step="4"><b>Publish…</b> in the editor sends it here: read the check, fill in its definition (name, what it is, its states, size) and press <i>Publish to the hotel</i>.</li>
                 <li data-step="5"><b>Try it and sell it</b>: <i>Give me one</i> puts it in your hand; <i>Put it in the catalogue</i> sells it on a page (or put it in a voucher). Players get it on their next login.</li>
             </ol>
             <div class="fe-now" id="fe-now">Nothing open yet.</div>
@@ -36,24 +36,33 @@
                 <div class="fe-def-fields">
                     <label>Name <input id="fe-name" maxlength="100"></label>
                     <label>Description <input id="fe-desc" maxlength="200"></label>
-                    <label>Kind
+                    <label>What it is in the hotel
                         <select id="fe-preset">
-                            <option value="furniture">Furniture (solid)</option>
-                            <option value="table">Table (things stack on it)</option>
-                            <option value="seat">Seat</option>
-                            <option value="bed">Bed</option>
-                            <option value="lamp">Lamp / switches on and off</option>
-                            <option value="rug">Rug (walk and stack on it)</option>
-                            <option value="wall">Wall item</option>
-                            <option value="walllamp">Wall item that switches on and off</option>
-                            <option value="keep">Keep as it is</option>
+                            <option value="furniture">Furniture: Habbos walk around it</option>
+                            <option value="table">Table or shelf: furni can stand on it</option>
+                            <option value="seat">Seat: Habbos sit on it</option>
+                            <option value="bed">Bed: Habbos lie on it</option>
+                            <option value="rug">Rug or floor tile: Habbos walk on it</option>
+                            <option value="wall">Wall item: hangs on a wall</option>
+                            <option value="keep">Keep what it is now</option>
                         </select>
+                        <small class="fe-hint" id="fe-kind-hint"></small>
                     </label>
-                    <label>Size <input id="fe-length" type="number" min="1" max="10" class="fe-num"> × <input id="fe-width" type="number" min="1" max="10" class="fe-num"> tiles</label>
-                    <label>Height <input id="fe-height" type="number" min="0" max="10" step="0.1" class="fe-num"></label>
+                    <div class="fe-group" id="fe-switch">
+                        <span>Its states</span>
+                        <small class="fe-hint" id="fe-states-text"></small>
+                        <label class="fe-check" id="fe-switches-row"><input type="checkbox" id="fe-switches"> a double-click switches it to the next one</label>
+                        <label class="fe-check" id="fe-switch-rights-row"><input type="checkbox" id="fe-switch-rights"> only for Habbos with rights in the room</label>
+                    </div>
+                    <div class="fe-row" id="fe-size-row">Size <input id="fe-length" type="number" min="1" max="10" class="fe-num"> × <input id="fe-width" type="number" min="1" max="10" class="fe-num"> tiles</div>
+                    <div class="fe-group" id="fe-height-row">
+                        <div class="fe-row"><span id="fe-height-label">Height</span> <input id="fe-height" type="number" min="0" max="10" step="0.1" class="fe-num"></div>
+                        <small class="fe-hint" id="fe-height-hint"></small>
+                    </div>
                     <label>Part colours <input id="fe-colour" maxlength="200" placeholder="#FFFFFF,#F7EBBC"></label>
                     <label class="fe-check"><input type="checkbox" id="fe-tradable" checked> tradable</label>
                     <label class="fe-check"><input type="checkbox" id="fe-recyclable" checked> recyclable</label>
+                    <div class="fe-attrs" id="fe-attrs" title="What is written to the furni's definition (items_definitions): behaviour and interactor are what the game server goes by, states is max_status"></div>
                 </div>
             </form>
             <div class="fe-actions">

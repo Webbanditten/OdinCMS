@@ -43,3 +43,12 @@
 .fe-after-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
 .fe-after-row select { flex: 1; min-width: 120px; max-width: 100%; }
 .fe-after-row label { font-size: 12px; }
+/* the definition: what the furni is, its states, and the attributes that come of them */
+.fe-hint { color: #666; font-size: 11px; line-height: 1.35; }
+.fe-group { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.fe-row { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.fe-group[hidden], .fe-row[hidden], .fe-check[hidden] { display: none; }
+.fe-def-fields .fe-group, .fe-def-fields > label { padding-bottom: 2px; }
+.fe-def-fields.is-off { opacity: .45; }
+.fe-attrs { font-size: 11px; color: #555; border-top: 1px solid #e6e6e6; margin-top: 2px; padding-top: 5px; display: flex; flex-wrap: wrap; gap: 3px 5px; align-items: baseline; }
+.fe-attrs code { font-size: 10.5px; background: #f1f4f8; padding: 0 3px; border-radius: 2px; overflow-wrap: anywhere; }
