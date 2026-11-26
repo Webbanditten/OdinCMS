@@ -3,9 +3,11 @@
 // that origin and that frame count. Privileged requests (validate, publish, roll back) are made here, with this page's
 // login and antiforgery token, after a click in this panel; the editor only proposes a furni.
 //
-// Messages to the editor: open { large: {name, bytes}, small?: {name, bytes}, colors, sprite, revision, madeHere },
-// published { ok, text }, status { text }. From the editor: ready, publish { sprite, large, small?, colour },
-// state { sprite, hotel, wall } (what is open now: the steps box shows where you are).
+// Messages to the editor: open { large: {name, bytes}, small?: {name, bytes}, colors, sprite, revision, madeHere,
+// height? (its definition's seat height, for the Habbo in the editor's room) }, published { ok, text }, status { text }.
+// From the editor: ready, publish { sprite, large, small?, colour, states, wall, kind?, height? } (kind and height: what
+// the Habbo in its room was set to: 'seat' or 'bed' and the seat's height), state { sprite, hotel, wall } (what is open
+// now: the steps box shows where you are).
 (function () {
     'use strict';
     var cfg = window.furniEditorHost;
@@ -28,11 +30,12 @@
         if (text !== undefined) $('fe-now').innerHTML = text;
     }
     function showState() {
+        showAfter();
         if (!current || !current.sprite) return step(1, 'Nothing open yet.');
         var kind = current.wall ? 'wall item' : 'furni';
         var name = '<code>' + esc(current.sprite) + '</code>';
         if (lastPublished === current.sprite && made[current.sprite])
-            return step(5, name + ' r' + made[current.sprite] + ' is in the hotel. Next: <a href="' + cfg.catalogueUrl + '">put it on a catalogue page</a> (or in a voucher) so players can get it.');
+            return step(5, name + ' r' + made[current.sprite] + ' is in the hotel. Next: <i>Give me one</i> to try it, and <i>Put it in the catalogue</i> (below) so players can get it.');
         if (current.hotel) return step(2, 'Open: ' + name + ', the hotel\'s own ' + kind + ' (read-only). <i>Make a copy…</i> in the editor to make it yours.');
         if (made[current.sprite]) return step(3, 'Open: ' + name + ', your ' + kind + ', live as r' + made[current.sprite] + '. <i>Publish…</i> again makes r' + (made[current.sprite] + 1) + '.');
         step(3, 'Open: ' + name + ', your new ' + kind + ': not in the hotel yet. <i>Publish…</i> in the editor when it\'s ready.');
@@ -77,6 +80,9 @@
             var colors = res[2].filter(function (d) { return d.sprite.split('*')[0] === sprite; })
                 .map(function (d) { return { label: d.sprite + ': ' + d.name, colour: d.colour }; });
             var msg = { type: 'open', sprite: sprite, revision: revision || 0, madeHere: !!madeHere, colors: colors };
+            // the seat height of its definition: where the Habbo in the editor's room sits or lies
+            var def = res[2].filter(function (d) { return d.sprite === sprite; })[0];
+            if (def && typeof def.topHeight === 'number') msg.height = def.topHeight;
             var transfer = [];
             if (res[0]) { msg.large = { name: 'hh_furni_xx_' + sprite + '.cct', bytes: res[0] }; transfer.push(res[0]); }
             if (res[1]) { msg.small = { name: 'hh_furni_xx_s_' + sprite + '.cct', bytes: res[1] }; transfer.push(res[1]); }
@@ -174,7 +180,7 @@
             if (r.ok && !r.small) head += '<p>' + (r.keepsSmall ? 'No small cast sent: the current small one is kept.' : 'No small (32 px) cast: the small room zoom shows nothing. Make one with the editor\'s 32 px button.') + '</p>';
             $('fe-report').innerHTML = head + reportHtml('hh_furni_xx_' + sprite + '.cct', r.large) + reportHtml('hh_furni_xx_s_' + sprite + '.cct', r.small);
             if (!r.ok) return;
-            upload = { uploadId: r.uploadId, sprite: sprite, isNew: r.state === 'new', existing: r.definition };
+            upload = { uploadId: r.uploadId, sprite: sprite, isNew: r.state === 'new', existing: r.definition, states: +m.states || 1 };
             var d = r.definition;
             $('fe-save-def').checked = true;
             $('fe-save-def').disabled = upload.isNew; // a new furni needs its definition
@@ -183,16 +189,19 @@
             $('fe-desc').value = d ? d.description || '' : '';
             $('fe-length').value = d ? d.length : (r.large.length || 1);
             $('fe-width').value = d ? d.width : (r.large.width || 1);
-            $('fe-height').value = d ? d.topHeight : 1;
+            var isWall = !!m.wall || r.large.classes.some(function (c) { return /^Item Object/.test(c); });
+            // What the editor knows: a wall item, more than one state (it switches), a Habbo sitting or lying on it.
+            var kind = isWall ? (upload.states > 1 ? 'walllamp' : 'wall') : m.kind === 'seat' ? 'seat' : m.kind === 'bed' ? 'bed' : upload.states > 1 ? 'lamp' : 'furniture';
+            $('fe-height').value = typeof m.height === 'number' ? m.height : d ? d.topHeight : presets[kind].height;
             $('fe-colour').value = (d && d.colour) || m.colour || '0,0,0';
             $('fe-tradable').checked = d ? d.isTradable : true;
             $('fe-recyclable').checked = d ? d.isRecyclable : true;
-            $('fe-preset').value = d ? 'keep' : (r.large.classes.some(function (c) { return /^Item Object/.test(c); }) ? 'wall' : 'furniture');
+            $('fe-preset').value = d ? 'keep' : kind;
             $('fe-note').value = '';
             $('fe-def').hidden = false;
             $('fe-note-row').hidden = false;
             $('fe-confirm').disabled = false;
-            if (r.large.classes.some(function (c) { return /^Item Object/.test(c); })) $('fe-length').value = $('fe-width').value = 1;
+            if (isWall) $('fe-length').value = $('fe-width').value = 1;
         }).catch(function (err) { alertBox('Check failed: ' + err.message); });
     }
 
@@ -212,7 +221,8 @@
             name: $('fe-name').value.trim() || upload.sprite, description: $('fe-desc').value.trim(),
             colour: $('fe-colour').value.trim() || '0,0,0',
             length: +$('fe-length').value || 1, width: +$('fe-width').value || 1, topHeight: +$('fe-height').value || 0,
-            maxStatus: preset ? preset.maxStatus : (d.maxStatus || '1'),
+            // a furni that switches has as many states as its .data
+            maxStatus: preset ? (preset.maxStatus !== '1' && upload.states > 2 ? String(upload.states) : preset.maxStatus) : (d.maxStatus || '1'),
             behaviour: preset ? preset.behaviour : (d.behaviour || ''),
             interactor: preset ? preset.interactor : (d.interactor || 'default'),
             isTradable: $('fe-tradable').checked, isRecyclable: $('fe-recyclable').checked, drinkIds: d.drinkIds || '',
@@ -223,7 +233,7 @@
             .then(function (r) {
                 var text = 'Published ' + r.sprite + ' r' + r.revision + (r.small ? ' (with its small cast)' : '') + (r.definitionId ? ', definition ' + r.definitionId : '') +
                     '. The hotel reloaded its catalogue; players get it on their next login.';
-                $('fe-report').innerHTML = '<p class="fe-report-ok">' + esc(text) + '</p><p><a href="' + cfg.catalogueUrl + '">Put it on a catalogue page</a></p>';
+                $('fe-report').innerHTML = '<p class="fe-report-ok">' + esc(text) + '</p><p>Next: <i>Give me one</i> or <i>Put it in the catalogue</i>, in the box below.</p>';
                 made[r.sprite] = r.revision;
                 lastPublished = r.sprite;
                 showState();
@@ -239,6 +249,45 @@
                 $('fe-report').insertAdjacentHTML('beforeend', '<p class="fe-report-error">' + esc(err.message) + '</p>');
                 send({ type: 'published', ok: false, text: err.message });
             });
+    });
+
+    // --- after publishing: into your hand, into the catalogue ---
+    var pagesLoaded = false;
+    function showAfter() {
+        var sprite = current && made[current.sprite] ? current.sprite : null;
+        $('fe-after').hidden = !sprite;
+        if (!sprite) return;
+        if ($('fe-after-sprite').textContent !== sprite) $('fe-after-result').innerHTML = '';
+        $('fe-after-sprite').textContent = sprite;
+        if (pagesLoaded) return;
+        pagesLoaded = true;
+        api('CataloguePages').then(function (list) {
+            $('fe-page').innerHTML = '<option value="">Pick a catalogue page…</option>' + list.map(function (p) {
+                return '<option value="' + p.id + '">' + esc(p.name || ('page ' + p.id)) + ' (' + p.products + ')' + (p.visible ? '' : ' · not in the index') + (p.fuse && p.fuse !== 'DEFAULT' ? ' · ' + esc(p.fuse) : '') + '</option>';
+            }).join('');
+        }).catch(function () { pagesLoaded = false; });
+    }
+    function afterResult(text, ok) {
+        $('fe-after-result').innerHTML = '<p class="' + (ok ? 'fe-report-ok' : 'fe-report-error') + '">' + text + '</p>';
+    }
+    function after(path, body, button, done) {
+        if (!current || !made[current.sprite]) return;
+        body.sprite = current.sprite;
+        button.disabled = true;
+        api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+            .then(function (r) { afterResult(done(r, body.sprite), true); })
+            .catch(function (err) { afterResult(esc(err.message), false); })
+            .then(function () { button.disabled = false; });
+    }
+    $('fe-giveme').addEventListener('click', function () {
+        after('GiveMe', {}, this, function (r, sprite) { return 'One <code>' + esc(sprite) + '</code> is in your hand: open the hotel and place it in a room.'; });
+    });
+    $('fe-sell').addEventListener('click', function () {
+        if (!+$('fe-page').value) { afterResult('Pick the catalogue page it goes on first.', false); return; }
+        after('AddToCatalogue', { pageId: +$('fe-page').value, price: +$('fe-price').value || 0 }, this, function (r, sprite) {
+            pagesLoaded = false;
+            return '<code>' + esc(sprite) + '</code> is on <b>' + esc(r.page) + '</b> for ' + r.price + ' credits. The hotel reloaded its catalogue.';
+        });
     });
 
     // --- versions ---

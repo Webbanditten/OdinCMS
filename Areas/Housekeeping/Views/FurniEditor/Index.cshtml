@@ -20,7 +20,7 @@
                 <li data-step="2"><b>Make it yours</b>: the hotel's own furni are never written over. <i>Make a copy…</i> in the editor gives it a class name of its own (<i>Rename…</i> on your own furni).</li>
                 <li data-step="3"><b>Edit</b> it in the editor; <i>Check</i> shows what the hotel would refuse.</li>
                 <li data-step="4"><b>Publish…</b> in the editor sends it here: read the check, fill in its definition (name, kind, size) and press <i>Publish to the hotel</i>.</li>
-                <li data-step="5"><b>Sell or give it</b>: put it on a catalogue page, or in a voucher. Players get it on their next login.</li>
+                <li data-step="5"><b>Try it and sell it</b>: <i>Give me one</i> puts it in your hand; <i>Put it in the catalogue</i> sells it on a page (or put it in a voucher). Players get it on their next login.</li>
             </ol>
             <div class="fe-now" id="fe-now">Nothing open yet.</div>
         </div>
@@ -58,6 +58,21 @@
                 <button type="button" id="fe-cancel">Cancel</button>
                 <button type="button" id="fe-confirm" class="fe-primary" disabled>Publish to the hotel</button>
             </div>
+        </div>
+
+        <div class="fe-box" id="fe-after" hidden>
+            <b>Try and sell <span id="fe-after-sprite"></span></b>
+            <div class="fe-after-row">
+                <button type="button" id="fe-giveme">Give me one</button>
+                <small class="fe-muted">Into your hand in the hotel, to try it in a room.</small>
+            </div>
+            <div class="fe-after-row">
+                <select id="fe-page" title="The catalogue page it is sold on"></select>
+                <label>for <input id="fe-price" type="number" min="0" max="9999" value="3" class="fe-num"> credits</label>
+                <button type="button" id="fe-sell" class="fe-primary">Put it in the catalogue</button>
+            </div>
+            <div id="fe-after-result"></div>
+            <small class="fe-muted">Its place on the page, its texts and packages: the <a href="@Url.Action("Index", "Catalogue")">catalogue editor</a>.</small>
         </div>
 
         <div class="fe-box">

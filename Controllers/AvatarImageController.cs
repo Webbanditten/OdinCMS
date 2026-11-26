@@ -94,6 +94,9 @@ namespace KeplerCMS.Controllers
         [HttpGet("habbo-imaging/avatarimage")]
         public async Task<IActionResult> AvatarImage()
         {
+            // Public pictures: other pages may read their pixels (the furni editor draws a Habbo in its preview room),
+            // as with the furni pictures.
+            Response.Headers["Access-Control-Allow-Origin"] = "*";
             
 
             string sex = null;

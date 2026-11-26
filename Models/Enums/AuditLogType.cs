@@ -55,6 +55,7 @@ namespace KeplerCMS.Models
         delete_tag,
         delete_stickie,
         publish_furni_cast,
-        restore_furni_cast
+        restore_furni_cast,
+        catalogue_furni_cast
     }
 }

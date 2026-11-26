@@ -40,8 +40,18 @@ the Housekeeping page, with its cookie, after a click in Housekeeping's own UI.
 4. **Versions.** Each sprite's versions (below) with who published them, when and what changed; **Open** loads one in
    the editor, **Roll back** makes it the current one again.
 
-Players get a new revision on their next login (see Versions). Adding it to a catalogue page stays in the catalogue
-editor (linked from the result).
+Players get a new revision on their next login (see Versions).
+
+5. **Try and sell.** For a furni made here that is live, the panel has *Give me one* (`GiveMe`: one into your own hand,
+   as a voucher gives furni, + `reload_inventory`) and *Put it in the catalogue* (`AddToCatalogue`: a new product on
+   the page you pick, at your price, + `reload_catalogue`). Both only take sprites made here (`Check` = "mine") and go
+   to the audit log. The page's layout, texts and packages stay in the catalogue editor.
+
+What the editor tells the form (message `publish`): `states` (the `.data` state count: more than one picks the kind
+"Lamp / switches on and off" and its `max_status`), `wall`, and, when a Habbo sat or lay on the furni in the editor's
+room, `kind` (`seat` / `bed`) and `height` (the seat height set there, the definition's `top_height`). Opening a furni
+sends its definition's `top_height` to the editor (`open.height`), so the Habbo starts where the hotel has it. The
+Habbo comes from `/habbo-imaging/avatarimage`, which sends `Access-Control-Allow-Origin: *` for that.
 
 ## Step by step (what the page shows)
 
