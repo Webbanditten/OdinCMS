@@ -98,7 +98,9 @@
                                         }
                                         else
                                         {
-                                            <a href="/" class="process-button" style=" width: 0px; height: 0px; padding-top: 2px; padding-bottom: 2px; padding-left: 4px; padding-right: 4px;">@DbRes.T("continue", "register")</a>
+                                            @* The button every earlier step moved on with: here it goes into the hotel, as the arrow in the picture
+                                               does (before, it led to the front page, where the hotel is one more click away). *@
+                                            <a href="/client" target="client" onclick="redirectNewHabbo(this); return false;" class="process-button" style=" width: 0px; height: 0px; padding-top: 2px; padding-bottom: 2px; padding-left: 4px; padding-right: 4px;">@DbRes.T("gotohotel", "topbar")</a>
                                         }
                                     }
                                     
