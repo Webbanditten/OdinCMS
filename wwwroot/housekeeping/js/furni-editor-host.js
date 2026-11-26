@@ -8,10 +8,24 @@
 // From the editor: ready, publish { sprite, large, small?, colour, states, wall, kind?, height? } (kind and height: what
 // the Habbo in its room was set to: 'seat' or 'bed' and the seat's height), state { sprite, hotel, wall } (what is open
 // now: the steps box shows where you are).
+//
+// The editor can also run in a window of its own ("Open the editor in its own window"): the same page, opened by this
+// one, talking to its opener instead of its parent. What is open is carried from one to the other: handover (asks an
+// editor for its casts as they are now; it answers with handover { sprite, large?, small?, colors, shown, hotel, dirty,
+// height }), then open { ...that, handover: true } to the other one once it said ready, and close to the one it left
+// (nothing is lost there any more: no warning). Messages from the window say popup: true.
 (function () {
     'use strict';
     var cfg = window.furniEditorHost;
     var frame = document.getElementById('fe-frame');
+    // The editor answers only the origin named in `parent`: this page's, as the browser sees it (see Index.cshtml).
+    function editorUrl() { return cfg.frameBase + encodeURIComponent(window.location.origin); }
+    frame.src = editorUrl();
+    var popup = null;        // the editor's own window, while it is out of the page
+    var frameLoaded = true;  // the frame holds an editor (false: emptied after its furni went to the window)
+    var frameReady = false;  // ... and it said ready
+    var move = null;         // carrying the open furni between the two: { from, to, toReady, furni, timer, done }
+    var watch = null;
     var token = (document.querySelector('input[name="__RequestVerificationToken"]') || {}).value || '';
     var $ = function (id) { return document.getElementById(id); };
     var upload = null; // the last checked furni: { uploadId, sprite, report }
@@ -41,8 +55,11 @@
         step(3, 'Open: ' + name + ', your new ' + kind + ': not in the hotel yet. <i>Publish…</i> in the editor when it\'s ready.');
     }
 
+    /** The editor in use: its own window while that is open, else the frame. */
+    function editorWindow() { return popup && !popup.closed ? popup : frame.contentWindow; }
     function send(message, transfer) {
-        if (frame.contentWindow) frame.contentWindow.postMessage(message, cfg.editorOrigin, transfer || []);
+        var w = editorWindow();
+        if (w) w.postMessage(message, cfg.editorOrigin, transfer || []);
     }
     function api(path, opts) {
         opts = opts || {};
@@ -87,6 +104,7 @@
             if (res[0]) { msg.large = { name: 'hh_furni_xx_' + sprite + '.cct', bytes: res[0] }; transfer.push(res[0]); }
             if (res[1]) { msg.small = { name: 'hh_furni_xx_s_' + sprite + '.cct', bytes: res[1] }; transfer.push(res[1]); }
             send(msg, transfer);
+            if (popup && !popup.closed) popup.focus();
             showVersions(sprite);
         }).catch(function (err) { alertBox('Couldn\'t open ' + sprite + ': ' + err.message); });
     }
@@ -324,12 +342,118 @@
             .catch(function (err) { alert('Roll back failed: ' + err.message); });
     });
 
+    // --- the editor in its own window ---
+    function showPlace() {
+        var out = !!popup;
+        document.querySelector('.fe-host').classList.toggle('is-popped', out);
+        $('fe-popped').hidden = !out;
+        $('fe-bar').hidden = out;
+        frame.hidden = out;
+    }
+    function reloadFrame() {
+        frame.src = editorUrl();
+        frameLoaded = true;
+        frameReady = false;
+    }
+    /** Carry what the editor in `from` has open to the one in `to` (once that is ready), then done(carried). */
+    function carry(from, to, toReady, done) {
+        if (move) clearTimeout(move.timer);
+        move = { from: from, to: to, toReady: toReady, furni: from ? undefined : null, answered: !!from, done: done };
+        if (from) {
+            from.postMessage({ type: 'handover' }, cfg.editorOrigin);
+            // an editor that doesn't answer keeps what it has: nothing is carried, and it is not closed
+            move.timer = setTimeout(function () {
+                if (move && move.furni === undefined) { move.furni = null; move.answered = false; finishMove(); }
+            }, 4000);
+        }
+        finishMove();
+    }
+    function finishMove() {
+        if (!move || !move.toReady || move.furni === undefined) return;
+        var m = move;
+        move = null;
+        clearTimeout(m.timer);
+        var f = m.furni;
+        if (f && (f.large || f.small)) {
+            var transfer = [];
+            if (f.large) transfer.push(f.large.bytes);
+            if (f.small) transfer.push(f.small.bytes);
+            m.to.postMessage({ type: 'open', handover: true, sprite: f.sprite, large: f.large, small: f.small, colors: f.colors, shown: f.shown, hotel: f.hotel, dirty: !!f.dirty, height: f.height }, cfg.editorOrigin, transfer);
+        }
+        // what it had open is in the other editor now: it may close without asking
+        if (m.answered && m.from) m.from.postMessage({ type: 'close' }, cfg.editorOrigin);
+        m.done(m.answered);
+    }
+    function watchPopup() {
+        clearInterval(watch);
+        watch = setInterval(function () {
+            if (!popup || !popup.closed) return;
+            // its window was closed: the editor is in the page again
+            clearInterval(watch);
+            popup = null;
+            if (move) { clearTimeout(move.timer); move = null; }
+            if (!frameLoaded) reloadFrame();
+            current = null;
+            showPlace();
+            showState();
+        }, 700);
+    }
+    $('fe-popout').addEventListener('click', function () {
+        var w = window.open(editorUrl(), 'furniEditor', 'popup=yes,left=0,top=0,width=' + screen.availWidth + ',height=' + screen.availHeight);
+        if (!w) { alertBox('The browser blocked the editor\'s window: allow pop-ups for this page and press the button again.'); return; }
+        var from = frameLoaded && frameReady ? frame.contentWindow : null;
+        popup = w;
+        current = null;
+        carry(from, w, false, function (carried) {
+            // one editor at a time: the frame is emptied once its furni is in the window (else it keeps what it has)
+            if (carried || !from) { frame.src = 'about:blank'; frameLoaded = false; frameReady = false; }
+        });
+        watchPopup();
+        showPlace();
+        showState();
+    });
+    $('fe-show').addEventListener('click', function () { if (popup && !popup.closed) popup.focus(); });
+    $('fe-dock').addEventListener('click', function () {
+        var w = popup;
+        if (!w || w.closed) return;
+        if (!frameLoaded) reloadFrame();
+        popup = null;
+        clearInterval(watch);
+        current = null;
+        carry(w, frame.contentWindow, frameReady, function (carried) {
+            if (!carried) alertBox('The editor\'s window didn\'t answer, so what is open there stayed there: close it yourself when you are done with it.');
+        });
+        showPlace();
+        showState();
+    });
+
     // --- the editor ---
     window.addEventListener('message', function (e) {
-        if (e.origin !== cfg.editorOrigin || e.source !== frame.contentWindow) return;
+        if (e.origin !== cfg.editorOrigin || !e.source) return;
         var m = e.data || {};
-        if (m.type === 'publish' && m.large instanceof ArrayBuffer && (!m.small || m.small instanceof ArrayBuffer)) onPublish(m);
-        else if (m.type === 'state') {
+        var fromFrame = e.source === frame.contentWindow;
+        var known = fromFrame || e.source === popup || (move && (e.source === move.to || e.source === move.from));
+        if (!known) {
+            // an editor window that outlived a reload of this page is still this page's (the frame keeps what it has)
+            if (m.popup !== true || popup || move) return;
+            popup = e.source;
+            watchPopup();
+            showPlace();
+        }
+        if (m.type === 'ready') {
+            if (fromFrame) frameReady = true;
+            if (move && e.source === move.to) { move.toReady = true; finishMove(); }
+            return;
+        }
+        if (m.type === 'handover') {
+            if (move && e.source === move.from && move.furni === undefined) { move.furni = m.large || m.small ? m : null; finishMove(); }
+            return;
+        }
+        if (e.source !== editorWindow()) return; // only the editor in use
+        if (m.type === 'publish' && m.large instanceof ArrayBuffer && (!m.small || m.small instanceof ArrayBuffer)) {
+            onPublish(m);
+            if (popup) { try { window.focus(); } catch (err) { /* the browser decides */ } }
+        } else if (m.type === 'state') {
             current = { sprite: String(m.sprite || ''), hotel: !!m.hotel, wall: !!m.wall };
             if (lastPublished && lastPublished !== current.sprite) lastPublished = null;
             showState();

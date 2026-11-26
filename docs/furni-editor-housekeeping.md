@@ -54,6 +54,25 @@ room, `kind` (`seat` / `bed`) and `height` (the seat height set there, the defin
 sends its definition's `top_height` to the editor (`open.height`), so the Habbo starts where the hotel has it. The
 Habbo comes from `/habbo-imaging/avatarimage`, which sends `Access-Control-Allow-Origin: *` for that.
 
+### The page's own origin
+
+The editor only talks to the origin it is given as `parent`, so that has to be the page's origin exactly as the
+browser has it. The server can't tell: prod's proxy terminates TLS and forwards no scheme, so `Request.Scheme` reads
+`http` there. Until 2026-11-26 the view built `parent` from it, the editor addressed `http://habbo-danmark.com`, and
+the browser dropped every message to the `https` page: the editor said "Sent … to Housekeeping" and nothing showed
+(no publish ever reached the server). `furni-editor-host.js` now sets the frame's address itself with
+`location.origin`.
+
+### The editor in its own window
+
+*Open the editor in its own window* opens the same editor page as a window (`window.open`, so the page is its
+`opener`): more room to draw, and *Publish…* there still shows the check report and the definition on this page,
+which has to stay open. What is open is carried over, unsaved changes included, both ways: the page asks the editor
+it leaves for `handover`, sends that to the other one as `open { handover: true }` once it said `ready`, and tells
+the first one `close`. An editor that doesn't answer keeps what it has and isn't closed. The frame is emptied while
+the window is out (one editor at a time); closing the window, or *Bring the editor back here*, puts the editor back
+in the page. An editor window that outlives a reload of the page is taken back when it next sends something.
+
 ## Step by step (what the page shows)
 
 The side panel's "How publishing works" box has the five steps and highlights where you are, from what the editor

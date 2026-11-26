@@ -3,8 +3,10 @@
     ViewBag.Title = "Furni editor";
     ViewBag.WideContent = true;
     var editorUrl = (string)ViewData["editorUrl"];
-    var cmsOrigin = $"{Context.Request.Scheme}://{Context.Request.Host}";
-    var frameUrl = editorUrl + (editorUrl.Contains('?') ? "&" : "?") + "embed=housekeeping&parent=" + Uri.EscapeDataString(cmsOrigin);
+    // The editor only talks to the origin it is given as `parent`. That is this page's own origin as the browser has it,
+    // which the server can't tell: prod's proxy terminates TLS, so Request.Scheme reads "http" there, and messages
+    // addressed to http://... never arrive at an https page. furni-editor-host.js adds location.origin and loads the frame.
+    var frameBase = editorUrl + (editorUrl.Contains('?') ? "&" : "?") + "embed=housekeeping&parent=";
 }
 <link rel="stylesheet" href="~/housekeeping/css/furni-editor-host.css" asp-append-version="true">
 
@@ -105,13 +107,26 @@
         </p>
     </div>
     <div class="fe-main">
-        <iframe id="fe-frame" src="@frameUrl" title="Furni editor"></iframe>
+        <div class="fe-bar" id="fe-bar">
+            <button type="button" id="fe-popout" title="The editor in a window of its own, as large as you like. What is open goes with it; Publish… there still shows its check report and definition on this page">Open the editor in its own window</button>
+            <small class="fe-muted">More room to draw. What you have open goes with it, and <i>Publish…</i> still comes back to this page.</small>
+        </div>
+        <div class="fe-popped" id="fe-popped" hidden>
+            <b>The editor is in its own window.</b>
+            <p><i>Publish…</i> there shows the check report and the definition here, on the left. Keep this page open: publishing goes through it.</p>
+            <div class="fe-actions">
+                <button type="button" id="fe-show" class="fe-primary">Show the editor's window</button>
+                <button type="button" id="fe-dock" title="The editor back in this page, with what is open in its window">Bring the editor back here</button>
+            </div>
+        </div>
+        <iframe id="fe-frame" title="Furni editor"></iframe>
     </div>
 </div>
 
 <script>
     window.furniEditorHost = {
         editorOrigin: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)ViewData["editorOrigin"])),
+        frameBase: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(frameBase)),
         canPublish: @(((bool)ViewData["canPublish"]) ? "true" : "false"),
         base: '@Url.Action("Index", "FurniEditor")'.replace(/\/Index$/i, '').replace(/\/$/, ''),
         catalogueUrl: '@Url.Action("Index", "Catalogue")'
