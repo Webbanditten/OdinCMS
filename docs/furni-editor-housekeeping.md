@@ -33,8 +33,8 @@ the Housekeeping page, with its cookie, after a click in Housekeeping's own UI.
 2. **Publish.** "Publish to hotel…" in the editor sends both casts to the Housekeeping page. It uploads them to
    `Validate`, which checks them (below) and whether the sprite may be published (new, or made here), and answers with
    a report per cast: member counts, the classes, the size, warnings, the revision it becomes.
-3. **Confirm in Housekeeping.** The report and a definition form (name, description, size from the cast, part colours
-   from the editor, behaviour preset: furniture, seat, bed, lamp/switchable, tradable/recyclable) are shown in
+3. **Confirm in Housekeeping.** The report and a definition form (name, description, what it is, its states, size from
+   the cast, part colours from the editor, tradable/recyclable; see "The definition form" below) are shown in
    Housekeeping's panel. **Publish** sends the same upload id; the server checks it again, keeps the old cast in the
    history, writes the new one, saves the definition and sends `reload_catalogue` (Odin reloads definitions and pages).
 4. **Versions.** Each sprite's versions (below) with who published them, when and what changed; **Open** loads one in
@@ -48,9 +48,9 @@ Players get a new revision on their next login (see Versions).
    the page you pick, at your price, + `reload_catalogue`). Both only take sprites made here (`Check` = "mine") and go
    to the audit log. The page's layout, texts and packages stay in the catalogue editor.
 
-What the editor tells the form (message `publish`): `states` (the `.data` state count: more than one picks the kind
-"Lamp / switches on and off" and its `max_status`), `wall`, and, when a Habbo sat or lay on the furni in the editor's
-room, `kind` (`seat` / `bed`) and `height` (the seat height set there, the definition's `top_height`). Opening a furni
+What the editor tells the form (message `publish`): `states` (the `.data` state count) and `stateNames` (its
+`statestrings`), `wall`, and, when a Habbo sat or lay on the furni in the editor's room, `kind` (`seat` / `bed`) and
+`height` (the seat height set there, the definition's `top_height`). Opening a furni
 sends its definition's `top_height` to the editor (`open.height`), so the Habbo starts where the hotel has it. The
 Habbo comes from `/habbo-imaging/avatarimage`, which sends `Access-Control-Allow-Origin: *` for that.
 
@@ -86,6 +86,33 @@ reports (message `state`: the open class, whether it is the hotel's, whether it 
 4. **Publish…** in the editor: the publish box (right under the steps, scrolled into view) shows the check and the
    definition form; *Publish to the hotel* writes it.
 5. **Sell or give it**: a catalogue page (catalogue editor) or a voucher. Players get it on their next login.
+
+### The definition form
+
+Two separate choices, each with a line saying what it means in the hotel, and under them the attributes they come to
+(`behaviour`, `interactor`, states = `max_status`), as they are written to `items_definitions`:
+
+| What it is | `behaviour` | `interactor` |
+|---|---|---|
+| Furniture: Habbos walk around it | `solid` | `default` |
+| Table or shelf: furni can stand on it | `solid,can_stack_on_top` | `default` |
+| Seat | `can_sit_on_top` | `chair` |
+| Bed | `can_lay_on_top` | `bed` |
+| Rug or floor tile | `can_stand_on_top,can_stack_on_top` | `default` |
+| Wall item (the cast decides; the only kind a wall cast is offered) | `wall_item` | `default` |
+
+**Its states** (from the cast's `.data`): "a double-click switches it to the next one" adds
+`custom_data_numeric_on_off` for two states (the hotel's lamps) and `custom_data_numeric_state` for more; "only for
+Habbos with rights in the room" adds `requires_rights_for_interaction` (a furni that doesn't switch carries it as the
+hotel's own do: everything but seats and beds). `max_status` is the number of states. Why the two attributes: the client
+sends the next state's number (`SETSTUFFDATA`), and Odin takes only 0, 1 and 2 under `custom_data_numeric_on_off`, so a
+floor furni with three states or more saved with it sticks on its second state (the form before 2026-11-26 did that
+with its "Lamp" kind). Wall items send `SETITEMSTATE`, which Odin takes for any wall item with rights, whatever its
+attributes: their switch can't be turned off, and the form says so.
+
+A furni the hotel already has shows its definition as these choices (and saving repairs an on/off attribute on a furni
+with more states). When its attributes hold something the form doesn't set (a gate, a roller, a vending machine), the
+choice is "Keep what it is now" and they are saved untouched; the catalogue editor's furni form edits them raw.
 
 Wall items (OdinCMS#133 era, dirplayer-rs `cea9e65e`): the editor converts Flash wall items to the hotel's wall
 layout (`leftwall <class>_<layer>_<frame>`, Item Object classes, see dirplayer-rs `habbo/furni-editor/src/flash.ts`),

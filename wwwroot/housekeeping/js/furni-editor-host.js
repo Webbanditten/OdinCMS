@@ -5,9 +5,10 @@
 //
 // Messages to the editor: open { large: {name, bytes}, small?: {name, bytes}, colors, sprite, revision, madeHere,
 // height? (its definition's seat height, for the Habbo in the editor's room) }, published { ok, text }, status { text }.
-// From the editor: ready, publish { sprite, large, small?, colour, states, wall, kind?, height? } (kind and height: what
-// the Habbo in its room was set to: 'seat' or 'bed' and the seat's height), state { sprite, hotel, wall } (what is open
-// now: the steps box shows where you are).
+// From the editor: ready, publish { sprite, large, small?, colour, states, stateNames?, wall, kind?, height? } (states:
+// how many the furni's .data has, stateNames: what they are called; kind and height: what the Habbo in its room was set
+// to: 'seat' or 'bed' and the seat's height), state { sprite, hotel, wall } (what is open now: the steps box shows
+// where you are).
 //
 // The editor can also run in a window of its own ("Open the editor in its own window"): the same page, opened by this
 // one, talking to its opener instead of its parent. What is open is carried from one to the other: handover (asks an
@@ -153,16 +154,93 @@
     }
 
     // --- publishing ---
-    var presets = {
-        furniture: { behaviour: 'solid,requires_rights_for_interaction', interactor: 'default', maxStatus: '1', height: 1 },
-        table: { behaviour: 'solid,can_stack_on_top,requires_rights_for_interaction', interactor: 'default', maxStatus: '1', height: 1 },
-        seat: { behaviour: 'can_sit_on_top', interactor: 'chair', maxStatus: '1', height: 1 },
-        bed: { behaviour: 'can_lay_on_top', interactor: 'bed', maxStatus: '2', height: 1.6 },
-        lamp: { behaviour: 'solid,custom_data_numeric_on_off,requires_rights_for_interaction', interactor: 'default', maxStatus: '2', height: 2 },
-        rug: { behaviour: 'can_stand_on_top,can_stack_on_top,requires_rights_for_interaction', interactor: 'default', maxStatus: '1', height: 0 },
-        wall: { behaviour: 'wall_item,requires_rights_for_interaction', interactor: 'default', maxStatus: '1', height: 0 },
-        walllamp: { behaviour: 'wall_item,requires_rights_for_interaction,custom_data_on_off', interactor: 'default', maxStatus: '2', height: 0 },
+// What a furni is in the hotel, as the attributes of its definition (items_definitions). `flags` (behaviour) and
+    // `interactor` are what the game server goes by. Switching is a separate choice (below), so a seat or a table can
+    // have states too; `rights` is whether a furni that doesn't switch still carries the rights flag, as the hotel's do.
+    var RIGHTS = 'requires_rights_for_interaction';
+    var SWITCH = ['custom_data_numeric_on_off', 'custom_data_numeric_state', 'custom_data_on_off'];
+    var kinds = {
+        furniture: { flags: ['solid'], interactor: 'default', height: 1, rights: true,
+            hint: 'Habbos walk around it and nothing can be put on it: a plant, a statue, a machine, a lamp.',
+            heightLabel: 'Height', heightHint: 'How tall it is; a chair\'s seat is 1. It hardly matters while nothing can stand on it.' },
+        table: { flags: ['solid', 'can_stack_on_top'], interactor: 'default', height: 1, rights: true,
+            hint: 'Habbos walk around it, and other furni can be put on top of it.',
+            heightLabel: 'Height of its top', heightHint: 'Furni put on it stand this high; most of the hotel\'s tables are 1.' },
+        seat: { flags: ['can_sit_on_top'], interactor: 'chair', height: 1, rights: false,
+            hint: 'Habbos walk to it and sit down, facing the way it is turned. Nothing can be put on it.',
+            heightLabel: 'Seat height', heightHint: 'How high a Habbo sits: 1 for most of the hotel\'s chairs, 1.2 for the higher ones. Set a Habbo on it in the editor\'s room to see it.' },
+        bed: { flags: ['can_lay_on_top'], interactor: 'bed', height: 1.6, rights: false,
+            hint: 'Habbos walk to it and lie down. Nothing can be put on it.',
+            heightLabel: 'Bed height', heightHint: 'How high a Habbo lies: the hotel\'s beds are 1.6 to 1.8, a sleeping bag 0.8.' },
+        rug: { flags: ['can_stand_on_top', 'can_stack_on_top'], interactor: 'default', height: 0, rights: true,
+            hint: 'Habbos walk over it, and furni can be put on top of it: a carpet, a floor tile, anything flat.',
+            heightLabel: 'Height', heightHint: 'How far it lifts what is on it: 0 for a carpet, 0.2 to 0.45 for the hotel\'s thicker tiles.' },
+        wall: { flags: ['wall_item'], interactor: 'default', height: 0, rights: true,
+            hint: 'It hangs on a wall. The cast decides this: it was made as a wall item.' },
     };
+    // Two states are the hotel's on / off (its lamps); more need the attribute that takes any state number, or the
+    // game server refuses the third state and the furni is stuck on its second.
+    function switchFlag(states) { return states > 2 ? 'custom_data_numeric_state' : 'custom_data_numeric_on_off'; }
+
+    // A definition the hotel already has, as this form's choices: { kind, switches, rights }. Null when its attributes
+    // hold something the form doesn't set (a gate, a roller, a vending machine...): then they are kept as they are.
+    function readDefinition(d) {
+        var flags = String(d.behaviour || '').split(',').map(function (f) { return f.trim().toLowerCase(); }).filter(Boolean);
+        var has = function (f) { return flags.indexOf(f) >= 0; };
+        var key = has('wall_item') ? 'wall' : has('can_sit_on_top') ? 'seat' : has('can_lay_on_top') ? 'bed' : has('can_stand_on_top') ? 'rug'
+            : has('solid') ? (has('can_stack_on_top') ? 'table' : 'furniture') : null;
+        if (!key) return null;
+        var kind = kinds[key], known = kind.flags.concat(SWITCH, [RIGHTS]);
+        if (!kind.flags.every(has) || flags.some(function (f) { return known.indexOf(f) < 0; })) return null;
+        if (String(d.interactor || 'default').toLowerCase() !== kind.interactor) return null;
+        return { kind: key, switches: SWITCH.some(has), rights: has(RIGHTS) };
+    }
+
+    // The attributes the form's choices come to.
+    function attributes() {
+        var d = (upload && upload.existing) || {};
+        var key = $('fe-preset').value, kind = kinds[key];
+        if (!kind) return { behaviour: d.behaviour || '', interactor: d.interactor || 'default', maxStatus: d.maxStatus || '1', kept: true };
+        var states = upload ? upload.states : 1;
+        // the game server switches every wall item that has states; a floor furni only with the attribute
+        var switches = states > 1 && (key === 'wall' || $('fe-switches').checked);
+        var flags = kind.flags.slice();
+        if (switches) flags.push(switchFlag(states));
+        if (switches ? $('fe-switch-rights').checked : kind.rights) flags.push(RIGHTS);
+        return { behaviour: flags.join(','), interactor: kind.interactor, maxStatus: String(states), switches: switches };
+    }
+
+    function refreshDefinition() {
+        if (!upload) return;
+        var key = $('fe-preset').value, kind = kinds[key], a = attributes();
+        var states = upload.states, names = upload.stateNames, wall = key === 'wall';
+        $('fe-def').querySelector('.fe-def-fields').classList.toggle('is-off', !$('fe-save-def').checked);
+        $('fe-kind-hint').textContent = kind ? kind.hint
+            : 'What it is stays as it is now (the attributes below). Its name, description, size, height and colours are still saved.';
+        // its states
+        var text;
+        if (states < 2) text = 'One state: there is nothing to switch.';
+        else {
+            // the names the furni gives its states (the editor's States tab); "state 1, state 2" says nothing
+            var named = names && names.length === states && !names.every(function (n) { return /^state \d+$/i.test(n); });
+            text = states + ' states' + (named ? ': ' + names.join(' → ') : '') + '.';
+            if (kind && wall) text += ' A wall item with states always switches on a double-click.';
+            else if (kind && !a.switches) text += ' Not switched: it stays in its first state' + (named ? ' (' + names[0] + ')' : '') + '.';
+            else if (kind && states > 2) text += ' Each double-click goes one further, and from the last back to the first.';
+        }
+        $('fe-states-text').textContent = text;
+        $('fe-switches-row').hidden = !kind || states < 2;
+        $('fe-switches').disabled = wall;
+        if (wall && states > 1) $('fe-switches').checked = true;
+        $('fe-switch-rights-row').hidden = !kind || !a.switches;
+        // size and height: a wall item has neither
+        $('fe-size-row').hidden = wall;
+        $('fe-height-row').hidden = wall;
+        $('fe-height-label').textContent = kind && kind.heightLabel ? kind.heightLabel : 'Height';
+        $('fe-height-hint').textContent = kind && kind.heightHint ? kind.heightHint : 'A seat: how high a Habbo sits. Anything else: how high furni put on it stand.';
+        $('fe-attrs').innerHTML = '<span>' + (a.kept ? 'Kept as' : 'Saved as') + '</span> <code>behaviour: ' + esc(a.behaviour || '(none)') + '</code> <code>interactor: ' +
+            esc(a.interactor) + '</code> <code>states: ' + esc(a.maxStatus) + '</code>';
+    }
 
     function reportHtml(title, r) {
         if (!r) return '';
@@ -198,8 +276,11 @@
             if (r.ok && !r.small) head += '<p>' + (r.keepsSmall ? 'No small cast sent: the current small one is kept.' : 'No small (32 px) cast: the small room zoom shows nothing. Make one with the editor\'s 32 px button.') + '</p>';
             $('fe-report').innerHTML = head + reportHtml('hh_furni_xx_' + sprite + '.cct', r.large) + reportHtml('hh_furni_xx_s_' + sprite + '.cct', r.small);
             if (!r.ok) return;
-            upload = { uploadId: r.uploadId, sprite: sprite, isNew: r.state === 'new', existing: r.definition, states: +m.states || 1 };
             var d = r.definition;
+            var isWall = !!m.wall || r.large.classes.some(function (c) { return /^Item Object/.test(c); });
+            upload = { uploadId: r.uploadId, sprite: sprite, isNew: r.state === 'new', existing: d, states: Math.max(1, +m.states || 1),
+                stateNames: Array.isArray(m.stateNames) ? m.stateNames.map(String) : null, wall: isWall,
+                givenHeight: typeof m.height === 'number' ? m.height : null };
             $('fe-save-def').checked = true;
             $('fe-save-def').disabled = upload.isNew; // a new furni needs its definition
             $('fe-def-state').textContent = d ? 'updates definition ' + d.id : 'a new definition';
@@ -207,42 +288,57 @@
             $('fe-desc').value = d ? d.description || '' : '';
             $('fe-length').value = d ? d.length : (r.large.length || 1);
             $('fe-width').value = d ? d.width : (r.large.width || 1);
-            var isWall = !!m.wall || r.large.classes.some(function (c) { return /^Item Object/.test(c); });
-            // What the editor knows: a wall item, more than one state (it switches), a Habbo sitting or lying on it.
-            var kind = isWall ? (upload.states > 1 ? 'walllamp' : 'wall') : m.kind === 'seat' ? 'seat' : m.kind === 'bed' ? 'bed' : upload.states > 1 ? 'lamp' : 'furniture';
-            $('fe-height').value = typeof m.height === 'number' ? m.height : d ? d.topHeight : presets[kind].height;
+            // The cast says whether it is a wall item, so only the kinds it can be are offered; "keep" needs a definition.
+            Array.prototype.forEach.call($('fe-preset').options, function (o) {
+                var off = o.value === 'keep' ? !d : (o.value === 'wall') !== isWall;
+                o.hidden = o.disabled = off;
+            });
+            // A new furni: what the editor knows (a wall item, a Habbo sitting or lying on it), and it switches when it
+            // has states. One the hotel has: its definition as the form's choices, or kept when the form can't say it.
+            var read = d ? readDefinition(d) : null;
+            if (read && (read.kind === 'wall') !== isWall) read = null;
+            var defIsWall = d ? /(^|,)\s*wall_item\s*(,|$)/i.test(d.behaviour || '') : isWall;
+            var kind = d && defIsWall === isWall ? (read ? read.kind : 'keep') : isWall ? 'wall' : m.kind === 'seat' ? 'seat' : m.kind === 'bed' ? 'bed' : 'furniture';
+            // states it didn't have before switch by themselves, like a new furni's
+            var gained = upload.states > 1 && (!read || (!read.switches && (parseInt(d.maxStatus, 10) || 1) < 2));
+            $('fe-switches').checked = upload.states > 1 && (gained || read.switches);
+            $('fe-switch-rights').checked = read && read.switches ? read.rights : true;
+            $('fe-height').value = upload.givenHeight !== null ? upload.givenHeight : d ? d.topHeight : kinds[kind].height;
             $('fe-colour').value = (d && d.colour) || m.colour || '0,0,0';
             $('fe-tradable').checked = d ? d.isTradable : true;
             $('fe-recyclable').checked = d ? d.isRecyclable : true;
-            $('fe-preset').value = d ? 'keep' : kind;
+            $('fe-preset').value = kind;
             $('fe-note').value = '';
             $('fe-def').hidden = false;
             $('fe-note-row').hidden = false;
             $('fe-confirm').disabled = false;
             if (isWall) $('fe-length').value = $('fe-width').value = 1;
+            refreshDefinition();
         }).catch(function (err) { alertBox('Check failed: ' + err.message); });
     }
 
     $('fe-preset').addEventListener('change', function () {
-        var p = presets[this.value];
-        if (p) $('fe-height').value = p.height;
+        var kind = kinds[this.value], d = upload && upload.existing;
+        // the kind's usual height, unless the editor's Habbo already showed how high it sits or lies
+        if (kind && !(upload && upload.givenHeight !== null && (this.value === 'seat' || this.value === 'bed'))) $('fe-height').value = kind.height;
+        else if (!kind && d) $('fe-height').value = d.topHeight;
+        refreshDefinition();
     });
+    ['fe-switches', 'fe-switch-rights', 'fe-save-def'].forEach(function (id) { $(id).addEventListener('change', refreshDefinition); });
 
     $('fe-cancel').addEventListener('click', function () { $('fe-publish').hidden = true; upload = null; note('Publishing cancelled'); });
 
     $('fe-confirm').addEventListener('click', function () {
         if (!upload) return;
         var d = upload.existing || {};
-        var preset = presets[$('fe-preset').value];
+        var attrs = attributes();
         var definition = {
             id: d.id || 0, sprite: upload.sprite, spriteId: d.spriteId || 0,
             name: $('fe-name').value.trim() || upload.sprite, description: $('fe-desc').value.trim(),
             colour: $('fe-colour').value.trim() || '0,0,0',
             length: +$('fe-length').value || 1, width: +$('fe-width').value || 1, topHeight: +$('fe-height').value || 0,
-            // a furni that switches has as many states as its .data
-            maxStatus: preset ? (preset.maxStatus !== '1' && upload.states > 2 ? String(upload.states) : preset.maxStatus) : (d.maxStatus || '1'),
-            behaviour: preset ? preset.behaviour : (d.behaviour || ''),
-            interactor: preset ? preset.interactor : (d.interactor || 'default'),
+            // max_status: as many states as its .data has
+            maxStatus: attrs.maxStatus, behaviour: attrs.behaviour, interactor: attrs.interactor,
             isTradable: $('fe-tradable').checked, isRecyclable: $('fe-recyclable').checked, drinkIds: d.drinkIds || '',
         };
         $('fe-confirm').disabled = true;
