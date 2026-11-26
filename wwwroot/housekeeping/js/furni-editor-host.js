@@ -35,7 +35,7 @@
         var kind = current.wall ? 'wall item' : 'furni';
         var name = '<code>' + esc(current.sprite) + '</code>';
         if (lastPublished === current.sprite && made[current.sprite])
-            return step(5, name + ' r' + made[current.sprite] + ' is in the hotel. Next: <i>Give me one</i> to try it, and <i>Put it in the catalogue</i> (below) so players can get it.');
+            return step(5, name + ' r' + made[current.sprite] + ' is in the hotel. Next: <i>Give me one</i> to try it (no catalogue needed), and <i>Put it in the catalogue</i> (below) when players should get it.');
         if (current.hotel) return step(2, 'Open: ' + name + ', the hotel\'s own ' + kind + ' (read-only). <i>Make a copy…</i> in the editor to make it yours.');
         if (made[current.sprite]) return step(3, 'Open: ' + name + ', your ' + kind + ', live as r' + made[current.sprite] + '. <i>Publish…</i> again makes r' + (made[current.sprite] + 1) + '.');
         step(3, 'Open: ' + name + ', your new ' + kind + ': not in the hotel yet. <i>Publish…</i> in the editor when it\'s ready.');
@@ -233,7 +233,12 @@
             .then(function (r) {
                 var text = 'Published ' + r.sprite + ' r' + r.revision + (r.small ? ' (with its small cast)' : '') + (r.definitionId ? ', definition ' + r.definitionId : '') +
                     '. The hotel reloaded its catalogue; players get it on their next login.';
-                $('fe-report').innerHTML = '<p class="fe-report-ok">' + esc(text) + '</p><p>Next: <i>Give me one</i> or <i>Put it in the catalogue</i>, in the box below.</p>';
+                $('fe-report').innerHTML = '<p class="fe-report-ok">' + esc(text) + '</p>' +
+                    '<p><button type="button" class="fe-primary" id="fe-giveme-now">Give me one</button> to try it in a room (no catalogue needed), or sell it in the box below.</p>';
+                $('fe-giveme-now').addEventListener('click', function () {
+                    $('fe-after').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    $('fe-giveme').click();
+                });
                 made[r.sprite] = r.revision;
                 lastPublished = r.sprite;
                 showState();
@@ -280,7 +285,11 @@
             .then(function () { button.disabled = false; });
     }
     $('fe-giveme').addEventListener('click', function () {
-        after('GiveMe', {}, this, function (r, sprite) { return 'One <code>' + esc(sprite) + '</code> is in your hand: open the hotel and place it in a room.'; });
+        after('GiveMe', { present: $('fe-present').checked }, this, function (r, sprite) {
+            return r.present
+                ? 'A present with <code>' + esc(sprite) + '</code> is in your hand: place it in a room of yours and open it.'
+                : 'One <code>' + esc(sprite) + '</code> is in your hand: open the hotel and place it in a room.';
+        });
     });
     $('fe-sell').addEventListener('click', function () {
         if (!+$('fe-page').value) { afterResult('Pick the catalogue page it goes on first.', false); return; }
