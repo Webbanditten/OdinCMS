@@ -1,7 +1,14 @@
 .fe-host { display: flex; gap: 12px; align-items: stretch; }
 .fe-side { width: 330px; flex: none; display: flex; flex-direction: column; gap: 10px; }
 .fe-main { flex: 1; min-width: 0; }
-.fe-main iframe { width: 100%; height: calc(100vh - 160px); min-height: 640px; border: 1px solid #c9c9c9; background: #fff; }
+.fe-main iframe { width: 100%; height: calc(100vh - 190px); min-height: 640px; border: 1px solid #c9c9c9; background: #fff; }
+.fe-main iframe[hidden], .fe-bar[hidden], .fe-popped[hidden] { display: none; }
+.fe-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.fe-popped { border: 1px dashed #9aa7b5; background: #f6f8fb; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.fe-popped p { margin: 0; }
+/* the editor is in its own window: the panel gets the room */
+.fe-host.is-popped .fe-side { width: auto; flex: 1 1 480px; max-width: 720px; }
+.fe-host.is-popped .fe-main { flex: 0 1 420px; }
 .fe-box[hidden] { display: none; }
 .fe-box { border: 1px solid #c9c9c9; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .fe-box input[type=search], .fe-def-fields input:not([type=checkbox]):not(.fe-num), .fe-def-fields select { width: 100%; box-sizing: border-box; }
