@@ -42,8 +42,11 @@ the Housekeeping page, with its cookie, after a click in Housekeeping's own UI.
 
 Players get a new revision on their next login (see Versions).
 
-5. **Try and sell.** For a furni made here that is live, the panel has *Give me one* (`GiveMe`: one into your own hand,
-   as a voucher gives furni, + `reload_inventory`) and *Put it in the catalogue* (`AddToCatalogue`: a new product on
+5. **Try and sell.** For a furni made here that is live, the panel (and the publish result) has *Give me one*
+   (`GiveMe`: one into your own hand, as a voucher gives furni, + `reload_inventory`; it needs no catalogue item) with
+   the option *wrapped as a present* (a `present_gen` box whose data names the furni's catalogue item, as Odin's
+   `createGift` writes it: a present opens into a catalogue item, so this one needs the furni in the catalogue, hidden
+   or not, and is refused otherwise), and *Put it in the catalogue* (`AddToCatalogue`: a new product on
    the page you pick, at your price, + `reload_catalogue`). Both only take sprites made here (`Check` = "mine") and go
    to the audit log. The page's layout, texts and packages stay in the catalogue editor.
 
