@@ -47,9 +47,11 @@ namespace KeplerCMS.Areas.Housekeeping
         private readonly IAuditLogService _audit;
         private readonly IGameDataService _gameData;
         private readonly DataContext _context;
+        private readonly ICatalogueFurniService _give;
 
-        public FurniEditorController(IConfiguration config, ICatalogueService catalogue, ICommandQueueService commands, IAuditLogService audit, IGameDataService gameData, DataContext context)
+        public FurniEditorController(IConfiguration config, ICatalogueService catalogue, ICommandQueueService commands, IAuditLogService audit, IGameDataService gameData, DataContext context, ICatalogueFurniService give)
         {
+            _give = give;
             _config = config;
             _catalogue = catalogue;
             _commands = commands;
@@ -95,6 +97,72 @@ namespace KeplerCMS.Areas.Housekeeping
                 d.Id, d.Sprite, d.Name, d.Description, d.Colour, d.Length, d.Width, d.Behaviour, d.Interactor, d.TopHeight, d.MaxStatus,
                 madeHere = made.Contains(Clean(d.Sprite)),
             }));
+        }
+
+        // --- after publishing: a furni made here into the catalogue, or into your own hand to try it ---
+
+        /// <summary>The catalogue's pages, to put a furni made here on one.</summary>
+        [HttpGet]
+        public async Task<IActionResult> CataloguePages() =>
+            Json((await _catalogue.GetPages()).Select(p => new { id = p.Id, name = string.IsNullOrWhiteSpace(p.Name) ? p.NameIndex : p.Name, products = p.ProductCount, visible = p.IndexVisible, fuse = p.Fuse }));
+
+        public class AfterRequest
+        {
+            public string Sprite { get; set; }
+            public int PageId { get; set; }
+            public int Price { get; set; }
+        }
+
+        /// <summary>The definition of a furni made here that is live, or the reason there is none.</summary>
+        private async Task<(ItemsDefinitions definition, string problem)> MadeHere(string sprite)
+        {
+            sprite = Clean(sprite);
+            if (string.IsNullOrEmpty(sprite)) return (null, "No furni.");
+            var own = await Check(sprite);
+            if (own.State != "mine" || own.Definition == null) return (null, $"'{sprite}' isn't a furni published from this editor with a definition: publish it first.");
+            var definition = await _context.ItemsDefinitions.FirstOrDefaultAsync(d => d.Id == own.Definition.Id);
+            return definition == null ? (null, "Its definition is gone.") : (definition, null);
+        }
+
+        /// <summary>Put a furni made here on a catalogue page as a new product, and tell the hotel.</summary>
+        [HttpPost]
+        public async Task<IActionResult> AddToCatalogue([FromBody] AfterRequest request)
+        {
+            var (definition, problem) = await MadeHere(request?.Sprite);
+            if (problem != null) return BadRequest(problem);
+            if (request.Price < 0 || request.Price > 9999) return BadRequest("A price from 0 to 9999 credits.");
+            var page = (await _catalogue.GetPages()).FirstOrDefault(p => p.Id == request.PageId);
+            if (page == null) return BadRequest("Pick a catalogue page.");
+            var ids = await _catalogue.AddProducts(page.Id, new List<int> { definition.Id });
+            if (ids.Count == 0) return BadRequest("The catalogue didn't take it.");
+            var item = await _context.CatalogueItems.FirstAsync(i => i.Id == ids[0]);
+            item.Price = request.Price;
+            await _context.SaveChangesAsync();
+            _commands.QueueCommand(CommandQueueType.reload_catalogue, new CommandTemplate());
+            var pageName = string.IsNullOrWhiteSpace(page.Name) ? page.NameIndex : page.Name;
+            await _audit.AddLog(AuditLogType.catalogue_furni_cast, UserId, definition.Sprite, $"On catalogue page {page.Id} ({pageName}) for {request.Price} credits, catalogue item {item.Id}", dataId: definition.Id);
+            return Json(new { id = item.Id, page = pageName, price = item.Price });
+        }
+
+        /// <summary>One of a furni made here into your own hand, to try it in a room.</summary>
+        [HttpPost]
+        public async Task<IActionResult> GiveMe([FromBody] AfterRequest request)
+        {
+            var (definition, problem) = await MadeHere(request?.Sprite);
+            if (problem != null) return BadRequest(problem);
+            var me = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == UserId);
+            if (me == null) return Forbid();
+            var sql = new ContextSql(_context);
+            await sql.InConnection(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                await _give.Give(me.Id, me.Username, new CatalogueFurniPart { Definition = definition, SpecialSpriteId = 0, Amount = 1 });
+                await transaction.CommitAsync();
+                return true;
+            });
+            _commands.QueueCommand(CommandQueueType.reload_inventory, new CommandTemplate { UserId = me.Id });
+            await _audit.AddLog(AuditLogType.give_furni, UserId, "Gave 1 x " + definition.Sprite + " to " + me.Username, "from the furni editor, to try it", me.Id, definition.Id);
+            return Json(new { ok = true });
         }
 
         /// <summary>The furni made here, newest first.</summary>
