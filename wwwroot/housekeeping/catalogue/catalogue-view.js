@@ -10,21 +10,35 @@
 //   state.page     { layout, headline, teasers[], body, labelPick, labelExtraS, texts{n: text}, links[] }
 //   state.products [{ name, description, price, sprite, colour, isPackage, packages: [{ sprite, amount }] }]
 //   state.purse    credits shown in the purse line
-// options: gameData (from CatalogueController.GameData), onSelectPage(id), onField(field), editMode
+// options: gameData (from CatalogueController.GameData), onSelectPage(id), onField(field), editMode,
+//   v31: draw Habbo r31's catalogue (hh_cat_new, players pick it on their profile) instead: its window and tree (state.index entries also carry
+//   parentId, icon, colour, folder), the page through its v31 layout, products in the product strip. Its assets are
+//   v31/layouts.json + v31/members/ (tools/catalogue/build_assets.py --v31).
 (function () {
     'use strict';
 
     var BASE = '/housekeeping/catalogue/';
+    var V31_BASE = BASE + 'v31/';
+    // The asset set being drawn: the old catalogue's (hh_cat_gfx_all) or the v31 one. render() switches it.
+    var sets = { old: null, v31: null };
     var assets = null;
     var inkCache = {};
 
-    function loadAssets() {
-        if (assets) return Promise.resolve(assets);
+    function loadSet(base) {
         return Promise.all([
-            fetch(BASE + 'layouts.json').then(function (r) { return r.json(); }),
-            fetch(BASE + 'images.json').then(function (r) { return r.json(); })
+            fetch(base + 'layouts.json').then(function (r) { return r.json(); }),
+            fetch(base + 'images.json').then(function (r) { return r.json(); })
         ]).then(function (results) {
-            assets = { windows: results[0].windows, members: results[0].members, images: results[1] };
+            return { base: base, windows: results[0].windows, members: results[0].members, sizes: results[0].sizes || {}, images: results[1] };
+        });
+    }
+
+    function loadAssets() {
+        if (sets.old) return Promise.resolve(sets.old);
+        return Promise.all([loadSet(BASE), loadSet(V31_BASE).catch(function () { return null; })]).then(function (results) {
+            sets.old = results[0];
+            sets.v31 = results[1];
+            assets = sets.old;
             return assets;
         });
     }
@@ -90,7 +104,7 @@
 
     function memberUrl(member) {
         var file = assets.members[(member || '').trim()];
-        return file ? BASE + 'members/' + file : null;
+        return file ? assets.base + 'members/' + file : null;
     }
 
     // Where the client finds a page image: a cast member first, else the image library in the client's language.
@@ -98,7 +112,7 @@
     // client does (an image uploaded a moment ago shows up without waiting for the server's cache).
     function pageImageUrl(name, gameData) {
         if (!name) return null;
-        if (assets.images[name]) return { url: BASE + 'images/' + assets.images[name].file, remote: false, known: true };
+        if (assets.images[name]) return { url: assets.base + 'images/' + assets.images[name].file, remote: false, known: true };
         if (!gameData || !gameData.imageLibraryUrl) return null;
         return {
             url: gameData.imageLibraryUrl + 'catalogue/' + encodeURIComponent(name) + '_' + gameData.language + '.gif',
@@ -345,12 +359,13 @@
     CatalogueView.prototype.load = function () { return loadAssets(); };
 
     CatalogueView.layouts = function () {
-        return Object.keys(assets.windows).filter(function (k) { return /^ctlg_/.test(k) && k !== 'ctlg_loading' && k !== 'ctlg_recycler_open'; }).sort();
+        return Object.keys(sets.old.windows).filter(function (k) { return /^ctlg_/.test(k) && k !== 'ctlg_loading' && k !== 'ctlg_recycler_open'; }).sort();
     };
 
     // What a layout can show, for the editor: texts slots, teaser slots, product icons, and so on.
-    CatalogueView.layoutInfo = function (layout) {
-        var window = assets.windows[layout === 'ctlg_recycler' && assets.windows.ctlg_recycler_open ? 'ctlg_recycler_open' : layout];
+    CatalogueView.layoutInfo = function (layout, set) {
+        set = set || sets.old;
+        var window = set.windows[layout === 'ctlg_recycler' && set.windows.ctlg_recycler_open ? 'ctlg_recycler_open' : layout];
         var info = { header: false, headerText: false, teasers: 0, texts: [], description: false, special: false, icons: 0, productSlots: 0, productName: false };
         if (!window) return info;
         window.elements.forEach(function (e) {
@@ -373,18 +388,29 @@
     CatalogueView.textKeys = function () {
         var keys = ['catalog_coins_amount', 'catalog_get_credits_link', 'credits', 'credit', 'catalog_selectproduct', 'catalog_select_product', 'catalog_page', 'buy', 'play_preview'];
         for (var pet = 0; pet < 10; pet++) keys.push('pet_race_' + pet + '_000');
-        keys.push('recycler_info_open');
-        Object.keys(assets.windows).forEach(function (k) {
-            assets.windows[k].elements.forEach(function (e) { if (e.key) keys.push(e.key); });
+        keys.push('recycler_info_open', 'pixels');
+        [sets.old, sets.v31].filter(Boolean).forEach(function (set) {
+            Object.keys(set.windows).forEach(function (k) {
+                set.windows[k].elements.forEach(function (e) { if (e.key) keys.push(e.key); });
+            });
         });
         return keys.filter(function (k, i, a) { return k && a.indexOf(k) === i; });
     };
 
-    CatalogueView.pageImageUrl = function (name, gameData) { return pageImageUrl(name, gameData); };
-    CatalogueView.castImages = function () { return assets.images; };
-    CatalogueView.windowElements = function (layout) { return (assets.windows[layout] || { elements: [] }).elements; };
+    CatalogueView.pageImageUrl = function (name, gameData) {
+        var active = assets;
+        assets = sets.old;
+        try { return pageImageUrl(name, gameData); } finally { assets = active; }
+    };
+    CatalogueView.castImages = function () { return sets.old.images; };
+    CatalogueView.windowElements = function (layout) { return (sets.old.windows[layout] || { elements: [] }).elements; };
+    CatalogueView.hasV31 = function () { return !!sets.v31; };
 
     CatalogueView.prototype.render = function (state) {
+        assets = (this.options.v31 && sets.v31) || sets.old;
+        var wasV31 = this.v31;
+        this.v31 = assets === sets.v31;
+        if (wasV31 !== this.v31) this.state = null;
         var keepProduct = this.state && state && this.state.pageId === state.pageId && this.state.page && state.page && this.state.page.layout === state.page.layout;
         if (!keepProduct) { this.productOffset = 0; this.selected = -1; }
         this.state = state;
@@ -397,16 +423,308 @@
         frame.style.height = main.height + 'px';
         this.frame = frame;
         this.drawWindow(main, [0, 0]);
+        if (this.v31) { this.renderV31(state); return; }
         var layout = state.page && assets.windows[state.page.layout];
         // The recycler page shows hh_recycler's "open" window in place of its layout (Recycler Interface Class).
         if (layout && state.page.layout === 'ctlg_recycler' && assets.windows.ctlg_recycler_open) layout = assets.windows.ctlg_recycler_open;
         if (layout) this.drawWindow(layout, layout.offset);
         else if (state.page) {
             var missing = el('div', 'ctlg-missing', { left: '20px', top: '60px' });
-            missing.textContent = 'The client has no layout "' + state.page.layout + '".';
+            missing.textContent = state.page.layout ? 'The client has no layout "' + state.page.layout + '".'
+                : 'A folder: in the v31 catalogue it groups pages in the tree. The old catalogue doesn\'t show it.';
             frame.appendChild(missing);
         }
         this.fillPage();
+    };
+
+    // ---- The v31 catalogue (hh_cat_new) ----
+
+    // hh_cat_new's variables: which page texts and images go into which elements (layout.fields.*), what a product
+    // click hides (layout.hide.onclick.default), the buy buttons (layout.buybutton.types: credits only, pixels are off),
+    // layouts the old page classes draw (Catalogpage Oldpage Wrapper Class), layouts without a product strip.
+    var V31_TEXT_FIELDS = {
+        'default': ['ctlg_header_text', 'ctlg_description', 'ctlg_special_txt', 'ctlg_text_1', 'ctlg_text_2'],
+        camera1: ['ctlg_header_text', 'ctlg_text_1'],
+        club1: ['ctlg_text_1', 'ctlg_text_2', 'ctlg_text_3', 'ctlg_text_4'],
+        club2: ['ctlg_text_1', 'ctlg_text_2', 'ctlg_text_3', 'ctlg_text_4'],
+        presents: ['ctlg_header_text', 'ctlg_text1'],
+        collectibles: ['ctlg_header_text', 'ctlg_collectibles_link'],
+        purse: ['ctlg_header_text', 'ctlg_special_txt'],
+        pets2: ['ctlg_header_text', 'ctlg_text_1', 'ctlg_text_2', 'ctlg_text_3'],
+        info_credits: [1, 2, 3, 4, 5, 6, 7, 8].map(function (n) { return 'ctlg_text_' + n; }),
+        info_pixels: [1, 2, 3, 4, 5, 6, 7, 8].map(function (n) { return 'ctlg_text_' + n; }),
+        frontpage3: [1, 2, 3, 4, 5, 6].map(function (n) { return 'ctlg_txt' + n; })
+    };
+    var V31_IMAGE_FIELDS = {
+        'default': ['ctlg_header_img', 'ctlg_teaserimg_1', 'ctlg_special_img', 'ctlg_teaserimg_2', 'ctlg_teaserimg_3'],
+        frontpage3: ['ctlg_header_img', 'ctlg_special_img']
+    };
+    var V31_HIDE_ON_CLICK = ['ctlg_special_txt', 'ctlg_special_img'];
+    var V31_BUY_BUTTONS = ['ctlg_buy_button', 'ctlg_buy_pixels_credits', 'ctlg_buy_pixels', 'ctlg_buy_andwear'];
+    var V31_PRICE_TEXTS = ['ctlg_price_1', 'ctlg_price_credits'];
+    var V31_OLD_PAGES = ['plasto', 'spaces', 'trophies', 'pets', 'recycler', 'soundmachine', 'purse'];
+    var V31_NO_STRIP = ['collectibles', 'camera1', 'camera2', 'club1', 'club2', 'purse', 'pets2', 'recycler_prizes'];
+    var V31_TREE_ICONS = { 1: 'purse', 2: 'furni', 3: 'plants', 4: 'trax', 5: 'pixels', 6: 'credits', 7: 'recycler', 8: 'pets', 9: 'hc', 10: 'special_discounts' };
+
+    // The page's v31 layout, as Odin sends it (CataloguePage.getV31Layout): layout_v31, else the old layout without
+    // "ctlg_"; product layouts show their products in default_3x3's strip.
+    CatalogueView.v31Layout = function (page) {
+        if (!page) return '';
+        if (page.layoutV31) return page.layoutV31;
+        var old = (page.layout || '').replace(/^ctlg_/, '');
+        return /^(layout1|layout2|productpage1|productpage2|productpage2b|productpage3|productpage3b)$/.test(old) ? 'default_3x3' : old;
+    };
+
+    CatalogueView.prototype.renderV31 = function (state) {
+        var gameData = this.options.gameData || {};
+        this.v31Strip = null;
+        this.stripSlots = [];
+        this.drawTree(state);
+        this.purseLine();
+        // updatePurseSaldo: "<balance> <credits>" (the old catalogue uses catalog_coins_amount).
+        this.setText('catalog_credits_bottom', (state.purse === undefined ? '-' : state.purse) + ' ' + textOf(gameData, 'credits'));
+        // pixels.enabled=false (Catalogue Interface Class showWindow)
+        this.hide('pixel_icon'); this.hide('catalog_pixels_bottom'); this.hide('catalog_get_pixels_bottom');
+        var page = state.page;
+        if (!page) return;
+        var layout = CatalogueView.v31Layout(page);
+        var window = layout && assets.windows['ctlg_' + layout];
+        if (!window) {
+            var note = el('div', 'ctlg-missing', { left: '20px', top: '60px' });
+            note.textContent = layout ? 'The v31 catalogue has no layout "' + layout + '".' : 'A folder: in the tree it opens and closes; it has no page.';
+            this.frame.appendChild(note);
+            return;
+        }
+        this.drawWindow(window, window.offset);
+        if (V31_OLD_PAGES.indexOf(layout) >= 0) {
+            // The old page class on v31's copy of its window (Catalogpage Oldpage Wrapper Class).
+            var oldPage = Object.assign({}, page, { layout: 'ctlg_' + layout });
+            this.state = Object.assign({}, state, { page: oldPage });
+            this.fillPageContent(oldPage, oldPage.layout, CatalogueView.layoutInfo(oldPage.layout, assets), gameData);
+            return;
+        }
+        this.fillV31(page, layout);
+    };
+
+    // Catalogpage Default Class mergeWindow: texts and images by the layout's field lists, the price box hidden until a
+    // product is picked, the product strip.
+    CatalogueView.prototype.fillV31 = function (page, layout) {
+        var self = this, gameData = this.options.gameData || {};
+        var texts = V31_TEXT_FIELDS[layout] || V31_TEXT_FIELDS['default'];
+        var images = V31_IMAGE_FIELDS[layout] || V31_IMAGE_FIELDS['default'];
+        this.v31Images = images;
+        texts.forEach(function (id) {
+            if (id === 'ctlg_special_txt') return;
+            var field, value;
+            if (id === 'ctlg_header_text') { field = 'body'; value = page.body; }
+            else if (id === 'ctlg_description') { field = 'labelPick'; value = page.labelPick; }
+            else if (id === 'ctlg_collectibles_link') { field = 'text:1'; value = (page.texts || {})[1]; }
+            else {
+                var n = id.replace(/\D/g, '');
+                if (!n) return;
+                field = 'text:' + n; value = (page.texts || {})[n];
+            }
+            self.setText(id, value || '', field);
+        });
+        images.forEach(function (id) {
+            var node = self.get(id);
+            if (!node || id === 'ctlg_special_img') return;
+            var name = null, field = null, m;
+            if (id === 'ctlg_header_img') { name = page.headline; field = 'headline'; }
+            else if ((m = /^ctlg_teaserimg_(\d+)$/.exec(id))) { name = (page.teasers || [])[m[1] - 1]; field = 'teaser:' + m[1]; }
+            node.textContent = '';
+            var src = name && pageImageUrl(name, gameData);
+            if (src) fillCentered(node, src.url, 36, src.remote);
+            self.editable(node, field);
+        });
+        if (images.indexOf('ctlg_special_img') >= 0) this.showSpecial(page.labelExtraS);
+        V31_BUY_BUTTONS.forEach(function (button) { if (self.get(button)) { self.hide('ctlg_price_box'); self.hide(button); } });
+        var strip = this.get('ctlg_productstrip');
+        this.v31Strip = strip && V31_NO_STRIP.indexOf(layout) < 0 ? strip : null;
+        if (this.v31Strip) this.drawStrip();
+        else this.hide('ctlg_products_scroll');
+        if (this.selected >= 0) this.selectV31(this.selected, true);
+    };
+
+    // Product Strip Default Class: 38 px item backgrounds 1 px apart on #f0f0f0, as many per row as fit, the icon
+    // centred on each; the strip scrolls when it's taller than its element.
+    CatalogueView.prototype.drawStrip = function () {
+        var self = this, strip = this.v31Strip, products = this.state.products || [];
+        var size = assets.sizes['stripitem.basic.bg.unselected'] || [38, 38];
+        var itemWidth = size[0] + 1, rowHeight = size[1] + 1;
+        var perRow = Math.max(1, Math.floor(parseInt(strip.style.width, 10) / itemWidth));
+        var rows = Math.ceil(products.length / perRow);
+        strip.textContent = '';
+        strip.classList.add('ctlg-strip');
+        var list = el('div', 'ctlg-strip-list');
+        var inner = el('div', 'ctlg-strip-inner', { height: rows * rowHeight + 'px' });
+        list.appendChild(inner);
+        this.stripSlots = [];
+        products.forEach(function (product, i) {
+            var slot = el('div', 'ctlg-strip-item', {
+                left: (i % perRow) * itemWidth + 'px', top: Math.floor(i / perRow) * rowHeight + 'px', width: size[0] + 'px', height: size[1] + 'px'
+            });
+            var bg = el('img', 'ctlg-strip-bg');
+            bg.alt = '';
+            bg.src = memberUrl(i === self.selected ? 'stripitem.basic.bg.selected' : 'stripitem.basic.bg.unselected') || '';
+            slot.appendChild(bg);
+            var holder = el('div', 'ctlg-strip-icon');
+            if (product.isPackage && (product.packages || []).length > 1) {
+                var dealNumber = products.filter(function (p, k) { return k <= i && p.isPackage && (p.packages || []).length > 1; }).length;
+                holder.appendChild(self.dealIcon(product, dealNumber));
+            } else if (product.isPackage) {
+                holder.appendChild(self.dealIcon(product, 0));
+            } else {
+                var icon = el('img', 'ctlg-centered');
+                icon.alt = '';
+                furniImage(icon, product.sprite, product.colour, '&icon=true');
+                holder.appendChild(icon);
+            }
+            slot.appendChild(holder);
+            slot.title = product.name;
+            slot.onclick = function (ev) { ev.stopPropagation(); self.selectV31(i); };
+            inner.appendChild(slot);
+            self.stripSlots.push(bg);
+        });
+        strip.appendChild(list);
+        if (rows * rowHeight > parseInt(strip.style.height, 10)) {
+            this.show('ctlg_products_scroll');
+            this.drawScrollbar(list, this.get('ctlg_products_scroll'));
+        } else {
+            this.hide('ctlg_products_scroll');
+        }
+    };
+
+    // A product click (Catalogpage Default Class handleClick + showPreview): hide the special badge, show the price box
+    // and buy button, the large preview in the second image field, name, description and "<price> <credits>".
+    CatalogueView.prototype.selectV31 = function (index, quiet) {
+        var self = this, products = this.state.products || [], product = products[index];
+        if (!product) return;
+        this.selected = index;
+        (this.stripSlots || []).forEach(function (bg, i) {
+            bg.src = memberUrl(i === index ? 'stripitem.basic.bg.selected' : 'stripitem.basic.bg.unselected') || '';
+        });
+        V31_HIDE_ON_CLICK.forEach(this.hide, this);
+        if (this.get('ctlg_buy_button')) { this.show('ctlg_price_box'); this.show('ctlg_buy_button'); }
+        var preview = this.get((this.v31Images || [])[1] || 'ctlg_teaserimg_1');
+        if (preview) {
+            preview.textContent = '';
+            preview.onclick = null;
+            preview.classList.remove('ctlg-editable');
+            var big = el('img', 'ctlg-centered');
+            big.alt = '';
+            var parts = product.isPackage ? (product.packages || []) : [];
+            if (parts.length > 1) {
+                var w = parseInt(preview.style.width, 10) || 162, h = parseInt(preview.style.height, 10) || 162;
+                dealPreviewPicture(parts, w, h).then(function (url) { big.src = url; });
+            } else {
+                var part = parts[0] || product;
+                furniImage(big, part.sprite, part.colour, '&direction=2');
+            }
+            preview.appendChild(big);
+        }
+        this.setText('ctlg_description', product.description);
+        this.setText('ctlg_product_name', product.name);
+        var price = product.price + ' ' + textOf(this.options.gameData || {}, 'credits');
+        V31_PRICE_TEXTS.forEach(function (id) { self.setText(id, price); });
+        if (!quiet && this.options.onSelectProduct) this.options.onSelectProduct(index);
+    };
+
+    // Treeview Node Renderer Class: 21 px nodes, the colour's background stretched over the width (selected: its
+    // selected variant), the icon at 5 + 8 per level in a 17 px column, bold text after it, an arrow 15 px from the
+    // right on nodes with children (down when open). Only open nodes show their children. The tree scrolls (with the
+    // wider frame, back_hide) when it's taller than ctlg_pages.
+    CatalogueView.prototype.drawTree = function (state) {
+        var self = this, node = this.get('ctlg_pages');
+        if (!node) return;
+        var entries = state.index || [];
+        var byId = {};
+        entries.forEach(function (e) { byId[e.id] = e; });
+        var parentOf = function (e) { return e.parentId > 0 && e.parentId !== e.id && byId[e.parentId] ? e.parentId : -1; };
+        var children = {};
+        entries.forEach(function (e) { var p = parentOf(e); (children[p] = children[p] || []).push(e); });
+        this.openNodes = this.openNodes || {};
+        var pageChanged = state.pageId !== this.treePageId;
+        if (pageChanged) {
+            // Open the way to the page being edited.
+            this.treePageId = state.pageId;
+            var seen = {};
+            for (var p = byId[state.pageId] && byId[parentOf(byId[state.pageId])]; p && !seen[p.id]; p = byId[parentOf(p)]) {
+                seen[p.id] = true;
+                this.openNodes[p.id] = true;
+            }
+        }
+        var rows = [];
+        var walk = function (parent, level, seen) {
+            (children[parent] || []).forEach(function (e) {
+                if (seen[e.id]) return;
+                rows.push({ entry: e, level: level });
+                if (self.openNodes[e.id] && children[e.id]) walk(e.id, level + 1, Object.assign({}, seen, { [e.id]: true }));
+            });
+        };
+        walk(-1, 1, {});
+        node.textContent = '';
+        node.classList.add('ctlg-tree');
+        var list = el('div', 'ctlg-tree-list');
+        var width = parseInt(node.style.width, 10);
+        var rowHeight = (assets.sizes.tree_basicslot_unselected || [1, 21])[1];
+        var selectedAt = -1;
+        rows.forEach(function (r, position) {
+            if (r.entry.id === state.pageId) selectedAt = position;
+            var e = r.entry, selected = e.id === state.pageId, hasChildren = !!children[e.id];
+            var row = el('div', 'ctlg-tree-node' + (e.hidden ? ' is-hidden' : ''), { height: rowHeight + 'px' });
+            var state2 = selected ? 'selected' : 'unselected';
+            var bg = el('img', 'ctlg-tree-bg');
+            bg.alt = '';
+            bg.src = memberUrl((e.colour > 0 ? 'tree_col' + e.colour : 'tree_basicslot') + '_' + state2) || memberUrl('tree_basicslot_' + state2) || '';
+            row.appendChild(bg);
+            var x = 5 + 8 * Math.max(r.level - 1, 0);
+            var iconName = V31_TREE_ICONS[e.icon] ? 'katalogi_ikoni.' + V31_TREE_ICONS[e.icon] : null;
+            if (iconName && memberUrl(iconName)) {
+                var size = assets.sizes[iconName] || [17, 17];
+                // The client centres the icon in its column by the icon's height (getCenteredOfs(maxwidth, height)).
+                var icon = el('img', 'ctlg-tree-icon', { left: (x + idiv(17 - size[1], 2)) + 'px', top: idiv(rowHeight - size[1], 2) + 'px' });
+                icon.alt = '';
+                inked(memberUrl(iconName), 36, false).then(function (src) { if (src) icon.src = src; });
+                row.appendChild(icon);
+                x += 17 + 8;
+            }
+            var label = el('span', 'ctlg-tree-label', { left: x + 'px' });
+            label.textContent = e.name;
+            row.appendChild(label);
+            if (hasChildren) {
+                var arrowName = self.openNodes[e.id] ? 'testarrow.down' : 'testarrow.right';
+                var arrowSize = assets.sizes[arrowName] || [7, 14];
+                var arrow = el('img', 'ctlg-tree-arrow', { left: (width - 15) + 'px', top: idiv(rowHeight - arrowSize[1], 2) + 'px' });
+                arrow.alt = '';
+                inked(memberUrl(arrowName), 36, false).then(function (src) { if (src) arrow.src = src; });
+                row.appendChild(arrow);
+            }
+            if (e.hidden) row.title = 'Hidden: players don\'t see this page';
+            row.onclick = function () {
+                if (hasChildren) self.openNodes[e.id] = !self.openNodes[e.id];
+                if (e.id !== state.pageId && self.options.onSelectPage) self.options.onSelectPage(e.id);
+                else self.drawTree(self.state);
+            };
+            list.appendChild(row);
+        });
+        node.appendChild(list);
+        if (rows.length * rowHeight > parseInt(node.style.height, 10)) {
+            this.show('back_hide');
+            this.show('ctlg_pages_scroll');
+            this.drawScrollbar(list, this.get('ctlg_pages_scroll'));
+        } else {
+            this.hide('back_hide');
+            this.hide('ctlg_pages_scroll');
+        }
+        if (this.treeScroll !== undefined) list.scrollTop = this.treeScroll;
+        // Like the old index: keep the scroll position, but bring a newly opened page (and its first children) into view.
+        if (pageChanged && selectedAt >= 0) {
+            var top = selectedAt * rowHeight, view = list.clientHeight;
+            if (top < list.scrollTop || top + rowHeight * 4 > list.scrollTop + view) list.scrollTop = Math.max(0, top - rowHeight * 3);
+        }
+        list.addEventListener('scroll', function () { self.treeScroll = list.scrollTop; });
+        list.dispatchEvent(new Event('scroll'));
     };
 
     CatalogueView.prototype.drawWindow = function (window, offset) {
@@ -513,7 +831,7 @@
         var gameData = this.options.gameData || {};
 
         // The page index (renderPageList): 21 px rows, bold text 6 px in, #DDDDDD with #AAAAAA lines, selected #EEEEEE.
-        var pages = this.get('ctlg_pages');
+        var pages = this.v31 ? null : this.get('ctlg_pages');
         if (pages) {
             pages.classList.add('ctlg-pages');
             var list = el('div', 'ctlg-pages-list');
@@ -544,15 +862,25 @@
         }
 
         // The purse line.
+        if (!this.v31) this.purseLine();
+
+        if (!state.page) return;
+        var layout = page.layout;
+        var info = CatalogueView.layoutInfo(layout, assets);
+        this.fillPageContent(page, layout, info, gameData);
+    };
+
+    CatalogueView.prototype.purseLine = function () {
+        var gameData = this.options.gameData || {}, state = this.state;
         var amount = state.purse === undefined ? '-' : String(state.purse);
         this.setText('catalog_credits_bottom', (textOf(gameData, 'catalog_coins_amount') || '%amount%').replace('%amount%', amount));
         this.setText('catalog_get_credits_bottom', textOf(gameData, 'catalog_get_credits_link'));
         var link = this.get('catalog_get_credits_bottom');
         if (link) link.classList.add('ctlg-link');
+    };
 
-        if (!state.page) return;
-        var layout = page.layout;
-        var info = CatalogueView.layoutInfo(layout);
+    CatalogueView.prototype.fillPageContent = function (page, layout, info, gameData) {
+        var self = this, state = this.state;
 
         // Header image and text, text slots, teasers (feedPageData).
         var header = this.get('ctlg_header_img');
@@ -618,7 +946,7 @@
         var position = chain ? chain.indexOf(page.nameIndex) : -1;
         if (!chain || position < 0) {
             this.hide('ctlg_nextpage_button'); this.hide('ctlg_prevpage_button'); this.hide('ctlg_subpage_counter');
-            if (!(CatalogueView.layoutInfo(page.layout).icons > 0)) this.hide('ctlg_page_text');
+            if (!(CatalogueView.layoutInfo(page.layout, assets).icons > 0)) this.hide('ctlg_page_text');
             return;
         }
         this.setText('ctlg_subpage_counter', (position + 1) + '/' + chain.length);
@@ -765,12 +1093,13 @@
     };
 
     CatalogueView.prototype.selectProduct = function (index, quiet) {
+        if (this.v31 && this.v31Strip) return this.selectV31(index, quiet);
         var products = this.state.products || [];
         var product = products[index];
         if (!product) return;
         this.selected = index;
         if (this.classSelect) { this.classSelect(index, quiet); return; }
-        var info = CatalogueView.layoutInfo(this.state.page.layout);
+        var info = CatalogueView.layoutInfo(this.state.page.layout, assets);
         if (info.icons > 0) this.showIcons(info.icons);
         var preview = this.get('ctlg_teaserimg_1');
         if (preview && info.productName) {

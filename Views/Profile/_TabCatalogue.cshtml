@@ -1,0 +1,19 @@
+@model KeplerCMS.Controllers.ProfileController.ProfilePage
+@using KeplerCMS.Helpers
+@* Which catalogue the client loads (users.catalogue_v31, Services/CatalogueChoice.cs): the classic list of pages or
+   Habbo r31's tree with folders. Only shown when cms.catalogue.choice lets this player choose. *@
+@{ var user = (KeplerCMS.Data.Models.Users)ViewData["user"]; }
+<form method="post" action="/profile/updatecatalogue">
+    <h3>@Texts.T("catalogue_title", "profile", "Dit katalog")</h3>
+    <p>@Texts.T("catalogue_intro", "profile", "Hotellet har to kataloger med de samme møbler og priser. Vælg det, du bedst kan lide.")</p>
+    <div class="profile-field profile-choice">
+        <span class="label">@Texts.T("catalogue_label", "profile", "Katalog:")</span>
+        <label><input type="radio" name="catalogue" value="classic" checked="@(!user.CatalogueV31)" /> @Texts.T("catalogue_classic", "profile", "Det klassiske katalog: alle sider i én liste")</label>
+        <label><input type="radio" name="catalogue" value="v31" checked="@user.CatalogueV31" /> @Texts.T("catalogue_v31", "profile", "Det nye katalog: siderne i mapper, med farver og ikoner")</label>
+    </div>
+    <p>@Texts.T("catalogue_note", "profile", "I det nye katalog køber du én ting ad gangen. Ændringen gælder fra næste gang, du går ind på hotellet.")</p>
+    <div id="register-buttons">
+        <div id="register-buttons-continue"><input type="submit" value="@Texts.T("save_changes", "habbohome", "Gem ændringer")" class="process-button" /></div>
+    </div>
+    <div class="clear"></div>
+</form>
