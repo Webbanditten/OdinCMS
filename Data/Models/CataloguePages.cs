@@ -44,5 +44,25 @@ namespace KeplerCMS.Data.Models
         public string LabelExtraT { get; set; }
         [Column("fuse")]
         public string Fuse { get; set; }
+
+        // The v31 catalogue's tree (Odin update.1.40.sql): parent page (-1 = top), node icon and colour, and the
+        // layout it uses when not derived from Layout. A page without a layout is a folder.
+        [Column("parent_id")]
+        public int ParentId { get; set; } = -1;
+        [Column("icon")]
+        public int Icon { get; set; }
+        [Column("colour")]
+        public int Colour { get; set; }
+        [Column("layout_v31")]
+        public string LayoutV31 { get; set; }
+    }
+
+    /// <summary>Page images that come from the image library (Odin sends them to the v31 catalogue as name_language).</summary>
+    [Table("catalogue_library_images")]
+    public class CatalogueLibraryImage
+    {
+        [System.ComponentModel.DataAnnotations.Key]
+        [Column("name")]
+        public string Name { get; set; }
     }
 }

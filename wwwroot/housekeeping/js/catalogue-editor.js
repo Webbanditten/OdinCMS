@@ -27,6 +27,13 @@ var CatalogueEditor = (function () {
         ctlg_presents: 'The gift boxes are drawn by the game.'
     };
 
+    // The v31 catalogue (hh_cat_new): its layouts and the tree's node icons (treeview.node.icon.N) and colours.
+    var V31_LAYOUTS = ['default_3x3', 'frontpage3', 'layout1', 'layout2', 'layout3', 'productpage1', 'productpage2', 'productpage3',
+        'spaces', 'plasto', 'trophies', 'pets', 'pets2', 'recycler', 'soundmachine', 'presents', 'camera1', 'camera2', 'club1', 'club2',
+        'collectibles', 'purse', 'info_credits', 'infopage1', 'infopage2', 'norares', 'cars'];
+    var V31_ICONS = ['none', 'purse', 'furni', 'plants', 'trax', 'pixels', 'credits', 'recycler', 'pets', 'HC', 'offers'];
+    var V31 = '/housekeeping/catalogue/v31/';
+
     var opts, view, gameData = {}, pages = [], current = null, draft = null, products = [], dupes = [];
     var selectedProduct = -1, openProduct = -1, dirtyPage = false, tab = 'page';
     var $ = function (sel, root) { return (root || document).querySelector(sel); };
@@ -242,11 +249,48 @@ var CatalogueEditor = (function () {
             ])
         ]));
 
+        // The v31 catalogue's tree
+        var parents = pages.filter(function (p) { return p.id !== draft.id; });
+        var parentSelect = h('select', { onchange: function (e) { draft.parentId = +e.target.value; setDirty(); } },
+            [h('option', { value: '-1', text: '(top level)' })].concat(parents.map(function (p) {
+                return h('option', { value: String(p.id), text: (p.isFolder ? '📁 ' : '') + p.name, selected: p.id === draft.parentId ? 'selected' : null });
+            })));
+        var swatch = h('img', { class: 'cated-v31-colour', alt: '' });
+        var iconImg = h('img', { class: 'cated-v31-icon', alt: '' });
+        var drawNode = function () {
+            swatch.src = V31 + 'colour_' + (draft.colour || 0) + '.png';
+            iconImg.src = draft.icon ? V31 + 'icon_' + draft.icon + '.png' : '';
+            iconImg.style.visibility = draft.icon ? '' : 'hidden';
+        };
+        var colourSelect = h('select', { onchange: function (e) { draft.colour = +e.target.value; drawNode(); setDirty(); } },
+            Array.from({ length: 12 }, function (_, i) { return h('option', { value: String(i), text: i === 0 ? 'grey (0)' : 'colour ' + i, selected: i === (draft.colour || 0) ? 'selected' : null }); }));
+        var iconSelect = h('select', { onchange: function (e) { draft.icon = +e.target.value; drawNode(); setDirty(); } },
+            V31_ICONS.map(function (name, i) { return h('option', { value: String(i), text: name, selected: i === (draft.icon || 0) ? 'selected' : null }); }));
+        var v31Layouts = V31_LAYOUTS.slice();
+        if (draft.layoutV31 && v31Layouts.indexOf(draft.layoutV31) < 0) v31Layouts.push(draft.layoutV31);
+        var v31LayoutSelect = h('select', { onchange: function (e) { draft.layoutV31 = e.target.value; setDirty(); } },
+            [h('option', { value: '', text: 'Same as the layout below' })].concat(v31Layouts.map(function (l) {
+                return h('option', { value: l, text: l, selected: l === draft.layoutV31 ? 'selected' : null });
+            })));
+        drawNode();
+        root.appendChild(h('div', { class: 'cated-section' }, [
+            h('h3', {}, ['v31 catalogue tree ', h('span', { class: 'cated-hint', text: '(the web client; Shockwave shows the list on the left)' })]),
+            h('div', { class: 'cated-grid' }, [
+                field('Under', parentSelect, 'folder or page it sits in'),
+                field('v31 layout', v31LayoutSelect, 'product pages use default_3x3'),
+                field('Colour', h('div', { class: 'cated-inline' }, [colourSelect, swatch])),
+                field('Icon', h('div', { class: 'cated-inline' }, [iconSelect, iconImg]))
+            ]),
+            !draft.layout ? h('p', { class: 'cated-hint', text: 'A folder: no layout, it only opens its pages in the v31 tree (the old catalogue leaves it out). Pick a layout below to make it a page.' }) : null
+        ]));
+
         // Layout
         var layouts = CatalogueView.layouts();
-        if (layouts.indexOf(draft.layout) < 0) layouts.push(draft.layout);
+        if (draft.layout && layouts.indexOf(draft.layout) < 0) layouts.push(draft.layout);
         var layoutSelect = h('select', { onchange: function (e) { draft.layout = e.target.value; setDirty(); renderPageTab(); renderPreview(); } },
-            layouts.map(function (l) { return h('option', { value: l, text: (LAYOUTS[l] || l) + '  (' + l.replace('ctlg_', '') + ')', selected: l === draft.layout ? 'selected' : null }); }));
+            [h('option', { value: '', text: 'No layout: a folder (v31 tree only)', selected: !draft.layout ? 'selected' : null })].concat(layouts.map(function (l) {
+                return h('option', { value: l, text: (LAYOUTS[l] || l) + '  (' + l.replace('ctlg_', '') + ')', selected: l === draft.layout ? 'selected' : null });
+            })));
         var slots = [];
         if (info.icons) slots.push(info.icons + ' product icons per page');
         if (info.productSlots) slots.push(info.productSlots + ' product' + (info.productSlots > 1 ? 's' : ''));
@@ -385,13 +429,14 @@ var CatalogueEditor = (function () {
         });
     }
 
-    function newPage() {
+    function newPage(folder) {
         confirmLeave().then(function (ok) {
             if (!ok) return;
-            Swal.fire({ title: 'New page', input: 'text', inputPlaceholder: 'Name in the index', showCancelButton: true, confirmButtonText: 'Create' })
+            Swal.fire({ title: folder ? 'New folder (v31 tree)' : 'New page', input: 'text', inputPlaceholder: 'Name in the index', showCancelButton: true, confirmButtonText: 'Create' })
                 .then(function (r) {
                     if (!r.value) return;
-                    var page = { name: r.value, nameIndex: r.value, layout: 'ctlg_layout2', indexVisible: false, fuse: 'DEFAULT', teasers: [], texts: {}, links: [] };
+                    var page = { name: r.value, nameIndex: r.value, layout: folder ? '' : 'ctlg_layout2', indexVisible: false, fuse: 'DEFAULT', teasers: [], texts: {}, links: [],
+                        parentId: draft && !folder ? (draft.isFolder ? draft.id : draft.parentId) : -1 };
                     api('SavePage', page).then(function (res) {
                         dirtyPage = false;
                         status('Page created (hidden from players until you tick "In the index").');
@@ -408,15 +453,21 @@ var CatalogueEditor = (function () {
         root.textContent = '';
         root.appendChild(h('p', { class: 'cated-hint', text: 'Drag pages to change their order in the game. Hidden pages are only reachable through links (sub-pages).' }));
         var list = h('ul', { class: 'cated-pages' });
+        // Depth in the v31 tree, for indenting (the order stays the game's order).
+        var byId = {};
+        pages.forEach(function (p) { byId[p.id] = p; });
+        var depth = function (p) { var d = 0, seen = {}; while (p && p.parentId > 0 && byId[p.parentId] && !seen[p.id] && d < 6) { seen[p.id] = 1; p = byId[p.parentId]; d++; } return d; };
         pages.forEach(function (p) {
             var tags = [];
             if (!p.indexVisible) tags.push(h('span', { class: 'cated-tag is-hidden', text: 'hidden' }));
             if (p.clubOnly) tags.push(h('span', { class: 'cated-tag is-club', text: 'HC' }));
             if (p.fuse && p.fuse !== 'DEFAULT') tags.push(h('span', { class: 'cated-tag' + (/club/.test(p.fuse) ? ' is-club' : ' is-staff'), text: p.fuse.replace('fuse_catalogue_', '') }));
             var li = h('li', { draggable: 'true', 'data-id': p.id, class: current && p.id === current.id ? 'is-active' : '' }, [
-                h('span', { class: 'cated-page-name', text: p.name }),
+                h('img', { class: 'cated-v31-colour', src: V31 + 'colour_' + (p.colour || 0) + '.png', alt: '', style: 'margin-left:' + depth(p) * 16 + 'px' }),
+                p.icon ? h('img', { class: 'cated-v31-icon', src: V31 + 'icon_' + p.icon + '.png', alt: '' }) : null,
+                h('span', { class: 'cated-page-name', text: (p.isFolder ? '📁 ' : '') + p.name }),
                 h('span', {}, tags),
-                h('span', { class: 'cated-page-meta', text: (LAYOUTS[p.layout] ? p.layout.replace('ctlg_', '') : p.layout) + ' · ' + p.productCount + ' products' })
+                h('span', { class: 'cated-page-meta', text: p.isFolder ? 'folder' : (LAYOUTS[p.layout] ? p.layout.replace('ctlg_', '') : p.layout) + ' · ' + p.productCount + ' products' })
             ]);
             li.onclick = function () { selectPage(p.id); };
             list.appendChild(li);
@@ -810,7 +861,8 @@ var CatalogueEditor = (function () {
         try { if (localStorage.getItem('cated-zoom')) { $('#cated-zoom').checked = true; $('#cated-stage').classList.add('is-2x'); } } catch (x) { }
         $('#cated-show-hidden').onchange = renderPreview;
         $('#cated-publish').onclick = publish;
-        $('#cated-new-page').onclick = newPage;
+        $('#cated-new-page').onclick = function () { newPage(false); };
+        $('#cated-new-folder').onclick = function () { newPage(true); };
         $('#cated-new-furni').onclick = function () { furniDialog(null, true); };
         window.addEventListener('beforeunload', function (e) { if (dirtyPage) { e.preventDefault(); e.returnValue = ''; } });
 

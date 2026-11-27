@@ -14,6 +14,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<int> SavePage(CataloguePageEdit edit);
         Task DeletePage(int id);
         Task ReorderPages(List<int> ids);
+        Task<int> SetLibraryImages(IEnumerable<string> names);
 
         Task<List<CatalogueProductEdit>> GetProducts(int pageId);
         Task<List<string>> DuplicateSaleCodes(IEnumerable<string> saleCodes);
