@@ -52,6 +52,10 @@ namespace KeplerCMS.Data.Models
         /// <summary>Other Habbos may ask this one to be friends (Odin reads it at login).</summary>
         [Column("allow_friend_requests")]
         public bool AllowFriendRequests { get; set; } = true;
+        /// <summary>The player's client loads Habbo r31's catalogue (a tree with folders) instead of the classic one,
+        /// when cms.catalogue.choice lets them choose (Services/CatalogueChoice.cs; set on the profile's Katalog tab).</summary>
+        [Column("catalogue_v31")]
+        public bool CatalogueV31 { get; set; }
 
         [Column("sso_ticket")]
         public string SSOTicket { get; set; }
