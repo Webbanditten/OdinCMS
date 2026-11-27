@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Models.Enums;
+using KeplerCMS.Services;
 using KeplerCMS.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeplerCMS.Areas.Housekeeping
@@ -104,6 +106,23 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             await _catalogue.DeletePage(request.Id);
             return Ok();
+        }
+
+        /// <summary>The v31 catalogue's tree: every page's parent and place among its siblings (the classic order stays).</summary>
+        [HttpPost]
+        public async Task<IActionResult> SaveTree([FromBody] List<CatalogueTreeNode> nodes)
+        {
+            if (nodes == null) return BadRequest("Missing tree.");
+            await _catalogue.SaveTree(nodes);
+            return Ok();
+        }
+
+        /// <summary>How many players have picked each catalogue, and who may choose (cms.catalogue.choice).</summary>
+        [HttpGet]
+        public async Task<IActionResult> CatalogueUse([FromServices] Data.DataContext context, [FromServices] CatalogueChoice choice)
+        {
+            var v31 = await context.Users.CountAsync(u => u.CatalogueV31);
+            return Json(new { v31, mode = await choice.Mode(), configured = choice.V31Vars != null });
         }
 
         [HttpPost]

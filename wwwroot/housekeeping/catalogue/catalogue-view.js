@@ -11,7 +11,7 @@
 //   state.products [{ name, description, price, sprite, colour, isPackage, packages: [{ sprite, amount }] }]
 //   state.purse    credits shown in the purse line
 // options: gameData (from CatalogueController.GameData), onSelectPage(id), onField(field), editMode,
-//   v31: draw the web client's catalogue (hh_cat_new) instead: its window and tree (state.index entries also carry
+//   v31: draw Habbo r31's catalogue (hh_cat_new, players pick it on their profile) instead: its window and tree (state.index entries also carry
 //   parentId, icon, colour, folder), the page through its v31 layout, products in the product strip. Its assets are
 //   v31/layouts.json + v31/members/ (tools/catalogue/build_assets.py --v31).
 (function () {

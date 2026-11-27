@@ -1,4 +1,4 @@
-@model KeplerCMS.Controllers.ProfileController.ProfilePage
+﻿@model KeplerCMS.Controllers.ProfileController.ProfilePage
 @using KeplerCMS.Helpers
 @*
     "Min profil", laid out like habbo.com's 2006 profile page (jeanropke/Neptune's profile views): info boxes on the left,
@@ -18,7 +18,9 @@
         ("email", "/profile/email", Texts.T("tab_email", "profile", "Email")),
         ("password", "/profile/password", Texts.T("tab_password", "profile", "Adgangskode")),
         ("privacy", "/profile/privacy", Texts.T("tab_privacy", "profile", "Privatliv")),
+        ("catalogue", "/profile/catalogue", Texts.T("tab_catalogue", "profile", "Katalog")),
     };
+    if (!Model.CatalogueChoice) tabs = tabs.Where(t => t.Key != "catalogue").ToArray();
     var partial = "_Tab" + char.ToUpperInvariant(Model.Tab[0]) + Model.Tab.Substring(1);
 }
 @section Styles {

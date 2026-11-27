@@ -70,7 +70,7 @@ namespace KeplerCMS.Services.Implementations
             Links = (p.LinkList ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList(),
             IndexVisible = p.IndexVisible == 1, ClubOnly = p.ClubOnly == 1, Fuse = string.IsNullOrEmpty(p.Fuse) ? "DEFAULT" : p.Fuse,
             ProductCount = productCount,
-            ParentId = p.ParentId, Icon = p.Icon, Colour = p.Colour, LayoutV31 = p.LayoutV31 ?? "",
+            ParentId = p.ParentId, TreeOrder = p.TreeOrder, OrderId = p.OrderId ?? 0, Icon = p.Icon, Colour = p.Colour, LayoutV31 = p.LayoutV31 ?? "",
         };
 
         private static string Nullable(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -159,6 +159,32 @@ namespace KeplerCMS.Services.Implementations
             _context.CatalogueLibraryImages.AddRange(list.Select(n => new CatalogueLibraryImage { Name = n }));
             await _context.SaveChangesAsync();
             return list.Count;
+        }
+
+        /// <summary>
+        /// The v31 catalogue's tree as arranged in the editor: every page's parent and place among its siblings
+        /// (tree_order, from 1). The classic catalogue's order (order_id) stays as it is. A parent that doesn't exist, the
+        /// page itself or one of its own descendants puts the page at the top.
+        /// </summary>
+        public async Task SaveTree(List<CatalogueTreeNode> nodes)
+        {
+            var pages = await _context.CataloguePages.ToListAsync();
+            var byId = pages.ToDictionary(p => p.Id);
+            var parentOf = nodes.Where(n => byId.ContainsKey(n.Id)).GroupBy(n => n.Id).ToDictionary(g => g.Key, g => g.Last().ParentId > 0 && byId.ContainsKey(g.Last().ParentId) ? g.Last().ParentId : -1);
+            foreach (var node in nodes)
+            {
+                if (!byId.TryGetValue(node.Id, out var page)) continue;
+                // walk up from the new parent: reaching the page itself would make a loop
+                var parent = parentOf[node.Id];
+                var seen = new HashSet<int> { node.Id };
+                for (var up = parent; up > 0; up = parentOf.TryGetValue(up, out var next) ? next : byId[up].ParentId)
+                {
+                    if (!seen.Add(up)) { parent = -1; break; }
+                }
+                page.ParentId = parent;
+                page.TreeOrder = Math.Max(0, node.TreeOrder);
+            }
+            await _context.SaveChangesAsync();
         }
 
         public async Task ReorderPages(List<int> ids)

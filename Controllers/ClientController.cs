@@ -3,6 +3,7 @@ using KeplerCMS.Filters;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using KeplerCMS.Services;
 
 namespace KeplerCMS.Controllers
 {
@@ -11,11 +12,13 @@ namespace KeplerCMS.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly CatalogueChoice _catalogue;
 
-        public ClientController(IUserService userService, IConfiguration configuration)
+        public ClientController(IUserService userService, IConfiguration configuration, CatalogueChoice catalogue)
         {
             _userService = userService;
             _configuration = configuration;
+            _catalogue = catalogue;
         }
         [LoggedInFilter]
         public async Task<IActionResult> Index(int forwardId = 0, int roomId = 0)
@@ -24,6 +27,8 @@ namespace KeplerCMS.Controllers
             ViewData["sso"] = userWithSSO.SSOTicket;
             ViewData["forwardId"] = forwardId;
             ViewData["roomId"] = roomId;
+            // The catalogue the player picked: Habbo r31's swaps the catalogue casts through its own variables file.
+            ViewData["catalogueVars"] = await _catalogue.VarsFor(userWithSSO);
             return View();
         }
 
@@ -54,6 +59,8 @@ namespace KeplerCMS.Controllers
             ViewData["sso"] = userWithSSO.SSOTicket;
             ViewData["forwardId"] = forwardId;
             ViewData["roomId"] = roomId;
+            // The catalogue the player picked: Habbo r31's swaps the catalogue casts through its own variables file.
+            ViewData["catalogueVars"] = await _catalogue.VarsFor(userWithSSO);
             return View();
         }
     }

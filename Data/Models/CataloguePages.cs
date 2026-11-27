@@ -49,6 +49,10 @@ namespace KeplerCMS.Data.Models
         // layout it uses when not derived from Layout. A page without a layout is a folder.
         [Column("parent_id")]
         public int ParentId { get; set; } = -1;
+        /// <summary>Place among its siblings in the v31 tree (Odin update.1.53.sql); 0 = not placed (after the placed ones,
+        /// by order_id). The classic catalogue goes by order_id alone, so arranging the tree never moves its pages.</summary>
+        [Column("tree_order")]
+        public int TreeOrder { get; set; }
         [Column("icon")]
         public int Icon { get; set; }
         [Column("colour")]

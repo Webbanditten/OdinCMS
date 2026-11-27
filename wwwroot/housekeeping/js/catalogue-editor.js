@@ -117,7 +117,7 @@ var CatalogueEditor = (function () {
         if (!view) return;
         var showHidden = $('#cated-show-hidden').checked;
         var v31 = !!view.options.v31;
-        var index = pages.filter(function (p) {
+        var index = (v31 ? pages.slice().sort(treeSort) : pages).filter(function (p) {
             var open = current && p.id === current.id;
             // The old catalogue's index leaves folders out (they only exist in the v31 tree).
             if (!v31 && p.isFolder && !open) return false;
@@ -282,7 +282,7 @@ var CatalogueEditor = (function () {
             })));
         drawNode();
         root.appendChild(h('div', { class: 'cated-section' }, [
-            h('h3', {}, ['v31 catalogue tree ', h('span', { class: 'cated-hint', text: '(the web client; Shockwave shows the list on the left)' })]),
+            h('h3', {}, ['v31 catalogue tree ', h('span', { class: 'cated-hint', text: '(Habbo r31\'s catalogue, for players who picked it on their profile; arrange it in Index > v31 tree)' })]),
             h('div', { class: 'cated-grid' }, [
                 field('Under', parentSelect, 'folder or page it sits in'),
                 field('v31 layout', v31LayoutSelect, 'product pages use default_3x3'),
@@ -454,28 +454,58 @@ var CatalogueEditor = (function () {
         });
     }
 
-    // ---- Index tab (all pages, drag to reorder) ----
+    // ---- Index tab: the classic catalogue's order, or the v31 tree (folders) ----
+    // The two catalogues share their pages but not their order: the classic index is a list in order_id order, the
+    // v31 index a tree (parent_id) in tree_order order. Arranging one never moves a page in the other.
+
+    var indexMode = 'classic';
+    try { if (localStorage.getItem('cated-index-mode') === 'tree') indexMode = 'tree'; } catch (x) { }
+
+    // Siblings in the v31 tree: placed ones (tree_order > 0) first, then the rest in the classic order (as Odin sends it).
+    function treeSort(a, b) {
+        var pa = a.treeOrder > 0 ? 0 : 1, pb = b.treeOrder > 0 ? 0 : 1;
+        return pa - pb || (a.treeOrder || 0) - (b.treeOrder || 0) || (a.orderId || 0) - (b.orderId || 0);
+    }
+
+    function pageTags(p) {
+        var tags = [];
+        if (!p.indexVisible) tags.push(h('span', { class: 'cated-tag is-hidden', text: 'hidden' }));
+        if (p.clubOnly) tags.push(h('span', { class: 'cated-tag is-club', text: 'HC' }));
+        if (p.fuse && p.fuse !== 'DEFAULT') tags.push(h('span', { class: 'cated-tag' + (/club/.test(p.fuse) ? ' is-club' : ' is-staff'), text: p.fuse.replace('fuse_catalogue_', '') }));
+        return tags;
+    }
+
+    function pageMeta(p) {
+        return p.isFolder ? 'folder' : (LAYOUTS[p.layout] ? p.layout.replace('ctlg_', '') : p.layout) + ' · ' + p.productCount + ' products';
+    }
 
     function renderIndexTab() {
         var root = $('#cated-tab-index');
         root.textContent = '';
-        root.appendChild(h('p', { class: 'cated-hint', text: 'Drag pages to change their order in the game. Hidden pages are only reachable through links (sub-pages).' }));
+        var modes = h('div', { class: 'cated-index-modes' }, [
+            h('button', { type: 'button', class: indexMode === 'classic' ? 'is-active' : '', text: 'Classic catalogue', title: 'The list the classic catalogue shows',
+                onclick: function () { setIndexMode('classic'); } }),
+            h('button', { type: 'button', class: indexMode === 'tree' ? 'is-active' : '', text: 'v31 tree (folders)', title: 'The tree Habbo r31\'s catalogue shows',
+                onclick: function () { setIndexMode('tree'); } })
+        ]);
+        root.appendChild(modes);
+        if (indexMode === 'tree') renderTreeIndex(root); else renderClassicIndex(root);
+    }
+
+    function setIndexMode(mode) {
+        indexMode = mode;
+        try { localStorage.setItem('cated-index-mode', mode); } catch (x) { }
+        renderIndexTab();
+    }
+
+    function renderClassicIndex(root) {
+        root.appendChild(h('p', { class: 'cated-hint', text: 'Drag pages to change their order in the classic catalogue. Hidden pages are only reachable through links (sub-pages). Folders only exist in the v31 tree.' }));
         var list = h('ul', { class: 'cated-pages' });
-        // Depth in the v31 tree, for indenting (the order stays the game's order).
-        var byId = {};
-        pages.forEach(function (p) { byId[p.id] = p; });
-        var depth = function (p) { var d = 0, seen = {}; while (p && p.parentId > 0 && byId[p.parentId] && !seen[p.id] && d < 6) { seen[p.id] = 1; p = byId[p.parentId]; d++; } return d; };
-        pages.forEach(function (p) {
-            var tags = [];
-            if (!p.indexVisible) tags.push(h('span', { class: 'cated-tag is-hidden', text: 'hidden' }));
-            if (p.clubOnly) tags.push(h('span', { class: 'cated-tag is-club', text: 'HC' }));
-            if (p.fuse && p.fuse !== 'DEFAULT') tags.push(h('span', { class: 'cated-tag' + (/club/.test(p.fuse) ? ' is-club' : ' is-staff'), text: p.fuse.replace('fuse_catalogue_', '') }));
+        pages.filter(function (p) { return !p.isFolder; }).forEach(function (p) {
             var li = h('li', { draggable: 'true', 'data-id': p.id, class: current && p.id === current.id ? 'is-active' : '' }, [
-                h('img', { class: 'cated-v31-colour', src: V31 + 'colour_' + (p.colour || 0) + '.png', alt: '', style: 'margin-left:' + depth(p) * 16 + 'px' }),
-                p.icon ? h('img', { class: 'cated-v31-icon', src: V31 + 'icon_' + p.icon + '.png', alt: '' }) : null,
-                h('span', { class: 'cated-page-name', text: (p.isFolder ? '📁 ' : '') + p.name }),
-                h('span', {}, tags),
-                h('span', { class: 'cated-page-meta', text: p.isFolder ? 'folder' : (LAYOUTS[p.layout] ? p.layout.replace('ctlg_', '') : p.layout) + ' · ' + p.productCount + ' products' })
+                h('span', { class: 'cated-page-name', text: p.name }),
+                h('span', {}, pageTags(p)),
+                h('span', { class: 'cated-page-meta', text: pageMeta(p) })
             ]);
             li.onclick = function () { selectPage(p.id); };
             list.appendChild(li);
@@ -487,6 +517,98 @@ var CatalogueEditor = (function () {
             }).catch(fail);
         });
         root.appendChild(list);
+    }
+
+    // The v31 tree: drag a page onto the top or bottom edge of another to put it before or after it, onto the middle to
+    // put it inside (any page can hold pages: Trax holds its genres). One save writes every page's parent and place.
+    function renderTreeIndex(root) {
+        var use = h('p', { class: 'cated-hint cated-tree-use', text: ' ' });
+        root.appendChild(h('p', { class: 'cated-hint', text: 'The index of Habbo r31\'s catalogue. Drag a page onto the top or bottom edge of another to put it before or after it, onto its middle to put it inside. Players only see the pages their fuse allows; a page whose folder they can\'t see is shown at the top. The classic catalogue\'s order isn\'t changed.' }));
+        root.appendChild(use);
+        api('CatalogueUse').then(function (r) {
+            if (!r) return;
+            var who = { off: 'nobody (everyone has the classic one)', staff: 'staff (ranks with fuse_catalogue_administrator)', everyone: 'every player' }[r.mode] || r.mode;
+            use.textContent = r.v31 + ' player' + (r.v31 === 1 ? ' has' : 's have') + ' picked this catalogue. Who may pick it on their profile: ' + who +
+                ' (Settings: cms.catalogue.choice)' + (r.configured ? '.' : '; keplercms:catalogueV31:vars isn\'t set, so nobody gets it.');
+        }).catch(function () { });
+        var byId = {};
+        pages.forEach(function (p) { byId[p.id] = p; });
+        var parentOf = function (p) { return p.parentId > 0 && p.parentId !== p.id && byId[p.parentId] ? p.parentId : -1; };
+        var kids = {};
+        pages.forEach(function (p) { var k = parentOf(p); (kids[k] = kids[k] || []).push(p); });
+        Object.keys(kids).forEach(function (k) { kids[k].sort(treeSort); });
+        var seen = {};
+        var build = function (parentId, depth) {
+            var ul = h('ul', { class: depth ? 'cated-tree-children' : 'cated-pages cated-tree' });
+            (kids[parentId] || []).forEach(function (p) {
+                if (seen[p.id]) return;
+                seen[p.id] = 1;
+                var row = h('div', { class: 'cated-tree-row' + (current && p.id === current.id ? ' is-active' : '') + (!p.indexVisible ? ' is-hidden' : ''), draggable: 'true' }, [
+                    h('img', { class: 'cated-v31-colour', src: V31 + 'colour_' + (p.colour || 0) + '.png', alt: '' }),
+                    p.icon ? h('img', { class: 'cated-v31-icon', src: V31 + 'icon_' + p.icon + '.png', alt: '' }) : null,
+                    h('span', { class: 'cated-page-name', text: (p.isFolder ? '📁 ' : '') + p.name }),
+                    h('span', {}, pageTags(p)),
+                    h('span', { class: 'cated-page-meta', text: pageMeta(p) })
+                ]);
+                row.onclick = function () { selectPage(p.id); };
+                var li = h('li', { 'data-id': p.id }, [row]);
+                if (depth < 8) li.appendChild(build(p.id, depth + 1));
+                ul.appendChild(li);
+            });
+            return ul;
+        };
+        var tree = build(-1, 0);
+        root.appendChild(tree);
+        treeDragging(tree);
+    }
+
+    function treeDragging(tree) {
+        var dragging = null, target = null, where = null;
+        var clear = function () { $$('.is-drop-before, .is-drop-after, .is-drop-into', tree).forEach(function (n) { n.classList.remove('is-drop-before', 'is-drop-after', 'is-drop-into'); }); };
+        tree.addEventListener('dragstart', function (e) {
+            var row = e.target.closest('.cated-tree-row');
+            if (!row) return;
+            dragging = row.parentNode;
+            dragging.classList.add('is-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', dragging.getAttribute('data-id')); } catch (x) { }
+        });
+        tree.addEventListener('dragover', function (e) {
+            if (!dragging) return;
+            var row = e.target.closest('.cated-tree-row');
+            clear(); target = null; where = null;
+            if (!row || dragging.contains(row)) return; // not onto itself or a page inside it
+            e.preventDefault();
+            var box = row.getBoundingClientRect(), y = (e.clientY - box.top) / box.height;
+            where = y < 0.28 ? 'before' : y > 0.72 ? 'after' : 'into';
+            target = row.parentNode;
+            row.classList.add('is-drop-' + where);
+        });
+        tree.addEventListener('drop', function (e) {
+            if (!dragging || !target) return;
+            e.preventDefault();
+            if (where === 'into') target.querySelector(':scope > .cated-tree-children').appendChild(dragging);
+            else target.parentNode.insertBefore(dragging, where === 'before' ? target : target.nextSibling);
+        });
+        tree.addEventListener('dragend', function () {
+            if (!dragging) return;
+            var moved = target !== null;
+            dragging.classList.remove('is-dragging');
+            clear();
+            dragging = null; target = null;
+            if (!moved) return;
+            // every page's parent and place among its siblings, from the list as it is now
+            var nodes = [];
+            $$('li[data-id]', tree).forEach(function (li) {
+                var parentLi = li.parentNode.closest('li[data-id]');
+                var siblings = $$(':scope > li[data-id]', li.parentNode);
+                nodes.push({ id: +li.getAttribute('data-id'), parentId: parentLi ? +parentLi.getAttribute('data-id') : -1, treeOrder: siblings.indexOf(li) + 1 });
+            });
+            api('SaveTree', nodes).then(function () {
+                status('Tree saved. Publish to show it in the hotel.');
+                return loadPages().then(function () { renderIndexTab(); renderPreview(); if (draft) renderPageTab(); });
+            }).catch(fail);
+        });
     }
 
     // Native drag & drop reordering of an <ul>'s <li data-id>.
