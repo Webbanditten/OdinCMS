@@ -3,11 +3,47 @@
 @inject IConfiguration Configuration
 @functions
 {
+    // A link into the hotel (/client, with or without a room to go to) opens or focuses the client's pop-up window,
+    // like "Gå til hotellet" in the top bar. Anything else is a plain link.
+    static readonly System.Text.RegularExpressions.Regex ClientPath = new(@"^/?client(/web)?/?([?#]|$)",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
 
-    void GenerateLink(string text, string href)
+    bool IsClientLink(string href)
     {
-        var link = (href.Contains("client")) ? "<a href='"+href+ "' target='client' onclick='openOrFocusHabbo(this); return false;'>" + text+"</a>" : "<a href='"+href+"'>"+text+"</a>";
-        @Html.Raw(link);
+        if (string.IsNullOrWhiteSpace(href)) { return false; }
+        var path = href.Trim();
+        // a full address of this site counts too
+        var own = System.Text.RegularExpressions.Regex.Match(path, @"^https?://([^/?#:]+)(:\d+)?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (own.Success)
+        {
+            if (!string.Equals(own.Groups[1].Value, Context.Request.Host.Host, StringComparison.OrdinalIgnoreCase)) { return false; }
+            path = path.Substring(own.Length);
+            if (path.Length == 0) { return false; }
+        }
+        return ClientPath.IsMatch(path);
+    }
+
+    // `inner` is markup: a link's text as staff wrote it, or the promo's picture.
+    string LinkHtml(string href, string inner)
+    {
+        var a = "<a href=\"" + System.Net.WebUtility.HtmlEncode(href ?? "") + "\"";
+        if (IsClientLink(href)) { a += " target=\"client\" onclick=\"openOrFocusHabbo(this); return false;\""; }
+        return a + ">" + inner + "</a>";
+    }
+
+    // The picture goes where the promo's first link goes, and opens the hotel the same way that link does.
+    string ImageHtml(KeplerCMS.Data.Models.Promo promo)
+    {
+        var img = "<img src=\"" + System.Net.WebUtility.HtmlEncode(promo.Img ?? "") + "\" alt=\"\">";
+        return string.IsNullOrWhiteSpace(promo.Link1Href) ? img : LinkHtml(promo.Link1Href, img);
+    }
+
+    string[] LinksHtml(KeplerCMS.Data.Models.Promo promo)
+    {
+        var links = new List<string>();
+        if (!string.IsNullOrEmpty(promo.Link1Text)) { links.Add(LinkHtml(promo.Link1Href, promo.Link1Text)); }
+        if (!string.IsNullOrEmpty(promo.Link2Text)) { links.Add(LinkHtml(promo.Link2Href, promo.Link2Text)); }
+        return links.ToArray();
     }
 }
 @{
@@ -20,32 +56,9 @@
             <!-- NEWS ITEMS INCLUDE -->
 
             <script type="text/javascript">
-            var promoPages = [
-                @{
-                    foreach (var promo in promos)
-                    {
-                        @:{
-                        @:image: "<img src='@promo.Img' alt=''>",
-                        @:links: [
-
-                        if(!string.IsNullOrEmpty(promo.Link1Text))
-                        {
-                             @: " @{ GenerateLink(promo.Link1Text, promo.Link1Href); } ",
-                        }
-
-                        if(!string.IsNullOrEmpty(promo.Link2Text))
-                        {   
-                             @: " @{ GenerateLink(promo.Link2Text, promo.Link2Href); } "
-                        }
-                        @:],
-                        @:text: "@promo.Teaser"
-                        @:},
-                    }
-
-                }
-
-
-            ]; </script>
+            // What showPromo() (js/habbo.js) puts in the page for each promo: the same markup as the first one below.
+            var promoPages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(promos.Select(p => new { image = ImageHtml(p), links = LinksHtml(p), text = p.Teaser ?? "" })));
+            </script>
 
             <div id="promoheader">
                 <h2>@Model.Details.NewsHeader</h2>
@@ -70,22 +83,15 @@
                     if (promos.Any())
                     {
                         <div id="promobody">
-                            <p id="promoimage"><a href="@promos[0].Link1Href" id="promo-link"><img src="@promos[0].Img" alt=""></a></p>
+                            <p id="promoimage">@Html.Raw(ImageHtml(promos[0]))</p>
                             <div class="promotext">
                                 <p id="promotext-content">@Html.Raw(@promos[0].Teaser)</p>
                             </div>
                             <div id="promolinks">
                                 <ul id="promolinks-list">
-                                    @{
-                                        if (!string.IsNullOrEmpty(promos[0].Link1Text))
-                                        {
-                                            <li>@{ GenerateLink(promos[0].Link1Text, promos[0].Link1Href); }</li>
-                                        }
-
-                                        if (!string.IsNullOrEmpty(promos[0].Link2Text))
-                                        {
-                                            <li>@{ GenerateLink(promos[0].Link2Text, promos[0].Link2Href);}</li>
-                                        }
+                                    @foreach (var link in LinksHtml(promos[0]))
+                                    {
+                                        <li>@Html.Raw(link)</li>
                                     }
                                 </ul>
                             </div>
