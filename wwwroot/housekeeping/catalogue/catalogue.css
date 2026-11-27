@@ -186,3 +186,14 @@ img.ctlg-el { object-fit: fill; }
 .cated-behaviours label { font-weight: normal; display: flex; gap: 4px; align-items: center; font-size: 11px; }
 .cated-furni-preview { display: flex; gap: 10px; align-items: center; min-height: 70px; }
 .cated-furni-preview img { image-rendering: pixelated; max-height: 120px; }
+
+/* "See it as" a rank */
+.cated-viewer-note { margin: 0 0 6px; padding: 4px 8px; border-radius: 4px; background: #e6f2fa; border: 1px solid #9cc8e4; font-size: 12px; }
+.cated-viewer-note.is-warning { background: #fff1d6; border-color: #e0b35c; }
+.cated-pages li.is-unseen .cated-page-name { color: #999; text-decoration: line-through; }
+.cated-tag.is-unseen { background: #999; color: #fff; }
+/* picking products to move */
+.cated-move-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 8px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 5px; background: #f6f6f6; }
+.cated-move-bar select { flex: 1; min-width: 0; }
+.cated-product-row .cated-pick { margin: 0; }
+.cated-product-row.is-picked { background: #e6f2fa; }

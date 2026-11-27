@@ -12,8 +12,12 @@
         <div class="cated-preview-bar">
             <label class="cated-check"><input type="checkbox" id="cated-zoom"> 2x</label>
             <label class="cated-check"><input type="checkbox" id="cated-show-hidden" checked> Show hidden pages</label>
+            <label class="cated-check" title="The index as a player of that rank gets it from the game: only the pages their fuses open">See it as
+                <select id="cated-viewer"><option value="">the editor (every page)</option></select></label>
+            <label class="cated-check" title="As a Habbo Club member of that rank: club pages and the club fuses too"><input type="checkbox" id="cated-viewer-club" disabled> with Habbo Club</label>
             <span class="cated-note">As in the game. Click a text or image to edit it, a product to open it.</span>
         </div>
+        <div class="cated-viewer-note" id="cated-viewer-note" hidden></div>
         <div class="cated-room"><div class="ctlg-stage" id="cated-stage"></div></div>
     </div>
 

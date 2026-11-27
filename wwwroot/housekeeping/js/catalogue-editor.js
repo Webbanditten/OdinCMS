@@ -29,6 +29,8 @@ var CatalogueEditor = (function () {
 
     var opts, view, gameData = {}, pages = [], current = null, draft = null, products = [], dupes = [];
     var selectedProduct = -1, openProduct = -1, dirtyPage = false, tab = 'page';
+    // "See it as": the ranks with the fuses Odin gives them (Viewers), the one picked (null = the editor's view)
+    var viewers = [], viewer = null, picked = {};
     var $ = function (sel, root) { return (root || document).querySelector(sel); };
     var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
@@ -108,14 +110,67 @@ var CatalogueEditor = (function () {
 
     function renderPreview() {
         if (!view) return;
-        var showHidden = $('#cated-show-hidden').checked;
-        var index = pages.filter(function (p) { return showHidden || p.indexVisible || (current && p.id === current.id); })
-            .map(function (p) { return { id: p.id, name: p.id === (draft && draft.id) ? draft.name : p.name, hidden: !p.indexVisible }; });
+        var showHidden = $('#cated-show-hidden').checked && !viewer;
+        var index = pages.filter(function (p) { return viewer ? seenBy(p) || (current && p.id === current.id) : showHidden || p.indexVisible || (current && p.id === current.id); })
+            // seen as a rank: the open page is greyed out in the index when they don't get it
+            .map(function (p) { return { id: p.id, name: p.id === (draft && draft.id) ? draft.name : p.name, hidden: viewer ? !seenBy(p) : !p.indexVisible }; });
         var visible = viewProducts();
         view.render({ index: index, pageId: draft ? draft.id : 0, page: draft, products: visible, purse: 500, linkChain: linkChain() });
         var visibleIndex = selectedProduct >= 0 ? visibleIndexOf(selectedProduct) : -1;
         if (visibleIndex >= 0) view.selectProduct(visibleIndex, true);
         markFocus();
+        viewerNote();
+    }
+
+    // ---- "See it as": the catalogue as a player of a rank gets it ----
+
+    function viewerFuses() {
+        if (!viewer) return null;
+        return $('#cated-viewer-club').checked ? viewer.clubFuses : viewer.fuses;
+    }
+
+    // Odin's getPagesForRank: in the index, a club page only for members, and the page's fuse among the player's.
+    function seenBy(p) {
+        if (!viewer) return true;
+        return !!p.indexVisible && (!p.clubOnly || $('#cated-viewer-club').checked) && viewerFuses().indexOf((p.fuse || 'DEFAULT').toLowerCase()) >= 0;
+    }
+
+    function whyNot(p) {
+        if (!p.indexVisible) return 'it is hidden from the index (only reachable through a link)';
+        if (p.clubOnly && !$('#cated-viewer-club').checked) return 'it is for Habbo Club members';
+        return 'they don\'t have its fuse (' + (p.fuse || 'DEFAULT') + ')';
+    }
+
+    function viewerName() {
+        return viewer ? viewer.name + ($('#cated-viewer-club').checked ? ' with Habbo Club' : '') : '';
+    }
+
+    function viewerNote() {
+        var note = $('#cated-viewer-note');
+        if (!note) return;
+        if (!viewer) { note.hidden = true; return; }
+        var seen = pages.filter(seenBy).length;
+        var text = viewerName() + ' sees ' + seen + ' of the ' + pages.length + ' pages.';
+        if (current && !seenBy(current)) text += ' This page isn\'t one of them: ' + whyNot(current) + '.';
+        note.textContent = text;
+        note.className = 'cated-viewer-note' + (current && !seenBy(current) ? ' is-warning' : '');
+        note.hidden = false;
+    }
+
+    function setViewer() {
+        var rank = $('#cated-viewer').value;
+        viewer = rank === '' ? null : viewers.filter(function (v) { return String(v.rank) === rank; })[0] || null;
+        $('#cated-viewer-club').disabled = !viewer;
+        $('#cated-show-hidden').disabled = !!viewer;
+        renderPreview(); renderIndexTab();
+    }
+
+    function loadViewers() {
+        return api('Viewers').then(function (list) {
+            viewers = list || [];
+            var select = $('#cated-viewer');
+            viewers.forEach(function (v) { select.appendChild(h('option', { value: String(v.rank), text: v.name + (v.rank ? ' (rank ' + v.rank + ')' : '') })); });
+        }).catch(function () { });
     }
 
     function visibleIndexOf(productIndex) {
@@ -162,7 +217,7 @@ var CatalogueEditor = (function () {
                 draft = JSON.parse(JSON.stringify(data.page));
                 products = data.products;
                 dupes = data.duplicateSaleCodes || [];
-                selectedProduct = -1; openProduct = -1; dirtyPage = false; focusField = null;
+                selectedProduct = -1; openProduct = -1; dirtyPage = false; focusField = null; picked = {};
                 if (history.replaceState) history.replaceState(null, '', '?page=' + id);
                 status('Page "' + current.name + '": ' + products.length + ' products.');
                 renderPageTab(); renderProductsTab(); renderIndexTab(); renderPreview();
@@ -407,13 +462,15 @@ var CatalogueEditor = (function () {
         var root = $('#cated-tab-index');
         root.textContent = '';
         root.appendChild(h('p', { class: 'cated-hint', text: 'Drag pages to change their order in the game. Hidden pages are only reachable through links (sub-pages).' }));
+        if (viewer) root.appendChild(h('p', { class: 'cated-hint', text: 'Seen as ' + viewerName() + ': ' + pages.filter(seenBy).length + ' of ' + pages.length + ' pages. Greyed out: pages they don\'t get.' }));
         var list = h('ul', { class: 'cated-pages' });
         pages.forEach(function (p) {
             var tags = [];
+            if (viewer && !seenBy(p)) tags.push(h('span', { class: 'cated-tag is-unseen', text: 'not theirs', title: 'Not in the index of ' + viewerName() + ': ' + whyNot(p) }));
             if (!p.indexVisible) tags.push(h('span', { class: 'cated-tag is-hidden', text: 'hidden' }));
             if (p.clubOnly) tags.push(h('span', { class: 'cated-tag is-club', text: 'HC' }));
             if (p.fuse && p.fuse !== 'DEFAULT') tags.push(h('span', { class: 'cated-tag' + (/club/.test(p.fuse) ? ' is-club' : ' is-staff'), text: p.fuse.replace('fuse_catalogue_', '') }));
-            var li = h('li', { draggable: 'true', 'data-id': p.id, class: current && p.id === current.id ? 'is-active' : '' }, [
+            var li = h('li', { draggable: 'true', 'data-id': p.id, class: (current && p.id === current.id ? 'is-active' : '') + (viewer && !seenBy(p) ? ' is-unseen' : '') }, [
                 h('span', { class: 'cated-page-name', text: p.name }),
                 h('span', {}, tags),
                 h('span', { class: 'cated-page-meta', text: (LAYOUTS[p.layout] ? p.layout.replace('ctlg_', '') : p.layout) + ' · ' + p.productCount + ' products' })
@@ -476,6 +533,7 @@ var CatalogueEditor = (function () {
             h('span', { class: 'cated-grow' }),
             h('span', { class: 'cated-hint', text: products.length + ' products; ' + capacity })
         ]));
+        root.appendChild(moveBar());
         if (dupes.length) {
             root.appendChild(h('p', { class: 'cated-warning', text: 'Sale code used by more than one product: ' + dupes.join(', ') + '. The game buys the first one it finds, so give each its own code.' }));
         }
@@ -483,8 +541,11 @@ var CatalogueEditor = (function () {
         products.forEach(function (p, i) {
             var sprite = p.isPackage ? productSprite((p.packages[0] || {}).definition, (p.packages[0] || {}).specialSpriteId) : productSprite(p.definition, p.specialSpriteId);
             var li = h('li', { draggable: 'true', 'data-id': p.id, class: (i === openProduct ? 'is-selected' : '') + (p.hidden ? ' is-hidden' : '') });
-            var row = h('div', { class: 'cated-product-row' }, [
+            var pick = h('input', { type: 'checkbox', class: 'cated-pick', title: 'Pick it, to move it to another page', checked: !!picked[p.id],
+                onclick: function (e) { e.stopPropagation(); }, onchange: function (e) { if (e.target.checked) picked[p.id] = true; else delete picked[p.id]; renderProductsTab(); } });
+            var row = h('div', { class: 'cated-product-row' + (picked[p.id] ? ' is-picked' : '') }, [
                 h('span', { class: 'cated-drag', text: '⋮⋮', title: 'Drag to reorder' }),
+                pick,
                 h('img', { src: sprite ? furniUrl(sprite, '&icon=true') : '', alt: '' }),
                 h('span', { class: 'cated-product-name' }, [
                     h('b', { text: p.name || '(no name)' }),
@@ -510,6 +571,50 @@ var CatalogueEditor = (function () {
             }).catch(fail);
         });
         root.appendChild(list);
+    }
+
+    // Pick products with their boxes, then move them to another page (e.g. rares from their own pages to one rares page).
+    function moveBar() {
+        var ids = products.filter(function (p) { return picked[p.id]; }).map(function (p) { return p.id; });
+        var all = products.length > 0 && ids.length === products.length;
+        var toggle = h('label', { class: 'cated-check' }, [h('input', { type: 'checkbox', checked: all, onchange: function (e) {
+            picked = {};
+            if (e.target.checked) products.forEach(function (p) { picked[p.id] = true; });
+            renderProductsTab();
+        } }), ids.length ? ids.length + ' picked' : 'Pick all']);
+        var target = h('select', { disabled: !ids.length }, [h('option', { value: '', text: 'Move them to the page…' })].concat(pages.filter(function (p) { return !draft || p.id !== draft.id; }).map(function (p) {
+            return h('option', { value: String(p.id), text: p.name + (p.indexVisible ? '' : ' (hidden)') + (p.fuse && p.fuse !== 'DEFAULT' ? ' · ' + p.fuse.replace('fuse_catalogue_', '') : '') });
+        })));
+        var go = h('button', { type: 'button', text: 'Move', disabled: !ids.length, onclick: function () {
+            var to = pages.filter(function (p) { return String(p.id) === target.value; })[0];
+            if (!to) return status('Pick the page to move them to.', 'error');
+            moveProducts(ids, to);
+        } });
+        return h('div', { class: 'cated-move-bar' }, [toggle, target, go]);
+    }
+
+    function moveProducts(ids, to) {
+        var from = draft;
+        var names = products.filter(function (p) { return ids.indexOf(p.id) >= 0; }).map(function (p) { return p.name || p.saleCode; });
+        var shown = names.slice(0, 8).join(', ') + (names.length > 8 ? ' and ' + (names.length - 8) + ' more' : '');
+        var fuseChange = (from.fuse || 'DEFAULT') !== (to.fuse || 'DEFAULT') || !!from.clubOnly !== !!to.clubOnly;
+        Swal.fire({
+            title: 'Move ' + ids.length + ' product' + (ids.length === 1 ? '' : 's') + ' to "' + to.name + '"?',
+            html: h('div', {}, [
+                h('p', { text: shown + '.' }),
+                h('p', { text: 'They leave "' + from.name + '" and go to the end of "' + to.name + '". Products that are on other pages too stay there.' }),
+                fuseChange ? h('p', { text: 'Who can buy them changes with the page: "' + to.name + '" is for ' + ((to.fuse || 'DEFAULT') === 'DEFAULT' ? 'everyone' : to.fuse) + (to.clubOnly ? ', Habbo Club only' : '') + '.' }) : null,
+                !to.indexVisible ? h('p', { text: '"' + to.name + '" isn\'t in the index yet: players find it once "In the index" is ticked on its Page tab (or through a link).' }) : null
+            ]).outerHTML,
+            showCancelButton: true, confirmButtonText: 'Move them'
+        }).then(function (r) {
+            if (!r.isConfirmed) return;
+            api('MoveProducts', { pageId: from.id, toPageId: to.id, ids: ids }).then(function (res) {
+                picked = {};
+                var moved = 'Moved ' + (res ? res.moved : ids.length) + ' to "' + to.name + '". Publish to show it in the hotel.';
+                return loadPages().then(function () { return selectPage(from.id, true); }).then(function () { status(moved); });
+            }).catch(fail);
+        });
     }
 
     function productForm(p) {
@@ -809,6 +914,9 @@ var CatalogueEditor = (function () {
         $('#cated-zoom').onchange = function (e) { $('#cated-stage').classList.toggle('is-2x', e.target.checked); try { localStorage.setItem('cated-zoom', e.target.checked ? '1' : ''); } catch (x) { } };
         try { if (localStorage.getItem('cated-zoom')) { $('#cated-zoom').checked = true; $('#cated-stage').classList.add('is-2x'); } } catch (x) { }
         $('#cated-show-hidden').onchange = renderPreview;
+        $('#cated-viewer').onchange = setViewer;
+        $('#cated-viewer-club').onchange = function () { renderPreview(); renderIndexTab(); };
+        loadViewers();
         $('#cated-publish').onclick = publish;
         $('#cated-new-page').onclick = newPage;
         $('#cated-new-furni').onclick = function () { furniDialog(null, true); };
