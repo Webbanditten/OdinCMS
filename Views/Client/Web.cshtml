@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @{
     Layout = null;
@@ -15,8 +15,7 @@
     // by default it uses the same ones as the Shockwave client.
     string Pick(string key) => string.IsNullOrEmpty(web[key]) ? cms[key] : web[key];
     var dcr = Pick("dcr");
-    // The catalogue the player picked (Services/CatalogueChoice.cs): r31's comes with its own variables file.
-    var vars = ViewData["catalogueVars"] as string ?? Pick("vars");
+    var vars = Pick("vars");
     var texts = Pick("texts");
 
     var host = cms["host"];

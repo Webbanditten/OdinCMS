@@ -27,16 +27,6 @@ namespace KeplerCMS.Models
         public bool ClubOnly { get; set; }
         public string Fuse { get; set; } = "DEFAULT";
         public int ProductCount { get; set; }
-
-        // v31 catalogue tree: parent page (-1 = top), node icon (treeview.node.icon.N) and colour
-        // (treeview.node.bg.N), and a v31 layout override. A page without a layout is a folder.
-        public int ParentId { get; set; } = -1;
-        public int TreeOrder { get; set; }
-        public int OrderId { get; set; }
-        public int Icon { get; set; }
-        public int Colour { get; set; }
-        public string LayoutV31 { get; set; } = "";
-        public bool IsFolder => string.IsNullOrEmpty(Layout) && string.IsNullOrEmpty(LayoutV31);
     }
 
     /// <summary>A catalogue item (product) as the editor shows and saves it.</summary>
@@ -116,13 +106,5 @@ namespace KeplerCMS.Models
             "pool_lift", "queue_tile", "game_tic_tac_toe", "game_chess", "game_battleships", "game_poker", "ws_join_queue",
             "ws_queue_tile", "ws_tile_start",
         };
-    }
-
-    /// <summary>One page's place in the v31 catalogue's tree, as the editor's Index tab saves it.</summary>
-    public class CatalogueTreeNode
-    {
-        public int Id { get; set; }
-        public int ParentId { get; set; } = -1;
-        public int TreeOrder { get; set; }
     }
 }
