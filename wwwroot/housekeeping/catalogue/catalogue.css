@@ -77,7 +77,8 @@ img.ctlg-el { object-fit: fill; }
 
 /* ---- Housekeeping editor ---- */
 .cated { display: flex; gap: 16px; align-items: flex-start; }
-.cated-preview { flex: none; position: sticky; top: 8px; }
+/* as wide as the catalogue picture (1x or 2x): its toolbar and notes wrap inside, and the panel gets the rest */
+.cated-preview { flex: none; position: sticky; top: 8px; width: min-content; }
 .cated-preview-bar { display: flex; gap: 8px; align-items: center; margin: 0 0 6px; flex-wrap: wrap; }
 .cated-preview-bar .cated-note { color: #666; font-size: 11px; }
 .cated-room { padding: 12px; background: #2E6E8E; border-radius: 4px; display: inline-block; }
@@ -125,8 +126,9 @@ img.ctlg-el { object-fit: fill; }
 
 /* Page list (Index tab) */
 .cated-pages { list-style: none; margin: 0; padding: 0; border: 1px solid #000; border-radius: 5px; overflow: hidden; background: #fff; }
-.cated-pages li { display: flex; gap: 8px; align-items: center; padding: 3px 8px; border-top: 1px solid #ddd; cursor: grab; }
-.cated-pages li:first-child { border-top: none; }
+/* columns that fill the panel's width (one on a narrow screen); lines between them drawn by each item's shadow */
+.cated-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.cated-pages li { display: flex; gap: 8px; align-items: center; padding: 3px 8px; box-shadow: 0 1px 0 #ddd, 1px 0 0 #ddd; cursor: grab; }
 .cated-pages li.is-active { background: #FFF1B8; }
 .cated-pages li.is-dragging { opacity: .4; }
 .cated-pages li.is-drop-before { box-shadow: inset 0 2px 0 #2996cc; }
@@ -139,8 +141,10 @@ img.ctlg-el { object-fit: fill; }
 
 /* Products tab */
 .cated-products { list-style: none; margin: 0; padding: 0; border: 1px solid #000; border-radius: 5px; overflow: hidden; background: #fff; }
-.cated-products > li { border-top: 1px solid #ddd; }
-.cated-products > li:first-child { border-top: none; }
+.cated-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.cated-products > li { box-shadow: 0 1px 0 #ddd, 1px 0 0 #ddd; min-width: 0; }
+/* the open product, with its form, gets the whole width */
+.cated-products > li.is-selected { grid-column: 1 / -1; }
 .cated-product-row { display: flex; gap: 8px; align-items: center; padding: 3px 8px; cursor: pointer; }
 .cated-product-row .cated-drag { cursor: grab; color: #999; }
 .cated-product-row img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
