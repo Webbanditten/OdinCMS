@@ -274,6 +274,33 @@ namespace KeplerCMS.Services.Implementations
         }
 
         /// <summary>
+        /// Move products from one page to another (e.g. rares from their own pages to one rares page): the source page in
+        /// each product's page list becomes the target (or is dropped when the product is on the target already). A product
+        /// that is on the target page only afterwards goes to its end, in the order it had; one that is also on other pages
+        /// keeps its order_id (it is shared by all its pages), so it lands where that falls. Returns how many moved.
+        /// </summary>
+        public async Task<int> MoveProducts(List<int> ids, int fromPageId, int toPageId)
+        {
+            if (fromPageId == toPageId || ids == null || ids.Count == 0) return 0;
+            if (!await _context.CataloguePages.AnyAsync(p => p.Id == toPageId)) throw new ArgumentException("The page to move to doesn't exist.");
+            var items = (await _context.CatalogueItems.Where(i => ids.Contains(i.Id)).ToListAsync())
+                .Where(i => ParsePages(i.PageId).Contains(fromPageId)).OrderBy(i => i.Order).ThenBy(i => i.Id).ToList();
+            var key = toPageId.ToString();
+            var order = (await _context.CatalogueItems.Where(i => i.PageId.Contains(key)).ToListAsync())
+                .Where(i => ParsePages(i.PageId).Contains(toPageId)).Select(i => i.Order).DefaultIfEmpty(0).Max() + 1;
+            foreach (var item in items)
+            {
+                var pages = ParsePages(item.PageId);
+                var at = pages.IndexOf(fromPageId);
+                if (pages.Contains(toPageId)) pages.RemoveAt(at); else pages[at] = toPageId;
+                item.PageId = FormatPages(pages);
+                if (pages.Count == 1) item.Order = order++;
+            }
+            await _context.SaveChangesAsync();
+            return items.Count;
+        }
+
+        /// <summary>
         /// Odin shows a page's products by order_id, then id. A product's order_id is shared by every page it is on, so
         /// the page's own order_id values are handed out again in the new order (other pages keep their relative order).
         /// </summary>

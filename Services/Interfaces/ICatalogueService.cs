@@ -21,6 +21,7 @@ namespace KeplerCMS.Services.Interfaces
         Task<List<int>> AddProducts(int pageId, List<int> definitionIds);
         Task RemoveProduct(int id, int pageId);
         Task ReorderProducts(int pageId, List<int> ids);
+        Task<int> MoveProducts(List<int> ids, int fromPageId, int toPageId);
 
         Task<List<CatalogueFurni>> SearchFurni(string query, int limit = 80);
         Task<CatalogueFurni> GetFurni(int id);

@@ -23,9 +23,11 @@ namespace KeplerCMS.Areas.Housekeeping
         private readonly ICommandQueueService _commandQueueService;
         private readonly ICatalogueService _catalogue;
         private readonly IGameDataService _gameData;
+        private readonly IFuseService _fuses;
 
-        public CatalogueController(ICommandQueueService commandQueueService, ICatalogueService catalogue, IGameDataService gameData)
+        public CatalogueController(ICommandQueueService commandQueueService, ICatalogueService catalogue, IGameDataService gameData, IFuseService fuses)
         {
+            _fuses = fuses;
             _commandQueueService = commandQueueService;
             _catalogue = catalogue;
             _gameData = gameData;
@@ -91,6 +93,7 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             public int Id { get; set; }
             public int PageId { get; set; }
+            public int ToPageId { get; set; }
             public List<int> Ids { get; set; } = new();
         }
 
@@ -138,6 +141,36 @@ namespace KeplerCMS.Areas.Housekeeping
         {
             await _catalogue.ReorderProducts(request.PageId, request.Ids);
             return Ok();
+        }
+
+        /// <summary>Move the picked products (ids) from this page (pageId) to another (toPageId).</summary>
+        [HttpPost]
+        public async Task<IActionResult> MoveProducts([FromBody] IdRequest request)
+        {
+            if (request.ToPageId <= 0 || request.ToPageId == request.PageId) return BadRequest("Pick another page to move them to.");
+            try { return Json(new { moved = await _catalogue.MoveProducts(request.Ids, request.PageId, request.ToPageId) }); }
+            catch (ArgumentException e) { return BadRequest(e.Message); }
+        }
+
+        /// <summary>
+        /// Who the preview can show the catalogue as: a player without a rank (rank 0, most of the hotel) and every rank,
+        /// each with the fuses Odin gives them at login (the rank's own, everyone's, and with Habbo Club the club ones:
+        /// PlayerDao.getFusesForPlayer). Odin lists a page when it is index visible, its fuse is one of those and, for a
+        /// club page, the player is a member.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Viewers()
+        {
+            var ranks = (await _fuses.GetRanks()).OrderBy(r => r.Id).Select(r => (r.Id, r.Name)).ToList();
+            ranks.Insert(0, (0, "Player (no rank)"));
+            var viewers = new List<object>();
+            foreach (var (id, name) in ranks)
+            {
+                var fuses = (await _fuses.GetFusesByRank(id, false)).Select(f => f.FuseName.ToLowerInvariant()).Distinct().ToList();
+                var club = (await _fuses.GetFusesByRank(id, true)).Select(f => f.FuseName.ToLowerInvariant()).Distinct().ToList();
+                viewers.Add(new { rank = id, name, fuses, clubFuses = club });
+            }
+            return Json(viewers);
         }
 
         // ---- Furni master data ----
