@@ -7,7 +7,6 @@ using KeplerCMS.Data;
 using KeplerCMS.Filters;
 using KeplerCMS.Models;
 using KeplerCMS.Models.Enums;
-using KeplerCMS.Services;
 using KeplerCMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,11 +29,9 @@ namespace KeplerCMS.Controllers
         private readonly ISettingsService _settingService;
         private readonly ICommandQueueService _commandQueue;
         private readonly DataContext _context;
-        private readonly CatalogueChoice _catalogue;
 
-        public ProfileController(IUserService userService, ISettingsService settingService, ICommandQueueService commandQueue, DataContext context, CatalogueChoice catalogue)
+        public ProfileController(IUserService userService, ISettingsService settingService, ICommandQueueService commandQueue, DataContext context)
         {
-            _catalogue = catalogue;
             _settingService = settingService;
             _userService = userService;
             _commandQueue = commandQueue;
@@ -49,14 +46,12 @@ namespace KeplerCMS.Controllers
             return string.IsNullOrWhiteSpace(value) || value == key ? fallback : value;
         }
 
-        public static readonly string[] Tabs = { "habbo", "mission", "email", "password", "privacy", "catalogue" };
+        public static readonly string[] Tabs = { "habbo", "mission", "email", "password", "privacy" };
 
         public class ProfilePage
         {
             public string Tab { get; set; }
             public bool UseRuffle { get; set; }
-            /// <summary>The "Katalog" tab: shown when cms.catalogue.choice lets this player pick a catalogue.</summary>
-            public bool CatalogueChoice { get; set; }
         }
 
         /// <summary>Back to the tab that was saved, with a green or red message.</summary>
@@ -70,9 +65,7 @@ namespace KeplerCMS.Controllers
         private async Task<IActionResult> Tab(string tab)
         {
             var settings = await _settingService.GetAll();
-            var mayChoose = await _catalogue.MayChoose(ViewData["user"] as Data.Models.Users);
-            if (tab == "catalogue" && !mayChoose) return Redirect("/profile");
-            return View("Index", new ProfilePage { Tab = tab, UseRuffle = settings.Any(s => s.Setting == "cms.use_ruffle" && s.Value == "1"), CatalogueChoice = mayChoose });
+            return View("Index", new ProfilePage { Tab = tab, UseRuffle = settings.Any(s => s.Setting == "cms.use_ruffle" && s.Value == "1") });
         }
 
         [LoggedInFilter]
@@ -94,9 +87,6 @@ namespace KeplerCMS.Controllers
 
         [LoggedInFilter]
         public Task<IActionResult> Privacy() => Tab("privacy");
-
-        [LoggedInFilter]
-        public Task<IActionResult> Catalogue() => Tab("catalogue");
 
         [LoggedInFilter]
         [HttpPost]
@@ -170,18 +160,6 @@ namespace KeplerCMS.Controllers
                 .SetProperty(u => u.AllowFriendRequests, allowRequests)
                 .SetProperty(u => u.AllowStalking, allowFollowing));
             return Done("privacy", ok: T("privacy_saved", "profile", "Dine indstillinger er gemt. De gælder fra næste gang, du går ind på hotellet."));
-        }
-
-        /// <summary>Which catalogue the client loads (Services/CatalogueChoice.cs): from the next time the hotel opens.</summary>
-        [LoggedInFilter]
-        [HttpPost]
-        public async Task<IActionResult> UpdateCatalogue(string catalogue)
-        {
-            var user = ViewData["user"] as Data.Models.Users;
-            if (!await _catalogue.MayChoose(user)) return Redirect("/profile");
-            var v31 = catalogue == "v31";
-            await _context.Users.Where(u => u.Id == UserId).ExecuteUpdateAsync(s => s.SetProperty(u => u.CatalogueV31, v31));
-            return Done("catalogue", ok: T("catalogue_saved", "profile", "Dit valg er gemt. Det gælder fra næste gang, du går ind på hotellet."));
         }
     }
 }
